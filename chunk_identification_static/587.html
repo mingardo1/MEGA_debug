@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+    <html lang="en">
+              <head>
+                <meta charset="utf-8">
+                <title>587</title>
+                    <style>
+                        #top {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        #bottom {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        abbr {
+                          /* Here is the delay */
+                          transition-delay:0s;
+                        }
+                    </style>
+              </head>
+              <body>
+                <span style="height: 4vh">
+                    587
+                    <a href="586.html">prev</a>
+                    <a href="588.html">next</a>
+                    <a href="587_chunks.html">chunks</a>
+                    <a href="index.html">index</a>
+                    DTStack/flinkStreamSQL_3f89d1e66187447b56be7b8b76e9b09af9b9850d_core/src/main/java/com/dtstack/flink/sql/classloader/ClassLoaderManager.java
+                    <textarea rows=1 onclick='navigator.clipboard.writeText(this.value)'>cd C:\studies\se\mega\git-analyzer-plus\notebooks\debug
+del /Q *
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;3f89d1e66187447b56be7b8b76e9b09af9b9850d:core/src/main/java/com/dtstack/flink/sql/classloader/ClassLoaderManager.java&quot; &gt; committed.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;3f89d1e66187447b56be7b8b76e9b09af9b9850d^1:core/src/main/java/com/dtstack/flink/sql/classloader/ClassLoaderManager.java&quot; &gt; ours.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;3f89d1e66187447b56be7b8b76e9b09af9b9850d^2:core/src/main/java/com/dtstack/flink/sql/classloader/ClassLoaderManager.java&quot; &gt; theirs.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;b2e4085e6d35798d51707eb23aa215e0e694591e:core/src/main/java/com/dtstack/flink/sql/classloader/ClassLoaderManager.java&quot; &gt; base.java
+copy ours.java 1ours.java
+copy ours.java 2ours.java
+copy theirs.java 1theirs.java
+copy theirs.java 2theirs.java
+copy base.java 1base.java
+copy base.java 2base.java
+&quot;C:\Program Files\Java\jdk1.8.0_241\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\jFSTMerge\build\libs\jFSTMerge-all.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\jfstmerge.java --show-base
+&quot;C:\Program Files\Eclipse Adoptium\jdk-17.0.11.9-hotspot\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\spork\target\spork-0.5.0-SNAPSHOT.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\spork.java
+del /Q 1*.java
+del /Q 2*.java
+del /Q jfstmerge.java.merge
+</textarea>
+                    {strict: [[b]], subset: [[b]]}
+                </span>
+                <div id="top">
+
+                    <table>
+                        <tr>
+                            <th>line based (standard git)</th>
+                            <th>jfstmerge</th>
+                            <th>spork</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1 /*
+   2  * Licensed to the Apache Software Foundation (ASF) under one
+   3  * or more contributor license agreements.  See the NOTICE file
+   4  * distributed with this work for additional information
+   5  * regarding copyright ownership.  The ASF licenses this file
+   6  * to you under the Apache License, Version 2.0 (the
+   7  * &quot;License&quot;); you may not use this file except in compliance
+   8  * with the License.  You may obtain a copy of the License at
+   9  *
+  10  *     http://www.apache.org/licenses/LICENSE-2.0
+  11  *
+  12  * Unless required by applicable law or agreed to in writing, software
+  13  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15  * See the License for the specific language governing permissions and
+  16  * limitations under the License.
+  17  */
+  18 
+  19 package com.dtstack.flink.sql.classloader;
+  20 
+  21 import com.dtstack.flink.sql.util.PluginUtil;
+  22 import com.dtstack.flink.sql.util.ReflectionUtils;
+  23 import org.apache.commons.lang3.StringUtils;
+  24 import org.slf4j.Logger;
+  25 import org.slf4j.LoggerFactory;
+  26 
+  27 import java.lang.reflect.InvocationTargetException;
+  28 import java.lang.reflect.Method;
+  29 import java.net.URL;
+  30 import java.net.URLClassLoader;
+  31 import java.util.ArrayList;
+  32 import java.util.Arrays;
+  33 import java.util.Comparator;
+  34 import java.util.List;
+  35 import java.util.Map;
+  36 import java.util.concurrent.ConcurrentHashMap;
+  37 
+  38 /**
+  39  * company: www.dtstack.com
+  40  * author: toutian
+  41  * create: 2019/10/14
+  42  */
+  43 public class ClassLoaderManager {
+  44 
+  45     private static final Logger LOG = LoggerFactory.getLogger(ClassLoaderManager.class);
+  46 
+  47     private static Map&lt;String, DtClassLoader&gt; pluginClassLoader = new ConcurrentHashMap&lt;&gt;();
+  48 
+<abbr title="  49     public static &lt;R&gt; R newInstance(String pluginJarPath, ClassLoaderSupplier&lt;R&gt; supplier) throws Exception {">  49     public static &lt;R&gt; R newInstance(String pluginJarPath, ClassLoaderSupplier&lt;R&gt; supplier) throws Excepti🔵</abbr>
+  50         ClassLoader classLoader = retrieveClassLoad(pluginJarPath);
+  51         return ClassLoaderSupplierCallBack.callbackAndReset(supplier, classLoader);
+  52     }
+  53 
+<abbr title="  54     public static &lt;R&gt; R newInstance(List&lt;URL&gt; jarUrls, ClassLoaderSupplier&lt;R&gt; supplier) throws Exception {">  54     public static &lt;R&gt; R newInstance(List&lt;URL&gt; jarUrls, ClassLoaderSupplier&lt;R&gt; supplier) throws Exception 🔵</abbr>
+  55         ClassLoader classLoader = retrieveClassLoad(jarUrls);
+  56         return ClassLoaderSupplierCallBack.callbackAndReset(supplier, classLoader);
+  57     }
+  58 
+  59     private static DtClassLoader retrieveClassLoad(String pluginJarPath) {
+  60         return pluginClassLoader.computeIfAbsent(pluginJarPath, k -&gt; {
+  61             try {
+  62                 URL[] urls = PluginUtil.getPluginJarUrls(pluginJarPath);
+  63                 ClassLoader parentClassLoader = Thread.currentThread().getContextClassLoader();
+  64                 DtClassLoader classLoader = new DtClassLoader(urls, parentClassLoader);
+  65                 LOG.info(&quot;pluginJarPath:{} create ClassLoad successful...&quot;, pluginJarPath);
+  66                 return classLoader;
+  67             } catch (Throwable e) {
+  68                 LOG.error(&quot;retrieve ClassLoad happens error:{}&quot;, e);
+  69                 throw new RuntimeException(&quot;retrieve ClassLoad happens error&quot;);
+  70             }
+  71         });
+  72     }
+  73 
+  74     private static DtClassLoader retrieveClassLoad(List&lt;URL&gt; jarUrls) {
+  75         jarUrls.sort(Comparator.comparing(URL::toString));
+  76         String jarUrlkey = StringUtils.join(jarUrls, &quot;_&quot;);
+  77         return pluginClassLoader.computeIfAbsent(jarUrlkey, k -&gt; {
+  78             try {
+  79                 URL[] urls = jarUrls.toArray(new URL[jarUrls.size()]);
+  80                 ClassLoader parentClassLoader = Thread.currentThread().getContextClassLoader();
+  81                 DtClassLoader classLoader = new DtClassLoader(urls, parentClassLoader);
+  82                 LOG.info(&quot;jarUrl:{} create ClassLoad successful...&quot;, jarUrlkey);
+  83                 return classLoader;
+  84             } catch (Throwable e) {
+  85                 LOG.error(&quot;retrieve ClassLoad happens error:{}&quot;, e);
+  86                 throw new RuntimeException(&quot;retrieve ClassLoad happens error&quot;);
+  87             }
+  88         });
+  89     }
+  90 
+  91     public static List&lt;URL&gt; getClassPath() {
+  92         List&lt;URL&gt; classPaths = new ArrayList&lt;&gt;();
+  93         for (Map.Entry&lt;String, DtClassLoader&gt; entry : pluginClassLoader.entrySet()) {
+  94             classPaths.addAll(Arrays.asList(entry.getValue().getURLs()));
+  95         }
+  96         return classPaths;
+  97     }
+  98 
+  99 
+ 100 
+ 101     public static URLClassLoader loadExtraJar(List&lt;URL&gt; jarUrlList, URLClassLoader classLoader)
+ 102             throws  IllegalAccessException, InvocationTargetException {
+ 103 &lt;&lt;&lt;&lt;&lt;&lt;&lt; GitAnalyzerPlus_ours
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 104 </span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 105         for(URL url : jarURLList){</span>
+ 106 ||||||| GitAnalyzerPlus_base
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 107         for(URL url : jarURLList){</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 108             if(url.toString().endsWith(&quot;.jar&quot;)){</span>
+ 109 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 110         for(URL url : jarUrlList){</span>
+ 111 &gt;&gt;&gt;&gt;&gt;&gt;&gt; GitAnalyzerPlus_theirs
+ 112             if(url.toString().endsWith(&quot;.jar&quot;)){
+ 113                 urlClassLoaderAddUrl(classLoader, url);
+ 114             }
+ 115         }
+ 116         return classLoader;
+ 117     }
+ 118 
+<abbr title=" 119     private static void urlClassLoaderAddUrl(URLClassLoader classLoader, URL url) throws InvocationTargetException, IllegalAccessException {"> 119     private static void urlClassLoaderAddUrl(URLClassLoader classLoader, URL url) throws InvocationTarget🔵</abbr>
+ 120         Method method = ReflectionUtils.getDeclaredMethod(classLoader, &quot;addURL&quot;, URL.class);
+ 121 
+ 122         if (method == null) {
+<abbr title=" 123             throw new RuntimeException(&quot;can&#x27;t not find declared method addURL, curr classLoader is &quot; + classLoader.getClass());"> 123             throw new RuntimeException(&quot;can&#x27;t not find declared method addURL, curr classLoader is &quot; + cl🔵</abbr>
+ 124         }
+ 125         method.setAccessible(true);
+ 126         method.invoke(classLoader, url);
+ 127     }
+ 128 }</pre></td>
+                            <td><pre>   1 /*
+   2  * Licensed to the Apache Software Foundation (ASF) under one
+   3  * or more contributor license agreements.  See the NOTICE file
+   4  * distributed with this work for additional information
+   5  * regarding copyright ownership.  The ASF licenses this file
+   6  * to you under the Apache License, Version 2.0 (the
+   7  * &quot;License&quot;); you may not use this file except in compliance
+   8  * with the License.  You may obtain a copy of the License at
+   9  *
+  10  *     http://www.apache.org/licenses/LICENSE-2.0
+  11  *
+  12  * Unless required by applicable law or agreed to in writing, software
+  13  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15  * See the License for the specific language governing permissions and
+  16  * limitations under the License.
+  17  */
+  18 
+  19 package com.dtstack.flink.sql.classloader;
+  20 
+  21 import com.dtstack.flink.sql.util.PluginUtil;
+  22 import com.dtstack.flink.sql.util.ReflectionUtils;
+  23 import org.apache.commons.lang3.StringUtils;
+  24 import org.slf4j.Logger;
+  25 import org.slf4j.LoggerFactory;
+  26 
+  27 import java.lang.reflect.InvocationTargetException;
+  28 import java.lang.reflect.Method;
+  29 import java.net.URL;
+  30 import java.net.URLClassLoader;
+  31 import java.util.ArrayList;
+  32 import java.util.Arrays;
+  33 import java.util.Comparator;
+  34 import java.util.List;
+  35 import java.util.Map;
+  36 import java.util.concurrent.ConcurrentHashMap;
+  37 
+  38 /**
+  39  * company: www.dtstack.com
+  40  * author: toutian
+  41  * create: 2019/10/14
+  42  */
+  43 public class ClassLoaderManager {
+  44 
+  45     private static final Logger LOG = LoggerFactory.getLogger(ClassLoaderManager.class);
+  46 
+  47     private static Map&lt;String, DtClassLoader&gt; pluginClassLoader = new ConcurrentHashMap&lt;&gt;();
+  48 
+<abbr title="  49     public static &lt;R&gt; R newInstance(String pluginJarPath, ClassLoaderSupplier&lt;R&gt; supplier) throws Exception {">  49     public static &lt;R&gt; R newInstance(String pluginJarPath, ClassLoaderSupplier&lt;R&gt; supplier) throws Excepti🔵</abbr>
+  50         ClassLoader classLoader = retrieveClassLoad(pluginJarPath);
+  51         return ClassLoaderSupplierCallBack.callbackAndReset(supplier, classLoader);
+  52     }
+  53 
+<abbr title="  54     public static &lt;R&gt; R newInstance(List&lt;URL&gt; jarUrls, ClassLoaderSupplier&lt;R&gt; supplier) throws Exception {">  54     public static &lt;R&gt; R newInstance(List&lt;URL&gt; jarUrls, ClassLoaderSupplier&lt;R&gt; supplier) throws Exception 🔵</abbr>
+  55         ClassLoader classLoader = retrieveClassLoad(jarUrls);
+  56         return ClassLoaderSupplierCallBack.callbackAndReset(supplier, classLoader);
+  57     }
+  58 
+  59     private static DtClassLoader retrieveClassLoad(String pluginJarPath) {
+  60         return pluginClassLoader.computeIfAbsent(pluginJarPath, k -&gt; {
+  61             try {
+  62                 URL[] urls = PluginUtil.getPluginJarUrls(pluginJarPath);
+  63                 ClassLoader parentClassLoader = Thread.currentThread().getContextClassLoader();
+  64                 DtClassLoader classLoader = new DtClassLoader(urls, parentClassLoader);
+  65                 LOG.info(&quot;pluginJarPath:{} create ClassLoad successful...&quot;, pluginJarPath);
+  66                 return classLoader;
+  67             } catch (Throwable e) {
+  68                 LOG.error(&quot;retrieve ClassLoad happens error:{}&quot;, e);
+  69                 throw new RuntimeException(&quot;retrieve ClassLoad happens error&quot;);
+  70             }
+  71         });
+  72     }
+  73 
+  74     private static DtClassLoader retrieveClassLoad(List&lt;URL&gt; jarUrls) {
+  75         jarUrls.sort(Comparator.comparing(URL::toString));
+  76         String jarUrlkey = StringUtils.join(jarUrls, &quot;_&quot;);
+  77         return pluginClassLoader.computeIfAbsent(jarUrlkey, k -&gt; {
+  78             try {
+  79                 URL[] urls = jarUrls.toArray(new URL[jarUrls.size()]);
+  80                 ClassLoader parentClassLoader = Thread.currentThread().getContextClassLoader();
+  81                 DtClassLoader classLoader = new DtClassLoader(urls, parentClassLoader);
+  82                 LOG.info(&quot;jarUrl:{} create ClassLoad successful...&quot;, jarUrlkey);
+  83                 return classLoader;
+  84             } catch (Throwable e) {
+  85                 LOG.error(&quot;retrieve ClassLoad happens error:{}&quot;, e);
+  86                 throw new RuntimeException(&quot;retrieve ClassLoad happens error&quot;);
+  87             }
+  88         });
+  89     }
+  90 
+  91     public static List&lt;URL&gt; getClassPath() {
+  92         List&lt;URL&gt; classPaths = new ArrayList&lt;&gt;();
+  93         for (Map.Entry&lt;String, DtClassLoader&gt; entry : pluginClassLoader.entrySet()) {
+  94             classPaths.addAll(Arrays.asList(entry.getValue().getURLs()));
+  95         }
+  96         return classPaths;
+  97     }
+  98 
+  99 
+ 100 
+ 101     public static URLClassLoader loadExtraJar(List&lt;URL&gt; jarUrlList, URLClassLoader classLoader)
+ 102             throws  IllegalAccessException, InvocationTargetException {
+ 103         for(URL url : jarUrlList){
+ 104             if(url.toString().endsWith(&quot;.jar&quot;)){
+ 105                 urlClassLoaderAddUrl(classLoader, url);
+ 106             }
+ 107         }
+ 108         return classLoader;
+ 109     }
+ 110 
+<abbr title=" 111     private static void urlClassLoaderAddUrl(URLClassLoader classLoader, URL url) throws InvocationTargetException, IllegalAccessException {"> 111     private static void urlClassLoaderAddUrl(URLClassLoader classLoader, URL url) throws InvocationTarget🔵</abbr>
+ 112         Method method = ReflectionUtils.getDeclaredMethod(classLoader, &quot;addURL&quot;, URL.class);
+ 113 
+ 114         if (method == null) {
+<abbr title=" 115             throw new RuntimeException(&quot;can&#x27;t not find declared method addURL, curr classLoader is &quot; + classLoader.getClass());"> 115             throw new RuntimeException(&quot;can&#x27;t not find declared method addURL, curr classLoader is &quot; + cl🔵</abbr>
+ 116         }
+ 117         method.setAccessible(true);
+ 118         method.invoke(classLoader, url);
+ 119     }
+ 120 }
+ 
+ 
+ 
+ 
+ 
+ 
+ </pre></td>
+                            <td><pre>   1 /*
+   2  * Licensed to the Apache Software Foundation (ASF) under one
+   3  * or more contributor license agreements.  See the NOTICE file
+   4  * distributed with this work for additional information
+   5  * regarding copyright ownership.  The ASF licenses this file
+   6  * to you under the Apache License, Version 2.0 (the
+   7  * &quot;License&quot;); you may not use this file except in compliance
+   8  * with the License.  You may obtain a copy of the License at
+   9  *
+  10  *     http://www.apache.org/licenses/LICENSE-2.0
+  11  *
+  12  * Unless required by applicable law or agreed to in writing, software
+  13  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15  * See the License for the specific language governing permissions and
+  16  * limitations under the License.
+  17  */
+  18 package com.dtstack.flink.sql.classloader;
+  19 
+  20 import com.dtstack.flink.sql.util.PluginUtil;
+  21 import com.dtstack.flink.sql.util.ReflectionUtils;
+  22 import java.lang.reflect.InvocationTargetException;
+  23 import java.lang.reflect.Method;
+  24 import java.net.URL;
+  25 import java.net.URLClassLoader;
+  26 import java.util.ArrayList;
+  27 import java.util.Arrays;
+  28 import java.util.Comparator;
+  29 import java.util.List;
+  30 import java.util.Map;
+  31 import java.util.concurrent.ConcurrentHashMap;
+  32 import org.apache.commons.lang3.StringUtils;
+  33 import org.slf4j.Logger;
+  34 import org.slf4j.LoggerFactory;
+  35 
+  36 
+  37 /**
+  38  * company: www.dtstack.com
+  39  * author: toutian
+  40  * create: 2019/10/14
+  41  */
+  42 public class ClassLoaderManager {
+  43     private static final Logger LOG = LoggerFactory.getLogger(ClassLoaderManager.class);
+  44 
+  45     private static Map&lt;String, DtClassLoader&gt; pluginClassLoader = new ConcurrentHashMap&lt;&gt;();
+  46 
+<abbr title="  47     public static &lt;R&gt; R newInstance(String pluginJarPath, ClassLoaderSupplier&lt;R&gt; supplier) throws Exception {">  47     public static &lt;R&gt; R newInstance(String pluginJarPath, ClassLoaderSupplier&lt;R&gt; supplier) throws Excepti🔵</abbr>
+  48         ClassLoader classLoader = retrieveClassLoad(pluginJarPath);
+  49         return ClassLoaderSupplierCallBack.callbackAndReset(supplier, classLoader);
+  50     }
+  51 
+<abbr title="  52     public static &lt;R&gt; R newInstance(List&lt;URL&gt; jarUrls, ClassLoaderSupplier&lt;R&gt; supplier) throws Exception {">  52     public static &lt;R&gt; R newInstance(List&lt;URL&gt; jarUrls, ClassLoaderSupplier&lt;R&gt; supplier) throws Exception 🔵</abbr>
+  53         ClassLoader classLoader = retrieveClassLoad(jarUrls);
+  54         return ClassLoaderSupplierCallBack.callbackAndReset(supplier, classLoader);
+  55     }
+  56 
+  57     private static DtClassLoader retrieveClassLoad(String pluginJarPath) {
+  58         return pluginClassLoader.computeIfAbsent(pluginJarPath, k -&gt; {
+  59             try {
+  60                 URL[] urls = PluginUtil.getPluginJarUrls(pluginJarPath);
+  61                 ClassLoader parentClassLoader = Thread.currentThread().getContextClassLoader();
+  62                 DtClassLoader classLoader = new DtClassLoader(urls, parentClassLoader);
+  63                 LOG.info(&quot;pluginJarPath:{} create ClassLoad successful...&quot;, pluginJarPath);
+  64                 return classLoader;
+  65             } catch (Throwable e) {
+  66                 LOG.error(&quot;retrieve ClassLoad happens error:{}&quot;, e);
+  67                 throw new RuntimeException(&quot;retrieve ClassLoad happens error&quot;);
+  68             }
+  69         });
+  70     }
+  71 
+  72     private static DtClassLoader retrieveClassLoad(List&lt;URL&gt; jarUrls) {
+  73         jarUrls.sort(Comparator.comparing(URL::toString));
+  74         String jarUrlkey = StringUtils.join(jarUrls, &quot;_&quot;);
+  75         return pluginClassLoader.computeIfAbsent(jarUrlkey, k -&gt; {
+  76             try {
+  77                 URL[] urls = jarUrls.toArray(new URL[jarUrls.size()]);
+  78                 ClassLoader parentClassLoader = Thread.currentThread().getContextClassLoader();
+  79                 DtClassLoader classLoader = new DtClassLoader(urls, parentClassLoader);
+  80                 LOG.info(&quot;jarUrl:{} create ClassLoad successful...&quot;, jarUrlkey);
+  81                 return classLoader;
+  82             } catch (Throwable e) {
+  83                 LOG.error(&quot;retrieve ClassLoad happens error:{}&quot;, e);
+  84                 throw new RuntimeException(&quot;retrieve ClassLoad happens error&quot;);
+  85             }
+  86         });
+  87     }
+  88 
+  89     public static List&lt;URL&gt; getClassPath() {
+  90         List&lt;URL&gt; classPaths = new ArrayList&lt;&gt;();
+  91         for (Map.Entry&lt;String, DtClassLoader&gt; entry : pluginClassLoader.entrySet()) {
+  92             classPaths.addAll(Arrays.asList(entry.getValue().getURLs()));
+  93         }
+  94         return classPaths;
+  95     }
+  96 
+<abbr title="  97     public static URLClassLoader loadExtraJar(List&lt;URL&gt; jarUrlList, URLClassLoader classLoader) throws IllegalAccessException, InvocationTargetException {">  97     public static URLClassLoader loadExtraJar(List&lt;URL&gt; jarUrlList, URLClassLoader classLoader) throws Il🔵</abbr>
+  98         for (URL url : jarUrlList) {
+  99             if (url.toString().endsWith(&quot;.jar&quot;)) {
+ 100                 urlClassLoaderAddUrl(classLoader, url);
+ 101             }
+ 102         }
+ 103         return classLoader;
+ 104     }
+ 105 
+<abbr title=" 106     private static void urlClassLoaderAddUrl(URLClassLoader classLoader, URL url) throws InvocationTargetException, IllegalAccessException {"> 106     private static void urlClassLoaderAddUrl(URLClassLoader classLoader, URL url) throws InvocationTarget🔵</abbr>
+ 107         Method method = ReflectionUtils.getDeclaredMethod(classLoader, &quot;addURL&quot;, URL.class);
+ 108 
+ 109         if (method == null) {
+<abbr title=" 110             throw new RuntimeException(&quot;can&#x27;t not find declared method addURL, curr classLoader is &quot; + classLoader.getClass());"> 110             throw new RuntimeException(&quot;can&#x27;t not find declared method addURL, curr classLoader is &quot; + cl🔵</abbr>
+ 111         }
+ 112         method.setAccessible(true);
+ 113         method.invoke(classLoader, url);
+ 114     }
+ 115 }
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ </pre></td>
+                        </tr>
+                    </table>
+                </div>
+                <div id="bottom">
+                    <table style="margin:auto">
+                        <tr>
+                            <th>ours vs. base</th>
+                            <th>theirs vs. base</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1  /*
+   2   * Licensed to the Apache Software Foundation (ASF) under one
+   3   * or more contributor license agreements.  See the NOTICE file
+   4   * distributed with this work for additional information
+   5   * regarding copyright ownership.  The ASF licenses this file
+   6   * to you under the Apache License, Version 2.0 (the
+   7   * &quot;License&quot;); you may not use this file except in compliance
+   8   * with the License.  You may obtain a copy of the License at
+   9   *
+  10   *     http://www.apache.org/licenses/LICENSE-2.0
+  11   *
+  12   * Unless required by applicable law or agreed to in writing, software
+  13   * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15   * See the License for the specific language governing permissions and
+  16   * limitations under the License.
+  17   */
+  18  
+  19  package com.dtstack.flink.sql.classloader;
+  20  
+  21  import com.dtstack.flink.sql.util.PluginUtil;
+  22  import com.dtstack.flink.sql.util.ReflectionUtils;
+  23  import org.apache.commons.lang3.StringUtils;
+  24  import org.slf4j.Logger;
+  25  import org.slf4j.LoggerFactory;
+  26  
+  27  import java.lang.reflect.InvocationTargetException;
+  28  import java.lang.reflect.Method;
+  29  import java.net.URL;
+  30  import java.net.URLClassLoader;
+  31  import java.util.ArrayList;
+  32  import java.util.Arrays;
+  33  import java.util.Comparator;
+  34  import java.util.List;
+  35  import java.util.Map;
+  36  import java.util.concurrent.ConcurrentHashMap;
+  37  
+  38  /**
+  39   * company: www.dtstack.com
+  40   * author: toutian
+  41   * create: 2019/10/14
+  42   */
+  43  public class ClassLoaderManager {
+  44  
+  45      private static final Logger LOG = LoggerFactory.getLogger(ClassLoaderManager.class);
+  46  
+  47      private static Map&lt;String, DtClassLoader&gt; pluginClassLoader = new ConcurrentHashMap&lt;&gt;();
+  48  
+  49      public static &lt;R&gt; R newInstance(String pluginJarPath, ClassLoaderSupplier&lt;R&gt; supplier) throws Exception {
+  50          ClassLoader classLoader = retrieveClassLoad(pluginJarPath);
+  51          return ClassLoaderSupplierCallBack.callbackAndReset(supplier, classLoader);
+  52      }
+  53  
+  54      public static &lt;R&gt; R newInstance(List&lt;URL&gt; jarUrls, ClassLoaderSupplier&lt;R&gt; supplier) throws Exception {
+  55          ClassLoader classLoader = retrieveClassLoad(jarUrls);
+  56          return ClassLoaderSupplierCallBack.callbackAndReset(supplier, classLoader);
+  57      }
+  58  
+  59      private static DtClassLoader retrieveClassLoad(String pluginJarPath) {
+  60          return pluginClassLoader.computeIfAbsent(pluginJarPath, k -&gt; {
+  61              try {
+  62                  URL[] urls = PluginUtil.getPluginJarUrls(pluginJarPath);
+  63                  ClassLoader parentClassLoader = Thread.currentThread().getContextClassLoader();
+  64                  DtClassLoader classLoader = new DtClassLoader(urls, parentClassLoader);
+  65                  LOG.info(&quot;pluginJarPath:{} create ClassLoad successful...&quot;, pluginJarPath);
+  66                  return classLoader;
+  67              } catch (Throwable e) {
+  68                  LOG.error(&quot;retrieve ClassLoad happens error:{}&quot;, e);
+  69                  throw new RuntimeException(&quot;retrieve ClassLoad happens error&quot;);
+  70              }
+  71          });
+  72      }
+  73  
+  74      private static DtClassLoader retrieveClassLoad(List&lt;URL&gt; jarUrls) {
+  75          jarUrls.sort(Comparator.comparing(URL::toString));
+  76          String jarUrlkey = StringUtils.join(jarUrls, &quot;_&quot;);
+  77          return pluginClassLoader.computeIfAbsent(jarUrlkey, k -&gt; {
+  78              try {
+  79                  URL[] urls = jarUrls.toArray(new URL[jarUrls.size()]);
+  80                  ClassLoader parentClassLoader = Thread.currentThread().getContextClassLoader();
+  81                  DtClassLoader classLoader = new DtClassLoader(urls, parentClassLoader);
+  82                  LOG.info(&quot;jarUrl:{} create ClassLoad successful...&quot;, jarUrlkey);
+  83                  return classLoader;
+  84              } catch (Throwable e) {
+  85                  LOG.error(&quot;retrieve ClassLoad happens error:{}&quot;, e);
+  86                  throw new RuntimeException(&quot;retrieve ClassLoad happens error&quot;);
+  87              }
+  88          });
+  89      }
+  90  
+  91      public static List&lt;URL&gt; getClassPath() {
+  92          List&lt;URL&gt; classPaths = new ArrayList&lt;&gt;();
+  93          for (Map.Entry&lt;String, DtClassLoader&gt; entry : pluginClassLoader.entrySet()) {
+  94              classPaths.addAll(Arrays.asList(entry.getValue().getURLs()));
+  95          }
+  96          return classPaths;
+  97      }
+  98  
+  99  
+ 100  
+ 101      public static URLClassLoader loadExtraJar(List&lt;URL&gt; jarURLList, URLClassLoader classLoader)
+
+ 102              throws  IllegalAccessException, InvocationTargetException {
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 103 +</span>
+ 104          for(URL url : jarURLList){
+
+ 105              if(url.toString().endsWith(&quot;.jar&quot;)){
+ 106                  urlClassLoaderAddUrl(classLoader, url);
+ 107              }
+ 108          }
+ 109          return classLoader;
+ 110      }
+ 111  
+<abbr title=" 112      private static void urlClassLoaderAddUrl(URLClassLoader classLoader, URL url) throws InvocationTargetException, IllegalAccessException {"> 112      private static void urlClassLoaderAddUrl(URLClassLoader classLoader, URL url) throws InvocationTargetException🔵</abbr>
+ 113          Method method = ReflectionUtils.getDeclaredMethod(classLoader, &quot;addURL&quot;, URL.class);
+ 114  
+ 115          if (method == null) {
+<abbr title=" 116              throw new RuntimeException(&quot;can&#x27;t not find declared method addURL, curr classLoader is &quot; + classLoader.getClass());"> 116              throw new RuntimeException(&quot;can&#x27;t not find declared method addURL, curr classLoader is &quot; + classLoader🔵</abbr>
+ 117          }
+ 118          method.setAccessible(true);
+ 119          method.invoke(classLoader, url);
+ 120      }
+ 121  }</pre></td>
+                            <td><pre>   1  /*
+   2   * Licensed to the Apache Software Foundation (ASF) under one
+   3   * or more contributor license agreements.  See the NOTICE file
+   4   * distributed with this work for additional information
+   5   * regarding copyright ownership.  The ASF licenses this file
+   6   * to you under the Apache License, Version 2.0 (the
+   7   * &quot;License&quot;); you may not use this file except in compliance
+   8   * with the License.  You may obtain a copy of the License at
+   9   *
+  10   *     http://www.apache.org/licenses/LICENSE-2.0
+  11   *
+  12   * Unless required by applicable law or agreed to in writing, software
+  13   * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15   * See the License for the specific language governing permissions and
+  16   * limitations under the License.
+  17   */
+  18  
+  19  package com.dtstack.flink.sql.classloader;
+  20  
+  21  import com.dtstack.flink.sql.util.PluginUtil;
+  22  import com.dtstack.flink.sql.util.ReflectionUtils;
+  23  import org.apache.commons.lang3.StringUtils;
+  24  import org.slf4j.Logger;
+  25  import org.slf4j.LoggerFactory;
+  26  
+  27  import java.lang.reflect.InvocationTargetException;
+  28  import java.lang.reflect.Method;
+  29  import java.net.URL;
+  30  import java.net.URLClassLoader;
+  31  import java.util.ArrayList;
+  32  import java.util.Arrays;
+  33  import java.util.Comparator;
+  34  import java.util.List;
+  35  import java.util.Map;
+  36  import java.util.concurrent.ConcurrentHashMap;
+  37  
+  38  /**
+  39   * company: www.dtstack.com
+  40   * author: toutian
+  41   * create: 2019/10/14
+  42   */
+  43  public class ClassLoaderManager {
+  44  
+  45      private static final Logger LOG = LoggerFactory.getLogger(ClassLoaderManager.class);
+  46  
+  47      private static Map&lt;String, DtClassLoader&gt; pluginClassLoader = new ConcurrentHashMap&lt;&gt;();
+  48  
+  49      public static &lt;R&gt; R newInstance(String pluginJarPath, ClassLoaderSupplier&lt;R&gt; supplier) throws Exception {
+  50          ClassLoader classLoader = retrieveClassLoad(pluginJarPath);
+  51          return ClassLoaderSupplierCallBack.callbackAndReset(supplier, classLoader);
+  52      }
+  53  
+  54      public static &lt;R&gt; R newInstance(List&lt;URL&gt; jarUrls, ClassLoaderSupplier&lt;R&gt; supplier) throws Exception {
+  55          ClassLoader classLoader = retrieveClassLoad(jarUrls);
+  56          return ClassLoaderSupplierCallBack.callbackAndReset(supplier, classLoader);
+  57      }
+  58  
+  59      private static DtClassLoader retrieveClassLoad(String pluginJarPath) {
+  60          return pluginClassLoader.computeIfAbsent(pluginJarPath, k -&gt; {
+  61              try {
+  62                  URL[] urls = PluginUtil.getPluginJarUrls(pluginJarPath);
+  63                  ClassLoader parentClassLoader = Thread.currentThread().getContextClassLoader();
+  64                  DtClassLoader classLoader = new DtClassLoader(urls, parentClassLoader);
+  65                  LOG.info(&quot;pluginJarPath:{} create ClassLoad successful...&quot;, pluginJarPath);
+  66                  return classLoader;
+  67              } catch (Throwable e) {
+  68                  LOG.error(&quot;retrieve ClassLoad happens error:{}&quot;, e);
+  69                  throw new RuntimeException(&quot;retrieve ClassLoad happens error&quot;);
+  70              }
+  71          });
+  72      }
+  73  
+  74      private static DtClassLoader retrieveClassLoad(List&lt;URL&gt; jarUrls) {
+  75          jarUrls.sort(Comparator.comparing(URL::toString));
+  76          String jarUrlkey = StringUtils.join(jarUrls, &quot;_&quot;);
+  77          return pluginClassLoader.computeIfAbsent(jarUrlkey, k -&gt; {
+  78              try {
+  79                  URL[] urls = jarUrls.toArray(new URL[jarUrls.size()]);
+  80                  ClassLoader parentClassLoader = Thread.currentThread().getContextClassLoader();
+  81                  DtClassLoader classLoader = new DtClassLoader(urls, parentClassLoader);
+  82                  LOG.info(&quot;jarUrl:{} create ClassLoad successful...&quot;, jarUrlkey);
+  83                  return classLoader;
+  84              } catch (Throwable e) {
+  85                  LOG.error(&quot;retrieve ClassLoad happens error:{}&quot;, e);
+  86                  throw new RuntimeException(&quot;retrieve ClassLoad happens error&quot;);
+  87              }
+  88          });
+  89      }
+  90  
+  91      public static List&lt;URL&gt; getClassPath() {
+  92          List&lt;URL&gt; classPaths = new ArrayList&lt;&gt;();
+  93          for (Map.Entry&lt;String, DtClassLoader&gt; entry : pluginClassLoader.entrySet()) {
+  94              classPaths.addAll(Arrays.asList(entry.getValue().getURLs()));
+  95          }
+  96          return classPaths;
+  97      }
+  98  
+  99  
+ 100  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 101 -    public static URLClassLoader loadExtraJar(List&lt;URL&gt; jarURLList, URLClassLoader classLoader)</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 102 +    public static URLClassLoader loadExtraJar(List&lt;URL&gt; jarUrlList, URLClassLoader classLoader)</span>
+ 103              throws  IllegalAccessException, InvocationTargetException {
+
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 104 -        for(URL url : jarURLList){</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 105 +        for(URL url : jarUrlList){</span>
+ 106              if(url.toString().endsWith(&quot;.jar&quot;)){
+ 107                  urlClassLoaderAddUrl(classLoader, url);
+ 108              }
+ 109          }
+ 110          return classLoader;
+ 111      }
+ 112  
+<abbr title=" 113      private static void urlClassLoaderAddUrl(URLClassLoader classLoader, URL url) throws InvocationTargetException, IllegalAccessException {"> 113      private static void urlClassLoaderAddUrl(URLClassLoader classLoader, URL url) throws InvocationTargetException🔵</abbr>
+ 114          Method method = ReflectionUtils.getDeclaredMethod(classLoader, &quot;addURL&quot;, URL.class);
+ 115  
+ 116          if (method == null) {
+<abbr title=" 117              throw new RuntimeException(&quot;can&#x27;t not find declared method addURL, curr classLoader is &quot; + classLoader.getClass());"> 117              throw new RuntimeException(&quot;can&#x27;t not find declared method addURL, curr classLoader is &quot; + classLoader🔵</abbr>
+ 118          }
+ 119          method.setAccessible(true);
+ 120          method.invoke(classLoader, url);
+ 121      }
+ 122  }</pre></td>
+                        </tr>
+                    </table>
+                </div>
+              </body>
+            </html>
+            

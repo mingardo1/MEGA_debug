@@ -1,0 +1,2745 @@
+<!DOCTYPE html>
+    <html lang="en">
+              <head>
+                <meta charset="utf-8">
+                <title>297</title>
+                    <style>
+                        #top {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        #bottom {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        abbr {
+                          /* Here is the delay */
+                          transition-delay:0s;
+                        }
+                    </style>
+              </head>
+              <body>
+                <span style="height: 4vh">
+                    297
+                    <a href="296.html">prev</a>
+                    <a href="298.html">next</a>
+                    <a href="297_chunks.html">chunks</a>
+                    <a href="index.html">index</a>
+                    DTStack/flinkStreamSQL_d798482fc62364d3674d38d4371e72d55c62b8cd_hbase/hbase-sink/src/main/java/com/dtstack/flink/sql/sink/hbase/HbaseOutputFormat.java
+                    <textarea rows=1 onclick='navigator.clipboard.writeText(this.value)'>cd C:\studies\se\mega\git-analyzer-plus\notebooks\debug
+del /Q *
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;d798482fc62364d3674d38d4371e72d55c62b8cd:hbase/hbase-sink/src/main/java/com/dtstack/flink/sql/sink/hbase/HbaseOutputFormat.java&quot; &gt; committed.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;d798482fc62364d3674d38d4371e72d55c62b8cd^1:hbase/hbase-sink/src/main/java/com/dtstack/flink/sql/sink/hbase/HbaseOutputFormat.java&quot; &gt; ours.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;d798482fc62364d3674d38d4371e72d55c62b8cd^2:hbase/hbase-sink/src/main/java/com/dtstack/flink/sql/sink/hbase/HbaseOutputFormat.java&quot; &gt; theirs.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;40b2b20be44e7989fcb02621921c6b127f7cbff9:hbase/hbase-sink/src/main/java/com/dtstack/flink/sql/sink/hbase/HbaseOutputFormat.java&quot; &gt; base.java
+copy ours.java 1ours.java
+copy ours.java 2ours.java
+copy theirs.java 1theirs.java
+copy theirs.java 2theirs.java
+copy base.java 1base.java
+copy base.java 2base.java
+&quot;C:\Program Files\Java\jdk1.8.0_241\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\jFSTMerge\build\libs\jFSTMerge-all.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\jfstmerge.java --show-base
+&quot;C:\Program Files\Eclipse Adoptium\jdk-17.0.11.9-hotspot\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\spork\target\spork-0.5.0-SNAPSHOT.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\spork.java
+del /Q 1*.java
+del /Q 2*.java
+del /Q jfstmerge.java.merge
+</textarea>
+                    {strict: [[bj]], subset: [[bj]]}
+                </span>
+                <div id="top">
+
+                    <table>
+                        <tr>
+                            <th>line based (standard git)</th>
+                            <th>jfstmerge</th>
+                            <th>spork</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1 /*
+   2  * Licensed to the Apache Software Foundation (ASF) under one
+   3  * or more contributor license agreements.  See the NOTICE file
+   4  * distributed with this work for additional information
+   5  * regarding copyright ownership.  The ASF licenses this file
+   6  * to you under the Apache License, Version 2.0 (the
+   7  * &quot;License&quot;); you may not use this file except in compliance
+   8  * with the License.  You may obtain a copy of the License at
+   9  *
+  10  *     http://www.apache.org/licenses/LICENSE-2.0
+  11  *
+  12  * Unless required by applicable law or agreed to in writing, software
+  13  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15  * See the License for the specific language governing permissions and
+  16  * limitations under the License.
+  17  */
+  18 
+  19 
+  20 package com.dtstack.flink.sql.sink.hbase;
+  21 
+  22 import com.dtstack.flink.sql.dirtyManager.manager.DirtyDataManager;
+  23 import com.dtstack.flink.sql.factory.DTThreadFactory;
+  24 import com.dtstack.flink.sql.outputformat.AbstractDtRichOutputFormat;
+  25 import com.google.common.collect.Maps;
+  26 import org.apache.commons.lang3.StringUtils;
+  27 import org.apache.flink.api.java.tuple.Tuple2;
+  28 import org.apache.flink.configuration.Configuration;
+  29 import org.apache.flink.types.Row;
+  30 import org.apache.flink.util.Preconditions;
+  31 import org.apache.hadoop.hbase.AuthUtil;
+  32 import org.apache.hadoop.hbase.ChoreService;
+  33 import org.apache.hadoop.hbase.HBaseConfiguration;
+  34 import org.apache.hadoop.hbase.ScheduledChore;
+  35 import org.apache.hadoop.hbase.TableName;
+  36 import org.apache.hadoop.hbase.client.Connection;
+  37 import org.apache.hadoop.hbase.client.ConnectionFactory;
+  38 import org.apache.hadoop.hbase.client.Put;
+  39 import org.apache.hadoop.hbase.client.Table;
+  40 import org.apache.hadoop.security.UserGroupInformation;
+  41 import org.slf4j.Logger;
+  42 import org.slf4j.LoggerFactory;
+  43 
+  44 import java.io.File;
+  45 import java.io.IOException;
+  46 import java.security.PrivilegedAction;
+  47 import java.util.ArrayList;
+  48 import java.util.LinkedList;
+  49 import java.util.List;
+  50 import java.util.Map;
+  51 import java.util.concurrent.ScheduledExecutorService;
+  52 import java.util.concurrent.ScheduledFuture;
+  53 import java.util.concurrent.ScheduledThreadPoolExecutor;
+  54 import java.util.concurrent.TimeUnit;
+  55 
+  56 /**
+  57  * @author: jingzhen@dtstack.com
+  58  * date: 2017-6-29
+  59  */
+  60 public class HbaseOutputFormat extends AbstractDtRichOutputFormat&lt;Tuple2&lt;Boolean, Row&gt;&gt; {
+  61 
+  62     private static final Logger LOG = LoggerFactory.getLogger(HbaseOutputFormat.class);
+  63     private String host;
+  64     private String zkParent;
+  65     private String rowkey;
+  66     private String tableName;
+  67     private String[] columnNames;
+  68     private Map&lt;String, String&gt; columnNameFamily;
+  69     private boolean kerberosAuthEnable;
+  70     private String regionserverKeytabFile;
+  71     private String regionserverPrincipal;
+  72     private String securityKrb5Conf;
+  73     private String zookeeperSaslClient;
+  74     private String clientPrincipal;
+  75     private String clientKeytabFile;
+  76     private String[] families;
+  77     private String[] qualifiers;
+  78     private transient org.apache.hadoop.conf.Configuration conf;
+  79     private transient Connection conn;
+  80     private transient Table table;
+  81     private transient ChoreService choreService;
+  82     private transient List&lt;Row&gt; records;
+  83     private transient volatile boolean closed = false;
+  84     /**
+  85      * 批量写入的参数
+  86      */
+  87     private Integer batchSize;
+  88     private Long batchWaitInterval;
+  89     /**
+  90      * 定时任务
+  91      */
+  92     private transient ScheduledExecutorService scheduler;
+  93     private transient ScheduledFuture&lt;?&gt; scheduledFuture;
+  94 
+  95     /**
+  96      * 脏数据管理
+  97      */
+  98     private DirtyDataManager dirtyDataManager;
+  99 
+ 100     private HbaseOutputFormat() {
+ 101     }
+ 102 
+ 103     public static HbaseOutputFormatBuilder buildHbaseOutputFormat() {
+ 104         return new HbaseOutputFormatBuilder();
+ 105     }
+ 106 
+ 107     @Override
+ 108     public void configure(Configuration parameters) {
+ 109         // 这里不要做耗时较长的操作，否则会导致AKKA通信超时
+ 110         // DO NOTHING
+ 111     }
+ 112 
+ 113     @Override
+ 114     public void open(int taskNumber, int numTasks) throws IOException {
+ 115         LOG.warn(&quot;---open---&quot;);
+ 116         records = new ArrayList&lt;&gt;();
+ 117         conf = HBaseConfiguration.create();
+ 118         openConn();
+ 119         table = conn.getTable(TableName.valueOf(tableName));
+ 120         LOG.warn(&quot;---open end(get table from hbase) ---&quot;);
+ 121         initMetric();
+ 122     }
+ 123 
+ 124     private void openConn() {
+ 125         try {
+ 126             if (kerberosAuthEnable) {
+ 127                 LOG.info(&quot;open kerberos conn&quot;);
+ 128                 openKerberosConn();
+ 129             } else {
+ 130                 LOG.info(&quot;open conn&quot;);
+ 131                 conf.set(HbaseConfigUtils.KEY_HBASE_ZOOKEEPER_QUORUM, host);
+ 132                 conf.set(HbaseConfigUtils.KEY_HBASE_ZOOKEEPER_ZNODE_QUORUM, zkParent);
+ 133                 conn = ConnectionFactory.createConnection(conf);
+ 134             }
+ 135         } catch (Exception e) {
+ 136             throw new RuntimeException(e);
+ 137         }
+ 138         initScheduledTask(batchWaitInterval);
+ 139     }
+ 140 
+ 141     /**
+ 142      * 初始化定时写入任务
+ 143      *
+ 144      * @param batchWaitInterval 定时任务时间
+ 145      */
+ 146     private void initScheduledTask(Long batchWaitInterval) {
+ 147         try {
+ 148             if (batchWaitInterval &gt; 0) {
+ 149                 this.scheduler = new ScheduledThreadPoolExecutor(
+ 150                         1,
+ 151                         new DTThreadFactory(&quot;hbase-batch-flusher&quot;)
+ 152                 );
+ 153 
+ 154                 this.scheduledFuture = this.scheduler.scheduleWithFixedDelay(
+ 155                         () -&gt; {
+ 156                             synchronized (HbaseOutputFormat.this) {
+ 157                                 if (!records.isEmpty()) {
+ 158                                     dealBatchOperation(records);
+ 159                                 }
+ 160                             }
+ 161                         }, batchWaitInterval, batchWaitInterval, TimeUnit.MILLISECONDS
+ 162                 );
+ 163             }
+ 164         } catch (Exception e) {
+ 165             LOG.error(&quot;init schedule task failed !&quot;);
+ 166             throw new RuntimeException(e);
+ 167         }
+ 168     }
+ 169 
+ 170     private void openKerberosConn() throws Exception {
+ 171         conf.set(HbaseConfigUtils.KEY_HBASE_ZOOKEEPER_QUORUM, host);
+ 172         conf.set(HbaseConfigUtils.KEY_HBASE_ZOOKEEPER_ZNODE_QUORUM, zkParent);
+ 173 
+ 174         LOG.info(&quot;kerberos config:{}&quot;, this.conf.toString());
+ 175         Preconditions.checkArgument(!StringUtils.isEmpty(clientPrincipal), &quot; clientPrincipal not null!&quot;);
+<abbr title=" 176         Preconditions.checkArgument(!StringUtils.isEmpty(clientKeytabFile), &quot; clientKeytabFile not null!&quot;);"> 176         Preconditions.checkArgument(!StringUtils.isEmpty(clientKeytabFile), &quot; clientKeytabFile not null!&quot;🔵</abbr>
+ 177 
+ 178         fillSyncKerberosConfig(conf, regionserverPrincipal, zookeeperSaslClient, securityKrb5Conf);
+ 179 
+ 180         clientKeytabFile = System.getProperty(&quot;user.dir&quot;) + File.separator + clientKeytabFile;
+<abbr title=" 181         clientPrincipal = !StringUtils.isEmpty(clientPrincipal) ? clientPrincipal : regionserverPrincipal;"> 181         clientPrincipal = !StringUtils.isEmpty(clientPrincipal) ? clientPrincipal : regionserverPrincipal🔵</abbr>
+ 182 
+ 183         conf.set(HbaseConfigUtils.KEY_HBASE_CLIENT_KEYTAB_FILE, clientKeytabFile);
+ 184         conf.set(HbaseConfigUtils.KEY_HBASE_CLIENT_KERBEROS_PRINCIPAL, clientPrincipal);
+ 185 
+<abbr title=" 186         UserGroupInformation userGroupInformation = HbaseConfigUtils.loginAndReturnUGI(conf, clientPrincipal, clientKeytabFile);"> 186         UserGroupInformation userGroupInformation = HbaseConfigUtils.loginAndReturnUGI(conf, clientPrinci🔵</abbr>
+ 187         org.apache.hadoop.conf.Configuration finalConf = conf;
+ 188         conn = userGroupInformation.doAs((PrivilegedAction&lt;Connection&gt;) () -&gt; {
+ 189             try {
+ 190                 ScheduledChore authChore = AuthUtil.getAuthChore(finalConf);
+ 191                 if (authChore != null) {
+ 192                     choreService = new ChoreService(&quot;hbaseKerberosSink&quot;);
+ 193                     choreService.scheduleChore(authChore);
+ 194                 }
+ 195 
+ 196                 return ConnectionFactory.createConnection(finalConf);
+ 197             } catch (IOException e) {
+ 198                 LOG.error(&quot;Get connection fail with config:{}&quot;, finalConf);
+ 199                 throw new RuntimeException(e);
+ 200             }
+ 201         });
+ 202     }
+ 203 
+ 204     @Override
+ 205     public void writeRecord(Tuple2&lt;Boolean, Row&gt; record) {
+ 206         if (record.f0) {
+ 207             if (this.batchSize &gt; 1) {
+ 208                 writeBatchRecord(record.f1);
+ 209             } else {
+ 210                 dealInsert(record.f1);
+ 211             }
+ 212         }
+ 213     }
+ 214 
+ 215     public void writeBatchRecord(Row row) {
+ 216         records.add(row);
+ 217         // 数据累计到batchSize之后开始处理
+ 218         if (records.size() == this.batchSize) {
+ 219             dealBatchOperation(records);
+ 220         }
+ 221     }
+ 222 
+ 223     protected synchronized void dealBatchOperation(List&lt;Row&gt; records) {
+ 224         // A null in the result array means that the call for that action failed, even after retries.
+ 225         Object[] results = new Object[records.size()];
+ 226         try {
+ 227             List&lt;Put&gt; puts = new ArrayList&lt;&gt;();
+ 228             for (Row record : records) {
+ 229                 puts.add(getPutByRow(record));
+ 230             }
+ 231             table.batch(puts, results);
+ 232 
+ 233             // 打印结果
+ 234             if (outRecords.getCount() % ROW_PRINT_FREQUENCY == 0) {
+ 235                 // 只打印最后一条数据
+ 236                 LOG.info(records.get(records.size() - 1).toString());
+ 237             }
+ 238 &lt;&lt;&lt;&lt;&lt;&lt;&lt; GitAnalyzerPlus_ours
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 239         } catch (IOException | InterruptedException e) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 240             // ignore exception</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 241         } finally {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 242             // 判断数据是否插入成功</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 243             for (int i = 0; i &lt; results.length; i++) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 244                 if (results[i] != null) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 245                     dirtyDataManager.execute();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 246                     // 脏数据记录</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 247                     dirtyDataManager.collectDirtyData(</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 248                             records.get(i).toString(),</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 249                             ((Exception) results[i]).getMessage()</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 250                     );</span>
+ 251 ||||||| GitAnalyzerPlus_base
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 252                     }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 253                     // 脏数据记录</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 254                     outDirtyRecords.inc();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 255                 } else {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 256                     // 输出结果条数记录</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 257                     outRecords.inc();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 258                 }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 259             }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 260             // 打印结果</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 261             if (outRecords.getCount() % ROW_PRINT_FREQUENCY == 0) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 262                 // 只打印最后一条数据</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 263                 LOG.info(records.get(records.size() - 1).toString());</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 264             }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 265         } catch (IOException | InterruptedException e) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 266             LOG.error(&quot;&quot;, e);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 267         } finally {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 268             // 添加完数据之后数据清空records</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 269             records.clear();</span>
+ 270 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 271         } catch (IOException | InterruptedException ignored) {</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 272         } finally {</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 273             // 判断数据是否插入成功</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 274             for (int i = 0; i &lt; results.length; i++) {</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 275                 if (results[i] != null) {</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 276                     if (outDirtyRecords.getCount() % DIRTY_PRINT_FREQUENCY == 0) {</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 277                         LOG.error(&quot;Get dirty data: {}&quot;, records.get(i).toString());</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 278                         LOG.error(&quot;Error cause: &quot; + results[i]);</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 279                     }</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 280                     // 脏数据记录</span>
+ 281 &gt;&gt;&gt;&gt;&gt;&gt;&gt; GitAnalyzerPlus_theirs
+ 282                     outDirtyRecords.inc();
+ 283                 } else {
+ 284                     // 输出结果条数记录
+ 285                     outRecords.inc();
+ 286                 }
+ 287             }
+ 288             // 添加完数据之后数据清空records
+ 289             records.clear();
+ 290         }
+ 291     }
+ 292 
+ 293     protected void dealInsert(Row record) {
+ 294         Put put = getPutByRow(record);
+ 295         if (put == null || put.isEmpty()) {
+ 296             // 记录脏数据
+ 297             outDirtyRecords.inc();
+ 298             return;
+ 299         }
+ 300 
+ 301         try {
+ 302             table.put(put);
+ 303             if (outRecords.getCount() % ROW_PRINT_FREQUENCY == 0) {
+ 304                 LOG.info(record.toString());
+ 305             }
+ 306         } catch (Exception e) {
+ 307             dirtyDataManager.collectDirtyData(
+ 308                     record.toString()
+ 309                     , e.getMessage());
+ 310             outDirtyRecords.inc();
+ 311         }
+ 312 
+ 313         outRecords.inc();
+ 314     }
+ 315 
+ 316     private Put getPutByRow(Row record) {
+ 317         String rowKey = buildRowKey(record);
+ 318         if (StringUtils.isEmpty(rowKey)) {
+ 319             return null;
+ 320         }
+ 321         Put put = new Put(rowKey.getBytes());
+ 322         for (int i = 0; i &lt; record.getArity(); ++i) {
+ 323             Object fieldVal = record.getField(i);
+ 324             if (fieldVal != null) {
+ 325                 byte[] val = fieldVal.toString().getBytes();
+ 326                 byte[] cf = families[i].getBytes();
+ 327                 byte[] qualifier = qualifiers[i].getBytes();
+ 328 
+ 329                 put.addColumn(cf, qualifier, val);
+ 330             }
+ 331         }
+ 332         return put;
+ 333     }
+ 334 
+ 335     private String buildRowKey(Row record) {
+ 336         String rowKeyValues = getRowKeyValues(record);
+ 337         // all rowkey not null
+ 338         if (StringUtils.isBlank(rowKeyValues)) {
+ 339             LOG.error(&quot;row key value must not null,record is ..{}&quot;, record);
+ 340             outDirtyRecords.inc();
+ 341             return &quot;&quot;;
+ 342         }
+ 343         return rowKeyValues;
+ 344     }
+ 345 
+ 346     private String getRowKeyValues(Row record) {
+ 347         Map&lt;String, Object&gt; row = rowConvertMap(record);
+ 348         RowKeyBuilder rowKeyBuilder = new RowKeyBuilder();
+ 349         rowKeyBuilder.init(rowkey);
+ 350         return rowKeyBuilder.getRowKey(row);
+ 351     }
+ 352 
+ 353     private Map&lt;String, Object&gt; rowConvertMap(Row record) {
+ 354         Map&lt;String, Object&gt; rowValue = Maps.newHashMap();
+ 355         for (int i = 0; i &lt; columnNames.length; i++) {
+ 356             rowValue.put(columnNames[i], record.getField(i));
+ 357         }
+ 358         return rowValue;
+ 359     }
+ 360 
+ 361     @Override
+ 362     public synchronized void close() throws IOException {
+ 363         if (closed) {
+ 364             return;
+ 365         }
+ 366 
+ 367         closed = true;
+ 368         if (!records.isEmpty()) {
+ 369             dealBatchOperation(records);
+ 370         }
+ 371 
+ 372         if (scheduledFuture != null) {
+ 373             scheduledFuture.cancel(false);
+ 374             if (scheduler != null) {
+ 375                 scheduler.shutdownNow();
+ 376             }
+ 377         }
+ 378 
+ 379         if (conn != null) {
+ 380             conn.close();
+ 381             conn = null;
+ 382         }
+ 383     }
+ 384 
+ 385     private void fillSyncKerberosConfig(org.apache.hadoop.conf.Configuration config,
+ 386                                         String regionserverPrincipal,
+ 387                                         String zookeeperSaslClient,
+ 388                                         String securityKrb5Conf) {
+ 389         if (StringUtils.isEmpty(regionserverPrincipal)) {
+<abbr title=" 390             throw new IllegalArgumentException(&quot;Must provide regionserverPrincipal when authentication is Kerberos&quot;);"> 390             throw new IllegalArgumentException(&quot;Must provide regionserverPrincipal when authentication is🔵</abbr>
+ 391         }
+ 392         config.set(HbaseConfigUtils.KEY_HBASE_MASTER_KERBEROS_PRINCIPAL, regionserverPrincipal);
+ 393         config.set(HbaseConfigUtils.KEY_HBASE_REGIONSERVER_KERBEROS_PRINCIPAL, regionserverPrincipal);
+ 394         config.set(HbaseConfigUtils.KEY_HBASE_SECURITY_AUTHORIZATION, &quot;true&quot;);
+ 395         config.set(HbaseConfigUtils.KEY_HBASE_SECURITY_AUTHENTICATION, &quot;kerberos&quot;);
+ 396 
+ 397 
+ 398         if (!StringUtils.isEmpty(zookeeperSaslClient)) {
+ 399             System.setProperty(HbaseConfigUtils.KEY_ZOOKEEPER_SASL_CLIENT, zookeeperSaslClient);
+ 400         }
+ 401 
+ 402         if (!StringUtils.isEmpty(securityKrb5Conf)) {
+ 403             String krb5ConfPath = System.getProperty(&quot;user.dir&quot;) + File.separator + securityKrb5Conf;
+ 404             LOG.info(&quot;krb5ConfPath:{}&quot;, krb5ConfPath);
+ 405             System.setProperty(HbaseConfigUtils.KEY_JAVA_SECURITY_KRB5_CONF, krb5ConfPath);
+ 406         }
+ 407     }
+ 408 
+ 409     @Override
+ 410     public String toString() {
+ 411         return &quot;HbaseOutputFormat kerberos{&quot; +
+ 412                 &quot;kerberosAuthEnable=&quot; + kerberosAuthEnable +
+ 413                 &quot;, regionserverKeytabFile=&#x27;&quot; + regionserverKeytabFile + &#x27;\&#x27;&#x27; +
+ 414                 &quot;, regionserverPrincipal=&#x27;&quot; + regionserverPrincipal + &#x27;\&#x27;&#x27; +
+ 415                 &quot;, securityKrb5Conf=&#x27;&quot; + securityKrb5Conf + &#x27;\&#x27;&#x27; +
+ 416                 &quot;, zookeeperSaslClient=&#x27;&quot; + zookeeperSaslClient + &#x27;\&#x27;&#x27; +
+ 417                 &quot;, clientPrincipal=&#x27;&quot; + clientPrincipal + &#x27;\&#x27;&#x27; +
+ 418                 &quot;, clientKeytabFile=&#x27;&quot; + clientKeytabFile + &#x27;\&#x27;&#x27; +
+ 419                 &quot;, batchSize=&#x27;&quot; + batchSize + &#x27;\&#x27;&#x27; +
+ 420                 &quot;, batchWaitInterval=&#x27;&quot; + batchWaitInterval + &#x27;\&#x27;&#x27; +
+ 421                 &#x27;}&#x27;;
+ 422     }
+ 423 
+ 424     public static class HbaseOutputFormatBuilder {
+ 425 
+ 426         private final HbaseOutputFormat format;
+ 427 
+ 428         private HbaseOutputFormatBuilder() {
+ 429             format = new HbaseOutputFormat();
+ 430         }
+ 431 
+ 432         public HbaseOutputFormatBuilder setHost(String host) {
+ 433             format.host = host;
+ 434             return this;
+ 435         }
+ 436 
+ 437         public HbaseOutputFormatBuilder setZkParent(String parent) {
+ 438             format.zkParent = parent;
+ 439             return this;
+ 440         }
+ 441 
+ 442 
+ 443         public HbaseOutputFormatBuilder setTable(String tableName) {
+ 444             format.tableName = tableName;
+ 445             return this;
+ 446         }
+ 447 
+ 448         public HbaseOutputFormatBuilder setRowkey(String rowkey) {
+ 449             format.rowkey = rowkey;
+ 450             return this;
+ 451         }
+ 452 
+ 453         public HbaseOutputFormatBuilder setColumnNames(String[] columnNames) {
+ 454             format.columnNames = columnNames;
+ 455             return this;
+ 456         }
+ 457 
+ 458         public HbaseOutputFormatBuilder setColumnNameFamily(Map&lt;String, String&gt; columnNameFamily) {
+ 459             format.columnNameFamily = columnNameFamily;
+ 460             return this;
+ 461         }
+ 462 
+ 463         public HbaseOutputFormatBuilder setKerberosAuthEnable(boolean kerberosAuthEnable) {
+ 464             format.kerberosAuthEnable = kerberosAuthEnable;
+ 465             return this;
+ 466         }
+ 467 
+ 468         public HbaseOutputFormatBuilder setRegionserverKeytabFile(String regionserverKeytabFile) {
+ 469             format.regionserverKeytabFile = regionserverKeytabFile;
+ 470             return this;
+ 471         }
+ 472 
+ 473         public HbaseOutputFormatBuilder setRegionserverPrincipal(String regionserverPrincipal) {
+ 474             format.regionserverPrincipal = regionserverPrincipal;
+ 475             return this;
+ 476         }
+ 477 
+ 478         public HbaseOutputFormatBuilder setSecurityKrb5Conf(String securityKrb5Conf) {
+ 479             format.securityKrb5Conf = securityKrb5Conf;
+ 480             return this;
+ 481         }
+ 482 
+ 483         public HbaseOutputFormatBuilder setZookeeperSaslClient(String zookeeperSaslClient) {
+ 484             format.zookeeperSaslClient = zookeeperSaslClient;
+ 485             return this;
+ 486         }
+ 487 
+ 488         public HbaseOutputFormatBuilder setClientPrincipal(String clientPrincipal) {
+ 489             format.clientPrincipal = clientPrincipal;
+ 490             return this;
+ 491         }
+ 492 
+ 493         public HbaseOutputFormatBuilder setClientKeytabFile(String clientKeytabFile) {
+ 494             format.clientKeytabFile = clientKeytabFile;
+ 495             return this;
+ 496         }
+ 497 
+ 498         public HbaseOutputFormatBuilder setDirtyManager(DirtyDataManager dirtyDataManager) {
+ 499             format.dirtyDataManager = dirtyDataManager;
+ 500             return this;
+ 501         }
+ 502 
+ 503         public HbaseOutputFormatBuilder setBatchSize(Integer batchSize) {
+ 504             format.batchSize = batchSize;
+ 505             return this;
+ 506         }
+ 507 
+ 508         public HbaseOutputFormatBuilder setBatchWaitInterval(Long batchWaitInterval) {
+ 509             format.batchWaitInterval = batchWaitInterval;
+ 510             return this;
+ 511         }
+ 512 
+ 513         public HbaseOutputFormat finish() {
+ 514             Preconditions.checkNotNull(format.host, &quot;zookeeperQuorum should be specified&quot;);
+ 515             Preconditions.checkNotNull(format.tableName, &quot;tableName should be specified&quot;);
+ 516             Preconditions.checkNotNull(format.columnNames, &quot;columnNames should be specified&quot;);
+<abbr title=" 517             Preconditions.checkArgument(format.columnNames.length != 0, &quot;columnNames length should not be zero&quot;);"> 517             Preconditions.checkArgument(format.columnNames.length != 0, &quot;columnNames length should not be🔵</abbr>
+ 518 
+ 519             String[] families = new String[format.columnNames.length];
+ 520             String[] qualifiers = new String[format.columnNames.length];
+ 521 
+ 522             if (format.columnNameFamily != null) {
+ 523                 List&lt;String&gt; keyList = new LinkedList&lt;&gt;(format.columnNameFamily.keySet());
+ 524                 String[] columns = keyList.toArray(new String[0]);
+ 525                 for (int i = 0; i &lt; columns.length; ++i) {
+ 526                     String col = columns[i];
+ 527                     String[] part = col.split(&quot;:&quot;);
+ 528                     families[i] = part[0];
+ 529                     qualifiers[i] = part[1];
+ 530                 }
+ 531             }
+ 532             format.families = families;
+ 533             format.qualifiers = qualifiers;
+ 534 
+ 535             return format;
+ 536         }
+ 537     }
+ 538 }</pre></td>
+                            <td><pre>   1 /*
+   2  * Licensed to the Apache Software Foundation (ASF) under one
+   3  * or more contributor license agreements.  See the NOTICE file
+   4  * distributed with this work for additional information
+   5  * regarding copyright ownership.  The ASF licenses this file
+   6  * to you under the Apache License, Version 2.0 (the
+   7  * &quot;License&quot;); you may not use this file except in compliance
+   8  * with the License.  You may obtain a copy of the License at
+   9  *
+  10  *     http://www.apache.org/licenses/LICENSE-2.0
+  11  *
+  12  * Unless required by applicable law or agreed to in writing, software
+  13  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15  * See the License for the specific language governing permissions and
+  16  * limitations under the License.
+  17  */
+  18 
+  19 
+  20 package com.dtstack.flink.sql.sink.hbase;
+  21 
+  22 import com.dtstack.flink.sql.dirtyManager.manager.DirtyDataManager;
+  23 import com.dtstack.flink.sql.factory.DTThreadFactory;
+  24 import com.dtstack.flink.sql.outputformat.AbstractDtRichOutputFormat;
+  25 import com.google.common.collect.Maps;
+  26 import org.apache.commons.lang3.StringUtils;
+  27 import org.apache.flink.api.java.tuple.Tuple2;
+  28 import org.apache.flink.configuration.Configuration;
+  29 import org.apache.flink.types.Row;
+  30 import org.apache.flink.util.Preconditions;
+  31 import org.apache.hadoop.hbase.AuthUtil;
+  32 import org.apache.hadoop.hbase.ChoreService;
+  33 import org.apache.hadoop.hbase.HBaseConfiguration;
+  34 import org.apache.hadoop.hbase.ScheduledChore;
+  35 import org.apache.hadoop.hbase.TableName;
+  36 import org.apache.hadoop.hbase.client.Connection;
+  37 import org.apache.hadoop.hbase.client.ConnectionFactory;
+  38 import org.apache.hadoop.hbase.client.Put;
+  39 import org.apache.hadoop.hbase.client.Table;
+  40 import org.apache.hadoop.security.UserGroupInformation;
+  41 import org.slf4j.Logger;
+  42 import org.slf4j.LoggerFactory;
+  43 
+  44 import java.io.File;
+  45 import java.io.IOException;
+  46 import java.security.PrivilegedAction;
+  47 import java.util.ArrayList;
+  48 import java.util.LinkedList;
+  49 import java.util.List;
+  50 import java.util.Map;
+  51 import java.util.concurrent.ScheduledExecutorService;
+  52 import java.util.concurrent.ScheduledFuture;
+  53 import java.util.concurrent.ScheduledThreadPoolExecutor;
+  54 import java.util.concurrent.TimeUnit;
+  55 
+  56 /**
+  57  * @author: jingzhen@dtstack.com
+  58  * date: 2017-6-29
+  59  */
+  60 public class HbaseOutputFormat extends AbstractDtRichOutputFormat&lt;Tuple2&lt;Boolean, Row&gt;&gt; {
+  61 
+  62     private static final Logger LOG = LoggerFactory.getLogger(HbaseOutputFormat.class);
+  63     private String host;
+  64     private String zkParent;
+  65     private String rowkey;
+  66     private String tableName;
+  67     private String[] columnNames;
+  68     private Map&lt;String, String&gt; columnNameFamily;
+  69     private boolean kerberosAuthEnable;
+  70     private String regionserverKeytabFile;
+  71     private String regionserverPrincipal;
+  72     private String securityKrb5Conf;
+  73     private String zookeeperSaslClient;
+  74     private String clientPrincipal;
+  75     private String clientKeytabFile;
+  76     private String[] families;
+  77     private String[] qualifiers;
+  78     private transient org.apache.hadoop.conf.Configuration conf;
+  79     private transient Connection conn;
+  80     private transient Table table;
+  81     private transient ChoreService choreService;
+  82     private transient List&lt;Row&gt; records;
+  83     private transient volatile boolean closed = false;
+  84     /**
+  85      * 批量写入的参数
+  86      */
+  87     private Integer batchSize;
+  88     private Long batchWaitInterval;
+  89     /**
+  90      * 定时任务
+  91      */
+  92     private transient ScheduledExecutorService scheduler;
+  93     private transient ScheduledFuture&lt;?&gt; scheduledFuture;
+  94 
+  95     /**
+  96      * 脏数据管理
+  97      */
+  98     private DirtyDataManager dirtyDataManager;
+  99 
+ 100     private HbaseOutputFormat() {
+ 101     }
+ 102 
+ 103     public static HbaseOutputFormatBuilder buildHbaseOutputFormat() {
+ 104         return new HbaseOutputFormatBuilder();
+ 105     }
+ 106 
+ 107     @Override
+ 108     public void configure(Configuration parameters) {
+ 109         // 这里不要做耗时较长的操作，否则会导致AKKA通信超时
+ 110         // DO NOTHING
+ 111     }
+ 112 
+ 113     @Override
+ 114     public void open(int taskNumber, int numTasks) throws IOException {
+ 115         LOG.warn(&quot;---open---&quot;);
+ 116         records = new ArrayList&lt;&gt;();
+ 117         conf = HBaseConfiguration.create();
+ 118         openConn();
+ 119         table = conn.getTable(TableName.valueOf(tableName));
+ 120         LOG.warn(&quot;---open end(get table from hbase) ---&quot;);
+ 121         initMetric();
+ 122     }
+ 123 
+ 124     private void openConn() {
+ 125         try {
+ 126             if (kerberosAuthEnable) {
+ 127                 LOG.info(&quot;open kerberos conn&quot;);
+ 128                 openKerberosConn();
+ 129             } else {
+ 130                 LOG.info(&quot;open conn&quot;);
+ 131                 conf.set(HbaseConfigUtils.KEY_HBASE_ZOOKEEPER_QUORUM, host);
+ 132                 conf.set(HbaseConfigUtils.KEY_HBASE_ZOOKEEPER_ZNODE_QUORUM, zkParent);
+ 133                 conn = ConnectionFactory.createConnection(conf);
+ 134             }
+ 135         } catch (Exception e) {
+ 136             throw new RuntimeException(e);
+ 137         }
+ 138         initScheduledTask(batchWaitInterval);
+ 139     }
+ 140 
+ 141     /**
+ 142      * 初始化定时写入任务
+ 143      *
+ 144      * @param batchWaitInterval 定时任务时间
+ 145      */
+ 146     private void initScheduledTask(Long batchWaitInterval) {
+ 147         try {
+ 148             if (batchWaitInterval &gt; 0) {
+ 149                 this.scheduler = new ScheduledThreadPoolExecutor(
+ 150                         1,
+ 151                         new DTThreadFactory(&quot;hbase-batch-flusher&quot;)
+ 152                 );
+ 153 
+ 154                 this.scheduledFuture = this.scheduler.scheduleWithFixedDelay(
+ 155                         () -&gt; {
+ 156                             synchronized (HbaseOutputFormat.this) {
+ 157                                 if (!records.isEmpty()) {
+ 158                                     dealBatchOperation(records);
+ 159                                 }
+ 160                             }
+ 161                         }, batchWaitInterval, batchWaitInterval, TimeUnit.MILLISECONDS
+ 162                 );
+ 163             }
+ 164         } catch (Exception e) {
+ 165             LOG.error(&quot;init schedule task failed !&quot;);
+ 166             throw new RuntimeException(e);
+ 167         }
+ 168     }
+ 169 
+ 170     private void openKerberosConn() throws Exception {
+ 171         conf.set(HbaseConfigUtils.KEY_HBASE_ZOOKEEPER_QUORUM, host);
+ 172         conf.set(HbaseConfigUtils.KEY_HBASE_ZOOKEEPER_ZNODE_QUORUM, zkParent);
+ 173 
+ 174         LOG.info(&quot;kerberos config:{}&quot;, this.conf.toString());
+ 175         Preconditions.checkArgument(!StringUtils.isEmpty(clientPrincipal), &quot; clientPrincipal not null!&quot;);
+<abbr title=" 176         Preconditions.checkArgument(!StringUtils.isEmpty(clientKeytabFile), &quot; clientKeytabFile not null!&quot;);"> 176         Preconditions.checkArgument(!StringUtils.isEmpty(clientKeytabFile), &quot; clientKeytabFile not null!&quot;🔵</abbr>
+ 177 
+ 178         fillSyncKerberosConfig(conf, regionserverPrincipal, zookeeperSaslClient, securityKrb5Conf);
+ 179 
+ 180         clientKeytabFile = System.getProperty(&quot;user.dir&quot;) + File.separator + clientKeytabFile;
+<abbr title=" 181         clientPrincipal = !StringUtils.isEmpty(clientPrincipal) ? clientPrincipal : regionserverPrincipal;"> 181         clientPrincipal = !StringUtils.isEmpty(clientPrincipal) ? clientPrincipal : regionserverPrincipal🔵</abbr>
+ 182 
+ 183         conf.set(HbaseConfigUtils.KEY_HBASE_CLIENT_KEYTAB_FILE, clientKeytabFile);
+ 184         conf.set(HbaseConfigUtils.KEY_HBASE_CLIENT_KERBEROS_PRINCIPAL, clientPrincipal);
+ 185 
+<abbr title=" 186         UserGroupInformation userGroupInformation = HbaseConfigUtils.loginAndReturnUGI(conf, clientPrincipal, clientKeytabFile);"> 186         UserGroupInformation userGroupInformation = HbaseConfigUtils.loginAndReturnUGI(conf, clientPrinci🔵</abbr>
+ 187         org.apache.hadoop.conf.Configuration finalConf = conf;
+ 188         conn = userGroupInformation.doAs((PrivilegedAction&lt;Connection&gt;) () -&gt; {
+ 189             try {
+ 190                 ScheduledChore authChore = AuthUtil.getAuthChore(finalConf);
+ 191                 if (authChore != null) {
+ 192                     choreService = new ChoreService(&quot;hbaseKerberosSink&quot;);
+ 193                     choreService.scheduleChore(authChore);
+ 194                 }
+ 195 
+ 196                 return ConnectionFactory.createConnection(finalConf);
+ 197             } catch (IOException e) {
+ 198                 LOG.error(&quot;Get connection fail with config:{}&quot;, finalConf);
+ 199                 throw new RuntimeException(e);
+ 200             }
+ 201         });
+ 202     }
+ 203 
+ 204     @Override
+ 205     public void writeRecord(Tuple2&lt;Boolean, Row&gt; record) {
+ 206         if (record.f0) {
+ 207             if (this.batchSize &gt; 1) {
+ 208                 writeBatchRecord(record.f1);
+ 209             } else {
+ 210                 dealInsert(record.f1);
+ 211             }
+ 212         }
+ 213     }
+ 214 
+ 215     public void writeBatchRecord(Row row) {
+ 216         records.add(row);
+ 217         // 数据累计到batchSize之后开始处理
+ 218         if (records.size() == this.batchSize) {
+ 219             dealBatchOperation(records);
+ 220         }
+ 221     }
+ 222 
+ 223     protected synchronized void dealBatchOperation(List&lt;Row&gt; records) {
+ 224         // A null in the result array means that the call for that action failed, even after retries.
+ 225         Object[] results = new Object[records.size()];
+ 226         try {
+ 227             List&lt;Put&gt; puts = new ArrayList&lt;&gt;();
+ 228             for (Row record : records) {
+ 229                 puts.add(getPutByRow(record));
+ 230             }
+ 231             table.batch(puts, results);
+ 232 
+ 233             // 打印结果
+ 234             if (outRecords.getCount() % ROW_PRINT_FREQUENCY == 0) {
+ 235                 // 只打印最后一条数据
+ 236                 LOG.info(records.get(records.size() - 1).toString());
+ 237             }
+ 238 &lt;&lt;&lt;&lt;&lt;&lt;&lt; MINE
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 239         } catch (IOException | InterruptedException e) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 240             // ignore exception</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 241         } finally {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 242             // 判断数据是否插入成功</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 243             for (int i = 0; i &lt; results.length; i++) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 244                 if (results[i] != null) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 245                     dirtyDataManager.execute();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 246                     // 脏数据记录</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 247                     dirtyDataManager.collectDirtyData(</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 248                             records.get(i).toString(),</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 249                             ((Exception) results[i]).getMessage()</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 250                     );</span>
+ 251 ||||||| BASE
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 252                     }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 253                     // 脏数据记录</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 254                     outDirtyRecords.inc();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 255                 } else {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 256                     // 输出结果条数记录</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 257                     outRecords.inc();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 258                 }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 259             }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 260             // 打印结果</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 261             if (outRecords.getCount() % ROW_PRINT_FREQUENCY == 0) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 262                 // 只打印最后一条数据</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 263                 LOG.info(records.get(records.size() - 1).toString());</span>
+ 264 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 265         } catch (IOException | InterruptedException ignored) {</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 266         } finally {</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 267             // 判断数据是否插入成功</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 268             for (int i = 0; i &lt; results.length; i++) {</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 269                 if (results[i] != null) {</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 270                     if (outDirtyRecords.getCount() % DIRTY_PRINT_FREQUENCY == 0) {</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 271                         LOG.error(&quot;Get dirty data: {}&quot;, records.get(i).toString());</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 272                         LOG.error(&quot;Error cause: &quot; + results[i]);</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 273                     }</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 274                     // 脏数据记录</span>
+ 275 &gt;&gt;&gt;&gt;&gt;&gt;&gt; YOURS
+ 276                     outDirtyRecords.inc();
+ 277                 } else {
+ 278                     // 输出结果条数记录
+ 279                     outRecords.inc();
+ 280                 }
+ 281             }
+ 282             // 添加完数据之后数据清空records
+ 283             records.clear();
+ 284         }
+ 285     }
+ 286 
+ 287     protected void dealInsert(Row record) {
+ 288         Put put = getPutByRow(record);
+ 289         if (put == null || put.isEmpty()) {
+ 290             // 记录脏数据
+ 291             outDirtyRecords.inc();
+ 292             return;
+ 293         }
+ 294 
+ 295         try {
+ 296             table.put(put);
+ 297         if (outRecords.getCount() % ROW_PRINT_FREQUENCY == 0) {
+ 298             LOG.info(record.toString());
+ 299         }
+ 300         } catch (Exception e) {
+ 301             dirtyDataManager.collectDirtyData(
+ 302                     record.toString()
+ 303                     , e.getMessage());
+ 304             outDirtyRecords.inc();
+ 305         }
+ 306 
+ 307         outRecords.inc();
+ 308     }
+ 309 
+ 310     private Put getPutByRow(Row record) {
+ 311         String rowKey = buildRowKey(record);
+ 312         if (StringUtils.isEmpty(rowKey)) {
+ 313             return null;
+ 314         }
+ 315         Put put = new Put(rowKey.getBytes());
+ 316         for (int i = 0; i &lt; record.getArity(); ++i) {
+ 317             Object fieldVal = record.getField(i);
+ 318             if (fieldVal != null) {
+ 319                 byte[] val = fieldVal.toString().getBytes();
+ 320                 byte[] cf = families[i].getBytes();
+ 321                 byte[] qualifier = qualifiers[i].getBytes();
+ 322 
+ 323                 put.addColumn(cf, qualifier, val);
+ 324             }
+ 325         }
+ 326         return put;
+ 327     }
+ 328 
+ 329     private String buildRowKey(Row record) {
+ 330         String rowKeyValues = getRowKeyValues(record);
+ 331         // all rowkey not null
+ 332         if (StringUtils.isBlank(rowKeyValues)) {
+ 333             LOG.error(&quot;row key value must not null,record is ..{}&quot;, record);
+ 334             outDirtyRecords.inc();
+ 335             return &quot;&quot;;
+ 336         }
+ 337         return rowKeyValues;
+ 338     }
+ 339 
+ 340     private String getRowKeyValues(Row record) {
+ 341         Map&lt;String, Object&gt; row = rowConvertMap(record);
+ 342         RowKeyBuilder rowKeyBuilder = new RowKeyBuilder();
+ 343         rowKeyBuilder.init(rowkey);
+ 344         return rowKeyBuilder.getRowKey(row);
+ 345     }
+ 346 
+ 347     private Map&lt;String, Object&gt; rowConvertMap(Row record) {
+ 348         Map&lt;String, Object&gt; rowValue = Maps.newHashMap();
+ 349         for (int i = 0; i &lt; columnNames.length; i++) {
+ 350             rowValue.put(columnNames[i], record.getField(i));
+ 351         }
+ 352         return rowValue;
+ 353     }
+ 354 
+ 355     @Override
+ 356     public synchronized void close() throws IOException {
+ 357         if (closed) {
+ 358             return;
+ 359         }
+ 360 
+ 361         closed = true;
+ 362         if (!records.isEmpty()) {
+ 363             dealBatchOperation(records);
+ 364         }
+ 365 
+ 366         if (scheduledFuture != null) {
+ 367             scheduledFuture.cancel(false);
+ 368             if (scheduler != null) {
+ 369                 scheduler.shutdownNow();
+ 370             }
+ 371         }
+ 372 
+ 373         if (conn != null) {
+ 374             conn.close();
+ 375             conn = null;
+ 376         }
+ 377     }
+ 378 
+ 379     private void fillSyncKerberosConfig(org.apache.hadoop.conf.Configuration config,
+ 380                                         String regionserverPrincipal,
+ 381                                         String zookeeperSaslClient,
+ 382                                         String securityKrb5Conf) {
+ 383         if (StringUtils.isEmpty(regionserverPrincipal)) {
+<abbr title=" 384             throw new IllegalArgumentException(&quot;Must provide regionserverPrincipal when authentication is Kerberos&quot;);"> 384             throw new IllegalArgumentException(&quot;Must provide regionserverPrincipal when authentication is🔵</abbr>
+ 385         }
+ 386         config.set(HbaseConfigUtils.KEY_HBASE_MASTER_KERBEROS_PRINCIPAL, regionserverPrincipal);
+ 387         config.set(HbaseConfigUtils.KEY_HBASE_REGIONSERVER_KERBEROS_PRINCIPAL, regionserverPrincipal);
+ 388         config.set(HbaseConfigUtils.KEY_HBASE_SECURITY_AUTHORIZATION, &quot;true&quot;);
+ 389         config.set(HbaseConfigUtils.KEY_HBASE_SECURITY_AUTHENTICATION, &quot;kerberos&quot;);
+ 390 
+ 391 
+ 392         if (!StringUtils.isEmpty(zookeeperSaslClient)) {
+ 393             System.setProperty(HbaseConfigUtils.KEY_ZOOKEEPER_SASL_CLIENT, zookeeperSaslClient);
+ 394         }
+ 395 
+ 396         if (!StringUtils.isEmpty(securityKrb5Conf)) {
+ 397             String krb5ConfPath = System.getProperty(&quot;user.dir&quot;) + File.separator + securityKrb5Conf;
+ 398             LOG.info(&quot;krb5ConfPath:{}&quot;, krb5ConfPath);
+ 399             System.setProperty(HbaseConfigUtils.KEY_JAVA_SECURITY_KRB5_CONF, krb5ConfPath);
+ 400         }
+ 401     }
+ 402 
+ 403     @Override
+ 404     public String toString() {
+ 405         return &quot;HbaseOutputFormat kerberos{&quot; +
+ 406                 &quot;kerberosAuthEnable=&quot; + kerberosAuthEnable +
+ 407                 &quot;, regionserverKeytabFile=&#x27;&quot; + regionserverKeytabFile + &#x27;\&#x27;&#x27; +
+ 408                 &quot;, regionserverPrincipal=&#x27;&quot; + regionserverPrincipal + &#x27;\&#x27;&#x27; +
+ 409                 &quot;, securityKrb5Conf=&#x27;&quot; + securityKrb5Conf + &#x27;\&#x27;&#x27; +
+ 410                 &quot;, zookeeperSaslClient=&#x27;&quot; + zookeeperSaslClient + &#x27;\&#x27;&#x27; +
+ 411                 &quot;, clientPrincipal=&#x27;&quot; + clientPrincipal + &#x27;\&#x27;&#x27; +
+ 412                 &quot;, clientKeytabFile=&#x27;&quot; + clientKeytabFile + &#x27;\&#x27;&#x27; +
+ 413                 &quot;, batchSize=&#x27;&quot; + batchSize + &#x27;\&#x27;&#x27; +
+ 414                 &quot;, batchWaitInterval=&#x27;&quot; + batchWaitInterval + &#x27;\&#x27;&#x27; +
+ 415                 &#x27;}&#x27;;
+ 416     }
+ 417 
+ 418     public static class HbaseOutputFormatBuilder {
+ 419 
+ 420         private final HbaseOutputFormat format;
+ 421 
+ 422         private HbaseOutputFormatBuilder() {
+ 423             format = new HbaseOutputFormat();
+ 424         }
+ 425 
+ 426         public HbaseOutputFormatBuilder setHost(String host) {
+ 427             format.host = host;
+ 428             return this;
+ 429         }
+ 430 
+ 431         public HbaseOutputFormatBuilder setZkParent(String parent) {
+ 432             format.zkParent = parent;
+ 433             return this;
+ 434         }
+ 435 
+ 436 
+ 437         public HbaseOutputFormatBuilder setTable(String tableName) {
+ 438             format.tableName = tableName;
+ 439             return this;
+ 440         }
+ 441 
+ 442         public HbaseOutputFormatBuilder setRowkey(String rowkey) {
+ 443             format.rowkey = rowkey;
+ 444             return this;
+ 445         }
+ 446 
+ 447         public HbaseOutputFormatBuilder setColumnNames(String[] columnNames) {
+ 448             format.columnNames = columnNames;
+ 449             return this;
+ 450         }
+ 451 
+ 452         public HbaseOutputFormatBuilder setColumnNameFamily(Map&lt;String, String&gt; columnNameFamily) {
+ 453             format.columnNameFamily = columnNameFamily;
+ 454             return this;
+ 455         }
+ 456 
+ 457         public HbaseOutputFormatBuilder setKerberosAuthEnable(boolean kerberosAuthEnable) {
+ 458             format.kerberosAuthEnable = kerberosAuthEnable;
+ 459             return this;
+ 460         }
+ 461 
+ 462         public HbaseOutputFormatBuilder setRegionserverKeytabFile(String regionserverKeytabFile) {
+ 463             format.regionserverKeytabFile = regionserverKeytabFile;
+ 464             return this;
+ 465         }
+ 466 
+ 467         public HbaseOutputFormatBuilder setRegionserverPrincipal(String regionserverPrincipal) {
+ 468             format.regionserverPrincipal = regionserverPrincipal;
+ 469             return this;
+ 470         }
+ 471 
+ 472         public HbaseOutputFormatBuilder setSecurityKrb5Conf(String securityKrb5Conf) {
+ 473             format.securityKrb5Conf = securityKrb5Conf;
+ 474             return this;
+ 475         }
+ 476 
+ 477         public HbaseOutputFormatBuilder setZookeeperSaslClient(String zookeeperSaslClient) {
+ 478             format.zookeeperSaslClient = zookeeperSaslClient;
+ 479             return this;
+ 480         }
+ 481 
+ 482         public HbaseOutputFormatBuilder setClientPrincipal(String clientPrincipal) {
+ 483             format.clientPrincipal = clientPrincipal;
+ 484             return this;
+ 485         }
+ 486 
+ 487         public HbaseOutputFormatBuilder setClientKeytabFile(String clientKeytabFile) {
+ 488             format.clientKeytabFile = clientKeytabFile;
+ 489             return this;
+ 490         }
+ 491 
+ 492         public HbaseOutputFormatBuilder setDirtyManager(DirtyDataManager dirtyDataManager) {
+ 493             format.dirtyDataManager = dirtyDataManager;
+ 494             return this;
+ 495         }
+ 496 
+ 497         public HbaseOutputFormatBuilder setBatchSize(Integer batchSize) {
+ 498             format.batchSize = batchSize;
+ 499             return this;
+ 500         }
+ 501 
+ 502         public HbaseOutputFormatBuilder setBatchWaitInterval(Long batchWaitInterval) {
+ 503             format.batchWaitInterval = batchWaitInterval;
+ 504             return this;
+ 505         }
+ 506 
+ 507         public HbaseOutputFormat finish() {
+ 508             Preconditions.checkNotNull(format.host, &quot;zookeeperQuorum should be specified&quot;);
+ 509             Preconditions.checkNotNull(format.tableName, &quot;tableName should be specified&quot;);
+ 510             Preconditions.checkNotNull(format.columnNames, &quot;columnNames should be specified&quot;);
+<abbr title=" 511             Preconditions.checkArgument(format.columnNames.length != 0, &quot;columnNames length should not be zero&quot;);"> 511             Preconditions.checkArgument(format.columnNames.length != 0, &quot;columnNames length should not be🔵</abbr>
+ 512 
+ 513             String[] families = new String[format.columnNames.length];
+ 514             String[] qualifiers = new String[format.columnNames.length];
+ 515 
+ 516             if (format.columnNameFamily != null) {
+ 517                 List&lt;String&gt; keyList = new LinkedList&lt;&gt;(format.columnNameFamily.keySet());
+ 518                 String[] columns = keyList.toArray(new String[0]);
+ 519                 for (int i = 0; i &lt; columns.length; ++i) {
+ 520                     String col = columns[i];
+ 521                     String[] part = col.split(&quot;:&quot;);
+ 522                     families[i] = part[0];
+ 523                     qualifiers[i] = part[1];
+ 524                 }
+ 525             }
+ 526             format.families = families;
+ 527             format.qualifiers = qualifiers;
+ 528 
+ 529             return format;
+ 530         }
+ 531     }
+ 532 }
+ 
+ 
+ 
+ 
+ </pre></td>
+                            <td><pre>   1 /*
+   2  * Licensed to the Apache Software Foundation (ASF) under one
+   3  * or more contributor license agreements.  See the NOTICE file
+   4  * distributed with this work for additional information
+   5  * regarding copyright ownership.  The ASF licenses this file
+   6  * to you under the Apache License, Version 2.0 (the
+   7  * &quot;License&quot;); you may not use this file except in compliance
+   8  * with the License.  You may obtain a copy of the License at
+   9  *
+  10  *     http://www.apache.org/licenses/LICENSE-2.0
+  11  *
+  12  * Unless required by applicable law or agreed to in writing, software
+  13  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15  * See the License for the specific language governing permissions and
+  16  * limitations under the License.
+  17  */
+  18 package com.dtstack.flink.sql.sink.hbase;
+  19 
+  20 import com.dtstack.flink.sql.dirtyManager.manager.DirtyDataManager;
+  21 import com.dtstack.flink.sql.factory.DTThreadFactory;
+  22 import com.dtstack.flink.sql.outputformat.AbstractDtRichOutputFormat;
+  23 import com.google.common.collect.Maps;
+  24 import java.io.File;
+  25 import java.io.IOException;
+  26 import java.security.PrivilegedAction;
+  27 import java.util.ArrayList;
+  28 import java.util.LinkedList;
+  29 import java.util.List;
+  30 import java.util.Map;
+  31 import java.util.concurrent.ScheduledExecutorService;
+  32 import java.util.concurrent.ScheduledFuture;
+  33 import java.util.concurrent.ScheduledThreadPoolExecutor;
+  34 import java.util.concurrent.TimeUnit;
+  35 import org.apache.commons.lang3.StringUtils;
+  36 import org.apache.flink.api.java.tuple.Tuple2;
+  37 import org.apache.flink.configuration.Configuration;
+  38 import org.apache.flink.types.Row;
+  39 import org.apache.flink.util.Preconditions;
+  40 import org.apache.hadoop.hbase.AuthUtil;
+  41 import org.apache.hadoop.hbase.ChoreService;
+  42 import org.apache.hadoop.hbase.HBaseConfiguration;
+  43 import org.apache.hadoop.hbase.ScheduledChore;
+  44 import org.apache.hadoop.hbase.TableName;
+  45 import org.apache.hadoop.hbase.client.Connection;
+  46 import org.apache.hadoop.hbase.client.ConnectionFactory;
+  47 import org.apache.hadoop.hbase.client.Put;
+  48 import org.apache.hadoop.hbase.client.Table;
+  49 import org.apache.hadoop.security.UserGroupInformation;
+  50 import org.slf4j.Logger;
+  51 import org.slf4j.LoggerFactory;
+  52 
+  53 
+  54 /**
+  55  * @author: jingzhen@dtstack.com
+  56  * date: 2017-6-29
+  57  */
+  58 public class HbaseOutputFormat extends AbstractDtRichOutputFormat&lt;Tuple2&lt;Boolean, Row&gt;&gt; {
+  59     private static final Logger LOG = LoggerFactory.getLogger(HbaseOutputFormat.class);
+  60 
+  61     private String host;
+  62 
+  63     private String zkParent;
+  64 
+  65     private String rowkey;
+  66 
+  67     private String tableName;
+  68 
+  69     private String[] columnNames;
+  70 
+  71     private Map&lt;String, String&gt; columnNameFamily;
+  72 
+  73     private boolean kerberosAuthEnable;
+  74 
+  75     private String regionserverKeytabFile;
+  76 
+  77     private String regionserverPrincipal;
+  78 
+  79     private String securityKrb5Conf;
+  80 
+  81     private String zookeeperSaslClient;
+  82 
+  83     private String clientPrincipal;
+  84 
+  85     private String clientKeytabFile;
+  86 
+  87     private String[] families;
+  88 
+  89     private String[] qualifiers;
+  90 
+  91     private transient org.apache.hadoop.conf.Configuration conf;
+  92 
+  93     private transient Connection conn;
+  94 
+  95     private transient Table table;
+  96 
+  97     private transient ChoreService choreService;
+  98 
+  99     private transient List&lt;Row&gt; records;
+ 100 
+ 101     private transient volatile boolean closed = false;
+ 102 
+ 103     /**
+ 104      * 批量写入的参数
+ 105      */
+ 106     private Integer batchSize;
+ 107 
+ 108     private Long batchWaitInterval;
+ 109 
+ 110     /**
+ 111      * 定时任务
+ 112      */
+ 113     private transient ScheduledExecutorService scheduler;
+ 114 
+ 115     private transient ScheduledFuture&lt;?&gt; scheduledFuture;
+ 116 
+ 117     /**
+ 118      * 脏数据管理
+ 119      */
+ 120     private DirtyDataManager dirtyDataManager;
+ 121 
+ 122     private HbaseOutputFormat() {
+ 123     }
+ 124 
+ 125     public static HbaseOutputFormatBuilder buildHbaseOutputFormat() {
+ 126         return new HbaseOutputFormatBuilder();
+ 127     }
+ 128 
+ 129     @Override
+ 130     public void configure(Configuration parameters) {
+ 131         // 这里不要做耗时较长的操作，否则会导致AKKA通信超时
+ 132         // DO NOTHING
+ 133     }
+ 134 
+ 135     @Override
+ 136     public void open(int taskNumber, int numTasks) throws IOException {
+ 137         LOG.warn(&quot;---open---&quot;);
+ 138         records = new ArrayList&lt;&gt;();
+ 139         conf = HBaseConfiguration.create();
+ 140         openConn();
+ 141         table = conn.getTable(TableName.valueOf(tableName));
+ 142         LOG.warn(&quot;---open end(get table from hbase) ---&quot;);
+ 143         initMetric();
+ 144     }
+ 145 
+ 146     private void openConn() {
+ 147         try {
+ 148             if (kerberosAuthEnable) {
+ 149                 LOG.info(&quot;open kerberos conn&quot;);
+ 150                 openKerberosConn();
+ 151             } else {
+ 152                 LOG.info(&quot;open conn&quot;);
+ 153                 conf.set(HbaseConfigUtils.KEY_HBASE_ZOOKEEPER_QUORUM, host);
+ 154                 conf.set(HbaseConfigUtils.KEY_HBASE_ZOOKEEPER_ZNODE_QUORUM, zkParent);
+ 155                 conn = ConnectionFactory.createConnection(conf);
+ 156             }
+ 157         } catch (Exception e) {
+ 158             throw new RuntimeException(e);
+ 159         }
+ 160         initScheduledTask(batchWaitInterval);
+ 161     }
+ 162 
+ 163     /**
+ 164      * 初始化定时写入任务
+ 165      *
+ 166      * @param batchWaitInterval 定时任务时间
+ 167      */
+ 168     private void initScheduledTask(Long batchWaitInterval) {
+ 169         try {
+ 170             if (batchWaitInterval &gt; 0) {
+ 171                 this.scheduler = new ScheduledThreadPoolExecutor(
+ 172                         1,
+ 173                         new DTThreadFactory(&quot;hbase-batch-flusher&quot;)
+ 174                 );
+ 175 
+ 176                 this.scheduledFuture = this.scheduler.scheduleWithFixedDelay(
+ 177                         () -&gt; {
+ 178                             synchronized (HbaseOutputFormat.this) {
+ 179                                 if (!records.isEmpty()) {
+ 180                                     dealBatchOperation(records);
+ 181                                 }
+ 182                             }
+ 183                         }, batchWaitInterval, batchWaitInterval, TimeUnit.MILLISECONDS
+ 184                 );
+ 185             }
+ 186         } catch (Exception e) {
+ 187             LOG.error(&quot;init schedule task failed !&quot;);
+ 188             throw new RuntimeException(e);
+ 189         }
+ 190     }
+ 191 
+ 192     private void openKerberosConn() throws Exception {
+ 193         conf.set(HbaseConfigUtils.KEY_HBASE_ZOOKEEPER_QUORUM, host);
+ 194         conf.set(HbaseConfigUtils.KEY_HBASE_ZOOKEEPER_ZNODE_QUORUM, zkParent);
+ 195 
+ 196         LOG.info(&quot;kerberos config:{}&quot;, this.conf.toString());
+ 197         Preconditions.checkArgument(!StringUtils.isEmpty(clientPrincipal), &quot; clientPrincipal not null!&quot;);
+<abbr title=" 198         Preconditions.checkArgument(!StringUtils.isEmpty(clientKeytabFile), &quot; clientKeytabFile not null!&quot;);"> 198         Preconditions.checkArgument(!StringUtils.isEmpty(clientKeytabFile), &quot; clientKeytabFile not null!&quot;🔵</abbr>
+ 199 
+ 200         fillSyncKerberosConfig(conf, regionserverPrincipal, zookeeperSaslClient, securityKrb5Conf);
+ 201 
+ 202         clientKeytabFile = System.getProperty(&quot;user.dir&quot;) + File.separator + clientKeytabFile;
+<abbr title=" 203         clientPrincipal = !StringUtils.isEmpty(clientPrincipal) ? clientPrincipal : regionserverPrincipal;"> 203         clientPrincipal = !StringUtils.isEmpty(clientPrincipal) ? clientPrincipal : regionserverPrincipal🔵</abbr>
+ 204 
+ 205         conf.set(HbaseConfigUtils.KEY_HBASE_CLIENT_KEYTAB_FILE, clientKeytabFile);
+ 206         conf.set(HbaseConfigUtils.KEY_HBASE_CLIENT_KERBEROS_PRINCIPAL, clientPrincipal);
+ 207 
+<abbr title=" 208         UserGroupInformation userGroupInformation = HbaseConfigUtils.loginAndReturnUGI(conf, clientPrincipal, clientKeytabFile);"> 208         UserGroupInformation userGroupInformation = HbaseConfigUtils.loginAndReturnUGI(conf, clientPrinci🔵</abbr>
+ 209         org.apache.hadoop.conf.Configuration finalConf = conf;
+ 210         conn = userGroupInformation.doAs((PrivilegedAction&lt;Connection&gt;) () -&gt; {
+ 211             try {
+ 212                 ScheduledChore authChore = AuthUtil.getAuthChore(finalConf);
+ 213                 if (authChore != null) {
+ 214                     choreService = new ChoreService(&quot;hbaseKerberosSink&quot;);
+ 215                     choreService.scheduleChore(authChore);
+ 216                 }
+ 217 
+ 218                 return ConnectionFactory.createConnection(finalConf);
+ 219             } catch (IOException e) {
+ 220                 LOG.error(&quot;Get connection fail with config:{}&quot;, finalConf);
+ 221                 throw new RuntimeException(e);
+ 222             }
+ 223         });
+ 224     }
+ 225 
+ 226     @Override
+ 227     public void writeRecord(Tuple2&lt;Boolean, Row&gt; record) {
+ 228         if (record.f0) {
+ 229             if (this.batchSize &gt; 1) {
+ 230                 writeBatchRecord(record.f1);
+ 231             } else {
+ 232                 dealInsert(record.f1);
+ 233             }
+ 234         }
+ 235     }
+ 236 
+ 237     public void writeBatchRecord(Row row) {
+ 238         records.add(row);
+ 239         // 数据累计到batchSize之后开始处理
+ 240         if (records.size() == this.batchSize) {
+ 241             dealBatchOperation(records);
+ 242         }
+ 243     }
+ 244 
+ 245     protected synchronized void dealBatchOperation(List&lt;Row&gt; records) {
+ 246         // A null in the result array means that the call for that action failed, even after retries.
+ 247         Object[] results = new Object[records.size()];
+ 248         try {
+ 249             List&lt;Put&gt; puts = new ArrayList&lt;&gt;();
+ 250             for (Row record : records) {
+ 251                 puts.add(getPutByRow(record));
+ 252             }
+ 253             table.batch(puts, results);
+ 254             // 打印结果
+ 255             if ((outRecords.getCount() % ROW_PRINT_FREQUENCY) == 0) {
+ 256                 // 只打印最后一条数据
+ 257                 LOG.info(records.get(records.size() - 1).toString());
+ 258             }
+ 259         } catch (IOException | java.lang.InterruptedException ignored) {
+ 260             // ignore exception
+ 261         } finally {
+ 262             // 判断数据是否插入成功
+ 263             for (int i = 0; i &lt; results.length; i++) {
+ 264                 if (results[i] != null) {
+ 265                     dirtyDataManager.execute();
+ 266                     // 脏数据记录
+<abbr title=" 267                     dirtyDataManager.collectDirtyData(records.get(i).toString(), ((Exception) (results[i])).getMessage());"> 267                     dirtyDataManager.collectDirtyData(records.get(i).toString(), ((Exception) (results[i]🔵</abbr>
+ 268                     outDirtyRecords.inc();
+ 269                 } else {
+ 270                     // 输出结果条数记录
+ 271                     outRecords.inc();
+ 272                 }
+ 273             }
+ 274             // 添加完数据之后数据清空records
+ 275             records.clear();
+ 276         }
+ 277     }
+ 278 
+ 279     protected void dealInsert(Row record) {
+ 280         Put put = getPutByRow(record);
+ 281         if ((put == null) || put.isEmpty()) {
+ 282             // 记录脏数据
+ 283             outDirtyRecords.inc();
+ 284             return;
+ 285         }
+ 286         try {
+ 287             table.put(put);
+ 288             if ((outRecords.getCount() % ROW_PRINT_FREQUENCY) == 0) {
+ 289                 LOG.info(record.toString());
+ 290             }
+ 291         } catch (java.lang.Exception e) {
+ 292             dirtyDataManager.collectDirtyData(record.toString(), e.getMessage());
+ 293             outDirtyRecords.inc();
+ 294         }
+ 295         outRecords.inc();
+ 296     }
+ 297 
+ 298     private Put getPutByRow(Row record) {
+ 299         String rowKey = buildRowKey(record);
+ 300         if (StringUtils.isEmpty(rowKey)) {
+ 301             return null;
+ 302         }
+ 303         Put put = new Put(rowKey.getBytes());
+ 304         for (int i = 0; i &lt; record.getArity(); ++i) {
+ 305             Object fieldVal = record.getField(i);
+ 306             if (fieldVal != null) {
+ 307                 byte[] val = fieldVal.toString().getBytes();
+ 308                 byte[] cf = families[i].getBytes();
+ 309                 byte[] qualifier = qualifiers[i].getBytes();
+ 310 
+ 311                 put.addColumn(cf, qualifier, val);
+ 312             }
+ 313         }
+ 314         return put;
+ 315     }
+ 316 
+ 317     private String buildRowKey(Row record) {
+ 318         String rowKeyValues = getRowKeyValues(record);
+ 319         // all rowkey not null
+ 320         if (StringUtils.isBlank(rowKeyValues)) {
+ 321             LOG.error(&quot;row key value must not null,record is ..{}&quot;, record);
+ 322             outDirtyRecords.inc();
+ 323             return &quot;&quot;;
+ 324         }
+ 325         return rowKeyValues;
+ 326     }
+ 327 
+ 328     private String getRowKeyValues(Row record) {
+ 329         Map&lt;String, Object&gt; row = rowConvertMap(record);
+ 330         RowKeyBuilder rowKeyBuilder = new RowKeyBuilder();
+ 331         rowKeyBuilder.init(rowkey);
+ 332         return rowKeyBuilder.getRowKey(row);
+ 333     }
+ 334 
+ 335     private Map&lt;String, Object&gt; rowConvertMap(Row record) {
+ 336         Map&lt;String, Object&gt; rowValue = Maps.newHashMap();
+ 337         for (int i = 0; i &lt; columnNames.length; i++) {
+ 338             rowValue.put(columnNames[i], record.getField(i));
+ 339         }
+ 340         return rowValue;
+ 341     }
+ 342 
+ 343     @Override
+ 344     public synchronized void close() throws IOException {
+ 345         if (closed) {
+ 346             return;
+ 347         }
+ 348 
+ 349         closed = true;
+ 350         if (!records.isEmpty()) {
+ 351             dealBatchOperation(records);
+ 352         }
+ 353 
+ 354         if (scheduledFuture != null) {
+ 355             scheduledFuture.cancel(false);
+ 356             if (scheduler != null) {
+ 357                 scheduler.shutdownNow();
+ 358             }
+ 359         }
+ 360 
+ 361         if (conn != null) {
+ 362             conn.close();
+ 363             conn = null;
+ 364         }
+ 365     }
+ 366 
+ 367     private void fillSyncKerberosConfig(org.apache.hadoop.conf.Configuration config,
+ 368                                         String regionserverPrincipal,
+ 369                                         String zookeeperSaslClient,
+ 370                                         String securityKrb5Conf) {
+ 371         if (StringUtils.isEmpty(regionserverPrincipal)) {
+<abbr title=" 372             throw new IllegalArgumentException(&quot;Must provide regionserverPrincipal when authentication is Kerberos&quot;);"> 372             throw new IllegalArgumentException(&quot;Must provide regionserverPrincipal when authentication is🔵</abbr>
+ 373         }
+ 374         config.set(HbaseConfigUtils.KEY_HBASE_MASTER_KERBEROS_PRINCIPAL, regionserverPrincipal);
+ 375         config.set(HbaseConfigUtils.KEY_HBASE_REGIONSERVER_KERBEROS_PRINCIPAL, regionserverPrincipal);
+ 376         config.set(HbaseConfigUtils.KEY_HBASE_SECURITY_AUTHORIZATION, &quot;true&quot;);
+ 377         config.set(HbaseConfigUtils.KEY_HBASE_SECURITY_AUTHENTICATION, &quot;kerberos&quot;);
+ 378 
+ 379 
+ 380         if (!StringUtils.isEmpty(zookeeperSaslClient)) {
+ 381             System.setProperty(HbaseConfigUtils.KEY_ZOOKEEPER_SASL_CLIENT, zookeeperSaslClient);
+ 382         }
+ 383 
+ 384         if (!StringUtils.isEmpty(securityKrb5Conf)) {
+ 385             String krb5ConfPath = System.getProperty(&quot;user.dir&quot;) + File.separator + securityKrb5Conf;
+ 386             LOG.info(&quot;krb5ConfPath:{}&quot;, krb5ConfPath);
+ 387             System.setProperty(HbaseConfigUtils.KEY_JAVA_SECURITY_KRB5_CONF, krb5ConfPath);
+ 388         }
+ 389     }
+ 390 
+ 391     @Override
+ 392     public String toString() {
+ 393         return &quot;HbaseOutputFormat kerberos{&quot; +
+ 394                 &quot;kerberosAuthEnable=&quot; + kerberosAuthEnable +
+ 395                 &quot;, regionserverKeytabFile=&#x27;&quot; + regionserverKeytabFile + &#x27;\&#x27;&#x27; +
+ 396                 &quot;, regionserverPrincipal=&#x27;&quot; + regionserverPrincipal + &#x27;\&#x27;&#x27; +
+ 397                 &quot;, securityKrb5Conf=&#x27;&quot; + securityKrb5Conf + &#x27;\&#x27;&#x27; +
+ 398                 &quot;, zookeeperSaslClient=&#x27;&quot; + zookeeperSaslClient + &#x27;\&#x27;&#x27; +
+ 399                 &quot;, clientPrincipal=&#x27;&quot; + clientPrincipal + &#x27;\&#x27;&#x27; +
+ 400                 &quot;, clientKeytabFile=&#x27;&quot; + clientKeytabFile + &#x27;\&#x27;&#x27; +
+ 401                 &quot;, batchSize=&#x27;&quot; + batchSize + &#x27;\&#x27;&#x27; +
+ 402                 &quot;, batchWaitInterval=&#x27;&quot; + batchWaitInterval + &#x27;\&#x27;&#x27; +
+ 403                 &#x27;}&#x27;;
+ 404     }
+ 405 
+ 406     public static class HbaseOutputFormatBuilder {
+ 407         private final HbaseOutputFormat format;
+ 408 
+ 409         private HbaseOutputFormatBuilder() {
+ 410             format = new HbaseOutputFormat();
+ 411         }
+ 412 
+ 413         public HbaseOutputFormatBuilder setHost(String host) {
+ 414             format.host = host;
+ 415             return this;
+ 416         }
+ 417 
+ 418         public HbaseOutputFormatBuilder setZkParent(String parent) {
+ 419             format.zkParent = parent;
+ 420             return this;
+ 421         }
+ 422 
+ 423         public HbaseOutputFormatBuilder setTable(String tableName) {
+ 424             format.tableName = tableName;
+ 425             return this;
+ 426         }
+ 427 
+ 428         public HbaseOutputFormatBuilder setRowkey(String rowkey) {
+ 429             format.rowkey = rowkey;
+ 430             return this;
+ 431         }
+ 432 
+ 433         public HbaseOutputFormatBuilder setColumnNames(String[] columnNames) {
+ 434             format.columnNames = columnNames;
+ 435             return this;
+ 436         }
+ 437 
+ 438         public HbaseOutputFormatBuilder setColumnNameFamily(Map&lt;String, String&gt; columnNameFamily) {
+ 439             format.columnNameFamily = columnNameFamily;
+ 440             return this;
+ 441         }
+ 442 
+ 443         public HbaseOutputFormatBuilder setKerberosAuthEnable(boolean kerberosAuthEnable) {
+ 444             format.kerberosAuthEnable = kerberosAuthEnable;
+ 445             return this;
+ 446         }
+ 447 
+ 448         public HbaseOutputFormatBuilder setRegionserverKeytabFile(String regionserverKeytabFile) {
+ 449             format.regionserverKeytabFile = regionserverKeytabFile;
+ 450             return this;
+ 451         }
+ 452 
+ 453         public HbaseOutputFormatBuilder setRegionserverPrincipal(String regionserverPrincipal) {
+ 454             format.regionserverPrincipal = regionserverPrincipal;
+ 455             return this;
+ 456         }
+ 457 
+ 458         public HbaseOutputFormatBuilder setSecurityKrb5Conf(String securityKrb5Conf) {
+ 459             format.securityKrb5Conf = securityKrb5Conf;
+ 460             return this;
+ 461         }
+ 462 
+ 463         public HbaseOutputFormatBuilder setZookeeperSaslClient(String zookeeperSaslClient) {
+ 464             format.zookeeperSaslClient = zookeeperSaslClient;
+ 465             return this;
+ 466         }
+ 467 
+ 468         public HbaseOutputFormatBuilder setClientPrincipal(String clientPrincipal) {
+ 469             format.clientPrincipal = clientPrincipal;
+ 470             return this;
+ 471         }
+ 472 
+ 473         public HbaseOutputFormatBuilder setClientKeytabFile(String clientKeytabFile) {
+ 474             format.clientKeytabFile = clientKeytabFile;
+ 475             return this;
+ 476         }
+ 477 
+ 478         public HbaseOutputFormatBuilder setDirtyManager(DirtyDataManager dirtyDataManager) {
+ 479             format.dirtyDataManager = dirtyDataManager;
+ 480             return this;
+ 481         }
+ 482 
+ 483         public HbaseOutputFormatBuilder setBatchSize(Integer batchSize) {
+ 484             format.batchSize = batchSize;
+ 485             return this;
+ 486         }
+ 487 
+ 488         public HbaseOutputFormatBuilder setBatchWaitInterval(Long batchWaitInterval) {
+ 489             format.batchWaitInterval = batchWaitInterval;
+ 490             return this;
+ 491         }
+ 492 
+ 493         public HbaseOutputFormat finish() {
+ 494             Preconditions.checkNotNull(format.host, &quot;zookeeperQuorum should be specified&quot;);
+ 495             Preconditions.checkNotNull(format.tableName, &quot;tableName should be specified&quot;);
+ 496             Preconditions.checkNotNull(format.columnNames, &quot;columnNames should be specified&quot;);
+<abbr title=" 497             Preconditions.checkArgument(format.columnNames.length != 0, &quot;columnNames length should not be zero&quot;);"> 497             Preconditions.checkArgument(format.columnNames.length != 0, &quot;columnNames length should not be🔵</abbr>
+ 498 
+ 499             String[] families = new String[format.columnNames.length];
+ 500             String[] qualifiers = new String[format.columnNames.length];
+ 501 
+ 502             if (format.columnNameFamily != null) {
+ 503                 List&lt;String&gt; keyList = new LinkedList&lt;&gt;(format.columnNameFamily.keySet());
+ 504                 String[] columns = keyList.toArray(new String[0]);
+ 505                 for (int i = 0; i &lt; columns.length; ++i) {
+ 506                     String col = columns[i];
+ 507                     String[] part = col.split(&quot;:&quot;);
+ 508                     families[i] = part[0];
+ 509                     qualifiers[i] = part[1];
+ 510                 }
+ 511             }
+ 512             format.families = families;
+ 513             format.qualifiers = qualifiers;
+ 514 
+ 515             return format;
+ 516         }
+ 517     }
+ 518 }
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ </pre></td>
+                        </tr>
+                    </table>
+                </div>
+                <div id="bottom">
+                    <table style="margin:auto">
+                        <tr>
+                            <th>ours vs. base</th>
+                            <th>theirs vs. base</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1  /*
+   2   * Licensed to the Apache Software Foundation (ASF) under one
+   3   * or more contributor license agreements.  See the NOTICE file
+   4   * distributed with this work for additional information
+   5   * regarding copyright ownership.  The ASF licenses this file
+   6   * to you under the Apache License, Version 2.0 (the
+   7   * &quot;License&quot;); you may not use this file except in compliance
+   8   * with the License.  You may obtain a copy of the License at
+   9   *
+  10   *     http://www.apache.org/licenses/LICENSE-2.0
+  11   *
+  12   * Unless required by applicable law or agreed to in writing, software
+  13   * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15   * See the License for the specific language governing permissions and
+  16   * limitations under the License.
+  17   */
+  18  
+  19  
+  20  package com.dtstack.flink.sql.sink.hbase;
+  21  
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  22 +import com.dtstack.flink.sql.dirtyManager.manager.DirtyDataManager;</span>
+  23  import com.dtstack.flink.sql.factory.DTThreadFactory;
+  24  import com.dtstack.flink.sql.outputformat.AbstractDtRichOutputFormat;
+  25  import com.google.common.collect.Maps;
+  26  import org.apache.commons.lang3.StringUtils;
+  27  import org.apache.flink.api.java.tuple.Tuple2;
+  28  import org.apache.flink.configuration.Configuration;
+  29  import org.apache.flink.types.Row;
+  30  import org.apache.flink.util.Preconditions;
+  31  import org.apache.hadoop.hbase.AuthUtil;
+  32  import org.apache.hadoop.hbase.ChoreService;
+  33  import org.apache.hadoop.hbase.HBaseConfiguration;
+  34  import org.apache.hadoop.hbase.ScheduledChore;
+  35  import org.apache.hadoop.hbase.TableName;
+  36  import org.apache.hadoop.hbase.client.Connection;
+  37  import org.apache.hadoop.hbase.client.ConnectionFactory;
+  38  import org.apache.hadoop.hbase.client.Put;
+  39  import org.apache.hadoop.hbase.client.Table;
+  40  import org.apache.hadoop.security.UserGroupInformation;
+  41  import org.slf4j.Logger;
+  42  import org.slf4j.LoggerFactory;
+  43  
+  44  import java.io.File;
+  45  import java.io.IOException;
+  46  import java.security.PrivilegedAction;
+  47  import java.util.ArrayList;
+  48  import java.util.LinkedList;
+  49  import java.util.List;
+  50  import java.util.Map;
+  51  import java.util.concurrent.ScheduledExecutorService;
+  52  import java.util.concurrent.ScheduledFuture;
+  53  import java.util.concurrent.ScheduledThreadPoolExecutor;
+  54  import java.util.concurrent.TimeUnit;
+  55  
+  56  /**
+  57   * @author: jingzhen@dtstack.com
+  58   * date: 2017-6-29
+  59   */
+  60  public class HbaseOutputFormat extends AbstractDtRichOutputFormat&lt;Tuple2&lt;Boolean, Row&gt;&gt; {
+  61  
+  62      private static final Logger LOG = LoggerFactory.getLogger(HbaseOutputFormat.class);
+  63      private String host;
+  64      private String zkParent;
+  65      private String rowkey;
+  66      private String tableName;
+  67      private String[] columnNames;
+  68      private Map&lt;String, String&gt; columnNameFamily;
+  69      private boolean kerberosAuthEnable;
+  70      private String regionserverKeytabFile;
+  71      private String regionserverPrincipal;
+  72      private String securityKrb5Conf;
+  73      private String zookeeperSaslClient;
+  74      private String clientPrincipal;
+  75      private String clientKeytabFile;
+  76      private String[] families;
+  77      private String[] qualifiers;
+  78      private transient org.apache.hadoop.conf.Configuration conf;
+  79      private transient Connection conn;
+  80      private transient Table table;
+  81      private transient ChoreService choreService;
+  82      private transient List&lt;Row&gt; records;
+  83      private transient volatile boolean closed = false;
+  84      /**
+  85       * 批量写入的参数
+  86       */
+  87      private Integer batchSize;
+  88      private Long batchWaitInterval;
+  89      /**
+  90       * 定时任务
+  91       */
+  92      private transient ScheduledExecutorService scheduler;
+  93      private transient ScheduledFuture&lt;?&gt; scheduledFuture;
+  94  
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  95 +    /**</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  96 +     * 脏数据管理</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  97 +     */</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  98 +    private DirtyDataManager dirtyDataManager;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  99 +</span>
+ 100      private HbaseOutputFormat() {
+ 101      }
+ 102  
+ 103      public static HbaseOutputFormatBuilder buildHbaseOutputFormat() {
+ 104          return new HbaseOutputFormatBuilder();
+ 105      }
+ 106  
+ 107      @Override
+ 108      public void configure(Configuration parameters) {
+ 109          // 这里不要做耗时较长的操作，否则会导致AKKA通信超时
+ 110          // DO NOTHING
+ 111      }
+ 112  
+ 113      @Override
+ 114      public void open(int taskNumber, int numTasks) throws IOException {
+ 115          LOG.warn(&quot;---open---&quot;);
+ 116          records = new ArrayList&lt;&gt;();
+ 117          conf = HBaseConfiguration.create();
+ 118          openConn();
+ 119          table = conn.getTable(TableName.valueOf(tableName));
+ 120          LOG.warn(&quot;---open end(get table from hbase) ---&quot;);
+ 121          initMetric();
+ 122      }
+ 123  
+ 124      private void openConn() {
+ 125          try {
+ 126              if (kerberosAuthEnable) {
+ 127                  LOG.info(&quot;open kerberos conn&quot;);
+ 128                  openKerberosConn();
+ 129              } else {
+ 130                  LOG.info(&quot;open conn&quot;);
+ 131                  conf.set(HbaseConfigUtils.KEY_HBASE_ZOOKEEPER_QUORUM, host);
+ 132                  conf.set(HbaseConfigUtils.KEY_HBASE_ZOOKEEPER_ZNODE_QUORUM, zkParent);
+ 133                  conn = ConnectionFactory.createConnection(conf);
+ 134              }
+ 135          } catch (Exception e) {
+ 136              throw new RuntimeException(e);
+ 137          }
+ 138          initScheduledTask(batchWaitInterval);
+ 139      }
+ 140  
+ 141      /**
+ 142       * 初始化定时写入任务
+ 143       *
+ 144       * @param batchWaitInterval 定时任务时间
+ 145       */
+ 146      private void initScheduledTask(Long batchWaitInterval) {
+ 147          try {
+ 148              if (batchWaitInterval &gt; 0) {
+ 149                  this.scheduler = new ScheduledThreadPoolExecutor(
+ 150                          1,
+ 151                          new DTThreadFactory(&quot;hbase-batch-flusher&quot;)
+ 152                  );
+ 153  
+ 154                  this.scheduledFuture = this.scheduler.scheduleWithFixedDelay(
+ 155                          () -&gt; {
+ 156                              synchronized (HbaseOutputFormat.this) {
+ 157                                  if (!records.isEmpty()) {
+ 158                                      dealBatchOperation(records);
+ 159                                  }
+ 160                              }
+ 161                          }, batchWaitInterval, batchWaitInterval, TimeUnit.MILLISECONDS
+ 162                  );
+ 163              }
+ 164          } catch (Exception e) {
+ 165              LOG.error(&quot;init schedule task failed !&quot;);
+ 166              throw new RuntimeException(e);
+ 167          }
+ 168      }
+ 169  
+ 170      private void openKerberosConn() throws Exception {
+ 171          conf.set(HbaseConfigUtils.KEY_HBASE_ZOOKEEPER_QUORUM, host);
+ 172          conf.set(HbaseConfigUtils.KEY_HBASE_ZOOKEEPER_ZNODE_QUORUM, zkParent);
+ 173  
+ 174          LOG.info(&quot;kerberos config:{}&quot;, this.conf.toString());
+ 175          Preconditions.checkArgument(!StringUtils.isEmpty(clientPrincipal), &quot; clientPrincipal not null!&quot;);
+ 176          Preconditions.checkArgument(!StringUtils.isEmpty(clientKeytabFile), &quot; clientKeytabFile not null!&quot;);
+ 177  
+ 178          fillSyncKerberosConfig(conf, regionserverPrincipal, zookeeperSaslClient, securityKrb5Conf);
+ 179  
+ 180          clientKeytabFile = System.getProperty(&quot;user.dir&quot;) + File.separator + clientKeytabFile;
+ 181          clientPrincipal = !StringUtils.isEmpty(clientPrincipal) ? clientPrincipal : regionserverPrincipal;
+ 182  
+ 183          conf.set(HbaseConfigUtils.KEY_HBASE_CLIENT_KEYTAB_FILE, clientKeytabFile);
+ 184          conf.set(HbaseConfigUtils.KEY_HBASE_CLIENT_KERBEROS_PRINCIPAL, clientPrincipal);
+ 185  
+<abbr title=" 186          UserGroupInformation userGroupInformation = HbaseConfigUtils.loginAndReturnUGI(conf, clientPrincipal, clientKeytabFile);"> 186          UserGroupInformation userGroupInformation = HbaseConfigUtils.loginAndReturnUGI(conf, clientPrincipal, clie🔵</abbr>
+ 187          org.apache.hadoop.conf.Configuration finalConf = conf;
+ 188          conn = userGroupInformation.doAs((PrivilegedAction&lt;Connection&gt;) () -&gt; {
+ 189              try {
+ 190                  ScheduledChore authChore = AuthUtil.getAuthChore(finalConf);
+ 191                  if (authChore != null) {
+ 192                      choreService = new ChoreService(&quot;hbaseKerberosSink&quot;);
+ 193                      choreService.scheduleChore(authChore);
+ 194                  }
+ 195  
+ 196                  return ConnectionFactory.createConnection(finalConf);
+ 197              } catch (IOException e) {
+ 198                  LOG.error(&quot;Get connection fail with config:{}&quot;, finalConf);
+ 199                  throw new RuntimeException(e);
+ 200              }
+ 201          });
+ 202      }
+ 203  
+ 204      @Override
+ 205      public void writeRecord(Tuple2&lt;Boolean, Row&gt; record) {
+ 206          if (record.f0) {
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 207 -            if (this.batchSize != 0) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 208 +            if (this.batchSize &gt; 1) {</span>
+ 209                  writeBatchRecord(record.f1);
+ 210              } else {
+ 211                  dealInsert(record.f1);
+ 212              }
+ 213          }
+ 214      }
+ 215  
+ 216      public void writeBatchRecord(Row row) {
+ 217          records.add(row);
+ 218          // 数据累计到batchSize之后开始处理
+ 219          if (records.size() == this.batchSize) {
+ 220              dealBatchOperation(records);
+ 221          }
+ 222      }
+ 223  
+ 224      protected synchronized void dealBatchOperation(List&lt;Row&gt; records) {
+ 225          // A null in the result array means that the call for that action failed, even after retries.
+ 226          Object[] results = new Object[records.size()];
+ 227          try {
+ 228              List&lt;Put&gt; puts = new ArrayList&lt;&gt;();
+ 229              for (Row record : records) {
+ 230                  puts.add(getPutByRow(record));
+ 231              }
+ 232              table.batch(puts, results);
+ 233  
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 234 +            // 打印结果</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 235 +            if (outRecords.getCount() % ROW_PRINT_FREQUENCY == 0) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 236 +                // 只打印最后一条数据</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 237 +                LOG.info(records.get(records.size() - 1).toString());</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 238 +            }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 239 +        } catch (IOException | InterruptedException e) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 240 +            // ignore exception</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 241 +        } finally {</span>
+ 242              // 判断数据是否插入成功
+ 243              for (int i = 0; i &lt; results.length; i++) {
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 244 -                if (results[i] == null) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 245 -                    if (outDirtyRecords.getCount() % DIRTY_PRINT_FREQUENCY == 0 || LOG.isDebugEnabled()) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 246 -                        LOG.error(&quot;record insert failed ..{}&quot;, records.get(i).toString());</span>
+
+
+
+
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 247 -                    }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 248 +                if (results[i] != null) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 249 +                    dirtyDataManager.execute();</span>
+ 250                      // 脏数据记录
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 251 +                    dirtyDataManager.collectDirtyData(</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 252 +                            records.get(i).toString(),</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 253 +                            ((Exception) results[i]).getMessage()</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 254 +                    );</span>
+ 255                      outDirtyRecords.inc();
+ 256                  } else {
+ 257                      // 输出结果条数记录
+ 258                      outRecords.inc();
+ 259                  }
+ 260              }
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 261 -            // 打印结果</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 262 -            if (outRecords.getCount() % ROW_PRINT_FREQUENCY == 0) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 263 -                // 只打印最后一条数据</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 264 -                LOG.info(records.get(records.size() - 1).toString());</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 265 -            }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 266 -        } catch (IOException | InterruptedException e) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 267 -            LOG.error(&quot;&quot;, e);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 268 -        } finally {</span>
+ 269              // 添加完数据之后数据清空records
+ 270              records.clear();
+ 271          }
+ 272      }
+ 273  
+ 274      protected void dealInsert(Row record) {
+ 275          Put put = getPutByRow(record);
+ 276          if (put == null || put.isEmpty()) {
+ 277              // 记录脏数据
+ 278              outDirtyRecords.inc();
+ 279              return;
+ 280          }
+ 281  
+ 282          try {
+ 283              table.put(put);
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 284 +            if (outRecords.getCount() % ROW_PRINT_FREQUENCY == 0) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 285 +                LOG.info(record.toString());</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 286 +            }</span>
+ 287          } catch (Exception e) {
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 288 -            if (outDirtyRecords.getCount() % DIRTY_PRINT_FREQUENCY == 0 || LOG.isDebugEnabled()) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 289 -                LOG.error(&quot;record insert failed ..{}&quot;, record.toString());</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 290 -                LOG.error(&quot;&quot;, e);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 291 -            }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 292 +            dirtyDataManager.collectDirtyData(</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 293 +                    record.toString()</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 294 +                    , e.getMessage());</span>
+ 295              outDirtyRecords.inc();
+ 296          }
+ 297  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 298 -        if (outRecords.getCount() % ROW_PRINT_FREQUENCY == 0) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 299 -            LOG.info(record.toString());</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 300 -        }</span>
+ 301          outRecords.inc();
+ 302      }
+ 303  
+ 304      private Put getPutByRow(Row record) {
+ 305          String rowKey = buildRowKey(record);
+ 306          if (StringUtils.isEmpty(rowKey)) {
+ 307              return null;
+ 308          }
+ 309          Put put = new Put(rowKey.getBytes());
+ 310          for (int i = 0; i &lt; record.getArity(); ++i) {
+ 311              Object fieldVal = record.getField(i);
+ 312              if (fieldVal != null) {
+ 313                  byte[] val = fieldVal.toString().getBytes();
+ 314                  byte[] cf = families[i].getBytes();
+ 315                  byte[] qualifier = qualifiers[i].getBytes();
+ 316  
+ 317                  put.addColumn(cf, qualifier, val);
+ 318              }
+ 319          }
+ 320          return put;
+ 321      }
+ 322  
+ 323      private String buildRowKey(Row record) {
+ 324          String rowKeyValues = getRowKeyValues(record);
+ 325          // all rowkey not null
+ 326          if (StringUtils.isBlank(rowKeyValues)) {
+ 327              LOG.error(&quot;row key value must not null,record is ..{}&quot;, record);
+ 328              outDirtyRecords.inc();
+ 329              return &quot;&quot;;
+ 330          }
+ 331          return rowKeyValues;
+ 332      }
+ 333  
+ 334      private String getRowKeyValues(Row record) {
+ 335          Map&lt;String, Object&gt; row = rowConvertMap(record);
+ 336          RowKeyBuilder rowKeyBuilder = new RowKeyBuilder();
+ 337          rowKeyBuilder.init(rowkey);
+ 338          return rowKeyBuilder.getRowKey(row);
+ 339      }
+ 340  
+ 341      private Map&lt;String, Object&gt; rowConvertMap(Row record) {
+ 342          Map&lt;String, Object&gt; rowValue = Maps.newHashMap();
+ 343          for (int i = 0; i &lt; columnNames.length; i++) {
+ 344              rowValue.put(columnNames[i], record.getField(i));
+ 345          }
+ 346          return rowValue;
+ 347      }
+ 348  
+ 349      @Override
+ 350      public synchronized void close() throws IOException {
+ 351          if (closed) {
+ 352              return;
+ 353          }
+ 354  
+ 355          closed = true;
+ 356          if (!records.isEmpty()) {
+ 357              dealBatchOperation(records);
+ 358          }
+ 359  
+ 360          if (scheduledFuture != null) {
+ 361              scheduledFuture.cancel(false);
+ 362              if (scheduler != null) {
+ 363                  scheduler.shutdownNow();
+ 364              }
+ 365          }
+ 366  
+ 367          if (conn != null) {
+ 368              conn.close();
+ 369              conn = null;
+ 370          }
+ 371      }
+ 372  
+ 373      private void fillSyncKerberosConfig(org.apache.hadoop.conf.Configuration config,
+ 374                                          String regionserverPrincipal,
+ 375                                          String zookeeperSaslClient,
+ 376                                          String securityKrb5Conf) {
+ 377          if (StringUtils.isEmpty(regionserverPrincipal)) {
+<abbr title=" 378              throw new IllegalArgumentException(&quot;Must provide regionserverPrincipal when authentication is Kerberos&quot;);"> 378              throw new IllegalArgumentException(&quot;Must provide regionserverPrincipal when authentication is Kerberos🔵</abbr>
+ 379          }
+ 380          config.set(HbaseConfigUtils.KEY_HBASE_MASTER_KERBEROS_PRINCIPAL, regionserverPrincipal);
+ 381          config.set(HbaseConfigUtils.KEY_HBASE_REGIONSERVER_KERBEROS_PRINCIPAL, regionserverPrincipal);
+ 382          config.set(HbaseConfigUtils.KEY_HBASE_SECURITY_AUTHORIZATION, &quot;true&quot;);
+ 383          config.set(HbaseConfigUtils.KEY_HBASE_SECURITY_AUTHENTICATION, &quot;kerberos&quot;);
+ 384  
+ 385  
+ 386          if (!StringUtils.isEmpty(zookeeperSaslClient)) {
+ 387              System.setProperty(HbaseConfigUtils.KEY_ZOOKEEPER_SASL_CLIENT, zookeeperSaslClient);
+ 388          }
+ 389  
+ 390          if (!StringUtils.isEmpty(securityKrb5Conf)) {
+ 391              String krb5ConfPath = System.getProperty(&quot;user.dir&quot;) + File.separator + securityKrb5Conf;
+ 392              LOG.info(&quot;krb5ConfPath:{}&quot;, krb5ConfPath);
+ 393              System.setProperty(HbaseConfigUtils.KEY_JAVA_SECURITY_KRB5_CONF, krb5ConfPath);
+ 394          }
+ 395      }
+ 396  
+ 397      @Override
+ 398      public String toString() {
+ 399          return &quot;HbaseOutputFormat kerberos{&quot; +
+ 400                  &quot;kerberosAuthEnable=&quot; + kerberosAuthEnable +
+ 401                  &quot;, regionserverKeytabFile=&#x27;&quot; + regionserverKeytabFile + &#x27;\&#x27;&#x27; +
+ 402                  &quot;, regionserverPrincipal=&#x27;&quot; + regionserverPrincipal + &#x27;\&#x27;&#x27; +
+ 403                  &quot;, securityKrb5Conf=&#x27;&quot; + securityKrb5Conf + &#x27;\&#x27;&#x27; +
+ 404                  &quot;, zookeeperSaslClient=&#x27;&quot; + zookeeperSaslClient + &#x27;\&#x27;&#x27; +
+ 405                  &quot;, clientPrincipal=&#x27;&quot; + clientPrincipal + &#x27;\&#x27;&#x27; +
+ 406                  &quot;, clientKeytabFile=&#x27;&quot; + clientKeytabFile + &#x27;\&#x27;&#x27; +
+ 407                  &quot;, batchSize=&#x27;&quot; + batchSize + &#x27;\&#x27;&#x27; +
+ 408                  &quot;, batchWaitInterval=&#x27;&quot; + batchWaitInterval + &#x27;\&#x27;&#x27; +
+ 409                  &#x27;}&#x27;;
+ 410      }
+ 411  
+ 412      public static class HbaseOutputFormatBuilder {
+ 413  
+ 414          private final HbaseOutputFormat format;
+ 415  
+ 416          private HbaseOutputFormatBuilder() {
+ 417              format = new HbaseOutputFormat();
+ 418          }
+ 419  
+ 420          public HbaseOutputFormatBuilder setHost(String host) {
+ 421              format.host = host;
+ 422              return this;
+ 423          }
+ 424  
+ 425          public HbaseOutputFormatBuilder setZkParent(String parent) {
+ 426              format.zkParent = parent;
+ 427              return this;
+ 428          }
+ 429  
+ 430  
+ 431          public HbaseOutputFormatBuilder setTable(String tableName) {
+ 432              format.tableName = tableName;
+ 433              return this;
+ 434          }
+ 435  
+ 436          public HbaseOutputFormatBuilder setRowkey(String rowkey) {
+ 437              format.rowkey = rowkey;
+ 438              return this;
+ 439          }
+ 440  
+ 441          public HbaseOutputFormatBuilder setColumnNames(String[] columnNames) {
+ 442              format.columnNames = columnNames;
+ 443              return this;
+ 444          }
+ 445  
+ 446          public HbaseOutputFormatBuilder setColumnNameFamily(Map&lt;String, String&gt; columnNameFamily) {
+ 447              format.columnNameFamily = columnNameFamily;
+ 448              return this;
+ 449          }
+ 450  
+ 451          public HbaseOutputFormatBuilder setKerberosAuthEnable(boolean kerberosAuthEnable) {
+ 452              format.kerberosAuthEnable = kerberosAuthEnable;
+ 453              return this;
+ 454          }
+ 455  
+ 456          public HbaseOutputFormatBuilder setRegionserverKeytabFile(String regionserverKeytabFile) {
+ 457              format.regionserverKeytabFile = regionserverKeytabFile;
+ 458              return this;
+ 459          }
+ 460  
+ 461          public HbaseOutputFormatBuilder setRegionserverPrincipal(String regionserverPrincipal) {
+ 462              format.regionserverPrincipal = regionserverPrincipal;
+ 463              return this;
+ 464          }
+ 465  
+ 466          public HbaseOutputFormatBuilder setSecurityKrb5Conf(String securityKrb5Conf) {
+ 467              format.securityKrb5Conf = securityKrb5Conf;
+ 468              return this;
+ 469          }
+ 470  
+ 471          public HbaseOutputFormatBuilder setZookeeperSaslClient(String zookeeperSaslClient) {
+ 472              format.zookeeperSaslClient = zookeeperSaslClient;
+ 473              return this;
+ 474          }
+ 475  
+ 476          public HbaseOutputFormatBuilder setClientPrincipal(String clientPrincipal) {
+ 477              format.clientPrincipal = clientPrincipal;
+ 478              return this;
+ 479          }
+ 480  
+ 481          public HbaseOutputFormatBuilder setClientKeytabFile(String clientKeytabFile) {
+ 482              format.clientKeytabFile = clientKeytabFile;
+ 483              return this;
+ 484          }
+ 485  
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 486 +        public HbaseOutputFormatBuilder setDirtyManager(DirtyDataManager dirtyDataManager) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 487 +            format.dirtyDataManager = dirtyDataManager;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 488 +            return this;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 489 +        }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 490 +</span>
+ 491          public HbaseOutputFormatBuilder setBatchSize(Integer batchSize) {
+ 492              format.batchSize = batchSize;
+ 493              return this;
+ 494          }
+ 495  
+ 496          public HbaseOutputFormatBuilder setBatchWaitInterval(Long batchWaitInterval) {
+ 497              format.batchWaitInterval = batchWaitInterval;
+ 498              return this;
+ 499          }
+ 500  
+ 501          public HbaseOutputFormat finish() {
+ 502              Preconditions.checkNotNull(format.host, &quot;zookeeperQuorum should be specified&quot;);
+ 503              Preconditions.checkNotNull(format.tableName, &quot;tableName should be specified&quot;);
+ 504              Preconditions.checkNotNull(format.columnNames, &quot;columnNames should be specified&quot;);
+ 505              Preconditions.checkArgument(format.columnNames.length != 0, &quot;columnNames length should not be zero&quot;);
+ 506  
+ 507              String[] families = new String[format.columnNames.length];
+ 508              String[] qualifiers = new String[format.columnNames.length];
+ 509  
+ 510              if (format.columnNameFamily != null) {
+ 511                  List&lt;String&gt; keyList = new LinkedList&lt;&gt;(format.columnNameFamily.keySet());
+ 512                  String[] columns = keyList.toArray(new String[0]);
+ 513                  for (int i = 0; i &lt; columns.length; ++i) {
+ 514                      String col = columns[i];
+ 515                      String[] part = col.split(&quot;:&quot;);
+ 516                      families[i] = part[0];
+ 517                      qualifiers[i] = part[1];
+ 518                  }
+ 519              }
+ 520              format.families = families;
+ 521              format.qualifiers = qualifiers;
+ 522  
+ 523              return format;
+ 524          }
+ 525      }
+ 526  }</pre></td>
+                            <td><pre>   1  /*
+   2   * Licensed to the Apache Software Foundation (ASF) under one
+   3   * or more contributor license agreements.  See the NOTICE file
+   4   * distributed with this work for additional information
+   5   * regarding copyright ownership.  The ASF licenses this file
+   6   * to you under the Apache License, Version 2.0 (the
+   7   * &quot;License&quot;); you may not use this file except in compliance
+   8   * with the License.  You may obtain a copy of the License at
+   9   *
+  10   *     http://www.apache.org/licenses/LICENSE-2.0
+  11   *
+  12   * Unless required by applicable law or agreed to in writing, software
+  13   * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15   * See the License for the specific language governing permissions and
+  16   * limitations under the License.
+  17   */
+  18  
+  19  
+  20  package com.dtstack.flink.sql.sink.hbase;
+  21  
+
+  22  import com.dtstack.flink.sql.factory.DTThreadFactory;
+  23  import com.dtstack.flink.sql.outputformat.AbstractDtRichOutputFormat;
+  24  import com.google.common.collect.Maps;
+  25  import org.apache.commons.lang3.StringUtils;
+  26  import org.apache.flink.api.java.tuple.Tuple2;
+  27  import org.apache.flink.configuration.Configuration;
+  28  import org.apache.flink.types.Row;
+  29  import org.apache.flink.util.Preconditions;
+  30  import org.apache.hadoop.hbase.AuthUtil;
+  31  import org.apache.hadoop.hbase.ChoreService;
+  32  import org.apache.hadoop.hbase.HBaseConfiguration;
+  33  import org.apache.hadoop.hbase.ScheduledChore;
+  34  import org.apache.hadoop.hbase.TableName;
+  35  import org.apache.hadoop.hbase.client.Connection;
+  36  import org.apache.hadoop.hbase.client.ConnectionFactory;
+  37  import org.apache.hadoop.hbase.client.Put;
+  38  import org.apache.hadoop.hbase.client.Table;
+  39  import org.apache.hadoop.security.UserGroupInformation;
+  40  import org.slf4j.Logger;
+  41  import org.slf4j.LoggerFactory;
+  42  
+  43  import java.io.File;
+  44  import java.io.IOException;
+  45  import java.security.PrivilegedAction;
+  46  import java.util.ArrayList;
+  47  import java.util.LinkedList;
+  48  import java.util.List;
+  49  import java.util.Map;
+  50  import java.util.concurrent.ScheduledExecutorService;
+  51  import java.util.concurrent.ScheduledFuture;
+  52  import java.util.concurrent.ScheduledThreadPoolExecutor;
+  53  import java.util.concurrent.TimeUnit;
+  54  
+  55  /**
+  56   * @author: jingzhen@dtstack.com
+  57   * date: 2017-6-29
+  58   */
+  59  public class HbaseOutputFormat extends AbstractDtRichOutputFormat&lt;Tuple2&lt;Boolean, Row&gt;&gt; {
+  60  
+  61      private static final Logger LOG = LoggerFactory.getLogger(HbaseOutputFormat.class);
+  62      private String host;
+  63      private String zkParent;
+  64      private String rowkey;
+  65      private String tableName;
+  66      private String[] columnNames;
+  67      private Map&lt;String, String&gt; columnNameFamily;
+  68      private boolean kerberosAuthEnable;
+  69      private String regionserverKeytabFile;
+  70      private String regionserverPrincipal;
+  71      private String securityKrb5Conf;
+  72      private String zookeeperSaslClient;
+  73      private String clientPrincipal;
+  74      private String clientKeytabFile;
+  75      private String[] families;
+  76      private String[] qualifiers;
+  77      private transient org.apache.hadoop.conf.Configuration conf;
+  78      private transient Connection conn;
+  79      private transient Table table;
+  80      private transient ChoreService choreService;
+  81      private transient List&lt;Row&gt; records;
+  82      private transient volatile boolean closed = false;
+  83      /**
+  84       * 批量写入的参数
+  85       */
+  86      private Integer batchSize;
+  87      private Long batchWaitInterval;
+  88      /**
+  89       * 定时任务
+  90       */
+  91      private transient ScheduledExecutorService scheduler;
+  92      private transient ScheduledFuture&lt;?&gt; scheduledFuture;
+  93  
+
+
+
+
+
+  94      private HbaseOutputFormat() {
+  95      }
+  96  
+  97      public static HbaseOutputFormatBuilder buildHbaseOutputFormat() {
+  98          return new HbaseOutputFormatBuilder();
+  99      }
+ 100  
+ 101      @Override
+ 102      public void configure(Configuration parameters) {
+ 103          // 这里不要做耗时较长的操作，否则会导致AKKA通信超时
+ 104          // DO NOTHING
+ 105      }
+ 106  
+ 107      @Override
+ 108      public void open(int taskNumber, int numTasks) throws IOException {
+ 109          LOG.warn(&quot;---open---&quot;);
+ 110          records = new ArrayList&lt;&gt;();
+ 111          conf = HBaseConfiguration.create();
+ 112          openConn();
+ 113          table = conn.getTable(TableName.valueOf(tableName));
+ 114          LOG.warn(&quot;---open end(get table from hbase) ---&quot;);
+ 115          initMetric();
+ 116      }
+ 117  
+ 118      private void openConn() {
+ 119          try {
+ 120              if (kerberosAuthEnable) {
+ 121                  LOG.info(&quot;open kerberos conn&quot;);
+ 122                  openKerberosConn();
+ 123              } else {
+ 124                  LOG.info(&quot;open conn&quot;);
+ 125                  conf.set(HbaseConfigUtils.KEY_HBASE_ZOOKEEPER_QUORUM, host);
+ 126                  conf.set(HbaseConfigUtils.KEY_HBASE_ZOOKEEPER_ZNODE_QUORUM, zkParent);
+ 127                  conn = ConnectionFactory.createConnection(conf);
+ 128              }
+ 129          } catch (Exception e) {
+ 130              throw new RuntimeException(e);
+ 131          }
+ 132          initScheduledTask(batchWaitInterval);
+ 133      }
+ 134  
+ 135      /**
+ 136       * 初始化定时写入任务
+ 137       *
+ 138       * @param batchWaitInterval 定时任务时间
+ 139       */
+ 140      private void initScheduledTask(Long batchWaitInterval) {
+ 141          try {
+ 142              if (batchWaitInterval &gt; 0) {
+ 143                  this.scheduler = new ScheduledThreadPoolExecutor(
+ 144                          1,
+ 145                          new DTThreadFactory(&quot;hbase-batch-flusher&quot;)
+ 146                  );
+ 147  
+ 148                  this.scheduledFuture = this.scheduler.scheduleWithFixedDelay(
+ 149                          () -&gt; {
+ 150                              synchronized (HbaseOutputFormat.this) {
+ 151                                  if (!records.isEmpty()) {
+ 152                                      dealBatchOperation(records);
+ 153                                  }
+ 154                              }
+ 155                          }, batchWaitInterval, batchWaitInterval, TimeUnit.MILLISECONDS
+ 156                  );
+ 157              }
+ 158          } catch (Exception e) {
+ 159              LOG.error(&quot;init schedule task failed !&quot;);
+ 160              throw new RuntimeException(e);
+ 161          }
+ 162      }
+ 163  
+ 164      private void openKerberosConn() throws Exception {
+ 165          conf.set(HbaseConfigUtils.KEY_HBASE_ZOOKEEPER_QUORUM, host);
+ 166          conf.set(HbaseConfigUtils.KEY_HBASE_ZOOKEEPER_ZNODE_QUORUM, zkParent);
+ 167  
+ 168          LOG.info(&quot;kerberos config:{}&quot;, this.conf.toString());
+ 169          Preconditions.checkArgument(!StringUtils.isEmpty(clientPrincipal), &quot; clientPrincipal not null!&quot;);
+ 170          Preconditions.checkArgument(!StringUtils.isEmpty(clientKeytabFile), &quot; clientKeytabFile not null!&quot;);
+ 171  
+ 172          fillSyncKerberosConfig(conf, regionserverPrincipal, zookeeperSaslClient, securityKrb5Conf);
+ 173  
+ 174          clientKeytabFile = System.getProperty(&quot;user.dir&quot;) + File.separator + clientKeytabFile;
+ 175          clientPrincipal = !StringUtils.isEmpty(clientPrincipal) ? clientPrincipal : regionserverPrincipal;
+ 176  
+ 177          conf.set(HbaseConfigUtils.KEY_HBASE_CLIENT_KEYTAB_FILE, clientKeytabFile);
+ 178          conf.set(HbaseConfigUtils.KEY_HBASE_CLIENT_KERBEROS_PRINCIPAL, clientPrincipal);
+ 179  
+<abbr title=" 180          UserGroupInformation userGroupInformation = HbaseConfigUtils.loginAndReturnUGI(conf, clientPrincipal, clientKeytabFile);"> 180          UserGroupInformation userGroupInformation = HbaseConfigUtils.loginAndReturnUGI(conf, clientPrincipal, clie🔵</abbr>
+ 181          org.apache.hadoop.conf.Configuration finalConf = conf;
+ 182          conn = userGroupInformation.doAs((PrivilegedAction&lt;Connection&gt;) () -&gt; {
+ 183              try {
+ 184                  ScheduledChore authChore = AuthUtil.getAuthChore(finalConf);
+ 185                  if (authChore != null) {
+ 186                      choreService = new ChoreService(&quot;hbaseKerberosSink&quot;);
+ 187                      choreService.scheduleChore(authChore);
+ 188                  }
+ 189  
+ 190                  return ConnectionFactory.createConnection(finalConf);
+ 191              } catch (IOException e) {
+ 192                  LOG.error(&quot;Get connection fail with config:{}&quot;, finalConf);
+ 193                  throw new RuntimeException(e);
+ 194              }
+ 195          });
+ 196      }
+ 197  
+ 198      @Override
+ 199      public void writeRecord(Tuple2&lt;Boolean, Row&gt; record) {
+ 200          if (record.f0) {
+ 201              if (this.batchSize != 0) {
+
+ 202                  writeBatchRecord(record.f1);
+ 203              } else {
+ 204                  dealInsert(record.f1);
+ 205              }
+ 206          }
+ 207      }
+ 208  
+ 209      public void writeBatchRecord(Row row) {
+ 210          records.add(row);
+ 211          // 数据累计到batchSize之后开始处理
+ 212          if (records.size() == this.batchSize) {
+ 213              dealBatchOperation(records);
+ 214          }
+ 215      }
+ 216  
+ 217      protected synchronized void dealBatchOperation(List&lt;Row&gt; records) {
+ 218          // A null in the result array means that the call for that action failed, even after retries.
+ 219          Object[] results = new Object[records.size()];
+ 220          try {
+ 221              List&lt;Put&gt; puts = new ArrayList&lt;&gt;();
+ 222              for (Row record : records) {
+ 223                  puts.add(getPutByRow(record));
+ 224              }
+ 225              table.batch(puts, results);
+ 226  
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 227 +            // 打印结果</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 228 +            if (outRecords.getCount() % ROW_PRINT_FREQUENCY == 0) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 229 +                // 只打印最后一条数据</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 230 +                LOG.info(records.get(records.size() - 1).toString());</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 231 +            }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 232 +        } catch (IOException | InterruptedException ignored) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 233 +        } finally {</span>
+
+ 234              // 判断数据是否插入成功
+ 235              for (int i = 0; i &lt; results.length; i++) {
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 236 -                if (results[i] == null) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 237 -                    if (outDirtyRecords.getCount() % DIRTY_PRINT_FREQUENCY == 0 || LOG.isDebugEnabled()) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 238 -                        LOG.error(&quot;record insert failed ..{}&quot;, records.get(i).toString());</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 239 +                if (results[i] != null) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 240 +                    if (outDirtyRecords.getCount() % DIRTY_PRINT_FREQUENCY == 0) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 241 +                        LOG.error(&quot;Get dirty data: {}&quot;, records.get(i).toString());</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 242 +                        LOG.error(&quot;Error cause: &quot; + results[i]);</span>
+ 243                      }
+
+
+ 244                      // 脏数据记录
+
+
+
+
+ 245                      outDirtyRecords.inc();
+ 246                  } else {
+ 247                      // 输出结果条数记录
+ 248                      outRecords.inc();
+ 249                  }
+ 250              }
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 251 -            // 打印结果</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 252 -            if (outRecords.getCount() % ROW_PRINT_FREQUENCY == 0) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 253 -                // 只打印最后一条数据</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 254 -                LOG.info(records.get(records.size() - 1).toString());</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 255 -            }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 256 -        } catch (IOException | InterruptedException e) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 257 -            LOG.error(&quot;&quot;, e);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 258 -        } finally {</span>
+ 259              // 添加完数据之后数据清空records
+ 260              records.clear();
+ 261          }
+ 262      }
+ 263  
+ 264      protected void dealInsert(Row record) {
+ 265          Put put = getPutByRow(record);
+ 266          if (put == null || put.isEmpty()) {
+ 267              // 记录脏数据
+ 268              outDirtyRecords.inc();
+ 269              return;
+ 270          }
+ 271  
+ 272          try {
+ 273              table.put(put);
+
+
+
+ 274          } catch (Exception e) {
+ 275              if (outDirtyRecords.getCount() % DIRTY_PRINT_FREQUENCY == 0 || LOG.isDebugEnabled()) {
+ 276                  LOG.error(&quot;record insert failed ..{}&quot;, record.toString());
+ 277                  LOG.error(&quot;&quot;, e);
+ 278              }
+
+
+
+ 279              outDirtyRecords.inc();
+ 280          }
+ 281  
+ 282          if (outRecords.getCount() % ROW_PRINT_FREQUENCY == 0) {
+ 283              LOG.info(record.toString());
+ 284          }
+ 285          outRecords.inc();
+ 286      }
+ 287  
+ 288      private Put getPutByRow(Row record) {
+ 289          String rowKey = buildRowKey(record);
+ 290          if (StringUtils.isEmpty(rowKey)) {
+ 291              return null;
+ 292          }
+ 293          Put put = new Put(rowKey.getBytes());
+ 294          for (int i = 0; i &lt; record.getArity(); ++i) {
+ 295              Object fieldVal = record.getField(i);
+ 296              if (fieldVal != null) {
+ 297                  byte[] val = fieldVal.toString().getBytes();
+ 298                  byte[] cf = families[i].getBytes();
+ 299                  byte[] qualifier = qualifiers[i].getBytes();
+ 300  
+ 301                  put.addColumn(cf, qualifier, val);
+ 302              }
+ 303          }
+ 304          return put;
+ 305      }
+ 306  
+ 307      private String buildRowKey(Row record) {
+ 308          String rowKeyValues = getRowKeyValues(record);
+ 309          // all rowkey not null
+ 310          if (StringUtils.isBlank(rowKeyValues)) {
+ 311              LOG.error(&quot;row key value must not null,record is ..{}&quot;, record);
+ 312              outDirtyRecords.inc();
+ 313              return &quot;&quot;;
+ 314          }
+ 315          return rowKeyValues;
+ 316      }
+ 317  
+ 318      private String getRowKeyValues(Row record) {
+ 319          Map&lt;String, Object&gt; row = rowConvertMap(record);
+ 320          RowKeyBuilder rowKeyBuilder = new RowKeyBuilder();
+ 321          rowKeyBuilder.init(rowkey);
+ 322          return rowKeyBuilder.getRowKey(row);
+ 323      }
+ 324  
+ 325      private Map&lt;String, Object&gt; rowConvertMap(Row record) {
+ 326          Map&lt;String, Object&gt; rowValue = Maps.newHashMap();
+ 327          for (int i = 0; i &lt; columnNames.length; i++) {
+ 328              rowValue.put(columnNames[i], record.getField(i));
+ 329          }
+ 330          return rowValue;
+ 331      }
+ 332  
+ 333      @Override
+ 334      public synchronized void close() throws IOException {
+ 335          if (closed) {
+ 336              return;
+ 337          }
+ 338  
+ 339          closed = true;
+ 340          if (!records.isEmpty()) {
+ 341              dealBatchOperation(records);
+ 342          }
+ 343  
+ 344          if (scheduledFuture != null) {
+ 345              scheduledFuture.cancel(false);
+ 346              if (scheduler != null) {
+ 347                  scheduler.shutdownNow();
+ 348              }
+ 349          }
+ 350  
+ 351          if (conn != null) {
+ 352              conn.close();
+ 353              conn = null;
+ 354          }
+ 355      }
+ 356  
+ 357      private void fillSyncKerberosConfig(org.apache.hadoop.conf.Configuration config,
+ 358                                          String regionserverPrincipal,
+ 359                                          String zookeeperSaslClient,
+ 360                                          String securityKrb5Conf) {
+ 361          if (StringUtils.isEmpty(regionserverPrincipal)) {
+<abbr title=" 362              throw new IllegalArgumentException(&quot;Must provide regionserverPrincipal when authentication is Kerberos&quot;);"> 362              throw new IllegalArgumentException(&quot;Must provide regionserverPrincipal when authentication is Kerberos🔵</abbr>
+ 363          }
+ 364          config.set(HbaseConfigUtils.KEY_HBASE_MASTER_KERBEROS_PRINCIPAL, regionserverPrincipal);
+ 365          config.set(HbaseConfigUtils.KEY_HBASE_REGIONSERVER_KERBEROS_PRINCIPAL, regionserverPrincipal);
+ 366          config.set(HbaseConfigUtils.KEY_HBASE_SECURITY_AUTHORIZATION, &quot;true&quot;);
+ 367          config.set(HbaseConfigUtils.KEY_HBASE_SECURITY_AUTHENTICATION, &quot;kerberos&quot;);
+ 368  
+ 369  
+ 370          if (!StringUtils.isEmpty(zookeeperSaslClient)) {
+ 371              System.setProperty(HbaseConfigUtils.KEY_ZOOKEEPER_SASL_CLIENT, zookeeperSaslClient);
+ 372          }
+ 373  
+ 374          if (!StringUtils.isEmpty(securityKrb5Conf)) {
+ 375              String krb5ConfPath = System.getProperty(&quot;user.dir&quot;) + File.separator + securityKrb5Conf;
+ 376              LOG.info(&quot;krb5ConfPath:{}&quot;, krb5ConfPath);
+ 377              System.setProperty(HbaseConfigUtils.KEY_JAVA_SECURITY_KRB5_CONF, krb5ConfPath);
+ 378          }
+ 379      }
+ 380  
+ 381      @Override
+ 382      public String toString() {
+ 383          return &quot;HbaseOutputFormat kerberos{&quot; +
+ 384                  &quot;kerberosAuthEnable=&quot; + kerberosAuthEnable +
+ 385                  &quot;, regionserverKeytabFile=&#x27;&quot; + regionserverKeytabFile + &#x27;\&#x27;&#x27; +
+ 386                  &quot;, regionserverPrincipal=&#x27;&quot; + regionserverPrincipal + &#x27;\&#x27;&#x27; +
+ 387                  &quot;, securityKrb5Conf=&#x27;&quot; + securityKrb5Conf + &#x27;\&#x27;&#x27; +
+ 388                  &quot;, zookeeperSaslClient=&#x27;&quot; + zookeeperSaslClient + &#x27;\&#x27;&#x27; +
+ 389                  &quot;, clientPrincipal=&#x27;&quot; + clientPrincipal + &#x27;\&#x27;&#x27; +
+ 390                  &quot;, clientKeytabFile=&#x27;&quot; + clientKeytabFile + &#x27;\&#x27;&#x27; +
+ 391                  &quot;, batchSize=&#x27;&quot; + batchSize + &#x27;\&#x27;&#x27; +
+ 392                  &quot;, batchWaitInterval=&#x27;&quot; + batchWaitInterval + &#x27;\&#x27;&#x27; +
+ 393                  &#x27;}&#x27;;
+ 394      }
+ 395  
+ 396      public static class HbaseOutputFormatBuilder {
+ 397  
+ 398          private final HbaseOutputFormat format;
+ 399  
+ 400          private HbaseOutputFormatBuilder() {
+ 401              format = new HbaseOutputFormat();
+ 402          }
+ 403  
+ 404          public HbaseOutputFormatBuilder setHost(String host) {
+ 405              format.host = host;
+ 406              return this;
+ 407          }
+ 408  
+ 409          public HbaseOutputFormatBuilder setZkParent(String parent) {
+ 410              format.zkParent = parent;
+ 411              return this;
+ 412          }
+ 413  
+ 414  
+ 415          public HbaseOutputFormatBuilder setTable(String tableName) {
+ 416              format.tableName = tableName;
+ 417              return this;
+ 418          }
+ 419  
+ 420          public HbaseOutputFormatBuilder setRowkey(String rowkey) {
+ 421              format.rowkey = rowkey;
+ 422              return this;
+ 423          }
+ 424  
+ 425          public HbaseOutputFormatBuilder setColumnNames(String[] columnNames) {
+ 426              format.columnNames = columnNames;
+ 427              return this;
+ 428          }
+ 429  
+ 430          public HbaseOutputFormatBuilder setColumnNameFamily(Map&lt;String, String&gt; columnNameFamily) {
+ 431              format.columnNameFamily = columnNameFamily;
+ 432              return this;
+ 433          }
+ 434  
+ 435          public HbaseOutputFormatBuilder setKerberosAuthEnable(boolean kerberosAuthEnable) {
+ 436              format.kerberosAuthEnable = kerberosAuthEnable;
+ 437              return this;
+ 438          }
+ 439  
+ 440          public HbaseOutputFormatBuilder setRegionserverKeytabFile(String regionserverKeytabFile) {
+ 441              format.regionserverKeytabFile = regionserverKeytabFile;
+ 442              return this;
+ 443          }
+ 444  
+ 445          public HbaseOutputFormatBuilder setRegionserverPrincipal(String regionserverPrincipal) {
+ 446              format.regionserverPrincipal = regionserverPrincipal;
+ 447              return this;
+ 448          }
+ 449  
+ 450          public HbaseOutputFormatBuilder setSecurityKrb5Conf(String securityKrb5Conf) {
+ 451              format.securityKrb5Conf = securityKrb5Conf;
+ 452              return this;
+ 453          }
+ 454  
+ 455          public HbaseOutputFormatBuilder setZookeeperSaslClient(String zookeeperSaslClient) {
+ 456              format.zookeeperSaslClient = zookeeperSaslClient;
+ 457              return this;
+ 458          }
+ 459  
+ 460          public HbaseOutputFormatBuilder setClientPrincipal(String clientPrincipal) {
+ 461              format.clientPrincipal = clientPrincipal;
+ 462              return this;
+ 463          }
+ 464  
+ 465          public HbaseOutputFormatBuilder setClientKeytabFile(String clientKeytabFile) {
+ 466              format.clientKeytabFile = clientKeytabFile;
+ 467              return this;
+ 468          }
+ 469  
+
+
+
+
+
+ 470          public HbaseOutputFormatBuilder setBatchSize(Integer batchSize) {
+ 471              format.batchSize = batchSize;
+ 472              return this;
+ 473          }
+ 474  
+ 475          public HbaseOutputFormatBuilder setBatchWaitInterval(Long batchWaitInterval) {
+ 476              format.batchWaitInterval = batchWaitInterval;
+ 477              return this;
+ 478          }
+ 479  
+ 480          public HbaseOutputFormat finish() {
+ 481              Preconditions.checkNotNull(format.host, &quot;zookeeperQuorum should be specified&quot;);
+ 482              Preconditions.checkNotNull(format.tableName, &quot;tableName should be specified&quot;);
+ 483              Preconditions.checkNotNull(format.columnNames, &quot;columnNames should be specified&quot;);
+ 484              Preconditions.checkArgument(format.columnNames.length != 0, &quot;columnNames length should not be zero&quot;);
+ 485  
+ 486              String[] families = new String[format.columnNames.length];
+ 487              String[] qualifiers = new String[format.columnNames.length];
+ 488  
+ 489              if (format.columnNameFamily != null) {
+ 490                  List&lt;String&gt; keyList = new LinkedList&lt;&gt;(format.columnNameFamily.keySet());
+ 491                  String[] columns = keyList.toArray(new String[0]);
+ 492                  for (int i = 0; i &lt; columns.length; ++i) {
+ 493                      String col = columns[i];
+ 494                      String[] part = col.split(&quot;:&quot;);
+ 495                      families[i] = part[0];
+ 496                      qualifiers[i] = part[1];
+ 497                  }
+ 498              }
+ 499              format.families = families;
+ 500              format.qualifiers = qualifiers;
+ 501  
+ 502              return format;
+ 503          }
+ 504      }
+ 505  }</pre></td>
+                        </tr>
+                    </table>
+                </div>
+              </body>
+            </html>
+            

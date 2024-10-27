@@ -1,0 +1,1046 @@
+<!DOCTYPE html>
+    <html lang="en">
+              <head>
+                <meta charset="utf-8">
+                <title>339</title>
+                    <style>
+                        #top {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        #bottom {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        abbr {
+                          /* Here is the delay */
+                          transition-delay:0s;
+                        }
+                    </style>
+              </head>
+              <body>
+                <span style="height: 4vh">
+                    339
+                    <a href="338.html">prev</a>
+                    <a href="340.html">next</a>
+                    <a href="339_chunks.html">chunks</a>
+                    <a href="index.html">index</a>
+                    DTStack/flinkStreamSQL_ee17739ea99d0b228fbeb1893c3bf5d3244097db_hbase/hbase-sink/src/main/java/com/dtstack/flink/sql/sink/hbase/HbaseSink.java
+                    <textarea rows=1 onclick='navigator.clipboard.writeText(this.value)'>cd C:\studies\se\mega\git-analyzer-plus\notebooks\debug
+del /Q *
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;ee17739ea99d0b228fbeb1893c3bf5d3244097db:hbase/hbase-sink/src/main/java/com/dtstack/flink/sql/sink/hbase/HbaseSink.java&quot; &gt; committed.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;ee17739ea99d0b228fbeb1893c3bf5d3244097db^1:hbase/hbase-sink/src/main/java/com/dtstack/flink/sql/sink/hbase/HbaseSink.java&quot; &gt; ours.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;ee17739ea99d0b228fbeb1893c3bf5d3244097db^2:hbase/hbase-sink/src/main/java/com/dtstack/flink/sql/sink/hbase/HbaseSink.java&quot; &gt; theirs.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;d8af8485026c1bfba5fda654f05f6301a0fe3b5c:hbase/hbase-sink/src/main/java/com/dtstack/flink/sql/sink/hbase/HbaseSink.java&quot; &gt; base.java
+copy ours.java 1ours.java
+copy ours.java 2ours.java
+copy theirs.java 1theirs.java
+copy theirs.java 2theirs.java
+copy base.java 1base.java
+copy base.java 2base.java
+&quot;C:\Program Files\Java\jdk1.8.0_241\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\jFSTMerge\build\libs\jFSTMerge-all.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\jfstmerge.java --show-base
+&quot;C:\Program Files\Eclipse Adoptium\jdk-17.0.11.9-hotspot\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\spork\target\spork-0.5.0-SNAPSHOT.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\spork.java
+del /Q 1*.java
+del /Q 2*.java
+del /Q jfstmerge.java.merge
+</textarea>
+                    {strict: [[b], [sbj]], subset: [[b], [sbj]]}
+                </span>
+                <div id="top">
+
+                    <table>
+                        <tr>
+                            <th>line based (standard git)</th>
+                            <th>jfstmerge</th>
+                            <th>spork</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1 /*
+   2  * Licensed to the Apache Software Foundation (ASF) under one
+   3  * or more contributor license agreements.  See the NOTICE file
+   4  * distributed with this work for additional information
+   5  * regarding copyright ownership.  The ASF licenses this file
+   6  * to you under the Apache License, Version 2.0 (the
+   7  * &quot;License&quot;); you may not use this file except in compliance
+   8  * with the License.  You may obtain a copy of the License at
+   9  *
+  10  *     http://www.apache.org/licenses/LICENSE-2.0
+  11  *
+  12  * Unless required by applicable law or agreed to in writing, software
+  13  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15  * See the License for the specific language governing permissions and
+  16  * limitations under the License.
+  17  */
+  18 
+  19 
+  20 package com.dtstack.flink.sql.sink.hbase;
+  21 
+  22 import com.dtstack.flink.sql.dirtyManager.manager.DirtyDataManager;
+  23 import com.dtstack.flink.sql.sink.IStreamSinkGener;
+  24 import com.dtstack.flink.sql.sink.hbase.table.HbaseTableInfo;
+  25 import com.dtstack.flink.sql.table.AbstractTargetTableInfo;
+  26 import org.apache.flink.api.common.typeinfo.TypeInformation;
+  27 import org.apache.flink.api.java.tuple.Tuple2;
+  28 import org.apache.flink.api.java.typeutils.RowTypeInfo;
+  29 import org.apache.flink.api.java.typeutils.TupleTypeInfo;
+  30 import org.apache.flink.streaming.api.datastream.DataStream;
+  31 import org.apache.flink.streaming.api.datastream.DataStreamSink;
+  32 import org.apache.flink.streaming.api.functions.sink.OutputFormatSinkFunction;
+  33 import org.apache.flink.streaming.api.functions.sink.RichSinkFunction;
+  34 import org.apache.flink.table.sinks.RetractStreamTableSink;
+  35 import org.apache.flink.table.sinks.TableSink;
+  36 import org.apache.flink.types.Row;
+  37 
+  38 import java.util.Map;
+  39 import java.util.Properties;
+  40 
+  41 /**
+  42  * Date: 2018/09/14
+  43  * Company: www.dtstack.com
+  44  *
+  45  * @author sishu.yss
+  46  */
+  47 public class HbaseSink implements RetractStreamTableSink&lt;Row&gt;, IStreamSinkGener&lt;HbaseSink&gt; {
+  48 
+  49     protected String[] fieldNames;
+  50     protected Map&lt;String, String&gt; columnNameFamily;
+  51     protected String zookeeperQuorum;
+  52     protected String port;
+  53     protected String parent;
+  54     protected String tableName;
+  55     protected String updateMode;
+  56     protected String rowkey;
+  57     protected String registerTabName;
+  58     protected boolean kerberosAuthEnable;
+  59     protected String regionserverKeytabFile;
+  60     protected String regionserverPrincipal;
+  61     protected String securityKrb5Conf;
+  62     protected String zookeeperSaslClient;
+  63     protected String batchSize;
+  64     protected String batchWaitInterval;
+  65     TypeInformation&lt;?&gt;[] fieldTypes;
+  66     private String clientPrincipal;
+  67     private String clientKeytabFile;
+  68     private int parallelism = 1;
+  69 
+  70 &lt;&lt;&lt;&lt;&lt;&lt;&lt; GitAnalyzerPlus_ours
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  71     private Properties dirtyProperties;</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  72 </span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  73 </span>
+  74 ||||||| GitAnalyzerPlus_base
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  75 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  76     public HbaseSink() {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  77         // TO DO NOTHING</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  78     }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  79 </span>
+  80 =======
+  81 &gt;&gt;&gt;&gt;&gt;&gt;&gt; GitAnalyzerPlus_theirs
+  82     public HbaseSink() {
+  83         // TO DO NOTHING
+  84     }
+  85 
+  86     @Override
+  87     public HbaseSink genStreamSink(AbstractTargetTableInfo targetTableInfo) {
+  88         HbaseTableInfo hbaseTableInfo = (HbaseTableInfo) targetTableInfo;
+  89         this.zookeeperQuorum = hbaseTableInfo.getHost();
+  90         this.port = hbaseTableInfo.getPort();
+  91         this.parent = hbaseTableInfo.getParent();
+  92         this.tableName = hbaseTableInfo.getTableName();
+  93         this.rowkey = hbaseTableInfo.getRowkey();
+  94         this.columnNameFamily = hbaseTableInfo.getColumnNameFamily();
+  95         this.registerTabName = hbaseTableInfo.getName();
+  96 
+  97         this.kerberosAuthEnable = hbaseTableInfo.isKerberosAuthEnable();
+  98         this.regionserverKeytabFile = hbaseTableInfo.getRegionserverKeytabFile();
+  99         this.regionserverPrincipal = hbaseTableInfo.getRegionserverPrincipal();
+ 100         this.securityKrb5Conf = hbaseTableInfo.getSecurityKrb5Conf();
+ 101         this.zookeeperSaslClient = hbaseTableInfo.getZookeeperSaslClient();
+ 102 
+ 103         this.clientKeytabFile = hbaseTableInfo.getClientKeytabFile();
+ 104         this.clientPrincipal = hbaseTableInfo.getClientPrincipal();
+ 105 
+ 106         this.dirtyProperties = hbaseTableInfo.getDirtyProperties();
+ 107 
+ 108         Integer tmpSinkParallelism = hbaseTableInfo.getParallelism();
+ 109         if (tmpSinkParallelism != null) {
+ 110             this.parallelism = tmpSinkParallelism;
+ 111         }
+ 112 
+ 113         this.batchSize = hbaseTableInfo.getBatchSize();
+ 114         this.batchWaitInterval = hbaseTableInfo.getBatchWaitInterval();
+ 115         return this;
+ 116     }
+ 117 
+ 118     @Override
+ 119     public void emitDataStream(DataStream&lt;Tuple2&lt;Boolean, Row&gt;&gt; dataStream) {
+ 120         consumeDataStream(dataStream);
+ 121     }
+ 122 
+ 123     @Override
+<abbr title=" 124     public DataStreamSink&lt;Tuple2&lt;Boolean, Row&gt;&gt; consumeDataStream(DataStream&lt;Tuple2&lt;Boolean, Row&gt;&gt; dataStream) {"> 124     public DataStreamSink&lt;Tuple2&lt;Boolean, Row&gt;&gt; consumeDataStream(DataStream&lt;Tuple2&lt;Boolean, Row&gt;&gt; dataSt🔵</abbr>
+ 125         HbaseOutputFormat.HbaseOutputFormatBuilder builder = HbaseOutputFormat.buildHbaseOutputFormat();
+ 126 
+ 127         HbaseOutputFormat outputFormat = builder
+ 128                 .setHost(this.zookeeperQuorum)
+ 129                 .setZkParent(this.parent)
+ 130                 .setTable(this.tableName)
+ 131                 .setRowkey(rowkey)
+ 132                 .setColumnNames(fieldNames)
+ 133                 .setColumnNameFamily(columnNameFamily)
+ 134                 .setKerberosAuthEnable(kerberosAuthEnable)
+ 135                 .setRegionserverKeytabFile(regionserverKeytabFile)
+ 136                 .setRegionserverPrincipal(regionserverPrincipal)
+ 137                 .setSecurityKrb5Conf(securityKrb5Conf)
+ 138                 .setZookeeperSaslClient(zookeeperSaslClient)
+ 139                 .setClientPrincipal(clientPrincipal)
+ 140                 .setClientKeytabFile(clientKeytabFile)
+ 141                 .setBatchSize(Integer.parseInt(batchSize))
+ 142                 .setBatchWaitInterval(Long.parseLong(batchWaitInterval))
+ 143                 .finish();
+ 144 
+ 145 &lt;&lt;&lt;&lt;&lt;&lt;&lt; GitAnalyzerPlus_ours
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 146         builder.setClientPrincipal(clientPrincipal);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 147         builder.setClientKeytabFile(clientKeytabFile);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 148 </span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 149         builder.setDirtyManager(DirtyDataManager.newInstance(dirtyProperties));</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 150 </span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 151         HbaseOutputFormat outputFormat = builder.finish();</span>
+ 152 ||||||| GitAnalyzerPlus_base
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 153 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 154         if (parallelism &gt; 0) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 155             dataStreamSink.setParallelism(parallelism);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 156         }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 157         </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 158         return dataStreamSink;</span>
+ 159 =======
+ 160 &gt;&gt;&gt;&gt;&gt;&gt;&gt; GitAnalyzerPlus_theirs
+ 161         RichSinkFunction richSinkFunction = new OutputFormatSinkFunction(outputFormat);
+ 162         DataStreamSink dataStreamSink = dataStream.addSink(richSinkFunction).name(registerTabName);
+ 163 
+ 164         if (parallelism &gt; 0) {
+ 165             dataStreamSink.setParallelism(parallelism);
+ 166         }
+ 167 
+ 168         return dataStreamSink;
+ 169     }
+ 170 
+ 171     @Override
+<abbr title=" 172     public TableSink&lt;Tuple2&lt;Boolean, Row&gt;&gt; configure(String[] fieldNames, TypeInformation&lt;?&gt;[] fieldTypes) {"> 172     public TableSink&lt;Tuple2&lt;Boolean, Row&gt;&gt; configure(String[] fieldNames, TypeInformation&lt;?&gt;[] fieldTypes🔵</abbr>
+ 173         this.fieldNames = fieldNames;
+ 174         this.fieldTypes = fieldTypes;
+ 175         return this;
+ 176     }
+ 177 
+ 178     @Override
+ 179     public TupleTypeInfo&lt;Tuple2&lt;Boolean, Row&gt;&gt; getOutputType() {
+ 180         return new TupleTypeInfo(org.apache.flink.table.api.Types.BOOLEAN(), getRecordType());
+ 181     }
+ 182 
+ 183     @Override
+ 184     public TypeInformation&lt;Row&gt; getRecordType() {
+ 185         return new RowTypeInfo(fieldTypes, fieldNames);
+ 186     }
+ 187 
+ 188     @Override
+ 189     public String[] getFieldNames() {
+ 190         return fieldNames;
+ 191     }
+ 192 
+ 193     @Override
+ 194     public TypeInformation&lt;?&gt;[] getFieldTypes() {
+ 195         return fieldTypes;
+ 196     }
+ 197 }</pre></td>
+                            <td><pre>   1 /*
+   2  * Licensed to the Apache Software Foundation (ASF) under one
+   3  * or more contributor license agreements.  See the NOTICE file
+   4  * distributed with this work for additional information
+   5  * regarding copyright ownership.  The ASF licenses this file
+   6  * to you under the Apache License, Version 2.0 (the
+   7  * &quot;License&quot;); you may not use this file except in compliance
+   8  * with the License.  You may obtain a copy of the License at
+   9  *
+  10  *     http://www.apache.org/licenses/LICENSE-2.0
+  11  *
+  12  * Unless required by applicable law or agreed to in writing, software
+  13  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15  * See the License for the specific language governing permissions and
+  16  * limitations under the License.
+  17  */
+  18 
+  19 
+  20 
+  21 package com.dtstack.flink.sql.sink.hbase;
+  22 
+  23 import com.dtstack.flink.sql.dirtyManager.manager.DirtyDataManager;
+  24 import com.dtstack.flink.sql.sink.IStreamSinkGener;
+  25 import com.dtstack.flink.sql.sink.hbase.table.HbaseTableInfo;
+  26 import com.dtstack.flink.sql.table.AbstractTargetTableInfo;
+  27 import org.apache.flink.api.common.typeinfo.TypeInformation;
+  28 import org.apache.flink.api.java.tuple.Tuple2;
+  29 import org.apache.flink.api.java.typeutils.RowTypeInfo;
+  30 import org.apache.flink.api.java.typeutils.TupleTypeInfo;
+  31 import org.apache.flink.streaming.api.datastream.DataStream;
+  32 import org.apache.flink.streaming.api.datastream.DataStreamSink;
+  33 import org.apache.flink.streaming.api.functions.sink.OutputFormatSinkFunction;
+  34 import org.apache.flink.streaming.api.functions.sink.RichSinkFunction;
+  35 import org.apache.flink.table.sinks.RetractStreamTableSink;
+  36 import org.apache.flink.table.sinks.TableSink;
+  37 import org.apache.flink.types.Row;
+  38 
+  39 import java.util.Map;
+  40 import java.util.Properties;
+  41 
+  42 /**
+  43  * Date: 2018/09/14
+  44  * Company: www.dtstack.com
+  45  *
+  46  * @author sishu.yss
+  47  */
+  48 public class HbaseSink implements RetractStreamTableSink&lt;Row&gt;, IStreamSinkGener&lt;HbaseSink&gt; {
+  49 
+  50     protected String[] fieldNames;
+  51     protected Map&lt;String, String&gt; columnNameFamily;
+  52     protected String zookeeperQuorum;
+  53     protected String port;
+  54     protected String parent;
+  55     protected String tableName;
+  56     protected String updateMode;
+  57     protected String rowkey;
+  58     protected String registerTabName;
+  59     protected boolean kerberosAuthEnable;
+  60     protected String regionserverKeytabFile;
+  61     protected String regionserverPrincipal;
+  62     protected String securityKrb5Conf;
+  63     protected String zookeeperSaslClient;
+  64     protected String batchSize;
+  65     protected String batchWaitInterval;
+  66     TypeInformation&lt;?&gt;[] fieldTypes;
+  67     private String clientPrincipal;
+  68     private String clientKeytabFile;
+  69     private int parallelism = 1;
+  70 
+  71     private Properties dirtyProperties;
+  72 
+  73     public HbaseSink() {
+  74         // TO DO NOTHING
+  75     }
+  76 
+  77     @Override
+  78     public HbaseSink genStreamSink(AbstractTargetTableInfo targetTableInfo) {
+  79         HbaseTableInfo hbaseTableInfo = (HbaseTableInfo) targetTableInfo;
+  80         this.zookeeperQuorum = hbaseTableInfo.getHost();
+  81         this.port = hbaseTableInfo.getPort();
+  82         this.parent = hbaseTableInfo.getParent();
+  83         this.tableName = hbaseTableInfo.getTableName();
+  84         this.rowkey = hbaseTableInfo.getRowkey();
+  85         this.columnNameFamily = hbaseTableInfo.getColumnNameFamily();
+  86         this.registerTabName =  hbaseTableInfo.getName();
+  87 
+  88         this.kerberosAuthEnable = hbaseTableInfo.isKerberosAuthEnable();
+  89         this.regionserverKeytabFile = hbaseTableInfo.getRegionserverKeytabFile();
+  90         this.regionserverPrincipal = hbaseTableInfo.getRegionserverPrincipal();
+  91         this.securityKrb5Conf = hbaseTableInfo.getSecurityKrb5Conf();
+  92         this.zookeeperSaslClient = hbaseTableInfo.getZookeeperSaslClient();
+  93 
+  94         this.clientKeytabFile = hbaseTableInfo.getClientKeytabFile();
+  95         this.clientPrincipal = hbaseTableInfo.getClientPrincipal();
+  96 
+  97         this.dirtyProperties = hbaseTableInfo.getDirtyProperties();
+  98 
+  99         Integer tmpSinkParallelism = hbaseTableInfo.getParallelism();
+ 100         if (tmpSinkParallelism != null) {
+ 101             this.parallelism = tmpSinkParallelism;
+ 102         }
+ 103 
+ 104         this.batchSize = hbaseTableInfo.getBatchSize();
+ 105         this.batchWaitInterval = hbaseTableInfo.getBatchWaitInterval();
+ 106         return this;
+ 107     }
+ 108 
+ 109     @Override
+ 110     public void emitDataStream(DataStream&lt;Tuple2&lt;Boolean, Row&gt;&gt; dataStream) {
+ 111         consumeDataStream(dataStream);
+ 112     }
+ 113 
+ 114     @Override
+<abbr title=" 115     public DataStreamSink&lt;Tuple2&lt;Boolean, Row&gt;&gt; consumeDataStream(DataStream&lt;Tuple2&lt;Boolean, Row&gt;&gt; dataStream) {"> 115     public DataStreamSink&lt;Tuple2&lt;Boolean, Row&gt;&gt; consumeDataStream(DataStream&lt;Tuple2&lt;Boolean, Row&gt;&gt; dataSt🔵</abbr>
+ 116         HbaseOutputFormat.HbaseOutputFormatBuilder builder = HbaseOutputFormat.buildHbaseOutputFormat();
+ 117 
+ 118         HbaseOutputFormat outputFormat = builder
+ 119                 .setHost(this.zookeeperQuorum)
+ 120                 .setZkParent(this.parent)
+ 121                 .setTable(this.tableName)
+ 122                 .setRowkey(rowkey)
+ 123                 .setColumnNames(fieldNames)
+ 124                 .setColumnNameFamily(columnNameFamily)
+ 125                 .setKerberosAuthEnable(kerberosAuthEnable)
+ 126                 .setRegionserverKeytabFile(regionserverKeytabFile)
+ 127                 .setRegionserverPrincipal(regionserverPrincipal)
+ 128                 .setSecurityKrb5Conf(securityKrb5Conf)
+ 129                 .setZookeeperSaslClient(zookeeperSaslClient)
+ 130                 .setClientPrincipal(clientPrincipal)
+ 131                 .setClientKeytabFile(clientKeytabFile)
+ 132                 .setBatchSize(Integer.parseInt(batchSize))
+ 133                 .setBatchWaitInterval(Long.parseLong(batchWaitInterval))
+ 134                 .finish();
+ 135 
+ 136 &lt;&lt;&lt;&lt;&lt;&lt;&lt; MINE
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 137         builder.setClientPrincipal(clientPrincipal);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 138         builder.setClientKeytabFile(clientKeytabFile);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 139 </span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 140         builder.setDirtyManager(DirtyDataManager.newInstance(dirtyProperties));</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 141 </span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 142         HbaseOutputFormat outputFormat = builder.finish();</span>
+ 143 ||||||| BASE
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 144         builder.setClientPrincipal(clientPrincipal);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 145         builder.setClientKeytabFile(clientKeytabFile);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 146 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 147         HbaseOutputFormat outputFormat = builder.finish();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 148         RichSinkFunction richSinkFunction = new OutputFormatSinkFunction(outputFormat);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 149         DataStreamSink dataStreamSink = dataStream.addSink(richSinkFunction).name(registerTabName);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 150 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 151         if (parallelism &gt; 0) {</span>
+ 152 =======
+ 153 &gt;&gt;&gt;&gt;&gt;&gt;&gt; YOURS
+ 154         RichSinkFunction richSinkFunction = new OutputFormatSinkFunction(outputFormat);
+ 155         DataStreamSink dataStreamSink = dataStream.addSink(richSinkFunction).name(registerTabName);
+ 156 
+ 157         if (parallelism &gt; 0) {
+ 158             dataStreamSink.setParallelism(parallelism);
+ 159         }
+ 160 
+ 161         return dataStreamSink;
+ 162     }
+ 163 
+ 164     @Override
+<abbr title=" 165     public TableSink&lt;Tuple2&lt;Boolean, Row&gt;&gt; configure(String[] fieldNames, TypeInformation&lt;?&gt;[] fieldTypes) {"> 165     public TableSink&lt;Tuple2&lt;Boolean, Row&gt;&gt; configure(String[] fieldNames, TypeInformation&lt;?&gt;[] fieldTypes🔵</abbr>
+ 166         this.fieldNames = fieldNames;
+ 167         this.fieldTypes = fieldTypes;
+ 168         return this;
+ 169     }
+ 170 
+ 171     @Override
+ 172     public TupleTypeInfo&lt;Tuple2&lt;Boolean, Row&gt;&gt; getOutputType() {
+ 173         return new TupleTypeInfo(org.apache.flink.table.api.Types.BOOLEAN(), getRecordType());
+ 174     }
+ 175 
+ 176     @Override
+ 177     public TypeInformation&lt;Row&gt; getRecordType() {
+ 178         return new RowTypeInfo(fieldTypes, fieldNames);
+ 179     }
+ 180 
+ 181     @Override
+ 182     public String[] getFieldNames() {
+ 183         return fieldNames;
+ 184     }
+ 185 
+ 186     @Override
+ 187     public TypeInformation&lt;?&gt;[] getFieldTypes() {
+ 188         return fieldTypes;
+ 189     }
+ 190 }
+ 
+ 
+ 
+ 
+ 
+ </pre></td>
+                            <td><pre>   1 /*
+   2  * Licensed to the Apache Software Foundation (ASF) under one
+   3  * or more contributor license agreements.  See the NOTICE file
+   4  * distributed with this work for additional information
+   5  * regarding copyright ownership.  The ASF licenses this file
+   6  * to you under the Apache License, Version 2.0 (the
+   7  * &quot;License&quot;); you may not use this file except in compliance
+   8  * with the License.  You may obtain a copy of the License at
+   9  *
+  10  *     http://www.apache.org/licenses/LICENSE-2.0
+  11  *
+  12  * Unless required by applicable law or agreed to in writing, software
+  13  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15  * See the License for the specific language governing permissions and
+  16  * limitations under the License.
+  17  */
+  18 package com.dtstack.flink.sql.sink.hbase;
+  19 
+  20 import com.dtstack.flink.sql.dirtyManager.manager.DirtyDataManager;
+  21 import com.dtstack.flink.sql.sink.IStreamSinkGener;
+  22 import com.dtstack.flink.sql.sink.hbase.table.HbaseTableInfo;
+  23 import com.dtstack.flink.sql.table.AbstractTargetTableInfo;
+  24 import java.util.Map;
+  25 import java.util.Properties;
+  26 import org.apache.flink.api.common.typeinfo.TypeInformation;
+  27 import org.apache.flink.api.java.tuple.Tuple2;
+  28 import org.apache.flink.api.java.typeutils.RowTypeInfo;
+  29 import org.apache.flink.api.java.typeutils.TupleTypeInfo;
+  30 import org.apache.flink.streaming.api.datastream.DataStream;
+  31 import org.apache.flink.streaming.api.datastream.DataStreamSink;
+  32 import org.apache.flink.streaming.api.functions.sink.OutputFormatSinkFunction;
+  33 import org.apache.flink.streaming.api.functions.sink.RichSinkFunction;
+  34 import org.apache.flink.table.sinks.RetractStreamTableSink;
+  35 import org.apache.flink.table.sinks.TableSink;
+  36 import org.apache.flink.types.Row;
+  37 
+  38 
+  39 /**
+  40  * Date: 2018/09/14
+  41  * Company: www.dtstack.com
+  42  * @author sishu.yss
+  43  */
+  44 public class HbaseSink implements RetractStreamTableSink&lt;Row&gt; , IStreamSinkGener&lt;HbaseSink&gt; {
+  45     protected String[] fieldNames;
+  46 
+  47     protected Map&lt;String, String&gt; columnNameFamily;
+  48 
+  49     protected String zookeeperQuorum;
+  50 
+  51     protected String port;
+  52 
+  53     protected String parent;
+  54 
+  55     protected String tableName;
+  56 
+  57     protected String updateMode;
+  58 
+  59     protected String rowkey;
+  60 
+  61     protected String registerTabName;
+  62 
+  63     protected boolean kerberosAuthEnable;
+  64 
+  65     protected String regionserverKeytabFile;
+  66 
+  67     protected String regionserverPrincipal;
+  68 
+  69     protected String securityKrb5Conf;
+  70 
+  71     protected String zookeeperSaslClient;
+  72 
+  73     protected String batchSize;
+  74 
+  75     protected String batchWaitInterval;
+  76 
+  77     TypeInformation&lt;?&gt;[] fieldTypes;
+  78 
+  79     private String clientPrincipal;
+  80 
+  81     private String clientKeytabFile;
+  82 
+  83     private int parallelism = 1;
+  84 
+  85     private Properties dirtyProperties;
+  86 
+  87     public HbaseSink() {
+  88         // TO DO NOTHING
+  89     }
+  90 
+  91     @Override
+  92     public HbaseSink genStreamSink(AbstractTargetTableInfo targetTableInfo) {
+  93         HbaseTableInfo hbaseTableInfo = ((HbaseTableInfo) (targetTableInfo));
+  94         this.zookeeperQuorum = hbaseTableInfo.getHost();
+  95         this.port = hbaseTableInfo.getPort();
+  96         this.parent = hbaseTableInfo.getParent();
+  97         this.tableName = hbaseTableInfo.getTableName();
+  98         this.rowkey = hbaseTableInfo.getRowkey();
+  99         this.columnNameFamily = hbaseTableInfo.getColumnNameFamily();
+ 100         this.registerTabName = hbaseTableInfo.getName();
+ 101         this.kerberosAuthEnable = hbaseTableInfo.isKerberosAuthEnable();
+ 102         this.regionserverKeytabFile = hbaseTableInfo.getRegionserverKeytabFile();
+ 103         this.regionserverPrincipal = hbaseTableInfo.getRegionserverPrincipal();
+ 104         this.securityKrb5Conf = hbaseTableInfo.getSecurityKrb5Conf();
+ 105         this.zookeeperSaslClient = hbaseTableInfo.getZookeeperSaslClient();
+ 106         this.clientKeytabFile = hbaseTableInfo.getClientKeytabFile();
+ 107         this.clientPrincipal = hbaseTableInfo.getClientPrincipal();
+ 108         this.dirtyProperties = hbaseTableInfo.getDirtyProperties();
+ 109         Integer tmpSinkParallelism = hbaseTableInfo.getParallelism();
+ 110         if (tmpSinkParallelism != null) {
+ 111             this.parallelism = tmpSinkParallelism;
+ 112         }
+ 113         this.batchSize = hbaseTableInfo.getBatchSize();
+ 114         this.batchWaitInterval = hbaseTableInfo.getBatchWaitInterval();
+ 115         return this;
+ 116     }
+ 117 
+ 118     @Override
+ 119     public void emitDataStream(DataStream&lt;Tuple2&lt;Boolean, Row&gt;&gt; dataStream) {
+ 120         consumeDataStream(dataStream);
+ 121     }
+ 122 
+ 123     @Override
+<abbr title=" 124     public DataStreamSink&lt;Tuple2&lt;Boolean, Row&gt;&gt; consumeDataStream(DataStream&lt;Tuple2&lt;Boolean, Row&gt;&gt; dataStream) {"> 124     public DataStreamSink&lt;Tuple2&lt;Boolean, Row&gt;&gt; consumeDataStream(DataStream&lt;Tuple2&lt;Boolean, Row&gt;&gt; dataSt🔵</abbr>
+ 125         HbaseOutputFormat.HbaseOutputFormatBuilder builder = HbaseOutputFormat.buildHbaseOutputFormat();
+ 126 
+ 127         HbaseOutputFormat outputFormat = builder
+ 128                 .setHost(this.zookeeperQuorum)
+ 129                 .setZkParent(this.parent)
+ 130                 .setTable(this.tableName)
+ 131                 .setRowkey(rowkey)
+ 132                 .setColumnNames(fieldNames)
+ 133                 .setColumnNameFamily(columnNameFamily)
+ 134                 .setKerberosAuthEnable(kerberosAuthEnable)
+ 135                 .setRegionserverKeytabFile(regionserverKeytabFile)
+ 136                 .setRegionserverPrincipal(regionserverPrincipal)
+ 137                 .setSecurityKrb5Conf(securityKrb5Conf)
+ 138                 .setZookeeperSaslClient(zookeeperSaslClient)
+ 139                 .setClientPrincipal(clientPrincipal)
+ 140                 .setClientKeytabFile(clientKeytabFile)
+ 141                 .setBatchSize(Integer.parseInt(batchSize))
+ 142                 .setBatchWaitInterval(Long.parseLong(batchWaitInterval))
+ 143                 .finish();
+ 144 
+ 145 
+ 146 &lt;&lt;&lt;&lt;&lt;&lt;&lt; LEFT
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 147         builder.setClientPrincipal(clientPrincipal);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 148         builder.setClientKeytabFile(clientKeytabFile);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 149 </span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 150         builder.setDirtyManager(DirtyDataManager.newInstance(dirtyProperties));</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 151 </span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 152         HbaseOutputFormat outputFormat = builder.finish();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 153 </span>
+ 154 ||||||| BASE
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"><abbr title=" 155 /*d94z9sk0k4hf9j3ijd - note the base isn&#x27;t actually empty, spork simply doesn&#x27;t generate a base - gd930kwohrp23k5b6vdk93d3r*/"> 155 /*d94z9sk0k4hf9j3ijd - note the base isn&#x27;t actually empty, spork simply doesn&#x27;t generate a base - gd930kw🔵</abbr></span>
+ 156 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 157 </span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 158 </span>
+ 159 &gt;&gt;&gt;&gt;&gt;&gt;&gt; RIGHT
+ 160         RichSinkFunction richSinkFunction = new OutputFormatSinkFunction(outputFormat);
+ 161         DataStreamSink dataStreamSink = dataStream.addSink(richSinkFunction).name(registerTabName);
+ 162 
+ 163         if (parallelism &gt; 0) {
+ 164             dataStreamSink.setParallelism(parallelism);
+ 165         }
+ 166 
+ 167         return dataStreamSink;
+ 168     }
+ 169 
+ 170     @Override
+<abbr title=" 171     public TableSink&lt;Tuple2&lt;Boolean, Row&gt;&gt; configure(String[] fieldNames, TypeInformation&lt;?&gt;[] fieldTypes) {"> 171     public TableSink&lt;Tuple2&lt;Boolean, Row&gt;&gt; configure(String[] fieldNames, TypeInformation&lt;?&gt;[] fieldTypes🔵</abbr>
+ 172         this.fieldNames = fieldNames;
+ 173         this.fieldTypes = fieldTypes;
+ 174         return this;
+ 175     }
+ 176 
+ 177     @Override
+ 178     public TupleTypeInfo&lt;Tuple2&lt;Boolean, Row&gt;&gt; getOutputType() {
+ 179         return new TupleTypeInfo(org.apache.flink.table.api.Types.BOOLEAN(), getRecordType());
+ 180     }
+ 181 
+ 182     @Override
+ 183     public TypeInformation&lt;Row&gt; getRecordType() {
+ 184         return new RowTypeInfo(fieldTypes, fieldNames);
+ 185     }
+ 186 
+ 187     @Override
+ 188     public String[] getFieldNames() {
+ 189         return fieldNames;
+ 190     }
+ 191 
+ 192     @Override
+ 193     public TypeInformation&lt;?&gt;[] getFieldTypes() {
+ 194         return fieldTypes;
+ 195     }
+ 196 }</pre></td>
+                        </tr>
+                    </table>
+                </div>
+                <div id="bottom">
+                    <table style="margin:auto">
+                        <tr>
+                            <th>ours vs. base</th>
+                            <th>theirs vs. base</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1  /*
+   2   * Licensed to the Apache Software Foundation (ASF) under one
+   3   * or more contributor license agreements.  See the NOTICE file
+   4   * distributed with this work for additional information
+   5   * regarding copyright ownership.  The ASF licenses this file
+   6   * to you under the Apache License, Version 2.0 (the
+   7   * &quot;License&quot;); you may not use this file except in compliance
+   8   * with the License.  You may obtain a copy of the License at
+   9   *
+  10   *     http://www.apache.org/licenses/LICENSE-2.0
+  11   *
+  12   * Unless required by applicable law or agreed to in writing, software
+  13   * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15   * See the License for the specific language governing permissions and
+  16   * limitations under the License.
+  17   */
+  18  
+  19  
+  20  
+  21  package com.dtstack.flink.sql.sink.hbase;
+  22  
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  23 +import com.dtstack.flink.sql.dirtyManager.manager.DirtyDataManager;</span>
+  24  import com.dtstack.flink.sql.sink.IStreamSinkGener;
+  25  import com.dtstack.flink.sql.sink.hbase.table.HbaseTableInfo;
+  26  import com.dtstack.flink.sql.table.AbstractTargetTableInfo;
+  27  import org.apache.flink.api.common.typeinfo.TypeInformation;
+  28  import org.apache.flink.api.java.tuple.Tuple2;
+  29  import org.apache.flink.api.java.typeutils.RowTypeInfo;
+  30  import org.apache.flink.api.java.typeutils.TupleTypeInfo;
+  31  import org.apache.flink.streaming.api.datastream.DataStream;
+  32  import org.apache.flink.streaming.api.datastream.DataStreamSink;
+  33  import org.apache.flink.streaming.api.functions.sink.OutputFormatSinkFunction;
+  34  import org.apache.flink.streaming.api.functions.sink.RichSinkFunction;
+  35  import org.apache.flink.table.sinks.RetractStreamTableSink;
+  36  import org.apache.flink.table.sinks.TableSink;
+  37  import org.apache.flink.types.Row;
+  38  
+  39  import java.util.Map;
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  40 +import java.util.Properties;</span>
+  41  
+  42  /**
+  43   * Date: 2018/09/14
+  44   * Company: www.dtstack.com
+
+  45   * @author sishu.yss
+  46   */
+  47  public class HbaseSink implements RetractStreamTableSink&lt;Row&gt;, IStreamSinkGener&lt;HbaseSink&gt; {
+  48  
+  49      protected String[] fieldNames;
+  50      protected Map&lt;String, String&gt; columnNameFamily;
+  51      TypeInformation&lt;?&gt;[] fieldTypes;
+  52      protected String zookeeperQuorum;
+  53      protected String port;
+  54      protected String parent;
+  55      protected String tableName;
+  56      protected String updateMode;
+  57      protected String rowkey;
+  58      protected String registerTabName;
+  59  
+  60      protected boolean kerberosAuthEnable;
+  61      protected String regionserverKeytabFile;
+  62      protected String regionserverPrincipal;
+  63      protected String securityKrb5Conf;
+  64      protected String zookeeperSaslClient;
+  65  
+
+
+
+  66      private String clientPrincipal;
+  67      private String clientKeytabFile;
+  68      private int parallelism = 1;
+  69  
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  70 +    private Properties dirtyProperties;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  71 +</span>
+  72  
+  73      public HbaseSink() {
+  74          // TO DO NOTHING
+  75      }
+  76  
+  77      @Override
+  78      public HbaseSink genStreamSink(AbstractTargetTableInfo targetTableInfo) {
+  79          HbaseTableInfo hbaseTableInfo = (HbaseTableInfo) targetTableInfo;
+  80          this.zookeeperQuorum = hbaseTableInfo.getHost();
+  81          this.port = hbaseTableInfo.getPort();
+  82          this.parent = hbaseTableInfo.getParent();
+  83          this.tableName = hbaseTableInfo.getTableName();
+  84          this.rowkey = hbaseTableInfo.getRowkey();
+  85          this.columnNameFamily = hbaseTableInfo.getColumnNameFamily();
+  86          this.registerTabName =  hbaseTableInfo.getName();
+
+  87  
+  88          this.kerberosAuthEnable = hbaseTableInfo.isKerberosAuthEnable();
+  89          this.regionserverKeytabFile = hbaseTableInfo.getRegionserverKeytabFile();
+  90          this.regionserverPrincipal = hbaseTableInfo.getRegionserverPrincipal();
+  91          this.securityKrb5Conf = hbaseTableInfo.getSecurityKrb5Conf();
+  92          this.zookeeperSaslClient = hbaseTableInfo.getZookeeperSaslClient();
+  93  
+  94          this.clientKeytabFile = hbaseTableInfo.getClientKeytabFile();
+  95          this.clientPrincipal = hbaseTableInfo.getClientPrincipal();
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  96 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  97 +        this.dirtyProperties = hbaseTableInfo.getDirtyProperties();</span>
+  98  
+  99          Integer tmpSinkParallelism = hbaseTableInfo.getParallelism();
+ 100          if (tmpSinkParallelism != null) {
+ 101              this.parallelism = tmpSinkParallelism;
+ 102          }
+
+
+
+ 103          return this;
+ 104      }
+ 105  
+ 106      @Override
+ 107      public void emitDataStream(DataStream&lt;Tuple2&lt;Boolean, Row&gt;&gt; dataStream) {
+ 108          consumeDataStream(dataStream);
+ 109      }
+ 110  
+ 111      @Override
+ 112      public DataStreamSink&lt;Tuple2&lt;Boolean, Row&gt;&gt; consumeDataStream(DataStream&lt;Tuple2&lt;Boolean, Row&gt;&gt; dataStream) {
+ 113          HbaseOutputFormat.HbaseOutputFormatBuilder builder = HbaseOutputFormat.buildHbaseOutputFormat();
+ 114          builder.setHost(this.zookeeperQuorum).setZkParent(this.parent).setTable(this.tableName);
+ 115  
+ 116          builder.setRowkey(rowkey);
+ 117          builder.setColumnNames(fieldNames);
+ 118          builder.setColumnNameFamily(columnNameFamily);
+ 119          builder.setKerberosAuthEnable(kerberosAuthEnable);
+ 120          builder.setRegionserverKeytabFile(regionserverKeytabFile);
+ 121          builder.setRegionserverPrincipal(regionserverPrincipal);
+ 122          builder.setSecurityKrb5Conf(securityKrb5Conf);
+ 123          builder.setZookeeperSaslClient(zookeeperSaslClient);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 124  
+ 125          builder.setClientPrincipal(clientPrincipal);
+ 126          builder.setClientKeytabFile(clientKeytabFile);
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 127 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 128 +        builder.setDirtyManager(DirtyDataManager.newInstance(dirtyProperties));</span>
+ 129  
+ 130          HbaseOutputFormat outputFormat = builder.finish();
+ 131          RichSinkFunction richSinkFunction = new OutputFormatSinkFunction(outputFormat);
+ 132          DataStreamSink dataStreamSink = dataStream.addSink(richSinkFunction).name(registerTabName);
+ 133  
+ 134          if (parallelism &gt; 0) {
+ 135              dataStreamSink.setParallelism(parallelism);
+ 136          }
+ 137  
+ 138          return dataStreamSink;
+ 139      }
+ 140  
+ 141      @Override
+ 142      public TableSink&lt;Tuple2&lt;Boolean, Row&gt;&gt; configure(String[] fieldNames, TypeInformation&lt;?&gt;[] fieldTypes) {
+ 143          this.fieldNames = fieldNames;
+ 144          this.fieldTypes = fieldTypes;
+ 145          return this;
+ 146      }
+ 147  
+ 148      @Override
+ 149      public TupleTypeInfo&lt;Tuple2&lt;Boolean, Row&gt;&gt; getOutputType() {
+ 150          return new TupleTypeInfo(org.apache.flink.table.api.Types.BOOLEAN(), getRecordType());
+ 151      }
+ 152  
+ 153      @Override
+ 154      public TypeInformation&lt;Row&gt; getRecordType() {
+ 155          return new RowTypeInfo(fieldTypes, fieldNames);
+ 156      }
+ 157  
+ 158      @Override
+ 159      public String[] getFieldNames() {
+ 160          return fieldNames;
+ 161      }
+ 162  
+ 163      @Override
+ 164      public TypeInformation&lt;?&gt;[] getFieldTypes() {
+ 165          return fieldTypes;
+ 166      }
+ 167  }</pre></td>
+                            <td><pre>   1  /*
+   2   * Licensed to the Apache Software Foundation (ASF) under one
+   3   * or more contributor license agreements.  See the NOTICE file
+   4   * distributed with this work for additional information
+   5   * regarding copyright ownership.  The ASF licenses this file
+   6   * to you under the Apache License, Version 2.0 (the
+   7   * &quot;License&quot;); you may not use this file except in compliance
+   8   * with the License.  You may obtain a copy of the License at
+   9   *
+  10   *     http://www.apache.org/licenses/LICENSE-2.0
+  11   *
+  12   * Unless required by applicable law or agreed to in writing, software
+  13   * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15   * See the License for the specific language governing permissions and
+  16   * limitations under the License.
+  17   */
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  18 -</span>
+  19  
+  20  
+  21  package com.dtstack.flink.sql.sink.hbase;
+  22  
+
+  23  import com.dtstack.flink.sql.sink.IStreamSinkGener;
+  24  import com.dtstack.flink.sql.sink.hbase.table.HbaseTableInfo;
+  25  import com.dtstack.flink.sql.table.AbstractTargetTableInfo;
+  26  import org.apache.flink.api.common.typeinfo.TypeInformation;
+  27  import org.apache.flink.api.java.tuple.Tuple2;
+  28  import org.apache.flink.api.java.typeutils.RowTypeInfo;
+  29  import org.apache.flink.api.java.typeutils.TupleTypeInfo;
+  30  import org.apache.flink.streaming.api.datastream.DataStream;
+  31  import org.apache.flink.streaming.api.datastream.DataStreamSink;
+  32  import org.apache.flink.streaming.api.functions.sink.OutputFormatSinkFunction;
+  33  import org.apache.flink.streaming.api.functions.sink.RichSinkFunction;
+  34  import org.apache.flink.table.sinks.RetractStreamTableSink;
+  35  import org.apache.flink.table.sinks.TableSink;
+  36  import org.apache.flink.types.Row;
+  37  
+  38  import java.util.Map;
+
+  39  
+  40  /**
+  41   * Date: 2018/09/14
+  42   * Company: www.dtstack.com
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  43 + *</span>
+  44   * @author sishu.yss
+  45   */
+  46  public class HbaseSink implements RetractStreamTableSink&lt;Row&gt;, IStreamSinkGener&lt;HbaseSink&gt; {
+  47  
+  48      protected String[] fieldNames;
+  49      protected Map&lt;String, String&gt; columnNameFamily;
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  50 -    TypeInformation&lt;?&gt;[] fieldTypes;</span>
+  51      protected String zookeeperQuorum;
+  52      protected String port;
+  53      protected String parent;
+  54      protected String tableName;
+  55      protected String updateMode;
+  56      protected String rowkey;
+  57      protected String registerTabName;
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  58 -</span>
+  59      protected boolean kerberosAuthEnable;
+  60      protected String regionserverKeytabFile;
+  61      protected String regionserverPrincipal;
+  62      protected String securityKrb5Conf;
+  63      protected String zookeeperSaslClient;
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  64 -</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  65 +    protected String batchSize;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  66 +    protected String batchWaitInterval;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  67 +    TypeInformation&lt;?&gt;[] fieldTypes;</span>
+  68      private String clientPrincipal;
+  69      private String clientKeytabFile;
+  70      private int parallelism = 1;
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  71 -</span>
+
+
+  72  
+  73      public HbaseSink() {
+  74          // TO DO NOTHING
+  75      }
+  76  
+  77      @Override
+  78      public HbaseSink genStreamSink(AbstractTargetTableInfo targetTableInfo) {
+  79          HbaseTableInfo hbaseTableInfo = (HbaseTableInfo) targetTableInfo;
+  80          this.zookeeperQuorum = hbaseTableInfo.getHost();
+  81          this.port = hbaseTableInfo.getPort();
+  82          this.parent = hbaseTableInfo.getParent();
+  83          this.tableName = hbaseTableInfo.getTableName();
+  84          this.rowkey = hbaseTableInfo.getRowkey();
+  85          this.columnNameFamily = hbaseTableInfo.getColumnNameFamily();
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  86 -        this.registerTabName =  hbaseTableInfo.getName();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  87 +        this.registerTabName = hbaseTableInfo.getName();</span>
+  88  
+  89          this.kerberosAuthEnable = hbaseTableInfo.isKerberosAuthEnable();
+  90          this.regionserverKeytabFile = hbaseTableInfo.getRegionserverKeytabFile();
+  91          this.regionserverPrincipal = hbaseTableInfo.getRegionserverPrincipal();
+  92          this.securityKrb5Conf = hbaseTableInfo.getSecurityKrb5Conf();
+  93          this.zookeeperSaslClient = hbaseTableInfo.getZookeeperSaslClient();
+  94  
+  95          this.clientKeytabFile = hbaseTableInfo.getClientKeytabFile();
+  96          this.clientPrincipal = hbaseTableInfo.getClientPrincipal();
+
+
+  97  
+  98          Integer tmpSinkParallelism = hbaseTableInfo.getParallelism();
+  99          if (tmpSinkParallelism != null) {
+ 100              this.parallelism = tmpSinkParallelism;
+ 101          }
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 102 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 103 +        this.batchSize = hbaseTableInfo.getBatchSize();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 104 +        this.batchWaitInterval = hbaseTableInfo.getBatchWaitInterval();</span>
+ 105          return this;
+ 106      }
+ 107  
+ 108      @Override
+ 109      public void emitDataStream(DataStream&lt;Tuple2&lt;Boolean, Row&gt;&gt; dataStream) {
+ 110          consumeDataStream(dataStream);
+ 111      }
+ 112  
+ 113      @Override
+ 114      public DataStreamSink&lt;Tuple2&lt;Boolean, Row&gt;&gt; consumeDataStream(DataStream&lt;Tuple2&lt;Boolean, Row&gt;&gt; dataStream) {
+ 115          HbaseOutputFormat.HbaseOutputFormatBuilder builder = HbaseOutputFormat.buildHbaseOutputFormat();
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 116 -        builder.setHost(this.zookeeperQuorum).setZkParent(this.parent).setTable(this.tableName);</span>
+ 117  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 118 -        builder.setRowkey(rowkey);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 119 -        builder.setColumnNames(fieldNames);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 120 -        builder.setColumnNameFamily(columnNameFamily);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 121 -        builder.setKerberosAuthEnable(kerberosAuthEnable);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 122 -        builder.setRegionserverKeytabFile(regionserverKeytabFile);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 123 -        builder.setRegionserverPrincipal(regionserverPrincipal);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 124 -        builder.setSecurityKrb5Conf(securityKrb5Conf);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 125 -        builder.setZookeeperSaslClient(zookeeperSaslClient);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 126 +        HbaseOutputFormat outputFormat = builder</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 127 +                .setHost(this.zookeeperQuorum)</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 128 +                .setZkParent(this.parent)</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 129 +                .setTable(this.tableName)</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 130 +                .setRowkey(rowkey)</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 131 +                .setColumnNames(fieldNames)</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 132 +                .setColumnNameFamily(columnNameFamily)</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 133 +                .setKerberosAuthEnable(kerberosAuthEnable)</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 134 +                .setRegionserverKeytabFile(regionserverKeytabFile)</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 135 +                .setRegionserverPrincipal(regionserverPrincipal)</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 136 +                .setSecurityKrb5Conf(securityKrb5Conf)</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 137 +                .setZookeeperSaslClient(zookeeperSaslClient)</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 138 +                .setClientPrincipal(clientPrincipal)</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 139 +                .setClientKeytabFile(clientKeytabFile)</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 140 +                .setBatchSize(Integer.parseInt(batchSize))</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 141 +                .setBatchWaitInterval(Long.parseLong(batchWaitInterval))</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 142 +                .finish();</span>
+ 143  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 144 -        builder.setClientPrincipal(clientPrincipal);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 145 -        builder.setClientKeytabFile(clientKeytabFile);</span>
+
+
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 146 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 147 -        HbaseOutputFormat outputFormat = builder.finish();</span>
+ 148          RichSinkFunction richSinkFunction = new OutputFormatSinkFunction(outputFormat);
+ 149          DataStreamSink dataStreamSink = dataStream.addSink(richSinkFunction).name(registerTabName);
+ 150  
+ 151          if (parallelism &gt; 0) {
+ 152              dataStreamSink.setParallelism(parallelism);
+ 153          }
+ 154  
+ 155          return dataStreamSink;
+ 156      }
+ 157  
+ 158      @Override
+ 159      public TableSink&lt;Tuple2&lt;Boolean, Row&gt;&gt; configure(String[] fieldNames, TypeInformation&lt;?&gt;[] fieldTypes) {
+ 160          this.fieldNames = fieldNames;
+ 161          this.fieldTypes = fieldTypes;
+ 162          return this;
+ 163      }
+ 164  
+ 165      @Override
+ 166      public TupleTypeInfo&lt;Tuple2&lt;Boolean, Row&gt;&gt; getOutputType() {
+ 167          return new TupleTypeInfo(org.apache.flink.table.api.Types.BOOLEAN(), getRecordType());
+ 168      }
+ 169  
+ 170      @Override
+ 171      public TypeInformation&lt;Row&gt; getRecordType() {
+ 172          return new RowTypeInfo(fieldTypes, fieldNames);
+ 173      }
+ 174  
+ 175      @Override
+ 176      public String[] getFieldNames() {
+ 177          return fieldNames;
+ 178      }
+ 179  
+ 180      @Override
+ 181      public TypeInformation&lt;?&gt;[] getFieldTypes() {
+ 182          return fieldTypes;
+ 183      }
+ 184  }</pre></td>
+                        </tr>
+                    </table>
+                </div>
+              </body>
+            </html>
+            

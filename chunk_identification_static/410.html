@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+    <html lang="en">
+              <head>
+                <meta charset="utf-8">
+                <title>410</title>
+                    <style>
+                        #top {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        #bottom {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        abbr {
+                          /* Here is the delay */
+                          transition-delay:0s;
+                        }
+                    </style>
+              </head>
+              <body>
+                <span style="height: 4vh">
+                    410
+                    <a href="409.html">prev</a>
+                    <a href="411.html">next</a>
+                    <a href="410_chunks.html">chunks</a>
+                    <a href="index.html">index</a>
+                    DTStack/flinkStreamSQL_f05e92b15d5e4c94442e53a9f83e2659c369aa5e_core/src/main/java/com/dtstack/flink/sql/table/AbstractSideTableParser.java
+                    <textarea rows=1 onclick='navigator.clipboard.writeText(this.value)'>cd C:\studies\se\mega\git-analyzer-plus\notebooks\debug
+del /Q *
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;f05e92b15d5e4c94442e53a9f83e2659c369aa5e:core/src/main/java/com/dtstack/flink/sql/table/AbstractSideTableParser.java&quot; &gt; committed.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;f05e92b15d5e4c94442e53a9f83e2659c369aa5e^1:core/src/main/java/com/dtstack/flink/sql/table/AbstractSideTableParser.java&quot; &gt; ours.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;f05e92b15d5e4c94442e53a9f83e2659c369aa5e^2:core/src/main/java/com/dtstack/flink/sql/table/AbstractSideTableParser.java&quot; &gt; theirs.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;14446f4dd844b1bb9da6c412e3556e135bafcba4:core/src/main/java/com/dtstack/flink/sql/table/AbstractSideTableParser.java&quot; &gt; base.java
+copy ours.java 1ours.java
+copy ours.java 2ours.java
+copy theirs.java 1theirs.java
+copy theirs.java 2theirs.java
+copy base.java 1base.java
+copy base.java 2base.java
+&quot;C:\Program Files\Java\jdk1.8.0_241\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\jFSTMerge\build\libs\jFSTMerge-all.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\jfstmerge.java --show-base
+&quot;C:\Program Files\Eclipse Adoptium\jdk-17.0.11.9-hotspot\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\spork\target\spork-0.5.0-SNAPSHOT.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\spork.java
+del /Q 1*.java
+del /Q 2*.java
+del /Q jfstmerge.java.merge
+</textarea>
+                    {strict: [[sbj]], subset: [[sbj]]}
+                </span>
+                <div id="top">
+
+                    <table>
+                        <tr>
+                            <th>line based (standard git)</th>
+                            <th>jfstmerge</th>
+                            <th>spork</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1 /*
+   2  * Licensed to the Apache Software Foundation (ASF) under one
+   3  * or more contributor license agreements.  See the NOTICE file
+   4  * distributed with this work for additional information
+   5  * regarding copyright ownership.  The ASF licenses this file
+   6  * to you under the Apache License, Version 2.0 (the
+   7  * &quot;License&quot;); you may not use this file except in compliance
+   8  * with the License.  You may obtain a copy of the License at
+   9  *
+  10  *     http://www.apache.org/licenses/LICENSE-2.0
+  11  *
+  12  * Unless required by applicable law or agreed to in writing, software
+  13  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15  * See the License for the specific language governing permissions and
+  16  * limitations under the License.
+  17  */
+  18 
+  19 
+  20 
+  21 package com.dtstack.flink.sql.table;
+  22 
+  23 import com.dtstack.flink.sql.enums.ECacheType;
+  24 import com.dtstack.flink.sql.side.AbstractSideTableInfo;
+  25 import com.dtstack.flink.sql.util.MathUtil;
+  26 import org.apache.flink.util.Preconditions;
+  27 
+  28 import java.util.Map;
+  29 import java.util.regex.Matcher;
+  30 import java.util.regex.Pattern;
+  31 
+  32 /**
+  33  * Reason:
+  34  * Date: 2018/8/2
+  35  * Company: www.dtstack.com
+  36  * @author xuchao
+  37  */
+  38 
+  39 public abstract class AbstractSideTableParser extends AbstractTableParser {
+  40 
+  41     private final static String SIDE_SIGN_KEY = &quot;sideSignKey&quot;;
+  42 
+  43     private final static Pattern SIDE_TABLE_SIGN = Pattern.compile(&quot;(?i)^PERIOD\\s+FOR\\s+SYSTEM_TIME$&quot;);
+  44 
+  45     public AbstractSideTableParser() {
+  46         addParserHandler(SIDE_SIGN_KEY, SIDE_TABLE_SIGN, this::dealSideSign);
+  47     }
+  48 
+  49     private void dealSideSign(Matcher matcher, AbstractTableInfo tableInfo){
+  50         //FIXME SIDE_TABLE_SIGN current just used as a sign for side table; and do nothing
+  51     }
+  52 
+  53     //Analytical create table attributes ==&gt; Get information cache
+  54     protected void parseCacheProp(AbstractSideTableInfo sideTableInfo, Map&lt;String, Object&gt; props){
+  55         if(props.containsKey(AbstractSideTableInfo.CACHE_KEY.toLowerCase())){
+<abbr title="  56             String cacheType = MathUtil.getString(props.get(AbstractSideTableInfo.CACHE_KEY.toLowerCase()));">  56             String cacheType = MathUtil.getString(props.get(AbstractSideTableInfo.CACHE_KEY.toLowerCase()🔵</abbr>
+  57             if(cacheType == null){
+  58                 return;
+  59             }
+  60 
+  61             if(!ECacheType.isValid(cacheType)){
+  62                 throw new RuntimeException(&quot;can&#x27;t not support cache type :&quot; + cacheType);
+  63             }
+  64 
+  65             sideTableInfo.setCacheType(cacheType);
+  66             if(props.containsKey(AbstractSideTableInfo.CACHE_SIZE_KEY.toLowerCase())){
+<abbr title="  67                 Integer cacheSize = MathUtil.getIntegerVal(props.get(AbstractSideTableInfo.CACHE_SIZE_KEY.toLowerCase()));">  67                 Integer cacheSize = MathUtil.getIntegerVal(props.get(AbstractSideTableInfo.CACHE_SIZE_KEY🔵</abbr>
+  68                 if(cacheSize &lt; 0){
+  69                     throw new RuntimeException(&quot;cache size need &gt; 0.&quot;);
+  70                 }
+  71                 sideTableInfo.setCacheSize(cacheSize);
+  72             }
+  73 
+  74             if(props.containsKey(AbstractSideTableInfo.CACHE_TTLMS_KEY.toLowerCase())){
+<abbr title="  75                 Long cacheTTLMS = MathUtil.getLongVal(props.get(AbstractSideTableInfo.CACHE_TTLMS_KEY.toLowerCase()));">  75                 Long cacheTTLMS = MathUtil.getLongVal(props.get(AbstractSideTableInfo.CACHE_TTLMS_KEY.toL🔵</abbr>
+  76                 if(cacheTTLMS &lt; 1000){
+  77                     throw new RuntimeException(&quot;cache time out need &gt; 1000 ms.&quot;);
+  78                 }
+  79                 sideTableInfo.setCacheTimeout(cacheTTLMS);
+  80             }
+  81 
+  82             if(props.containsKey(AbstractSideTableInfo.PARTITIONED_JOIN_KEY.toLowerCase())){
+<abbr title="  83                 Boolean partitionedJoinKey = MathUtil.getBoolean(props.get(AbstractSideTableInfo.PARTITIONED_JOIN_KEY.toLowerCase()));">  83                 Boolean partitionedJoinKey = MathUtil.getBoolean(props.get(AbstractSideTableInfo.PARTITIO🔵</abbr>
+  84                 if(partitionedJoinKey){
+  85                     sideTableInfo.setPartitionedJoin(true);
+  86                 }
+  87             }
+  88 
+  89             if(props.containsKey(AbstractSideTableInfo.CACHE_MODE_KEY.toLowerCase())){
+<abbr title="  90                 String cachemode = MathUtil.getString(props.get(AbstractSideTableInfo.CACHE_MODE_KEY.toLowerCase()));">  90                 String cachemode = MathUtil.getString(props.get(AbstractSideTableInfo.CACHE_MODE_KEY.toLo🔵</abbr>
+  91 
+  92                 if(!&quot;ordered&quot;.equalsIgnoreCase(cachemode) &amp;&amp; !&quot;unordered&quot;.equalsIgnoreCase(cachemode)){
+  93                     throw new RuntimeException(&quot;cachemode must ordered or unordered!&quot;);
+  94                 }
+  95                 sideTableInfo.setCacheMode(cachemode.toLowerCase());
+  96             }
+  97 
+  98             if(props.containsKey(AbstractSideTableInfo.ASYNC_CAP_KEY.toLowerCase())){
+<abbr title="  99                 Integer asyncCap = MathUtil.getIntegerVal(props.get(AbstractSideTableInfo.ASYNC_CAP_KEY.toLowerCase()));">  99                 Integer asyncCap = MathUtil.getIntegerVal(props.get(AbstractSideTableInfo.ASYNC_CAP_KEY.t🔵</abbr>
+ 100                 if(asyncCap &lt; 0){
+ 101                     throw new RuntimeException(&quot;asyncCapacity size need &gt; 0.&quot;);
+ 102                 }
+ 103                 sideTableInfo.setAsyncCapacity(asyncCap);
+ 104             }
+ 105 
+ 106             if(props.containsKey(AbstractSideTableInfo.ASYNC_TIMEOUT_KEY.toLowerCase())){
+<abbr title=" 107                 Integer asyncTimeout = MathUtil.getIntegerVal(props.get(AbstractSideTableInfo.ASYNC_TIMEOUT_KEY.toLowerCase()));"> 107                 Integer asyncTimeout = MathUtil.getIntegerVal(props.get(AbstractSideTableInfo.ASYNC_TIMEO🔵</abbr>
+ 108                 if (asyncTimeout&lt;0){
+ 109                     throw new RuntimeException(&quot;asyncTimeout size need &gt; 0.&quot;);
+ 110                 }
+ 111                 sideTableInfo.setAsyncTimeout(asyncTimeout);
+ 112             }
+ 113             if(props.containsKey(AbstractSideTableInfo.ASYNC_TIMEOUT_NUM_KEY.toLowerCase())){
+<abbr title=" 114                 Integer asyncTimeoutNum = MathUtil.getIntegerVal(props.get(AbstractSideTableInfo.ASYNC_TIMEOUT_NUM_KEY.toLowerCase()));"> 114                 Integer asyncTimeoutNum = MathUtil.getIntegerVal(props.get(AbstractSideTableInfo.ASYNC_TI🔵</abbr>
+ 115                 if (asyncTimeoutNum &gt; 0){
+ 116                     sideTableInfo.setAsyncTimeoutNumLimit(asyncTimeoutNum);
+ 117                 }
+ 118             }
+ 119 
+ 120 &lt;&lt;&lt;&lt;&lt;&lt;&lt; GitAnalyzerPlus_ours
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 121             if(props.containsKey(AbstractSideTableInfo.ASYNC_FAIL_MAX_NUM_KEY.toLowerCase())){</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"><abbr title=" 122                 Long asyncFailNum = MathUtil.getLongVal(props.get(AbstractSideTableInfo.ASYNC_FAIL_MAX_NUM_KEY.toLowerCase()));"> 122                 Long asyncFailNum = MathUtil.getLongVal(props.get(AbstractSideTableInfo.ASYNC_FAIL_MAX_NU🔵</abbr></span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 123                 if (asyncFailNum &gt; 0){</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 124                     sideTableInfo.setAsyncFailMaxNum(asyncFailNum);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 125                 }</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 126             }</span>
+ 127 ||||||| GitAnalyzerPlus_base
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 128     }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 129 }</span>
+ 130 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 131             if (props.containsKey(AbstractSideTableInfo.ASYNC_REQ_POOL_KEY.toLowerCase())) {</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"><abbr title=" 132                 Integer asyncPoolSize = MathUtil.getIntegerVal(props.get(AbstractSideTableInfo.ASYNC_REQ_POOL_KEY.toLowerCase()));"> 132                 Integer asyncPoolSize = MathUtil.getIntegerVal(props.get(AbstractSideTableInfo.ASYNC_REQ_🔵</abbr></span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"><abbr title=" 133                 Preconditions.checkArgument(asyncPoolSize &gt; 0 &amp;&amp; asyncPoolSize &lt;= 20, &quot;asyncPoolSize size limit (0,20]&quot;);"> 133                 Preconditions.checkArgument(asyncPoolSize &gt; 0 &amp;&amp; asyncPoolSize &lt;= 20, &quot;asyncPoolSize size🔵</abbr></span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 134                 sideTableInfo.setAsyncPoolSize(asyncPoolSize);</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 135             }</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 136 </span>
+ 137 &gt;&gt;&gt;&gt;&gt;&gt;&gt; GitAnalyzerPlus_theirs
+ 138         }
+ 139     }
+ 140 }</pre></td>
+                            <td><pre>   1 /*
+   2  * Licensed to the Apache Software Foundation (ASF) under one
+   3  * or more contributor license agreements.  See the NOTICE file
+   4  * distributed with this work for additional information
+   5  * regarding copyright ownership.  The ASF licenses this file
+   6  * to you under the Apache License, Version 2.0 (the
+   7  * &quot;License&quot;); you may not use this file except in compliance
+   8  * with the License.  You may obtain a copy of the License at
+   9  *
+  10  *     http://www.apache.org/licenses/LICENSE-2.0
+  11  *
+  12  * Unless required by applicable law or agreed to in writing, software
+  13  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15  * See the License for the specific language governing permissions and
+  16  * limitations under the License.
+  17  */
+  18 
+  19 
+  20 
+  21 package com.dtstack.flink.sql.table;
+  22 
+  23 import com.dtstack.flink.sql.enums.ECacheType;
+  24 import com.dtstack.flink.sql.side.AbstractSideTableInfo;
+  25 import com.dtstack.flink.sql.util.MathUtil;
+  26 import org.apache.flink.util.Preconditions;
+  27 
+  28 import java.util.Map;
+  29 import java.util.regex.Matcher;
+  30 import java.util.regex.Pattern;
+  31 
+  32 /**
+  33  * Reason:
+  34  * Date: 2018/8/2
+  35  * Company: www.dtstack.com
+  36  * @author xuchao
+  37  */
+  38 
+  39 public abstract class AbstractSideTableParser extends AbstractTableParser {
+  40 
+  41     private final static String SIDE_SIGN_KEY = &quot;sideSignKey&quot;;
+  42 
+  43     private final static Pattern SIDE_TABLE_SIGN = Pattern.compile(&quot;(?i)^PERIOD\\s+FOR\\s+SYSTEM_TIME$&quot;);
+  44 
+  45     public AbstractSideTableParser() {
+  46         addParserHandler(SIDE_SIGN_KEY, SIDE_TABLE_SIGN, this::dealSideSign);
+  47     }
+  48 
+  49     private void dealSideSign(Matcher matcher, AbstractTableInfo tableInfo){
+  50         //FIXME SIDE_TABLE_SIGN current just used as a sign for side table; and do nothing
+  51     }
+  52 
+  53     //Analytical create table attributes ==&gt; Get information cache
+  54     protected void parseCacheProp(AbstractSideTableInfo sideTableInfo, Map&lt;String, Object&gt; props){
+  55         if(props.containsKey(AbstractSideTableInfo.CACHE_KEY.toLowerCase())){
+<abbr title="  56             String cacheType = MathUtil.getString(props.get(AbstractSideTableInfo.CACHE_KEY.toLowerCase()));">  56             String cacheType = MathUtil.getString(props.get(AbstractSideTableInfo.CACHE_KEY.toLowerCase()🔵</abbr>
+  57             if(cacheType == null){
+  58                 return;
+  59             }
+  60 
+  61             if(!ECacheType.isValid(cacheType)){
+  62                 throw new RuntimeException(&quot;can&#x27;t not support cache type :&quot; + cacheType);
+  63             }
+  64 
+  65             sideTableInfo.setCacheType(cacheType);
+  66             if(props.containsKey(AbstractSideTableInfo.CACHE_SIZE_KEY.toLowerCase())){
+<abbr title="  67                 Integer cacheSize = MathUtil.getIntegerVal(props.get(AbstractSideTableInfo.CACHE_SIZE_KEY.toLowerCase()));">  67                 Integer cacheSize = MathUtil.getIntegerVal(props.get(AbstractSideTableInfo.CACHE_SIZE_KEY🔵</abbr>
+  68                 if(cacheSize &lt; 0){
+  69                     throw new RuntimeException(&quot;cache size need &gt; 0.&quot;);
+  70                 }
+  71                 sideTableInfo.setCacheSize(cacheSize);
+  72             }
+  73 
+  74             if(props.containsKey(AbstractSideTableInfo.CACHE_TTLMS_KEY.toLowerCase())){
+<abbr title="  75                 Long cacheTTLMS = MathUtil.getLongVal(props.get(AbstractSideTableInfo.CACHE_TTLMS_KEY.toLowerCase()));">  75                 Long cacheTTLMS = MathUtil.getLongVal(props.get(AbstractSideTableInfo.CACHE_TTLMS_KEY.toL🔵</abbr>
+  76                 if(cacheTTLMS &lt; 1000){
+  77                     throw new RuntimeException(&quot;cache time out need &gt; 1000 ms.&quot;);
+  78                 }
+  79                 sideTableInfo.setCacheTimeout(cacheTTLMS);
+  80             }
+  81 
+  82             if(props.containsKey(AbstractSideTableInfo.PARTITIONED_JOIN_KEY.toLowerCase())){
+<abbr title="  83                 Boolean partitionedJoinKey = MathUtil.getBoolean(props.get(AbstractSideTableInfo.PARTITIONED_JOIN_KEY.toLowerCase()));">  83                 Boolean partitionedJoinKey = MathUtil.getBoolean(props.get(AbstractSideTableInfo.PARTITIO🔵</abbr>
+  84                 if(partitionedJoinKey){
+  85                     sideTableInfo.setPartitionedJoin(true);
+  86                 }
+  87             }
+  88 
+  89             if(props.containsKey(AbstractSideTableInfo.CACHE_MODE_KEY.toLowerCase())){
+<abbr title="  90                 String cachemode = MathUtil.getString(props.get(AbstractSideTableInfo.CACHE_MODE_KEY.toLowerCase()));">  90                 String cachemode = MathUtil.getString(props.get(AbstractSideTableInfo.CACHE_MODE_KEY.toLo🔵</abbr>
+  91 
+  92                 if(!&quot;ordered&quot;.equalsIgnoreCase(cachemode) &amp;&amp; !&quot;unordered&quot;.equalsIgnoreCase(cachemode)){
+  93                     throw new RuntimeException(&quot;cachemode must ordered or unordered!&quot;);
+  94                 }
+  95                 sideTableInfo.setCacheMode(cachemode.toLowerCase());
+  96             }
+  97 
+  98             if(props.containsKey(AbstractSideTableInfo.ASYNC_CAP_KEY.toLowerCase())){
+<abbr title="  99                 Integer asyncCap = MathUtil.getIntegerVal(props.get(AbstractSideTableInfo.ASYNC_CAP_KEY.toLowerCase()));">  99                 Integer asyncCap = MathUtil.getIntegerVal(props.get(AbstractSideTableInfo.ASYNC_CAP_KEY.t🔵</abbr>
+ 100                 if(asyncCap &lt; 0){
+ 101                     throw new RuntimeException(&quot;asyncCapacity size need &gt; 0.&quot;);
+ 102                 }
+ 103                 sideTableInfo.setAsyncCapacity(asyncCap);
+ 104             }
+ 105 
+ 106             if(props.containsKey(AbstractSideTableInfo.ASYNC_TIMEOUT_KEY.toLowerCase())){
+<abbr title=" 107                 Integer asyncTimeout = MathUtil.getIntegerVal(props.get(AbstractSideTableInfo.ASYNC_TIMEOUT_KEY.toLowerCase()));"> 107                 Integer asyncTimeout = MathUtil.getIntegerVal(props.get(AbstractSideTableInfo.ASYNC_TIMEO🔵</abbr>
+ 108                 if (asyncTimeout&lt;0){
+ 109                     throw new RuntimeException(&quot;asyncTimeout size need &gt; 0.&quot;);
+ 110                 }
+ 111                 sideTableInfo.setAsyncTimeout(asyncTimeout);
+ 112             }
+ 113             if(props.containsKey(AbstractSideTableInfo.ASYNC_TIMEOUT_NUM_KEY.toLowerCase())){
+<abbr title=" 114                 Integer asyncTimeoutNum = MathUtil.getIntegerVal(props.get(AbstractSideTableInfo.ASYNC_TIMEOUT_NUM_KEY.toLowerCase()));"> 114                 Integer asyncTimeoutNum = MathUtil.getIntegerVal(props.get(AbstractSideTableInfo.ASYNC_TI🔵</abbr>
+ 115                 if (asyncTimeoutNum &gt; 0){
+ 116                     sideTableInfo.setAsyncTimeoutNumLimit(asyncTimeoutNum);
+ 117                 }
+ 118             }
+ 119 
+ 120 &lt;&lt;&lt;&lt;&lt;&lt;&lt; MINE
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 121             if(props.containsKey(AbstractSideTableInfo.ASYNC_FAIL_MAX_NUM_KEY.toLowerCase())){</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"><abbr title=" 122                 Long asyncFailNum = MathUtil.getLongVal(props.get(AbstractSideTableInfo.ASYNC_FAIL_MAX_NUM_KEY.toLowerCase()));"> 122                 Long asyncFailNum = MathUtil.getLongVal(props.get(AbstractSideTableInfo.ASYNC_FAIL_MAX_NU🔵</abbr></span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 123                 if (asyncFailNum &gt; 0){</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 124                     sideTableInfo.setAsyncFailMaxNum(asyncFailNum);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 125                 }</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 126             }</span>
+ 127 ||||||| BASE
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 128     }</span>
+ 129 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 130             if (props.containsKey(AbstractSideTableInfo.ASYNC_REQ_POOL_KEY.toLowerCase())) {</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"><abbr title=" 131                 Integer asyncPoolSize = MathUtil.getIntegerVal(props.get(AbstractSideTableInfo.ASYNC_REQ_POOL_KEY.toLowerCase()));"> 131                 Integer asyncPoolSize = MathUtil.getIntegerVal(props.get(AbstractSideTableInfo.ASYNC_REQ_🔵</abbr></span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"><abbr title=" 132                 Preconditions.checkArgument(asyncPoolSize &gt; 0 &amp;&amp; asyncPoolSize &lt;= 20, &quot;asyncPoolSize size limit (0,20]&quot;);"> 132                 Preconditions.checkArgument(asyncPoolSize &gt; 0 &amp;&amp; asyncPoolSize &lt;= 20, &quot;asyncPoolSize size🔵</abbr></span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 133                 sideTableInfo.setAsyncPoolSize(asyncPoolSize);</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 134             }</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 135 </span>
+ 136 &gt;&gt;&gt;&gt;&gt;&gt;&gt; YOURS
+ 137         }
+ 138     }
+ 139 }</pre></td>
+                            <td><pre>   1 /*
+   2  * Licensed to the Apache Software Foundation (ASF) under one
+   3  * or more contributor license agreements.  See the NOTICE file
+   4  * distributed with this work for additional information
+   5  * regarding copyright ownership.  The ASF licenses this file
+   6  * to you under the Apache License, Version 2.0 (the
+   7  * &quot;License&quot;); you may not use this file except in compliance
+   8  * with the License.  You may obtain a copy of the License at
+   9  *
+  10  *     http://www.apache.org/licenses/LICENSE-2.0
+  11  *
+  12  * Unless required by applicable law or agreed to in writing, software
+  13  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15  * See the License for the specific language governing permissions and
+  16  * limitations under the License.
+  17  */
+  18 package com.dtstack.flink.sql.table;
+  19 
+  20 import com.dtstack.flink.sql.enums.ECacheType;
+  21 import com.dtstack.flink.sql.side.AbstractSideTableInfo;
+  22 import com.dtstack.flink.sql.util.MathUtil;
+  23 import java.util.Map;
+  24 import java.util.regex.Matcher;
+  25 import java.util.regex.Pattern;
+  26 import org.apache.flink.util.Preconditions;
+  27 
+  28 
+  29 /**
+  30  * Reason:
+  31  * Date: 2018/8/2
+  32  * Company: www.dtstack.com
+  33  * @author xuchao
+  34  */
+  35 public abstract class AbstractSideTableParser extends AbstractTableParser {
+  36     private final static String SIDE_SIGN_KEY = &quot;sideSignKey&quot;;
+  37 
+  38     private final static Pattern SIDE_TABLE_SIGN = Pattern.compile(&quot;(?i)^PERIOD\\s+FOR\\s+SYSTEM_TIME$&quot;);
+  39 
+  40     public AbstractSideTableParser() {
+  41         addParserHandler(SIDE_SIGN_KEY, SIDE_TABLE_SIGN, this::dealSideSign);
+  42     }
+  43 
+  44     private void dealSideSign(Matcher matcher, AbstractTableInfo tableInfo){
+  45         //FIXME SIDE_TABLE_SIGN current just used as a sign for side table; and do nothing
+  46     }
+  47 
+  48     //Analytical create table attributes ==&gt; Get information cache
+  49     protected void parseCacheProp(AbstractSideTableInfo sideTableInfo, Map&lt;String, Object&gt; props) {
+  50         if (props.containsKey(AbstractSideTableInfo.CACHE_KEY.toLowerCase())) {
+<abbr title="  51             String cacheType = MathUtil.getString(props.get(AbstractSideTableInfo.CACHE_KEY.toLowerCase()));">  51             String cacheType = MathUtil.getString(props.get(AbstractSideTableInfo.CACHE_KEY.toLowerCase()🔵</abbr>
+  52             if (cacheType == null) {
+  53                 return;
+  54             }
+  55             if (!ECacheType.isValid(cacheType)) {
+  56                 throw new RuntimeException(&quot;can&#x27;t not support cache type :&quot; + cacheType);
+  57             }
+  58             sideTableInfo.setCacheType(cacheType);
+  59             if (props.containsKey(AbstractSideTableInfo.CACHE_SIZE_KEY.toLowerCase())) {
+<abbr title="  60                 Integer cacheSize = MathUtil.getIntegerVal(props.get(AbstractSideTableInfo.CACHE_SIZE_KEY.toLowerCase()));">  60                 Integer cacheSize = MathUtil.getIntegerVal(props.get(AbstractSideTableInfo.CACHE_SIZE_KEY🔵</abbr>
+  61                 if (cacheSize &lt; 0) {
+  62                     throw new RuntimeException(&quot;cache size need &gt; 0.&quot;);
+  63                 }
+  64                 sideTableInfo.setCacheSize(cacheSize);
+  65             }
+  66             if (props.containsKey(AbstractSideTableInfo.CACHE_TTLMS_KEY.toLowerCase())) {
+<abbr title="  67                 Long cacheTTLMS = MathUtil.getLongVal(props.get(AbstractSideTableInfo.CACHE_TTLMS_KEY.toLowerCase()));">  67                 Long cacheTTLMS = MathUtil.getLongVal(props.get(AbstractSideTableInfo.CACHE_TTLMS_KEY.toL🔵</abbr>
+  68                 if (cacheTTLMS &lt; 1000) {
+  69                     throw new RuntimeException(&quot;cache time out need &gt; 1000 ms.&quot;);
+  70                 }
+  71                 sideTableInfo.setCacheTimeout(cacheTTLMS);
+  72             }
+  73             if (props.containsKey(AbstractSideTableInfo.PARTITIONED_JOIN_KEY.toLowerCase())) {
+<abbr title="  74                 Boolean partitionedJoinKey = MathUtil.getBoolean(props.get(AbstractSideTableInfo.PARTITIONED_JOIN_KEY.toLowerCase()));">  74                 Boolean partitionedJoinKey = MathUtil.getBoolean(props.get(AbstractSideTableInfo.PARTITIO🔵</abbr>
+  75                 if (partitionedJoinKey) {
+  76                     sideTableInfo.setPartitionedJoin(true);
+  77                 }
+  78             }
+  79             if (props.containsKey(AbstractSideTableInfo.CACHE_MODE_KEY.toLowerCase())) {
+<abbr title="  80                 String cachemode = MathUtil.getString(props.get(AbstractSideTableInfo.CACHE_MODE_KEY.toLowerCase()));">  80                 String cachemode = MathUtil.getString(props.get(AbstractSideTableInfo.CACHE_MODE_KEY.toLo🔵</abbr>
+<abbr title="  81                 if ((!&quot;ordered&quot;.equalsIgnoreCase(cachemode)) &amp;&amp; (!&quot;unordered&quot;.equalsIgnoreCase(cachemode))) {">  81                 if ((!&quot;ordered&quot;.equalsIgnoreCase(cachemode)) &amp;&amp; (!&quot;unordered&quot;.equalsIgnoreCase(cachemode)🔵</abbr>
+  82                     throw new RuntimeException(&quot;cachemode must ordered or unordered!&quot;);
+  83                 }
+  84                 sideTableInfo.setCacheMode(cachemode.toLowerCase());
+  85             }
+  86             if (props.containsKey(AbstractSideTableInfo.ASYNC_CAP_KEY.toLowerCase())) {
+<abbr title="  87                 Integer asyncCap = MathUtil.getIntegerVal(props.get(AbstractSideTableInfo.ASYNC_CAP_KEY.toLowerCase()));">  87                 Integer asyncCap = MathUtil.getIntegerVal(props.get(AbstractSideTableInfo.ASYNC_CAP_KEY.t🔵</abbr>
+  88                 if (asyncCap &lt; 0) {
+  89                     throw new RuntimeException(&quot;asyncCapacity size need &gt; 0.&quot;);
+  90                 }
+  91                 sideTableInfo.setAsyncCapacity(asyncCap);
+  92             }
+  93             if (props.containsKey(AbstractSideTableInfo.ASYNC_TIMEOUT_KEY.toLowerCase())) {
+<abbr title="  94                 Integer asyncTimeout = MathUtil.getIntegerVal(props.get(AbstractSideTableInfo.ASYNC_TIMEOUT_KEY.toLowerCase()));">  94                 Integer asyncTimeout = MathUtil.getIntegerVal(props.get(AbstractSideTableInfo.ASYNC_TIMEO🔵</abbr>
+  95                 if (asyncTimeout &lt; 0) {
+  96                     throw new RuntimeException(&quot;asyncTimeout size need &gt; 0.&quot;);
+  97                 }
+  98                 sideTableInfo.setAsyncTimeout(asyncTimeout);
+  99             }
+ 100             if (props.containsKey(AbstractSideTableInfo.ASYNC_TIMEOUT_NUM_KEY.toLowerCase())) {
+<abbr title=" 101                 Integer asyncTimeoutNum = MathUtil.getIntegerVal(props.get(AbstractSideTableInfo.ASYNC_TIMEOUT_NUM_KEY.toLowerCase()));"> 101                 Integer asyncTimeoutNum = MathUtil.getIntegerVal(props.get(AbstractSideTableInfo.ASYNC_TI🔵</abbr>
+ 102                 if (asyncTimeoutNum &gt; 0) {
+ 103                     sideTableInfo.setAsyncTimeoutNumLimit(asyncTimeoutNum);
+ 104                 }
+ 105             }
+ 106 
+ 107 &lt;&lt;&lt;&lt;&lt;&lt;&lt; LEFT
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 108             if(props.containsKey(AbstractSideTableInfo.ASYNC_FAIL_MAX_NUM_KEY.toLowerCase())){</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"><abbr title=" 109                 Long asyncFailNum = MathUtil.getLongVal(props.get(AbstractSideTableInfo.ASYNC_FAIL_MAX_NUM_KEY.toLowerCase()));"> 109                 Long asyncFailNum = MathUtil.getLongVal(props.get(AbstractSideTableInfo.ASYNC_FAIL_MAX_NU🔵</abbr></span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 110                 if (asyncFailNum &gt; 0){</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 111                     sideTableInfo.setAsyncFailMaxNum(asyncFailNum);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 112                 }</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 113             }</span>
+ 114 ||||||| BASE
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"><abbr title=" 115 /*d94z9sk0k4hf9j3ijd - note the base isn&#x27;t actually empty, spork simply doesn&#x27;t generate a base - gd930kwohrp23k5b6vdk93d3r*/"> 115 /*d94z9sk0k4hf9j3ijd - note the base isn&#x27;t actually empty, spork simply doesn&#x27;t generate a base - gd930kw🔵</abbr></span>
+ 116 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 117 </span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 118             if (props.containsKey(AbstractSideTableInfo.ASYNC_REQ_POOL_KEY.toLowerCase())) {</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"><abbr title=" 119                 Integer asyncPoolSize = MathUtil.getIntegerVal(props.get(AbstractSideTableInfo.ASYNC_REQ_POOL_KEY.toLowerCase()));"> 119                 Integer asyncPoolSize = MathUtil.getIntegerVal(props.get(AbstractSideTableInfo.ASYNC_REQ_🔵</abbr></span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"><abbr title=" 120                 Preconditions.checkArgument(asyncPoolSize &gt; 0 &amp;&amp; asyncPoolSize &lt;= 20, &quot;asyncPoolSize size limit (0,20]&quot;);"> 120                 Preconditions.checkArgument(asyncPoolSize &gt; 0 &amp;&amp; asyncPoolSize &lt;= 20, &quot;asyncPoolSize size🔵</abbr></span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 121                 sideTableInfo.setAsyncPoolSize(asyncPoolSize);</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 122             }</span>
+ 123 &gt;&gt;&gt;&gt;&gt;&gt;&gt; RIGHT
+ 124 
+ 125         }
+ 126     }
+ 127 }
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ </pre></td>
+                        </tr>
+                    </table>
+                </div>
+                <div id="bottom">
+                    <table style="margin:auto">
+                        <tr>
+                            <th>ours vs. base</th>
+                            <th>theirs vs. base</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1  /*
+   2   * Licensed to the Apache Software Foundation (ASF) under one
+   3   * or more contributor license agreements.  See the NOTICE file
+   4   * distributed with this work for additional information
+   5   * regarding copyright ownership.  The ASF licenses this file
+   6   * to you under the Apache License, Version 2.0 (the
+   7   * &quot;License&quot;); you may not use this file except in compliance
+   8   * with the License.  You may obtain a copy of the License at
+   9   *
+  10   *     http://www.apache.org/licenses/LICENSE-2.0
+  11   *
+  12   * Unless required by applicable law or agreed to in writing, software
+  13   * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15   * See the License for the specific language governing permissions and
+  16   * limitations under the License.
+  17   */
+  18  
+  19  
+  20  
+  21  package com.dtstack.flink.sql.table;
+  22  
+  23  import com.dtstack.flink.sql.enums.ECacheType;
+  24  import com.dtstack.flink.sql.side.AbstractSideTableInfo;
+  25  import com.dtstack.flink.sql.util.MathUtil;
+
+
+  26  import java.util.Map;
+  27  import java.util.regex.Matcher;
+  28  import java.util.regex.Pattern;
+  29  
+  30  /**
+  31   * Reason:
+  32   * Date: 2018/8/2
+  33   * Company: www.dtstack.com
+  34   * @author xuchao
+  35   */
+  36  
+  37  public abstract class AbstractSideTableParser extends AbstractTableParser {
+  38  
+  39      private final static String SIDE_SIGN_KEY = &quot;sideSignKey&quot;;
+  40  
+  41      private final static Pattern SIDE_TABLE_SIGN = Pattern.compile(&quot;(?i)^PERIOD\\s+FOR\\s+SYSTEM_TIME$&quot;);
+  42  
+  43      public AbstractSideTableParser() {
+  44          addParserHandler(SIDE_SIGN_KEY, SIDE_TABLE_SIGN, this::dealSideSign);
+  45      }
+  46  
+  47      private void dealSideSign(Matcher matcher, AbstractTableInfo tableInfo){
+  48          //FIXME SIDE_TABLE_SIGN current just used as a sign for side table; and do nothing
+  49      }
+  50  
+  51      //Analytical create table attributes ==&gt; Get information cache
+  52      protected void parseCacheProp(AbstractSideTableInfo sideTableInfo, Map&lt;String, Object&gt; props){
+  53          if(props.containsKey(AbstractSideTableInfo.CACHE_KEY.toLowerCase())){
+  54              String cacheType = MathUtil.getString(props.get(AbstractSideTableInfo.CACHE_KEY.toLowerCase()));
+  55              if(cacheType == null){
+  56                  return;
+  57              }
+  58  
+  59              if(!ECacheType.isValid(cacheType)){
+  60                  throw new RuntimeException(&quot;can&#x27;t not support cache type :&quot; + cacheType);
+  61              }
+  62  
+  63              sideTableInfo.setCacheType(cacheType);
+  64              if(props.containsKey(AbstractSideTableInfo.CACHE_SIZE_KEY.toLowerCase())){
+<abbr title="  65                  Integer cacheSize = MathUtil.getIntegerVal(props.get(AbstractSideTableInfo.CACHE_SIZE_KEY.toLowerCase()));">  65                  Integer cacheSize = MathUtil.getIntegerVal(props.get(AbstractSideTableInfo.CACHE_SIZE_KEY.toLowerC🔵</abbr>
+  66                  if(cacheSize &lt; 0){
+  67                      throw new RuntimeException(&quot;cache size need &gt; 0.&quot;);
+  68                  }
+  69                  sideTableInfo.setCacheSize(cacheSize);
+  70              }
+  71  
+  72              if(props.containsKey(AbstractSideTableInfo.CACHE_TTLMS_KEY.toLowerCase())){
+<abbr title="  73                  Long cacheTTLMS = MathUtil.getLongVal(props.get(AbstractSideTableInfo.CACHE_TTLMS_KEY.toLowerCase()));">  73                  Long cacheTTLMS = MathUtil.getLongVal(props.get(AbstractSideTableInfo.CACHE_TTLMS_KEY.toLowerCase(🔵</abbr>
+  74                  if(cacheTTLMS &lt; 1000){
+  75                      throw new RuntimeException(&quot;cache time out need &gt; 1000 ms.&quot;);
+  76                  }
+  77                  sideTableInfo.setCacheTimeout(cacheTTLMS);
+  78              }
+  79  
+  80              if(props.containsKey(AbstractSideTableInfo.PARTITIONED_JOIN_KEY.toLowerCase())){
+<abbr title="  81                  Boolean partitionedJoinKey = MathUtil.getBoolean(props.get(AbstractSideTableInfo.PARTITIONED_JOIN_KEY.toLowerCase()));">  81                  Boolean partitionedJoinKey = MathUtil.getBoolean(props.get(AbstractSideTableInfo.PARTITIONED_JOIN_🔵</abbr>
+  82                  if(partitionedJoinKey){
+  83                      sideTableInfo.setPartitionedJoin(true);
+  84                  }
+  85              }
+  86  
+  87              if(props.containsKey(AbstractSideTableInfo.CACHE_MODE_KEY.toLowerCase())){
+<abbr title="  88                  String cachemode = MathUtil.getString(props.get(AbstractSideTableInfo.CACHE_MODE_KEY.toLowerCase()));">  88                  String cachemode = MathUtil.getString(props.get(AbstractSideTableInfo.CACHE_MODE_KEY.toLowerCase()🔵</abbr>
+  89  
+  90                  if(!&quot;ordered&quot;.equalsIgnoreCase(cachemode) &amp;&amp; !&quot;unordered&quot;.equalsIgnoreCase(cachemode)){
+  91                      throw new RuntimeException(&quot;cachemode must ordered or unordered!&quot;);
+  92                  }
+  93                  sideTableInfo.setCacheMode(cachemode.toLowerCase());
+  94              }
+  95  
+  96              if(props.containsKey(AbstractSideTableInfo.ASYNC_CAP_KEY.toLowerCase())){
+<abbr title="  97                  Integer asyncCap = MathUtil.getIntegerVal(props.get(AbstractSideTableInfo.ASYNC_CAP_KEY.toLowerCase()));">  97                  Integer asyncCap = MathUtil.getIntegerVal(props.get(AbstractSideTableInfo.ASYNC_CAP_KEY.toLowerCas🔵</abbr>
+  98                  if(asyncCap &lt; 0){
+  99                      throw new RuntimeException(&quot;asyncCapacity size need &gt; 0.&quot;);
+ 100                  }
+ 101                  sideTableInfo.setAsyncCapacity(asyncCap);
+ 102              }
+ 103  
+ 104              if(props.containsKey(AbstractSideTableInfo.ASYNC_TIMEOUT_KEY.toLowerCase())){
+<abbr title=" 105                  Integer asyncTimeout = MathUtil.getIntegerVal(props.get(AbstractSideTableInfo.ASYNC_TIMEOUT_KEY.toLowerCase()));"> 105                  Integer asyncTimeout = MathUtil.getIntegerVal(props.get(AbstractSideTableInfo.ASYNC_TIMEOUT_KEY.to🔵</abbr>
+ 106                  if (asyncTimeout&lt;0){
+ 107                      throw new RuntimeException(&quot;asyncTimeout size need &gt; 0.&quot;);
+ 108                  }
+ 109                  sideTableInfo.setAsyncTimeout(asyncTimeout);
+ 110              }
+ 111              if(props.containsKey(AbstractSideTableInfo.ASYNC_TIMEOUT_NUM_KEY.toLowerCase())){
+<abbr title=" 112                  Integer asyncTimeoutNum = MathUtil.getIntegerVal(props.get(AbstractSideTableInfo.ASYNC_TIMEOUT_NUM_KEY.toLowerCase()));"> 112                  Integer asyncTimeoutNum = MathUtil.getIntegerVal(props.get(AbstractSideTableInfo.ASYNC_TIMEOUT_NUM🔵</abbr>
+ 113                  if (asyncTimeoutNum &gt; 0){
+ 114                      sideTableInfo.setAsyncTimeoutNumLimit(asyncTimeoutNum);
+ 115                  }
+ 116              }
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 117 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 118 +            if(props.containsKey(AbstractSideTableInfo.ASYNC_FAIL_MAX_NUM_KEY.toLowerCase())){</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"><abbr title=" 119 +                Long asyncFailNum = MathUtil.getLongVal(props.get(AbstractSideTableInfo.ASYNC_FAIL_MAX_NUM_KEY.toLowerCase()));"> 119 +                Long asyncFailNum = MathUtil.getLongVal(props.get(AbstractSideTableInfo.ASYNC_FAIL_MAX_NUM_KEY.toL🔵</abbr></span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 120 +                if (asyncFailNum &gt; 0){</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 121 +                    sideTableInfo.setAsyncFailMaxNum(asyncFailNum);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 122 +                }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 123 +            }</span>
+ 124          }
+ 125      }
+ 126  }</pre></td>
+                            <td><pre>   1  /*
+   2   * Licensed to the Apache Software Foundation (ASF) under one
+   3   * or more contributor license agreements.  See the NOTICE file
+   4   * distributed with this work for additional information
+   5   * regarding copyright ownership.  The ASF licenses this file
+   6   * to you under the Apache License, Version 2.0 (the
+   7   * &quot;License&quot;); you may not use this file except in compliance
+   8   * with the License.  You may obtain a copy of the License at
+   9   *
+  10   *     http://www.apache.org/licenses/LICENSE-2.0
+  11   *
+  12   * Unless required by applicable law or agreed to in writing, software
+  13   * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15   * See the License for the specific language governing permissions and
+  16   * limitations under the License.
+  17   */
+  18  
+  19  
+  20  
+  21  package com.dtstack.flink.sql.table;
+  22  
+  23  import com.dtstack.flink.sql.enums.ECacheType;
+  24  import com.dtstack.flink.sql.side.AbstractSideTableInfo;
+  25  import com.dtstack.flink.sql.util.MathUtil;
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  26 +import org.apache.flink.util.Preconditions;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  27 +</span>
+  28  import java.util.Map;
+  29  import java.util.regex.Matcher;
+  30  import java.util.regex.Pattern;
+  31  
+  32  /**
+  33   * Reason:
+  34   * Date: 2018/8/2
+  35   * Company: www.dtstack.com
+  36   * @author xuchao
+  37   */
+  38  
+  39  public abstract class AbstractSideTableParser extends AbstractTableParser {
+  40  
+  41      private final static String SIDE_SIGN_KEY = &quot;sideSignKey&quot;;
+  42  
+  43      private final static Pattern SIDE_TABLE_SIGN = Pattern.compile(&quot;(?i)^PERIOD\\s+FOR\\s+SYSTEM_TIME$&quot;);
+  44  
+  45      public AbstractSideTableParser() {
+  46          addParserHandler(SIDE_SIGN_KEY, SIDE_TABLE_SIGN, this::dealSideSign);
+  47      }
+  48  
+  49      private void dealSideSign(Matcher matcher, AbstractTableInfo tableInfo){
+  50          //FIXME SIDE_TABLE_SIGN current just used as a sign for side table; and do nothing
+  51      }
+  52  
+  53      //Analytical create table attributes ==&gt; Get information cache
+  54      protected void parseCacheProp(AbstractSideTableInfo sideTableInfo, Map&lt;String, Object&gt; props){
+  55          if(props.containsKey(AbstractSideTableInfo.CACHE_KEY.toLowerCase())){
+  56              String cacheType = MathUtil.getString(props.get(AbstractSideTableInfo.CACHE_KEY.toLowerCase()));
+  57              if(cacheType == null){
+  58                  return;
+  59              }
+  60  
+  61              if(!ECacheType.isValid(cacheType)){
+  62                  throw new RuntimeException(&quot;can&#x27;t not support cache type :&quot; + cacheType);
+  63              }
+  64  
+  65              sideTableInfo.setCacheType(cacheType);
+  66              if(props.containsKey(AbstractSideTableInfo.CACHE_SIZE_KEY.toLowerCase())){
+<abbr title="  67                  Integer cacheSize = MathUtil.getIntegerVal(props.get(AbstractSideTableInfo.CACHE_SIZE_KEY.toLowerCase()));">  67                  Integer cacheSize = MathUtil.getIntegerVal(props.get(AbstractSideTableInfo.CACHE_SIZE_KEY.toLowerC🔵</abbr>
+  68                  if(cacheSize &lt; 0){
+  69                      throw new RuntimeException(&quot;cache size need &gt; 0.&quot;);
+  70                  }
+  71                  sideTableInfo.setCacheSize(cacheSize);
+  72              }
+  73  
+  74              if(props.containsKey(AbstractSideTableInfo.CACHE_TTLMS_KEY.toLowerCase())){
+<abbr title="  75                  Long cacheTTLMS = MathUtil.getLongVal(props.get(AbstractSideTableInfo.CACHE_TTLMS_KEY.toLowerCase()));">  75                  Long cacheTTLMS = MathUtil.getLongVal(props.get(AbstractSideTableInfo.CACHE_TTLMS_KEY.toLowerCase(🔵</abbr>
+  76                  if(cacheTTLMS &lt; 1000){
+  77                      throw new RuntimeException(&quot;cache time out need &gt; 1000 ms.&quot;);
+  78                  }
+  79                  sideTableInfo.setCacheTimeout(cacheTTLMS);
+  80              }
+  81  
+  82              if(props.containsKey(AbstractSideTableInfo.PARTITIONED_JOIN_KEY.toLowerCase())){
+<abbr title="  83                  Boolean partitionedJoinKey = MathUtil.getBoolean(props.get(AbstractSideTableInfo.PARTITIONED_JOIN_KEY.toLowerCase()));">  83                  Boolean partitionedJoinKey = MathUtil.getBoolean(props.get(AbstractSideTableInfo.PARTITIONED_JOIN_🔵</abbr>
+  84                  if(partitionedJoinKey){
+  85                      sideTableInfo.setPartitionedJoin(true);
+  86                  }
+  87              }
+  88  
+  89              if(props.containsKey(AbstractSideTableInfo.CACHE_MODE_KEY.toLowerCase())){
+<abbr title="  90                  String cachemode = MathUtil.getString(props.get(AbstractSideTableInfo.CACHE_MODE_KEY.toLowerCase()));">  90                  String cachemode = MathUtil.getString(props.get(AbstractSideTableInfo.CACHE_MODE_KEY.toLowerCase()🔵</abbr>
+  91  
+  92                  if(!&quot;ordered&quot;.equalsIgnoreCase(cachemode) &amp;&amp; !&quot;unordered&quot;.equalsIgnoreCase(cachemode)){
+  93                      throw new RuntimeException(&quot;cachemode must ordered or unordered!&quot;);
+  94                  }
+  95                  sideTableInfo.setCacheMode(cachemode.toLowerCase());
+  96              }
+  97  
+  98              if(props.containsKey(AbstractSideTableInfo.ASYNC_CAP_KEY.toLowerCase())){
+<abbr title="  99                  Integer asyncCap = MathUtil.getIntegerVal(props.get(AbstractSideTableInfo.ASYNC_CAP_KEY.toLowerCase()));">  99                  Integer asyncCap = MathUtil.getIntegerVal(props.get(AbstractSideTableInfo.ASYNC_CAP_KEY.toLowerCas🔵</abbr>
+ 100                  if(asyncCap &lt; 0){
+ 101                      throw new RuntimeException(&quot;asyncCapacity size need &gt; 0.&quot;);
+ 102                  }
+ 103                  sideTableInfo.setAsyncCapacity(asyncCap);
+ 104              }
+ 105  
+ 106              if(props.containsKey(AbstractSideTableInfo.ASYNC_TIMEOUT_KEY.toLowerCase())){
+<abbr title=" 107                  Integer asyncTimeout = MathUtil.getIntegerVal(props.get(AbstractSideTableInfo.ASYNC_TIMEOUT_KEY.toLowerCase()));"> 107                  Integer asyncTimeout = MathUtil.getIntegerVal(props.get(AbstractSideTableInfo.ASYNC_TIMEOUT_KEY.to🔵</abbr>
+ 108                  if (asyncTimeout&lt;0){
+ 109                      throw new RuntimeException(&quot;asyncTimeout size need &gt; 0.&quot;);
+ 110                  }
+ 111                  sideTableInfo.setAsyncTimeout(asyncTimeout);
+ 112              }
+ 113              if(props.containsKey(AbstractSideTableInfo.ASYNC_TIMEOUT_NUM_KEY.toLowerCase())){
+<abbr title=" 114                  Integer asyncTimeoutNum = MathUtil.getIntegerVal(props.get(AbstractSideTableInfo.ASYNC_TIMEOUT_NUM_KEY.toLowerCase()));"> 114                  Integer asyncTimeoutNum = MathUtil.getIntegerVal(props.get(AbstractSideTableInfo.ASYNC_TIMEOUT_NUM🔵</abbr>
+ 115                  if (asyncTimeoutNum &gt; 0){
+ 116                      sideTableInfo.setAsyncTimeoutNumLimit(asyncTimeoutNum);
+ 117                  }
+ 118              }
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 119 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 120 +            if (props.containsKey(AbstractSideTableInfo.ASYNC_REQ_POOL_KEY.toLowerCase())) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"><abbr title=" 121 +                Integer asyncPoolSize = MathUtil.getIntegerVal(props.get(AbstractSideTableInfo.ASYNC_REQ_POOL_KEY.toLowerCase()));"> 121 +                Integer asyncPoolSize = MathUtil.getIntegerVal(props.get(AbstractSideTableInfo.ASYNC_REQ_POOL_KEY.🔵</abbr></span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"><abbr title=" 122 +                Preconditions.checkArgument(asyncPoolSize &gt; 0 &amp;&amp; asyncPoolSize &lt;= 20, &quot;asyncPoolSize size limit (0,20]&quot;);"> 122 +                Preconditions.checkArgument(asyncPoolSize &gt; 0 &amp;&amp; asyncPoolSize &lt;= 20, &quot;asyncPoolSize size limit (0🔵</abbr></span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 123 +                sideTableInfo.setAsyncPoolSize(asyncPoolSize);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 124 +            }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 125 +</span>
+ 126          }
+ 127      }
+ 128  }</pre></td>
+                        </tr>
+                    </table>
+                </div>
+              </body>
+            </html>
+            

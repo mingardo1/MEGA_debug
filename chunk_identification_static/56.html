@@ -1,0 +1,2910 @@
+<!DOCTYPE html>
+    <html lang="en">
+              <head>
+                <meta charset="utf-8">
+                <title>56</title>
+                    <style>
+                        #top {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        #bottom {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        abbr {
+                          /* Here is the delay */
+                          transition-delay:0s;
+                        }
+                    </style>
+              </head>
+              <body>
+                <span style="height: 4vh">
+                    56
+                    <a href="55.html">prev</a>
+                    <a href="57.html">next</a>
+                    <a href="56_chunks.html">chunks</a>
+                    <a href="index.html">index</a>
+                    AriaLyy/Aria_0d4f29d921f90eae739f3f468c1d492de3b42636_Aria/src/main/java/com/arialyy/aria/core/download/downloader/DownloadGroupUtil.java
+                    <textarea rows=1 onclick='navigator.clipboard.writeText(this.value)'>cd C:\studies\se\mega\git-analyzer-plus\notebooks\debug
+del /Q *
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\AriaLyy\Aria show &quot;0d4f29d921f90eae739f3f468c1d492de3b42636:Aria/src/main/java/com/arialyy/aria/core/download/downloader/DownloadGroupUtil.java&quot; &gt; committed.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\AriaLyy\Aria show &quot;0d4f29d921f90eae739f3f468c1d492de3b42636^1:Aria/src/main/java/com/arialyy/aria/core/download/downloader/DownloadGroupUtil.java&quot; &gt; ours.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\AriaLyy\Aria show &quot;0d4f29d921f90eae739f3f468c1d492de3b42636^2:Aria/src/main/java/com/arialyy/aria/core/download/downloader/DownloadGroupUtil.java&quot; &gt; theirs.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\AriaLyy\Aria show &quot;4f1412b55470f431a66ea1ebfe5e131652183b1b:Aria/src/main/java/com/arialyy/aria/core/download/downloader/DownloadGroupUtil.java&quot; &gt; base.java
+copy ours.java 1ours.java
+copy ours.java 2ours.java
+copy theirs.java 1theirs.java
+copy theirs.java 2theirs.java
+copy base.java 1base.java
+copy base.java 2base.java
+&quot;C:\Program Files\Java\jdk1.8.0_241\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\jFSTMerge\build\libs\jFSTMerge-all.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\jfstmerge.java --show-base
+&quot;C:\Program Files\Eclipse Adoptium\jdk-17.0.11.9-hotspot\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\spork\target\spork-0.5.0-SNAPSHOT.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\spork.java
+del /Q 1*.java
+del /Q 2*.java
+del /Q jfstmerge.java.merge
+</textarea>
+                    {strict: [[b], [j]], subset: [[b], [j]]}
+                </span>
+                <div id="top">
+
+                    <table>
+                        <tr>
+                            <th>line based (standard git)</th>
+                            <th>jfstmerge</th>
+                            <th>spork</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1 /*
+   2  * Copyright (C) 2016 AriaLyy(https://github.com/AriaLyy/Aria)
+   3  *
+   4  * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+   5  * you may not use this file except in compliance with the License.
+   6  * You may obtain a copy of the License at
+   7  *
+   8  *      http://www.apache.org/licenses/LICENSE-2.0
+   9  *
+  10  * Unless required by applicable law or agreed to in writing, software
+  11  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  12  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  13  * See the License for the specific language governing permissions and
+  14  * limitations under the License.
+  15  */
+  16 package com.arialyy.aria.core.download.downloader;
+  17 
+  18 import android.util.SparseArray;
+  19 import com.arialyy.aria.core.common.IUtil;
+  20 import com.arialyy.aria.core.download.DownloadGroupTaskEntity;
+  21 import com.arialyy.aria.core.download.DownloadTaskEntity;
+  22 import com.arialyy.aria.core.inf.IEntity;
+  23 import java.util.Set;
+  24 import java.util.concurrent.ExecutorService;
+  25 import java.util.concurrent.Executors;
+  26 
+  27 /**
+  28  * Created by AriaL on 2017/6/30.
+  29  * 任务组下载工具
+  30  */
+  31 public class DownloadGroupUtil extends AbsGroupUtil implements IUtil {
+  32   private final String TAG = &quot;DownloadGroupUtil&quot;;
+  33   private ExecutorService mInfoPool;
+  34 
+  35   /**
+  36    * 文件信息回调组
+  37    */
+  38   private SparseArray&lt;OnFileInfoCallback&gt; mFileInfoCallbacks = new SparseArray&lt;&gt;();
+  39 
+  40   public DownloadGroupUtil(IDownloadGroupListener listener, DownloadGroupTaskEntity taskEntity) {
+  41     super(listener, taskEntity);
+  42     mInfoPool = Executors.newCachedThreadPool();
+  43   }
+  44 
+  45   @Override public void onCancel() {
+  46     super.onCancel();
+  47     if (!mInfoPool.isShutdown()) {
+  48       mInfoPool.shutdown();
+  49     }
+  50   }
+  51 
+  52   @Override protected void onStop() {
+  53     super.onStop();
+  54     if (!mInfoPool.isShutdown()) {
+  55       mInfoPool.shutdown();
+  56     }
+  57   }
+  58 
+  59   @Override protected void onStart() {
+  60     super.onStart();
+  61     Set&lt;String&gt; keys = mExeMap.keySet();
+  62     int i = 0;
+  63     for (String key : keys) {
+  64       DownloadTaskEntity taskEntity = mExeMap.get(key);
+  65       if (taskEntity != null) {
+  66         if (taskEntity.getState() != IEntity.STATE_FAIL
+  67             &amp;&amp; taskEntity.getState() != IEntity.STATE_WAIT) {
+  68           startChildDownload(taskEntity);
+  69           i++;
+  70         } else {
+  71           mInfoPool.execute(createFileInfoThread(taskEntity));
+  72         }
+  73       }
+  74     }
+  75     if (i == mExeMap.size()) startRunningFlow();
+  76   }
+  77 
+  78   /**
+  79    * 创建文件信息获取线程
+  80    */
+  81   private HttpFileInfoThread createFileInfoThread(DownloadTaskEntity taskEntity) {
+  82     OnFileInfoCallback callback = mFileInfoCallbacks.get(taskEntity.hashCode());
+  83 
+  84     if (callback == null) {
+  85       callback = new OnFileInfoCallback() {
+  86         int failNum = 0;
+  87 
+  88         @Override public void onComplete(String url, int code) {
+  89           DownloadTaskEntity te = mExeMap.get(url);
+  90           if (te != null) {
+  91             mTotalSize += te.getEntity().getFileSize();
+  92             startChildDownload(te);
+  93           }
+  94           mInitNum++;
+  95           if (mInitNum + mInitFailNum &gt;= mTaskEntity.getEntity().getSubTask().size()) {
+  96             startRunningFlow();
+  97           }
+  98         }
+  99 
+ 100         @Override public void onFail(String url, String errorMsg) {
+ 101           DownloadTaskEntity te = mExeMap.get(url);
+ 102           if (te != null) {
+ 103             mFailMap.put(url, te);
+ 104             mFileInfoCallbacks.put(te.hashCode(), this);
+ 105           }
+ 106           //404链接不重试下载
+ 107           if (failNum &lt; 10 &amp;&amp; !errorMsg.contains(&quot;错误码：404&quot;) &amp;&amp; !errorMsg.contains(
+ 108               &quot;UnknownHostException&quot;)) {
+ 109             mInfoPool.execute(createFileInfoThread(te));
+ 110           } else {
+ 111             mInitFailNum++;
+ 112             mActualTaskNum--;
+ 113             if (mActualTaskNum &lt; 0) mActualTaskNum = 0;
+ 114           }
+ 115           failNum++;
+ 116           if (mInitNum + mInitFailNum &gt;= mTaskEntity.getEntity().getSubTask().size()) {
+ 117             startRunningFlow();
+ 118           }
+ 119         }
+ 120       };
+ 121     }
+ 122 &lt;&lt;&lt;&lt;&lt;&lt;&lt; GitAnalyzerPlus_ours
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 123     return new FileInfoThread(taskEntity, callback);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 124   }</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 125 </span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 126   private void closeTimer(boolean isRunning) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 127     this.isRunning = isRunning;</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 128     if (mTimer != null) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 129       mTimer.purge();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 130       mTimer.cancel();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 131     }</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 132   }</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 133 </span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 134   /**</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 135    * 开始进度流程</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 136    */</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 137   private void startRunningFlow() {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 138     closeTimer(true);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 139     mListener.onPostPre(mTotalSize);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 140     mListener.onStart(mCurrentLocation);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 141     mTimer = new Timer(true);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 142     mTimer.schedule(new TimerTask() {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 143       @Override public void run() {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 144         if (!isRunning) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 145           closeTimer(false);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 146         } else if (mCurrentLocation &gt;= 0) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 147           mListener.onProgress(mCurrentLocation);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 148         }</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 149       }</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 150     }, 0, 1000);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 151   }</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 152 </span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 153   /**</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 154    * 启动子任务下载器</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 155    */</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 156   private void startChildDownload(DownloadTaskEntity taskEntity) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 157     ChildDownloadListener listener = new ChildDownloadListener(taskEntity);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 158     Downloader dt = new Downloader(listener, taskEntity);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 159     mDownloaderMap.put(taskEntity.getEntity().getDownloadUrl(), dt);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 160     if (mExePool.isShutdown()) return;</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 161     mExePool.execute(dt);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 162   }</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 163 </span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 164   /**</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 165    * 创建子任务下载信息</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 166    */</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 167   private DownloadTaskEntity createChildDownloadTask(DownloadEntity entity) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 168     DownloadTaskEntity taskEntity = mTasksMap.get(entity.getDownloadUrl());</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 169     if (taskEntity != null) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 170       taskEntity.entity = entity;</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 171       return taskEntity;</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 172     }</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 173     taskEntity = new DownloadTaskEntity();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 174     taskEntity.entity = entity;</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 175     taskEntity.headers = mTaskEntity.headers;</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 176     taskEntity.requestEnum = mTaskEntity.requestEnum;</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 177     taskEntity.redirectUrlKey = mTaskEntity.redirectUrlKey;</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 178     taskEntity.removeFile = mTaskEntity.removeFile;</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 179     taskEntity.groupName = mTaskEntity.key;</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 180     taskEntity.isGroupTask = true;</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 181     taskEntity.key = entity.getDownloadPath();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 182     taskEntity.save();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 183     return taskEntity;</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 184   }</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 185 </span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 186   /**</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 187    * 子任务事件监听</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 188    */</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 189   private class ChildDownloadListener implements IDownloadListener {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 190 </span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 191     DownloadTaskEntity taskEntity;</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 192     DownloadEntity entity;</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 193 </span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 194     long lastLen = 0;</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 195 </span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 196     ChildDownloadListener(DownloadTaskEntity entity) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 197       this.taskEntity = entity;</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 198       this.entity = taskEntity.getEntity();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 199       lastLen = this.entity.getCurrentProgress();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 200       this.entity.setFailNum(0);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 201     }</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 202 </span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 203     @Override public void onPre() {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 204       saveData(IEntity.STATE_PRE, -1);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 205     }</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 206 </span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 207     @Override public void onPostPre(long fileSize) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 208       entity.setFileSize(fileSize);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 209       entity.setConvertFileSize(CommonUtil.formatFileSize(fileSize));</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 210       saveData(IEntity.STATE_POST_PRE, -1);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 211     }</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 212 </span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 213     @Override public void onResume(long resumeLocation) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 214       saveData(IEntity.STATE_POST_PRE, IEntity.STATE_RUNNING);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 215       lastLen = resumeLocation;</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 216     }</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 217 </span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 218     @Override public void onStart(long startLocation) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 219       saveData(IEntity.STATE_POST_PRE, IEntity.STATE_RUNNING);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 220       lastLen = startLocation;</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 221     }</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 222 </span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 223     @Override public void onProgress(long currentLocation) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 224       long speed = currentLocation - lastLen;</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 225       mCurrentLocation += speed;</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 226       lastLen = currentLocation;</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 227       entity.setCurrentProgress(currentLocation);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 228       handleSpeed(speed);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 229     }</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 230 </span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 231     @Override public void onStop(long stopLocation) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 232       saveData(IEntity.STATE_STOP, stopLocation);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 233       handleSpeed(0);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 234       mListener.onSubStop(entity);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 235     }</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 236 </span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 237     @Override public void onCancel() {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 238       saveData(IEntity.STATE_CANCEL, -1);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 239       handleSpeed(0);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 240       mListener.onSubCancel(entity);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 241     }</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 242 </span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 243     @Override public void onComplete() {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 244       saveData(IEntity.STATE_COMPLETE, entity.getFileSize());</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 245       mCompleteNum++;</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 246       handleSpeed(0);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 247       mListener.onSubComplete(entity);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 248       //如果子任务完成的数量和总任务数一致，表示任务组任务已经完成</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 249       if (mCompleteNum &gt;= mTaskEntity.getEntity().getSubTask().size()) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 250         closeTimer(false);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 251         mListener.onComplete();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 252       } else if (mCompleteNum + mFailNum &gt;= mActualTaskNum) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 253         //如果子任务完成数量加上失败的数量和总任务数一致，则任务组停止下载</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 254         closeTimer(false);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 255         mListener.onComplete();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 256       }</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 257     }</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 258 </span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 259     @Override public void onFail() {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 260       entity.setFailNum(entity.getFailNum() + 1);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 261       saveData(IEntity.STATE_FAIL, lastLen);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 262       handleSpeed(0);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 263       reTry();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 264     }</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 265 </span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 266     /**</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 267      * 失败后重试下载，如果失败次数超过5次，不再重试</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 268      */</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 269     private void reTry() {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 270       if (entity.getFailNum() &lt; 5) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 271         reStartTask();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 272       } else {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 273         mFailNum++;</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 274         mListener.onSubFail(entity);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 275         //如果失败的任务数大于实际的下载任务数，任务组停止下载</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 276         if (mFailNum &gt;= mActualTaskNum) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 277           closeTimer(false);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 278           mListener.onStop(mCurrentLocation);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 279         }</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 280       }</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 281     }</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 282 </span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 283     private void reStartTask() {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 284       Timer timer = new Timer();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 285       timer.schedule(new TimerTask() {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 286         @Override public void run() {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 287           Downloader dt = mDownloaderMap.get(entity.getDownloadUrl());</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 288           dt.startDownload();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 289         }</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 290       }, 3000);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 291     }</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 292 </span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 293     private void handleSpeed(long speed) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 294       entity.setSpeed(speed);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 295       entity.setConvertSpeed(speed &lt;= 0 ? &quot;&quot; : CommonUtil.formatFileSize(speed) + &quot;/s&quot;);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 296     }</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 297 </span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 298     private void saveData(int state, long location) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 299       entity.setState(state);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 300       entity.setComplete(state == IEntity.STATE_COMPLETE);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 301       if (entity.isComplete()) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 302         entity.setCompleteTime(System.currentTimeMillis());</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 303         entity.setCurrentProgress(entity.getFileSize());</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 304       } else if (location &gt; 0) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 305         entity.setCurrentProgress(location);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 306       }</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 307       entity.update();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 308     }</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 309 </span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 310     @Override public void supportBreakpoint(boolean support) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 311 </span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 312     }</span>
+ 313 ||||||| GitAnalyzerPlus_base
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 314     return mCurrentLocation;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 315   }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 316 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 317   @Override public boolean isDownloading() {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 318     return isRunning;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 319   }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 320 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 321   @Override public void cancelDownload() {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 322     closeTimer(false);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 323     mListener.onCancel();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 324     if (!mInfoPool.isShutdown()) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 325       mInfoPool.shutdown();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 326     }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 327     if (!mExePool.isShutdown()) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 328       mExePool.shutdown();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 329     }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 330 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 331     Set&lt;String&gt; keys = mDownloaderMap.keySet();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 332     for (String key : keys) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 333       Downloader dt = mDownloaderMap.get(key);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 334       if (dt != null) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 335         dt.cancelDownload();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 336       }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 337     }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 338     delDownloadInfo();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 339     mTaskEntity.deleteData();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 340   }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 341 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 342   /**</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 343    * 删除所有子任务的下载信息</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 344    */</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 345   private void delDownloadInfo() {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 346     List&lt;DownloadTaskEntity&gt; tasks =</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 347         DbEntity.findDatas(DownloadTaskEntity.class, &quot;groupName=?&quot;, mTaskEntity.key);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 348     if (tasks == null || tasks.isEmpty()) return;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 349     for (DownloadTaskEntity taskEntity : tasks) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 350       CommonUtil.delDownloadTaskConfig(taskEntity.removeFile, taskEntity);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 351     }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 352   }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 353 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 354   @Override public void stopDownload() {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 355     closeTimer(false);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 356     mListener.onStop(mCurrentLocation);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 357     if (!mInfoPool.isShutdown()) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 358       mInfoPool.shutdown();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 359     }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 360     if (!mExePool.isShutdown()) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 361       mExePool.shutdown();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 362     }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 363 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 364     Set&lt;String&gt; keys = mDownloaderMap.keySet();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 365     for (String key : keys) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 366       Downloader dt = mDownloaderMap.get(key);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 367       if (dt != null) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 368         dt.stopDownload();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 369       }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 370     }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 371   }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 372 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 373   @Override public void startDownload() {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 374     isRunning = true;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 375     mFailNum = 0;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 376     Set&lt;String&gt; keys = mExeMap.keySet();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 377     mListener.onPre();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 378     int i = 0;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 379     for (String key : keys) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 380       DownloadTaskEntity taskEntity = mExeMap.get(key);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 381       if (taskEntity != null) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 382         if (taskEntity.getState() != IEntity.STATE_FAIL</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 383             &amp;&amp; taskEntity.getState() != IEntity.STATE_WAIT) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 384           startChildDownload(taskEntity);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 385           i++;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 386         } else {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 387           mInfoPool.execute(createFileInfoThread(taskEntity));</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 388         }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 389       }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 390     }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 391     if (i == mExeMap.size()) startRunningFlow();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 392   }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 393 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 394   @Override public void resumeDownload() {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 395     startDownload();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 396     mListener.onResume(mCurrentLocation);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 397   }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 398 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 399   /**</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 400    * 创建文件信息获取线程</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 401    */</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 402   private FileInfoThread createFileInfoThread(DownloadTaskEntity taskEntity) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 403     FileInfoThread.OnFileInfoCallback callback = mFileInfoCallbacks.get(taskEntity.hashCode());</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 404 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 405     if (callback == null) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 406       callback = new FileInfoThread.OnFileInfoCallback() {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 407         int failNum = 0;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 408 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 409         @Override public void onComplete(String url, int code) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 410           DownloadTaskEntity te = mExeMap.get(url);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 411           if (te != null) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 412             mTotalSize += te.getEntity().getFileSize();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 413             startChildDownload(te);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 414           }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 415           mInitNum++;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 416           if (mInitNum + mInitFailNum &gt;= mTaskEntity.getEntity().getSubTask().size()) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 417             startRunningFlow();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 418           }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 419         }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 420 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 421         @Override public void onFail(String url, String errorMsg) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 422           DownloadTaskEntity te = mExeMap.get(url);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 423           if (te != null) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 424             mFailMap.put(url, te);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 425             mFileInfoCallbacks.put(te.hashCode(), this);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 426           }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 427           //404链接不重试下载</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 428           if (failNum &lt; 10 &amp;&amp; !errorMsg.contains(&quot;错误码：404&quot;) &amp;&amp; !errorMsg.contains(</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 429               &quot;UnknownHostException&quot;)) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 430             mInfoPool.execute(createFileInfoThread(te));</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 431           } else {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 432             mInitFailNum++;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 433             mActualTaskNum--;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 434             if (mActualTaskNum &lt; 0) mActualTaskNum = 0;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 435           }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 436           failNum++;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 437           if (mInitNum + mInitFailNum &gt;= mTaskEntity.getEntity().getSubTask().size()) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 438             startRunningFlow();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 439           }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 440         }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 441       };</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 442     }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 443     return new FileInfoThread(taskEntity, callback);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 444   }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 445 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 446   private void closeTimer(boolean isRunning) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 447     this.isRunning = isRunning;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 448     if (mTimer != null) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 449       mTimer.purge();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 450       mTimer.cancel();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 451     }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 452   }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 453 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 454   /**</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 455    * 开始进度流程</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 456    */</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 457   private void startRunningFlow() {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 458     closeTimer(true);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 459     mListener.onPostPre(mTotalSize);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 460     mListener.onStart(mCurrentLocation);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 461     mTimer = new Timer(true);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 462     mTimer.schedule(new TimerTask() {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 463       @Override public void run() {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 464         if (!isRunning) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 465           closeTimer(false);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 466         } else if (mCurrentLocation &gt;= 0) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 467           mListener.onProgress(mCurrentLocation);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 468         }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 469       }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 470     }, 0, 1000);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 471   }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 472 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 473   /**</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 474    * 启动子任务下载器</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 475    */</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 476   private void startChildDownload(DownloadTaskEntity taskEntity) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 477     ChildDownloadListener listener = new ChildDownloadListener(taskEntity);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 478     Downloader dt = new Downloader(listener, taskEntity);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 479     mDownloaderMap.put(taskEntity.getEntity().getDownloadUrl(), dt);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 480     if (mExePool.isShutdown()) return;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 481     mExePool.execute(dt);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 482   }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 483 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 484   /**</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 485    * 创建子任务下载信息</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 486    */</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 487   private DownloadTaskEntity createChildDownloadTask(DownloadEntity entity) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 488     DownloadTaskEntity taskEntity = mTasksMap.get(entity.getDownloadUrl());</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 489     if (taskEntity != null) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 490       taskEntity.entity = entity;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 491       return taskEntity;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 492     }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 493     taskEntity = new DownloadTaskEntity();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 494     taskEntity.entity = entity;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 495     taskEntity.headers = mTaskEntity.headers;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 496     taskEntity.requestEnum = mTaskEntity.requestEnum;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 497     taskEntity.redirectUrlKey = mTaskEntity.redirectUrlKey;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 498     taskEntity.removeFile = mTaskEntity.removeFile;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 499     taskEntity.groupName = mTaskEntity.key;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 500     taskEntity.isGroupTask = true;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 501     taskEntity.key = entity.getDownloadPath();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 502     taskEntity.save();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 503     return taskEntity;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 504   }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 505 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 506   /**</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 507    * 子任务事件监听</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 508    */</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 509   private class ChildDownloadListener implements IDownloadListener {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 510 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 511     DownloadTaskEntity taskEntity;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 512     DownloadEntity entity;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 513 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 514     long lastLen = 0;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 515 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 516     ChildDownloadListener(DownloadTaskEntity entity) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 517       this.taskEntity = entity;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 518       this.entity = taskEntity.getEntity();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 519       lastLen = this.entity.getCurrentProgress();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 520       this.entity.setFailNum(0);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 521     }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 522 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 523     @Override public void onPre() {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 524       saveData(IEntity.STATE_PRE, -1);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 525     }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 526 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 527     @Override public void onPostPre(long fileSize) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 528       entity.setFileSize(fileSize);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 529       entity.setConvertFileSize(CommonUtil.formatFileSize(fileSize));</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 530       saveData(IEntity.STATE_POST_PRE, -1);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 531     }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 532 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 533     @Override public void onResume(long resumeLocation) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 534       saveData(IEntity.STATE_POST_PRE, IEntity.STATE_RUNNING);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 535       lastLen = resumeLocation;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 536     }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 537 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 538     @Override public void onStart(long startLocation) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 539       saveData(IEntity.STATE_POST_PRE, IEntity.STATE_RUNNING);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 540       lastLen = startLocation;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 541     }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 542 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 543     @Override public void onProgress(long currentLocation) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 544       long speed = currentLocation - lastLen;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 545       mCurrentLocation += speed;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 546       lastLen = currentLocation;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 547       entity.setCurrentProgress(currentLocation);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 548       handleSpeed(speed);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 549     }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 550 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 551     @Override public void onStop(long stopLocation) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 552       saveData(IEntity.STATE_STOP, stopLocation);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 553       handleSpeed(0);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 554       mListener.onSubStop(entity);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 555     }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 556 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 557     @Override public void onCancel() {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 558       saveData(IEntity.STATE_CANCEL, -1);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 559       handleSpeed(0);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 560       mListener.onSubCancel(entity);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 561     }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 562 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 563     @Override public void onComplete() {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 564       saveData(IEntity.STATE_COMPLETE, entity.getFileSize());</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 565       mCompleteNum++;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 566       handleSpeed(0);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 567       mListener.onSubComplete(entity);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 568       //如果子任务完成的数量和总任务数一致，表示任务组任务已经完成</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 569       if (mCompleteNum &gt;= mTaskEntity.getEntity().getSubTask().size()){</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 570         closeTimer(false);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 571         mListener.onComplete();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 572       }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 573       //如果子任务完成数量加上失败的数量和总任务数一致，则任务组停止下载</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 574       if (mCompleteNum + mFailNum &gt;= mActualTaskNum) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 575         closeTimer(false);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 576         mListener.onComplete();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 577       }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 578     }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 579 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 580     @Override public void onFail() {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 581       entity.setFailNum(entity.getFailNum() + 1);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 582       saveData(IEntity.STATE_FAIL, lastLen);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 583       handleSpeed(0);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 584       reTry();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 585     }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 586 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 587     /**</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 588      * 失败后重试下载，如果失败次数超过5次，不再重试</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 589      */</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 590     private void reTry() {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 591       if (entity.getFailNum() &lt; 5) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 592         reStartTask();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 593       } else {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 594         mFailNum++;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 595         mListener.onSubFail(entity);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 596         //如果失败的任务数大于实际的下载任务数，任务组停止下载</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 597         if (mFailNum &gt;= mActualTaskNum) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 598           closeTimer(false);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 599           mListener.onStop(mCurrentLocation);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 600         }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 601       }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 602     }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 603 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 604     private void reStartTask() {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 605       Timer timer = new Timer();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 606       timer.schedule(new TimerTask() {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 607         @Override public void run() {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 608           Downloader dt = mDownloaderMap.get(entity.getDownloadUrl());</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 609           dt.startDownload();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 610         }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 611       }, 3000);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 612     }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 613 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 614     private void handleSpeed(long speed) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 615       entity.setSpeed(speed);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 616       entity.setConvertSpeed(speed &lt;= 0 ? &quot;&quot; : CommonUtil.formatFileSize(speed) + &quot;/s&quot;);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 617     }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 618 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 619     private void saveData(int state, long location) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 620       entity.setState(state);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 621       entity.setComplete(state == IEntity.STATE_COMPLETE);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 622       if (entity.isComplete()) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 623         entity.setCompleteTime(System.currentTimeMillis());</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 624         entity.setCurrentProgress(entity.getFileSize());</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 625       } else if (location &gt; 0) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 626         entity.setCurrentProgress(location);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 627       }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 628       entity.update();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 629     }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 630 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 631     @Override public void supportBreakpoint(boolean support) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 632 </span>
+ 633 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 634     return new HttpFileInfoThread(taskEntity, callback);</span>
+ 635 &gt;&gt;&gt;&gt;&gt;&gt;&gt; GitAnalyzerPlus_theirs
+ 636   }
+ 637 }</pre></td>
+                            <td><pre>   1 /*
+   2  * Copyright (C) 2016 AriaLyy(https://github.com/AriaLyy/Aria)
+   3  *
+   4  * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+   5  * you may not use this file except in compliance with the License.
+   6  * You may obtain a copy of the License at
+   7  *
+   8  *      http://www.apache.org/licenses/LICENSE-2.0
+   9  *
+  10  * Unless required by applicable law or agreed to in writing, software
+  11  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  12  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  13  * See the License for the specific language governing permissions and
+  14  * limitations under the License.
+  15  */
+  16 package com.arialyy.aria.core.download.downloader;
+  17 
+  18 import android.util.SparseArray;
+  19 import com.arialyy.aria.core.common.IUtil;
+  20 import com.arialyy.aria.core.download.DownloadGroupTaskEntity;
+  21 import com.arialyy.aria.core.download.DownloadTaskEntity;
+  22 import com.arialyy.aria.core.inf.IEntity;
+  23 import java.util.Set;
+  24 import java.util.concurrent.ExecutorService;
+  25 import java.util.concurrent.Executors;
+  26 
+  27 /**
+  28  * Created by AriaL on 2017/6/30.
+  29  * 任务组下载工具
+  30  */
+  31 public class DownloadGroupUtil extends AbsGroupUtil implements IUtil {
+  32 &lt;&lt;&lt;&lt;&lt;&lt;&lt; MINE
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  33 </span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  34 </span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  35  /**</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  36   * 子任务事件监听</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  37   */</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  38  private class ChildDownloadListener implements IDownloadListener {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  39 </span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  40   DownloadTaskEntity taskEntity;</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  41   DownloadEntity entity;</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  42 </span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  43   long lastLen = 0;</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  44 </span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  45   ChildDownloadListener(DownloadTaskEntity entity) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  46    this.taskEntity = entity;</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  47    this.entity = taskEntity.getEntity();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  48    lastLen = this.entity.getCurrentProgress();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  49    this.entity.setFailNum(0);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  50   }</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  51 </span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  52   @Override public void onPre() {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  53    saveData(IEntity.STATE_PRE, -1);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  54   }</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  55 </span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  56   @Override public void onPostPre(long fileSize) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  57    entity.setFileSize(fileSize);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  58    entity.setConvertFileSize(CommonUtil.formatFileSize(fileSize));</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  59    saveData(IEntity.STATE_POST_PRE, -1);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  60   }</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  61 </span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  62   @Override public void onResume(long resumeLocation) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  63    saveData(IEntity.STATE_POST_PRE, IEntity.STATE_RUNNING);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  64    lastLen = resumeLocation;</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  65   }</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  66 </span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  67   @Override public void onStart(long startLocation) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  68    saveData(IEntity.STATE_POST_PRE, IEntity.STATE_RUNNING);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  69    lastLen = startLocation;</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  70   }</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  71 </span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  72   @Override public void onProgress(long currentLocation) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  73    long speed = currentLocation - lastLen;</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  74    mCurrentLocation += speed;</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  75    lastLen = currentLocation;</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  76    entity.setCurrentProgress(currentLocation);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  77    handleSpeed(speed);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  78   }</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  79 </span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  80   @Override public void onStop(long stopLocation) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  81    saveData(IEntity.STATE_STOP, stopLocation);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  82    handleSpeed(0);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  83    mListener.onSubStop(entity);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  84   }</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  85 </span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  86   @Override public void onCancel() {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  87    saveData(IEntity.STATE_CANCEL, -1);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  88    handleSpeed(0);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  89    mListener.onSubCancel(entity);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  90   }</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  91 </span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  92   @Override public void onComplete() {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  93    saveData(IEntity.STATE_COMPLETE, entity.getFileSize());</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  94    mCompleteNum++;</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  95    handleSpeed(0);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  96    mListener.onSubComplete(entity);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  97    //如果子任务完成的数量和总任务数一致，表示任务组任务已经完成</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  98    if (mCompleteNum &gt;= mTaskEntity.getEntity().getSubTask().size()) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  99     closeTimer(false);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 100     mListener.onComplete();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 101    } else if (mCompleteNum + mFailNum &gt;= mActualTaskNum) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 102     //如果子任务完成数量加上失败的数量和总任务数一致，则任务组停止下载</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 103     closeTimer(false);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 104     mListener.onComplete();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 105    }</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 106   }</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 107 </span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 108   @Override public void onFail() {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 109    entity.setFailNum(entity.getFailNum() + 1);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 110    saveData(IEntity.STATE_FAIL, lastLen);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 111    handleSpeed(0);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 112    reTry();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 113   }</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 114 </span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 115   /**</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 116    * 失败后重试下载，如果失败次数超过5次，不再重试</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 117    */</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 118   private void reTry() {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 119    if (entity.getFailNum() &lt; 5) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 120     reStartTask();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 121    } else {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 122     mFailNum++;</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 123     mListener.onSubFail(entity);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 124     //如果失败的任务数大于实际的下载任务数，任务组停止下载</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 125     if (mFailNum &gt;= mActualTaskNum) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 126      closeTimer(false);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 127      mListener.onStop(mCurrentLocation);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 128     }</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 129    }</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 130   }</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 131 </span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 132   private void reStartTask() {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 133    Timer timer = new Timer();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 134    timer.schedule(new TimerTask() {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 135     @Override public void run() {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 136      Downloader dt = mDownloaderMap.get(entity.getDownloadUrl());</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 137      dt.startDownload();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 138     }</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 139    }, 3000);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 140   }</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 141 </span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 142   private void handleSpeed(long speed) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 143    entity.setSpeed(speed);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 144    entity.setConvertSpeed(speed &lt;= 0 ? &quot;&quot; : CommonUtil.formatFileSize(speed) + &quot;/s&quot;);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 145   }</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 146 </span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 147   private void saveData(int state, long location) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 148    entity.setState(state);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 149    entity.setComplete(state == IEntity.STATE_COMPLETE);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 150    if (entity.isComplete()) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 151     entity.setCompleteTime(System.currentTimeMillis());</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 152     entity.setCurrentProgress(entity.getFileSize());</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 153    } else if (location &gt; 0) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 154     entity.setCurrentProgress(location);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 155    }</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 156    entity.update();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 157   }</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 158 </span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 159   @Override public void supportBreakpoint(boolean support) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 160 </span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 161   }</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 162  }</span>
+ 163 ||||||| BASE
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 164 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 165 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 166  /**</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 167   * 子任务事件监听</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 168   */</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 169  private class ChildDownloadListener implements IDownloadListener {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 170 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 171   DownloadTaskEntity taskEntity;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 172   DownloadEntity entity;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 173 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 174   long lastLen = 0;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 175 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 176   ChildDownloadListener(DownloadTaskEntity entity) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 177    this.taskEntity = entity;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 178    this.entity = taskEntity.getEntity();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 179    lastLen = this.entity.getCurrentProgress();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 180    this.entity.setFailNum(0);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 181   }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 182 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 183   @Override public void onPre() {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 184    saveData(IEntity.STATE_PRE, -1);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 185   }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 186 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 187   @Override public void onPostPre(long fileSize) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 188    entity.setFileSize(fileSize);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 189    entity.setConvertFileSize(CommonUtil.formatFileSize(fileSize));</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 190    saveData(IEntity.STATE_POST_PRE, -1);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 191   }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 192 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 193   @Override public void onResume(long resumeLocation) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 194    saveData(IEntity.STATE_POST_PRE, IEntity.STATE_RUNNING);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 195    lastLen = resumeLocation;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 196   }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 197 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 198   @Override public void onStart(long startLocation) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 199    saveData(IEntity.STATE_POST_PRE, IEntity.STATE_RUNNING);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 200    lastLen = startLocation;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 201   }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 202 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 203   @Override public void onProgress(long currentLocation) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 204    long speed = currentLocation - lastLen;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 205    mCurrentLocation += speed;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 206    lastLen = currentLocation;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 207    entity.setCurrentProgress(currentLocation);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 208    handleSpeed(speed);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 209   }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 210 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 211   @Override public void onStop(long stopLocation) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 212    saveData(IEntity.STATE_STOP, stopLocation);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 213    handleSpeed(0);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 214    mListener.onSubStop(entity);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 215   }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 216 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 217   @Override public void onCancel() {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 218    saveData(IEntity.STATE_CANCEL, -1);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 219    handleSpeed(0);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 220    mListener.onSubCancel(entity);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 221   }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 222 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 223   @Override public void onComplete() {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 224    saveData(IEntity.STATE_COMPLETE, entity.getFileSize());</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 225    mCompleteNum++;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 226    handleSpeed(0);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 227    mListener.onSubComplete(entity);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 228    //如果子任务完成的数量和总任务数一致，表示任务组任务已经完成</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 229    if (mCompleteNum &gt;= mTaskEntity.getEntity().getSubTask().size()){</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 230     closeTimer(false);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 231     mListener.onComplete();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 232    }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 233    //如果子任务完成数量加上失败的数量和总任务数一致，则任务组停止下载</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 234    if (mCompleteNum + mFailNum &gt;= mActualTaskNum) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 235     closeTimer(false);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 236     mListener.onComplete();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 237    }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 238   }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 239 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 240   @Override public void onFail() {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 241    entity.setFailNum(entity.getFailNum() + 1);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 242    saveData(IEntity.STATE_FAIL, lastLen);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 243    handleSpeed(0);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 244    reTry();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 245   }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 246 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 247   /**</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 248    * 失败后重试下载，如果失败次数超过5次，不再重试</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 249    */</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 250   private void reTry() {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 251    if (entity.getFailNum() &lt; 5) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 252     reStartTask();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 253    } else {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 254     mFailNum++;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 255     mListener.onSubFail(entity);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 256     //如果失败的任务数大于实际的下载任务数，任务组停止下载</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 257     if (mFailNum &gt;= mActualTaskNum) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 258      closeTimer(false);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 259      mListener.onStop(mCurrentLocation);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 260     }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 261    }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 262   }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 263 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 264   private void reStartTask() {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 265    Timer timer = new Timer();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 266    timer.schedule(new TimerTask() {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 267     @Override public void run() {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 268      Downloader dt = mDownloaderMap.get(entity.getDownloadUrl());</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 269      dt.startDownload();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 270     }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 271    }, 3000);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 272   }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 273 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 274   private void handleSpeed(long speed) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 275    entity.setSpeed(speed);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 276    entity.setConvertSpeed(speed &lt;= 0 ? &quot;&quot; : CommonUtil.formatFileSize(speed) + &quot;/s&quot;);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 277   }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 278 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 279   private void saveData(int state, long location) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 280    entity.setState(state);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 281    entity.setComplete(state == IEntity.STATE_COMPLETE);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 282    if (entity.isComplete()) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 283     entity.setCompleteTime(System.currentTimeMillis());</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 284     entity.setCurrentProgress(entity.getFileSize());</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 285    } else if (location &gt; 0) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 286     entity.setCurrentProgress(location);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 287    }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 288    entity.update();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 289   }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 290 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 291   @Override public void supportBreakpoint(boolean support) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 292 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 293   }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 294  }</span>
+ 295 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 296 </span>
+ 297 &gt;&gt;&gt;&gt;&gt;&gt;&gt; YOURS
+ 298   private final String TAG = &quot;DownloadGroupUtil&quot;;
+ 299   private ExecutorService mInfoPool;
+ 300 
+ 301   /**
+ 302    * 文件信息回调组
+ 303    */
+ 304   private SparseArray&lt;OnFileInfoCallback&gt; mFileInfoCallbacks = new SparseArray&lt;&gt;();
+ 305 
+ 306   public DownloadGroupUtil(IDownloadGroupListener listener, DownloadGroupTaskEntity taskEntity) {
+ 307     super(listener, taskEntity);
+ 308     mInfoPool = Executors.newCachedThreadPool();
+ 309   }
+ 310 
+ 311   @Override protected void onStart() {
+ 312     super.onStart();
+ 313     Set&lt;String&gt; keys = mExeMap.keySet();
+ 314     int i = 0;
+ 315     for (String key : keys) {
+ 316       DownloadTaskEntity taskEntity = mExeMap.get(key);
+ 317       if (taskEntity != null) {
+ 318         if (taskEntity.getState() != IEntity.STATE_FAIL
+ 319             &amp;&amp; taskEntity.getState() != IEntity.STATE_WAIT) {
+ 320           startChildDownload(taskEntity);
+ 321           i++;
+ 322         } else {
+ 323           mInfoPool.execute(createFileInfoThread(taskEntity));
+ 324         }
+ 325       }
+ 326     }
+ 327     if (i == mExeMap.size()) startRunningFlow();
+ 328   }
+ 329 
+ 330   @Override public void onCancel() {
+ 331     super.onCancel();
+ 332     if (!mInfoPool.isShutdown()) {
+ 333       mInfoPool.shutdown();
+ 334     }
+ 335   }
+ 336 
+ 337   @Override protected void onStop() {
+ 338     super.onStop();
+ 339     if (!mInfoPool.isShutdown()) {
+ 340       mInfoPool.shutdown();
+ 341     }
+ 342   }
+ 343 
+ 344   /**
+ 345    * 创建文件信息获取线程
+ 346    */
+ 347   private HttpFileInfoThread createFileInfoThread(DownloadTaskEntity taskEntity) {
+ 348     OnFileInfoCallback callback = mFileInfoCallbacks.get(taskEntity.hashCode());
+ 349 
+ 350     if (callback == null) {
+ 351       callback = new OnFileInfoCallback() {
+ 352         int failNum = 0;
+ 353 
+ 354         @Override public void onComplete(String url, int code) {
+ 355           DownloadTaskEntity te = mExeMap.get(url);
+ 356           if (te != null) {
+ 357             mTotalSize += te.getEntity().getFileSize();
+ 358             startChildDownload(te);
+ 359           }
+ 360           mInitNum++;
+ 361           if (mInitNum + mInitFailNum &gt;= mTaskEntity.getEntity().getSubTask().size()) {
+ 362             startRunningFlow();
+ 363           }
+ 364         }
+ 365 
+ 366         @Override public void onFail(String url, String errorMsg) {
+ 367           DownloadTaskEntity te = mExeMap.get(url);
+ 368           if (te != null) {
+ 369             mFailMap.put(url, te);
+ 370             mFileInfoCallbacks.put(te.hashCode(), this);
+ 371           }
+ 372           //404链接不重试下载
+ 373           if (failNum &lt; 10 &amp;&amp; !errorMsg.contains(&quot;错误码：404&quot;) &amp;&amp; !errorMsg.contains(
+ 374               &quot;UnknownHostException&quot;)) {
+ 375             mInfoPool.execute(createFileInfoThread(te));
+ 376           } else {
+ 377             mInitFailNum++;
+ 378             mActualTaskNum--;
+ 379             if (mActualTaskNum &lt; 0) mActualTaskNum = 0;
+ 380           }
+ 381           failNum++;
+ 382           if (mInitNum + mInitFailNum &gt;= mTaskEntity.getEntity().getSubTask().size()) {
+ 383             startRunningFlow();
+ 384           }
+ 385         }
+ 386       };
+ 387     }
+ 388     return new HttpFileInfoThread(taskEntity, callback);
+ 389   }
+ 390 }
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ </pre></td>
+                            <td><pre>   1 /*
+   2  * Copyright (C) 2016 AriaLyy(https://github.com/AriaLyy/Aria)
+   3  *
+   4  * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+   5  * you may not use this file except in compliance with the License.
+   6  * You may obtain a copy of the License at
+   7  *
+   8  *      http://www.apache.org/licenses/LICENSE-2.0
+   9  *
+  10  * Unless required by applicable law or agreed to in writing, software
+  11  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  12  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  13  * See the License for the specific language governing permissions and
+  14  * limitations under the License.
+  15  */
+  16 package com.arialyy.aria.core.download.downloader;
+  17 
+  18 import android.util.SparseArray;
+  19 import com.arialyy.aria.core.common.IUtil;
+  20 import com.arialyy.aria.core.download.DownloadGroupTaskEntity;
+  21 import com.arialyy.aria.core.download.DownloadTaskEntity;
+  22 import com.arialyy.aria.core.inf.IEntity;
+  23 import java.util.Set;
+  24 import java.util.concurrent.ExecutorService;
+  25 import java.util.concurrent.Executors;
+  26 
+  27 
+  28 /**
+  29  * Created by AriaL on 2017/6/30.
+  30  * 任务组下载工具
+  31  */
+  32 public class DownloadGroupUtil extends AbsGroupUtil implements IUtil {
+  33   private final String TAG = &quot;DownloadGroupUtil&quot;;
+  34 
+  35   private ExecutorService mInfoPool;
+  36 
+  37   /**
+  38    * 文件信息回调组
+  39    */
+  40   private SparseArray&lt;OnFileInfoCallback&gt; mFileInfoCallbacks = new SparseArray&lt;&gt;();
+  41 
+  42   public DownloadGroupUtil(IDownloadGroupListener listener, DownloadGroupTaskEntity taskEntity) {
+  43     super(listener, taskEntity);
+  44     mInfoPool = Executors.newCachedThreadPool();
+  45   }
+  46 
+  47   @Override
+  48   public void onCancel() {
+  49     super.onCancel();
+  50     if (!mInfoPool.isShutdown()) {
+  51       mInfoPool.shutdown();
+  52     }
+  53   }
+  54 
+  55   @Override
+  56   protected void onStop() {
+  57     super.onStop();
+  58     if (!mInfoPool.isShutdown()) {
+  59       mInfoPool.shutdown();
+  60     }
+  61   }
+  62 
+  63   @Override
+  64   protected void onStart() {
+  65     super.onStart();
+  66     Set&lt;String&gt; keys = mExeMap.keySet();
+  67     int i = 0;
+  68     for (String key : keys) {
+  69       DownloadTaskEntity taskEntity = mExeMap.get(key);
+  70       if (taskEntity != null) {
+<abbr title="  71         if ((taskEntity.getState() != IEntity.STATE_FAIL) &amp;&amp; (taskEntity.getState() != IEntity.STATE_WAIT)) {">  71         if ((taskEntity.getState() != IEntity.STATE_FAIL) &amp;&amp; (taskEntity.getState() != IEntity.STATE_WAIT🔵</abbr>
+  72           startChildDownload(taskEntity);
+  73           i++;
+  74         } else {
+  75           mInfoPool.execute(createFileInfoThread(taskEntity));
+  76         }
+  77       }
+  78     }
+  79     if (i == mExeMap.size()) {
+  80       startRunningFlow();
+  81     }
+  82   }
+  83 
+  84   /**
+  85    * 创建文件信息获取线程
+  86    */
+  87   private HttpFileInfoThread createFileInfoThread(DownloadTaskEntity taskEntity) {
+  88     OnFileInfoCallback callback = mFileInfoCallbacks.get(taskEntity.hashCode());
+  89     if (callback == null) {
+  90       callback = new OnFileInfoCallback() {
+  91         int failNum = 0;
+  92 
+  93         @Override
+  94         public void onComplete(String url, int code) {
+  95           DownloadTaskEntity te = mExeMap.get(url);
+  96           if (te != null) {
+  97             mTotalSize += te.getEntity().getFileSize();
+  98             startChildDownload(te);
+  99           }
+ 100           mInitNum++;
+ 101           if ((mInitNum + mInitFailNum) &gt;= mTaskEntity.getEntity().getSubTask().size()) {
+ 102             startRunningFlow();
+ 103           }
+ 104         }
+ 105 
+ 106         @Override
+ 107         public void onFail(String url, String errorMsg) {
+ 108           DownloadTaskEntity te = mExeMap.get(url);
+ 109           if (te != null) {
+ 110             mFailMap.put(url, te);
+ 111             mFileInfoCallbacks.put(te.hashCode(), this);
+ 112           }
+ 113           //404链接不重试下载
+<abbr title=" 114           if (((failNum &lt; 10) &amp;&amp; (!errorMsg.contains(&quot;错误码：404&quot;))) &amp;&amp; (!errorMsg.contains(&quot;UnknownHostException&quot;))) {"> 114           if (((failNum &lt; 10) &amp;&amp; (!errorMsg.contains(&quot;错误码：404&quot;))) &amp;&amp; (!errorMsg.contains(&quot;UnknownHostExce🔵</abbr>
+ 115             mInfoPool.execute(createFileInfoThread(te));
+ 116           } else {
+ 117             mInitFailNum++;
+ 118             mActualTaskNum--;
+ 119             if (mActualTaskNum &lt; 0) {
+ 120               mActualTaskNum = 0;
+ 121             }
+ 122           }
+ 123           failNum++;
+ 124           if ((mInitNum + mInitFailNum) &gt;= mTaskEntity.getEntity().getSubTask().size()) {
+ 125             startRunningFlow();
+ 126           }
+ 127         }
+ 128       };
+ 129     }
+ 130     return new HttpFileInfoThread(taskEntity, callback);
+ 131   }
+ 132 }
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ </pre></td>
+                        </tr>
+                    </table>
+                </div>
+                <div id="bottom">
+                    <table style="margin:auto">
+                        <tr>
+                            <th>ours vs. base</th>
+                            <th>theirs vs. base</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1  /*
+   2   * Copyright (C) 2016 AriaLyy(https://github.com/AriaLyy/Aria)
+   3   *
+   4   * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+   5   * you may not use this file except in compliance with the License.
+   6   * You may obtain a copy of the License at
+   7   *
+   8   *      http://www.apache.org/licenses/LICENSE-2.0
+   9   *
+  10   * Unless required by applicable law or agreed to in writing, software
+  11   * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  12   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  13   * See the License for the specific language governing permissions and
+  14   * limitations under the License.
+  15   */
+  16  package com.arialyy.aria.core.download.downloader;
+  17  
+  18  import android.util.SparseArray;
+  19  import com.arialyy.aria.core.download.DownloadEntity;
+
+  20  import com.arialyy.aria.core.download.DownloadGroupTaskEntity;
+  21  import com.arialyy.aria.core.download.DownloadTaskEntity;
+  22  import com.arialyy.aria.core.inf.IEntity;
+  23  import com.arialyy.aria.orm.DbEntity;
+  24  import com.arialyy.aria.util.CommonUtil;
+  25  import java.io.File;
+  26  import java.util.HashMap;
+  27  import java.util.List;
+  28  import java.util.Map;
+  29  import java.util.Set;
+  30  import java.util.Timer;
+  31  import java.util.TimerTask;
+  32  import java.util.concurrent.ExecutorService;
+  33  import java.util.concurrent.Executors;
+  34  
+  35  /**
+  36   * Created by AriaL on 2017/6/30.
+  37   * 任务组下载工具
+  38   */
+  39  public class DownloadGroupUtil implements IDownloadUtil {
+
+  40    private final String TAG = &quot;DownloadGroupUtil&quot;;
+  41    /**
+  42     * 任务组所有任务总大小
+  43     */
+  44    private long mTotalSize = 0;
+  45    private long mCurrentLocation = 0;
+  46    private ExecutorService mInfoPool;
+  47    private ExecutorService mExePool;
+  48    private IDownloadGroupListener mListener;
+  49    private DownloadGroupTaskEntity mTaskEntity;
+  50    private boolean isRunning = true;
+  51    private Timer mTimer;
+  52    /**
+  53     * 初始化完成的任务书数
+  54     */
+  55    private int mInitNum = 0;
+  56    /**
+  57     * 初始化失败的任务数
+  58     */
+  59    private int mInitFailNum = 0;
+  60    /**
+  61     * 保存所有没有下载完成的任务，key为下载地址
+  62     */
+  63    private Map&lt;String, DownloadTaskEntity&gt; mExeMap = new HashMap&lt;&gt;();
+  64  
+  65    /**
+  66     * 下载失败的映射表，key为下载地址
+  67     */
+  68    private Map&lt;String, DownloadTaskEntity&gt; mFailMap = new HashMap&lt;&gt;();
+  69  
+  70    /**
+  71     * 下载器映射表，key为下载地址
+  72     */
+  73    private Map&lt;String, Downloader&gt; mDownloaderMap = new HashMap&lt;&gt;();
+  74  
+  75    /**
+  76     * 文件信息回调组
+  77     */
+  78    private SparseArray&lt;FileInfoThread.OnFileInfoCallback&gt; mFileInfoCallbacks = new SparseArray&lt;&gt;();
+  79    /**
+  80     * 该任务组对应的所有任务
+  81     */
+  82    private Map&lt;String, DownloadTaskEntity&gt; mTasksMap = new HashMap&lt;&gt;();
+  83    //已经完成的任务数
+  84    private int mCompleteNum = 0;
+  85    //失败的任务数
+  86    private int mFailNum = 0;
+  87    //实际的下载任务数
+  88    private int mActualTaskNum = 0;
+
+  89  
+  90    public DownloadGroupUtil(IDownloadGroupListener listener, DownloadGroupTaskEntity taskEntity) {
+  91      mListener = listener;
+  92      mTaskEntity = taskEntity;
+
+  93      mInfoPool = Executors.newCachedThreadPool();
+  94      mExePool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+  95      mActualTaskNum = mTaskEntity.entity.getSubTask().size();
+  96      List&lt;DownloadTaskEntity&gt; tasks =
+  97          DbEntity.findDatas(DownloadTaskEntity.class, &quot;groupName=?&quot;, mTaskEntity.key);
+  98      if (tasks != null &amp;&amp; !tasks.isEmpty()) {
+  99        for (DownloadTaskEntity te : tasks) {
+ 100          mTasksMap.put(te.getEntity().getDownloadUrl(), te);
+ 101        }
+ 102      }
+ 103      for (DownloadEntity entity : mTaskEntity.entity.getSubTask()) {
+ 104        File file = new File(entity.getDownloadPath());
+ 105        if (entity.getState() == IEntity.STATE_COMPLETE &amp;&amp; file.exists()) {
+ 106          mCompleteNum++;
+ 107          mInitNum++;
+ 108          mCurrentLocation += entity.getFileSize();
+ 109        } else {
+ 110          mExeMap.put(entity.getDownloadUrl(), createChildDownloadTask(entity));
+ 111          mCurrentLocation += entity.getCurrentProgress();
+ 112        }
+ 113        mTotalSize += entity.getFileSize();
+
+
+
+
+
+
+ 114      }
+ 115    }
+ 116  
+ 117    @Override public long getFileSize() {
+ 118      return mTotalSize;
+ 119    }
+ 120  
+ 121    @Override public long getCurrentLocation() {
+ 122      return mCurrentLocation;
+ 123    }
+ 124  
+ 125    @Override public boolean isDownloading() {
+ 126      return isRunning;
+ 127    }
+ 128  
+ 129    @Override public void cancelDownload() {
+ 130      closeTimer(false);
+ 131      mListener.onCancel();
+
+
+ 132      if (!mInfoPool.isShutdown()) {
+ 133        mInfoPool.shutdown();
+ 134      }
+ 135      if (!mExePool.isShutdown()) {
+ 136        mExePool.shutdown();
+ 137      }
+ 138  
+ 139      Set&lt;String&gt; keys = mDownloaderMap.keySet();
+ 140      for (String key : keys) {
+ 141        Downloader dt = mDownloaderMap.get(key);
+ 142        if (dt != null) {
+ 143          dt.cancelDownload();
+ 144        }
+ 145      }
+ 146      delDownloadInfo();
+ 147      mTaskEntity.deleteData();
+ 148    }
+ 149  
+ 150    /**
+ 151     * 删除所有子任务的下载信息
+ 152     */
+ 153    private void delDownloadInfo() {
+ 154      List&lt;DownloadTaskEntity&gt; tasks =
+ 155          DbEntity.findDatas(DownloadTaskEntity.class, &quot;groupName=?&quot;, mTaskEntity.key);
+ 156      if (tasks == null || tasks.isEmpty()) return;
+ 157      for (DownloadTaskEntity taskEntity : tasks) {
+ 158        CommonUtil.delDownloadTaskConfig(taskEntity.removeFile, taskEntity);
+ 159      }
+ 160    }
+ 161  
+ 162    @Override public void stopDownload() {
+ 163      closeTimer(false);
+ 164      mListener.onStop(mCurrentLocation);
+ 165      if (!mInfoPool.isShutdown()) {
+ 166        mInfoPool.shutdown();
+ 167      }
+ 168      if (!mExePool.isShutdown()) {
+ 169        mExePool.shutdown();
+ 170      }
+ 171  
+ 172      Set&lt;String&gt; keys = mDownloaderMap.keySet();
+ 173      for (String key : keys) {
+ 174        Downloader dt = mDownloaderMap.get(key);
+ 175        if (dt != null) {
+ 176          dt.stopDownload();
+ 177        }
+ 178      }
+ 179    }
+ 180  
+ 181    @Override public void startDownload() {
+ 182      isRunning = true;
+ 183      mFailNum = 0;
+
+
+ 184      Set&lt;String&gt; keys = mExeMap.keySet();
+ 185      mListener.onPre();
+ 186      int i = 0;
+ 187      for (String key : keys) {
+ 188        DownloadTaskEntity taskEntity = mExeMap.get(key);
+ 189        if (taskEntity != null) {
+ 190          if (taskEntity.getState() != IEntity.STATE_FAIL
+ 191              &amp;&amp; taskEntity.getState() != IEntity.STATE_WAIT) {
+ 192            startChildDownload(taskEntity);
+ 193            i++;
+ 194          } else {
+ 195            mInfoPool.execute(createFileInfoThread(taskEntity));
+ 196          }
+ 197        }
+ 198      }
+ 199      if (i == mExeMap.size()) startRunningFlow();
+ 200    }
+ 201  
+ 202    @Override public void resumeDownload() {
+ 203      startDownload();
+ 204      mListener.onResume(mCurrentLocation);
+ 205    }
+ 206  
+ 207    /**
+ 208     * 创建文件信息获取线程
+ 209     */
+ 210    private FileInfoThread createFileInfoThread(DownloadTaskEntity taskEntity) {
+ 211      FileInfoThread.OnFileInfoCallback callback = mFileInfoCallbacks.get(taskEntity.hashCode());
+
+
+ 212  
+ 213      if (callback == null) {
+ 214        callback = new FileInfoThread.OnFileInfoCallback() {
+
+ 215          int failNum = 0;
+ 216  
+ 217          @Override public void onComplete(String url, int code) {
+ 218            DownloadTaskEntity te = mExeMap.get(url);
+ 219            if (te != null) {
+ 220              mTotalSize += te.getEntity().getFileSize();
+ 221              startChildDownload(te);
+ 222            }
+ 223            mInitNum++;
+ 224            if (mInitNum + mInitFailNum &gt;= mTaskEntity.getEntity().getSubTask().size()) {
+ 225              startRunningFlow();
+ 226            }
+ 227          }
+ 228  
+ 229          @Override public void onFail(String url, String errorMsg) {
+ 230            DownloadTaskEntity te = mExeMap.get(url);
+ 231            if (te != null) {
+ 232              mFailMap.put(url, te);
+ 233              mFileInfoCallbacks.put(te.hashCode(), this);
+ 234            }
+ 235            //404链接不重试下载
+ 236            if (failNum &lt; 10 &amp;&amp; !errorMsg.contains(&quot;错误码：404&quot;) &amp;&amp; !errorMsg.contains(
+ 237                &quot;UnknownHostException&quot;)) {
+ 238              mInfoPool.execute(createFileInfoThread(te));
+ 239            } else {
+ 240              mInitFailNum++;
+ 241              mActualTaskNum--;
+ 242              if (mActualTaskNum &lt; 0) mActualTaskNum = 0;
+ 243            }
+ 244            failNum++;
+ 245            if (mInitNum + mInitFailNum &gt;= mTaskEntity.getEntity().getSubTask().size()) {
+ 246              startRunningFlow();
+ 247            }
+ 248          }
+ 249        };
+ 250      }
+ 251      return new FileInfoThread(taskEntity, callback);
+ 252    }
+ 253  
+ 254    private void closeTimer(boolean isRunning) {
+ 255      this.isRunning = isRunning;
+ 256      if (mTimer != null) {
+ 257        mTimer.purge();
+ 258        mTimer.cancel();
+ 259      }
+ 260    }
+ 261  
+ 262    /**
+ 263     * 开始进度流程
+ 264     */
+ 265    private void startRunningFlow() {
+ 266      closeTimer(true);
+ 267      mListener.onPostPre(mTotalSize);
+ 268      mListener.onStart(mCurrentLocation);
+ 269      mTimer = new Timer(true);
+ 270      mTimer.schedule(new TimerTask() {
+ 271        @Override public void run() {
+ 272          if (!isRunning) {
+ 273            closeTimer(false);
+ 274          } else if (mCurrentLocation &gt;= 0) {
+ 275            mListener.onProgress(mCurrentLocation);
+ 276          }
+ 277        }
+ 278      }, 0, 1000);
+ 279    }
+ 280  
+ 281    /**
+ 282     * 启动子任务下载器
+ 283     */
+ 284    private void startChildDownload(DownloadTaskEntity taskEntity) {
+ 285      ChildDownloadListener listener = new ChildDownloadListener(taskEntity);
+ 286      Downloader dt = new Downloader(listener, taskEntity);
+ 287      mDownloaderMap.put(taskEntity.getEntity().getDownloadUrl(), dt);
+ 288      if (mExePool.isShutdown()) return;
+ 289      mExePool.execute(dt);
+ 290    }
+ 291  
+ 292    /**
+ 293     * 创建子任务下载信息
+ 294     */
+ 295    private DownloadTaskEntity createChildDownloadTask(DownloadEntity entity) {
+ 296      DownloadTaskEntity taskEntity = mTasksMap.get(entity.getDownloadUrl());
+ 297      if (taskEntity != null) {
+ 298        taskEntity.entity = entity;
+ 299        return taskEntity;
+ 300      }
+ 301      taskEntity = new DownloadTaskEntity();
+ 302      taskEntity.entity = entity;
+ 303      taskEntity.headers = mTaskEntity.headers;
+ 304      taskEntity.requestEnum = mTaskEntity.requestEnum;
+ 305      taskEntity.redirectUrlKey = mTaskEntity.redirectUrlKey;
+ 306      taskEntity.removeFile = mTaskEntity.removeFile;
+ 307      taskEntity.groupName = mTaskEntity.key;
+ 308      taskEntity.isGroupTask = true;
+ 309      taskEntity.key = entity.getDownloadPath();
+ 310      taskEntity.save();
+ 311      return taskEntity;
+ 312    }
+ 313  
+ 314    /**
+ 315     * 子任务事件监听
+ 316     */
+ 317    private class ChildDownloadListener implements IDownloadListener {
+ 318  
+ 319      DownloadTaskEntity taskEntity;
+ 320      DownloadEntity entity;
+ 321  
+ 322      long lastLen = 0;
+ 323  
+ 324      ChildDownloadListener(DownloadTaskEntity entity) {
+ 325        this.taskEntity = entity;
+ 326        this.entity = taskEntity.getEntity();
+ 327        lastLen = this.entity.getCurrentProgress();
+ 328        this.entity.setFailNum(0);
+ 329      }
+ 330  
+ 331      @Override public void onPre() {
+ 332        saveData(IEntity.STATE_PRE, -1);
+ 333      }
+ 334  
+ 335      @Override public void onPostPre(long fileSize) {
+ 336        entity.setFileSize(fileSize);
+ 337        entity.setConvertFileSize(CommonUtil.formatFileSize(fileSize));
+ 338        saveData(IEntity.STATE_POST_PRE, -1);
+ 339      }
+ 340  
+ 341      @Override public void onResume(long resumeLocation) {
+ 342        saveData(IEntity.STATE_POST_PRE, IEntity.STATE_RUNNING);
+ 343        lastLen = resumeLocation;
+ 344      }
+ 345  
+ 346      @Override public void onStart(long startLocation) {
+ 347        saveData(IEntity.STATE_POST_PRE, IEntity.STATE_RUNNING);
+ 348        lastLen = startLocation;
+ 349      }
+ 350  
+ 351      @Override public void onProgress(long currentLocation) {
+ 352        long speed = currentLocation - lastLen;
+ 353        mCurrentLocation += speed;
+ 354        lastLen = currentLocation;
+ 355        entity.setCurrentProgress(currentLocation);
+ 356        handleSpeed(speed);
+ 357      }
+ 358  
+ 359      @Override public void onStop(long stopLocation) {
+ 360        saveData(IEntity.STATE_STOP, stopLocation);
+ 361        handleSpeed(0);
+ 362        mListener.onSubStop(entity);
+ 363      }
+ 364  
+ 365      @Override public void onCancel() {
+ 366        saveData(IEntity.STATE_CANCEL, -1);
+ 367        handleSpeed(0);
+ 368        mListener.onSubCancel(entity);
+ 369      }
+ 370  
+ 371      @Override public void onComplete() {
+ 372        saveData(IEntity.STATE_COMPLETE, entity.getFileSize());
+ 373        mCompleteNum++;
+ 374        handleSpeed(0);
+ 375        mListener.onSubComplete(entity);
+ 376        //如果子任务完成的数量和总任务数一致，表示任务组任务已经完成
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 377 -      if (mCompleteNum &gt;= mTaskEntity.getEntity().getSubTask().size()){</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 378 +      if (mCompleteNum &gt;= mTaskEntity.getEntity().getSubTask().size()) {</span>
+ 379          closeTimer(false);
+ 380          mListener.onComplete();
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 381 -      }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 382 -      //如果子任务完成数量加上失败的数量和总任务数一致，则任务组停止下载</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 383 -      if (mCompleteNum + mFailNum &gt;= mActualTaskNum) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 384 +      } else if (mCompleteNum + mFailNum &gt;= mActualTaskNum) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 385 +        //如果子任务完成数量加上失败的数量和总任务数一致，则任务组停止下载</span>
+ 386          closeTimer(false);
+ 387          mListener.onComplete();
+ 388        }
+ 389      }
+ 390  
+ 391      @Override public void onFail() {
+ 392        entity.setFailNum(entity.getFailNum() + 1);
+ 393        saveData(IEntity.STATE_FAIL, lastLen);
+ 394        handleSpeed(0);
+ 395        reTry();
+ 396      }
+ 397  
+ 398      /**
+ 399       * 失败后重试下载，如果失败次数超过5次，不再重试
+ 400       */
+ 401      private void reTry() {
+ 402        if (entity.getFailNum() &lt; 5) {
+ 403          reStartTask();
+ 404        } else {
+ 405          mFailNum++;
+ 406          mListener.onSubFail(entity);
+ 407          //如果失败的任务数大于实际的下载任务数，任务组停止下载
+ 408          if (mFailNum &gt;= mActualTaskNum) {
+ 409            closeTimer(false);
+ 410            mListener.onStop(mCurrentLocation);
+ 411          }
+ 412        }
+ 413      }
+ 414  
+ 415      private void reStartTask() {
+ 416        Timer timer = new Timer();
+ 417        timer.schedule(new TimerTask() {
+ 418          @Override public void run() {
+ 419            Downloader dt = mDownloaderMap.get(entity.getDownloadUrl());
+ 420            dt.startDownload();
+ 421          }
+ 422        }, 3000);
+ 423      }
+ 424  
+ 425      private void handleSpeed(long speed) {
+ 426        entity.setSpeed(speed);
+ 427        entity.setConvertSpeed(speed &lt;= 0 ? &quot;&quot; : CommonUtil.formatFileSize(speed) + &quot;/s&quot;);
+ 428      }
+ 429  
+ 430      private void saveData(int state, long location) {
+ 431        entity.setState(state);
+ 432        entity.setComplete(state == IEntity.STATE_COMPLETE);
+ 433        if (entity.isComplete()) {
+ 434          entity.setCompleteTime(System.currentTimeMillis());
+ 435          entity.setCurrentProgress(entity.getFileSize());
+ 436        } else if (location &gt; 0) {
+ 437          entity.setCurrentProgress(location);
+ 438        }
+ 439        entity.update();
+ 440      }
+ 441  
+ 442      @Override public void supportBreakpoint(boolean support) {
+ 443  
+ 444      }
+
+ 445    }
+ 446  }</pre></td>
+                            <td><pre>   1  /*
+   2   * Copyright (C) 2016 AriaLyy(https://github.com/AriaLyy/Aria)
+   3   *
+   4   * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+   5   * you may not use this file except in compliance with the License.
+   6   * You may obtain a copy of the License at
+   7   *
+   8   *      http://www.apache.org/licenses/LICENSE-2.0
+   9   *
+  10   * Unless required by applicable law or agreed to in writing, software
+  11   * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  12   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  13   * See the License for the specific language governing permissions and
+  14   * limitations under the License.
+  15   */
+  16  package com.arialyy.aria.core.download.downloader;
+  17  
+  18  import android.util.SparseArray;
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  19 -import com.arialyy.aria.core.download.DownloadEntity;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  20 +import com.arialyy.aria.core.common.IUtil;</span>
+  21  import com.arialyy.aria.core.download.DownloadGroupTaskEntity;
+  22  import com.arialyy.aria.core.download.DownloadTaskEntity;
+  23  import com.arialyy.aria.core.inf.IEntity;
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  24 -import com.arialyy.aria.orm.DbEntity;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  25 -import com.arialyy.aria.util.CommonUtil;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  26 -import java.io.File;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  27 -import java.util.HashMap;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  28 -import java.util.List;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  29 -import java.util.Map;</span>
+  30  import java.util.Set;
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  31 -import java.util.Timer;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  32 -import java.util.TimerTask;</span>
+  33  import java.util.concurrent.ExecutorService;
+  34  import java.util.concurrent.Executors;
+  35  
+  36  /**
+  37   * Created by AriaL on 2017/6/30.
+  38   * 任务组下载工具
+  39   */
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  40 -public class DownloadGroupUtil implements IDownloadUtil {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  41 +public class DownloadGroupUtil extends AbsGroupUtil implements IUtil {</span>
+  42    private final String TAG = &quot;DownloadGroupUtil&quot;;
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  43 -  /**</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  44 -   * 任务组所有任务总大小</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  45 -   */</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  46 -  private long mTotalSize = 0;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  47 -  private long mCurrentLocation = 0;</span>
+  48    private ExecutorService mInfoPool;
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  49 -  private ExecutorService mExePool;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  50 -  private IDownloadGroupListener mListener;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  51 -  private DownloadGroupTaskEntity mTaskEntity;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  52 -  private boolean isRunning = true;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  53 -  private Timer mTimer;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  54 -  /**</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  55 -   * 初始化完成的任务书数</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  56 -   */</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  57 -  private int mInitNum = 0;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  58 -  /**</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  59 -   * 初始化失败的任务数</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  60 -   */</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  61 -  private int mInitFailNum = 0;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  62 -  /**</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  63 -   * 保存所有没有下载完成的任务，key为下载地址</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  64 -   */</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  65 -  private Map&lt;String, DownloadTaskEntity&gt; mExeMap = new HashMap&lt;&gt;();</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  66 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  67 -  /**</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  68 -   * 下载失败的映射表，key为下载地址</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  69 -   */</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  70 -  private Map&lt;String, DownloadTaskEntity&gt; mFailMap = new HashMap&lt;&gt;();</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  71 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  72 -  /**</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  73 -   * 下载器映射表，key为下载地址</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  74 -   */</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  75 -  private Map&lt;String, Downloader&gt; mDownloaderMap = new HashMap&lt;&gt;();</span>
+  76  
+  77    /**
+  78     * 文件信息回调组
+  79     */
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  80 -  private SparseArray&lt;FileInfoThread.OnFileInfoCallback&gt; mFileInfoCallbacks = new SparseArray&lt;&gt;();</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  81 -  /**</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  82 -   * 该任务组对应的所有任务</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  83 -   */</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  84 -  private Map&lt;String, DownloadTaskEntity&gt; mTasksMap = new HashMap&lt;&gt;();</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  85 -  //已经完成的任务数</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  86 -  private int mCompleteNum = 0;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  87 -  //失败的任务数</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  88 -  private int mFailNum = 0;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  89 -  //实际的下载任务数</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  90 -  private int mActualTaskNum = 0;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  91 +  private SparseArray&lt;OnFileInfoCallback&gt; mFileInfoCallbacks = new SparseArray&lt;&gt;();</span>
+  92  
+  93    public DownloadGroupUtil(IDownloadGroupListener listener, DownloadGroupTaskEntity taskEntity) {
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  94 -    mListener = listener;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  95 -    mTaskEntity = taskEntity;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  96 +    super(listener, taskEntity);</span>
+  97      mInfoPool = Executors.newCachedThreadPool();
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  98 -    mExePool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  99 -    mActualTaskNum = mTaskEntity.entity.getSubTask().size();</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 100 -    List&lt;DownloadTaskEntity&gt; tasks =</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 101 -        DbEntity.findDatas(DownloadTaskEntity.class, &quot;groupName=?&quot;, mTaskEntity.key);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 102 -    if (tasks != null &amp;&amp; !tasks.isEmpty()) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 103 -      for (DownloadTaskEntity te : tasks) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 104 -        mTasksMap.put(te.getEntity().getDownloadUrl(), te);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 105 -      }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 106 -    }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 107 -    for (DownloadEntity entity : mTaskEntity.entity.getSubTask()) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 108 -      File file = new File(entity.getDownloadPath());</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 109 -      if (entity.getState() == IEntity.STATE_COMPLETE &amp;&amp; file.exists()) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 110 -        mCompleteNum++;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 111 -        mInitNum++;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 112 -        mCurrentLocation += entity.getFileSize();</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 113 -      } else {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 114 -        mExeMap.put(entity.getDownloadUrl(), createChildDownloadTask(entity));</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 115 -        mCurrentLocation += entity.getCurrentProgress();</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 116 -      }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 117 -      mTotalSize += entity.getFileSize();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 118 +  }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 119 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 120 +  @Override public void onCancel() {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 121 +    super.onCancel();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 122 +    if (!mInfoPool.isShutdown()) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 123 +      mInfoPool.shutdown();</span>
+ 124      }
+ 125    }
+ 126  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 127 -  @Override public long getFileSize() {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 128 -    return mTotalSize;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 129 -  }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 130 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 131 -  @Override public long getCurrentLocation() {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 132 -    return mCurrentLocation;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 133 -  }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 134 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 135 -  @Override public boolean isDownloading() {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 136 -    return isRunning;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 137 -  }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 138 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 139 -  @Override public void cancelDownload() {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 140 -    closeTimer(false);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 141 -    mListener.onCancel();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 142 +  @Override protected void onStop() {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 143 +    super.onStop();</span>
+ 144      if (!mInfoPool.isShutdown()) {
+ 145        mInfoPool.shutdown();
+ 146      }
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 147 -    if (!mExePool.isShutdown()) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 148 -      mExePool.shutdown();</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 149 -    }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 150 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 151 -    Set&lt;String&gt; keys = mDownloaderMap.keySet();</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 152 -    for (String key : keys) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 153 -      Downloader dt = mDownloaderMap.get(key);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 154 -      if (dt != null) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 155 -        dt.cancelDownload();</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 156 -      }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 157 -    }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 158 -    delDownloadInfo();</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 159 -    mTaskEntity.deleteData();</span>
+ 160    }
+ 161  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 162 -  /**</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 163 -   * 删除所有子任务的下载信息</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 164 -   */</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 165 -  private void delDownloadInfo() {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 166 -    List&lt;DownloadTaskEntity&gt; tasks =</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 167 -        DbEntity.findDatas(DownloadTaskEntity.class, &quot;groupName=?&quot;, mTaskEntity.key);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 168 -    if (tasks == null || tasks.isEmpty()) return;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 169 -    for (DownloadTaskEntity taskEntity : tasks) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 170 -      CommonUtil.delDownloadTaskConfig(taskEntity.removeFile, taskEntity);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 171 -    }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 172 -  }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 173 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 174 -  @Override public void stopDownload() {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 175 -    closeTimer(false);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 176 -    mListener.onStop(mCurrentLocation);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 177 -    if (!mInfoPool.isShutdown()) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 178 -      mInfoPool.shutdown();</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 179 -    }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 180 -    if (!mExePool.isShutdown()) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 181 -      mExePool.shutdown();</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 182 -    }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 183 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 184 -    Set&lt;String&gt; keys = mDownloaderMap.keySet();</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 185 -    for (String key : keys) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 186 -      Downloader dt = mDownloaderMap.get(key);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 187 -      if (dt != null) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 188 -        dt.stopDownload();</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 189 -      }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 190 -    }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 191 -  }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 192 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 193 -  @Override public void startDownload() {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 194 -    isRunning = true;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 195 -    mFailNum = 0;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 196 +  @Override protected void onStart() {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 197 +    super.onStart();</span>
+ 198      Set&lt;String&gt; keys = mExeMap.keySet();
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 199 -    mListener.onPre();</span>
+ 200      int i = 0;
+ 201      for (String key : keys) {
+ 202        DownloadTaskEntity taskEntity = mExeMap.get(key);
+ 203        if (taskEntity != null) {
+ 204          if (taskEntity.getState() != IEntity.STATE_FAIL
+ 205              &amp;&amp; taskEntity.getState() != IEntity.STATE_WAIT) {
+ 206            startChildDownload(taskEntity);
+ 207            i++;
+ 208          } else {
+ 209            mInfoPool.execute(createFileInfoThread(taskEntity));
+ 210          }
+ 211        }
+ 212      }
+ 213      if (i == mExeMap.size()) startRunningFlow();
+ 214    }
+ 215  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 216 -  @Override public void resumeDownload() {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 217 -    startDownload();</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 218 -    mListener.onResume(mCurrentLocation);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 219 -  }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 220 -</span>
+ 221    /**
+ 222     * 创建文件信息获取线程
+ 223     */
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 224 -  private FileInfoThread createFileInfoThread(DownloadTaskEntity taskEntity) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 225 -    FileInfoThread.OnFileInfoCallback callback = mFileInfoCallbacks.get(taskEntity.hashCode());</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 226 +  private HttpFileInfoThread createFileInfoThread(DownloadTaskEntity taskEntity) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 227 +    OnFileInfoCallback callback = mFileInfoCallbacks.get(taskEntity.hashCode());</span>
+ 228  
+ 229      if (callback == null) {
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 230 -      callback = new FileInfoThread.OnFileInfoCallback() {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 231 +      callback = new OnFileInfoCallback() {</span>
+ 232          int failNum = 0;
+ 233  
+ 234          @Override public void onComplete(String url, int code) {
+ 235            DownloadTaskEntity te = mExeMap.get(url);
+ 236            if (te != null) {
+ 237              mTotalSize += te.getEntity().getFileSize();
+ 238              startChildDownload(te);
+ 239            }
+ 240            mInitNum++;
+ 241            if (mInitNum + mInitFailNum &gt;= mTaskEntity.getEntity().getSubTask().size()) {
+ 242              startRunningFlow();
+ 243            }
+ 244          }
+ 245  
+ 246          @Override public void onFail(String url, String errorMsg) {
+ 247            DownloadTaskEntity te = mExeMap.get(url);
+ 248            if (te != null) {
+ 249              mFailMap.put(url, te);
+ 250              mFileInfoCallbacks.put(te.hashCode(), this);
+ 251            }
+ 252            //404链接不重试下载
+ 253            if (failNum &lt; 10 &amp;&amp; !errorMsg.contains(&quot;错误码：404&quot;) &amp;&amp; !errorMsg.contains(
+ 254                &quot;UnknownHostException&quot;)) {
+ 255              mInfoPool.execute(createFileInfoThread(te));
+ 256            } else {
+ 257              mInitFailNum++;
+ 258              mActualTaskNum--;
+ 259              if (mActualTaskNum &lt; 0) mActualTaskNum = 0;
+ 260            }
+ 261            failNum++;
+ 262            if (mInitNum + mInitFailNum &gt;= mTaskEntity.getEntity().getSubTask().size()) {
+ 263              startRunningFlow();
+ 264            }
+ 265          }
+ 266        };
+ 267      }
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 268 -    return new FileInfoThread(taskEntity, callback);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 269 -  }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 270 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 271 -  private void closeTimer(boolean isRunning) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 272 -    this.isRunning = isRunning;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 273 -    if (mTimer != null) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 274 -      mTimer.purge();</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 275 -      mTimer.cancel();</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 276 -    }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 277 -  }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 278 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 279 -  /**</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 280 -   * 开始进度流程</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 281 -   */</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 282 -  private void startRunningFlow() {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 283 -    closeTimer(true);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 284 -    mListener.onPostPre(mTotalSize);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 285 -    mListener.onStart(mCurrentLocation);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 286 -    mTimer = new Timer(true);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 287 -    mTimer.schedule(new TimerTask() {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 288 -      @Override public void run() {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 289 -        if (!isRunning) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 290 -          closeTimer(false);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 291 -        } else if (mCurrentLocation &gt;= 0) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 292 -          mListener.onProgress(mCurrentLocation);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 293 -        }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 294 -      }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 295 -    }, 0, 1000);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 296 -  }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 297 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 298 -  /**</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 299 -   * 启动子任务下载器</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 300 -   */</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 301 -  private void startChildDownload(DownloadTaskEntity taskEntity) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 302 -    ChildDownloadListener listener = new ChildDownloadListener(taskEntity);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 303 -    Downloader dt = new Downloader(listener, taskEntity);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 304 -    mDownloaderMap.put(taskEntity.getEntity().getDownloadUrl(), dt);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 305 -    if (mExePool.isShutdown()) return;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 306 -    mExePool.execute(dt);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 307 -  }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 308 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 309 -  /**</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 310 -   * 创建子任务下载信息</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 311 -   */</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 312 -  private DownloadTaskEntity createChildDownloadTask(DownloadEntity entity) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 313 -    DownloadTaskEntity taskEntity = mTasksMap.get(entity.getDownloadUrl());</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 314 -    if (taskEntity != null) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 315 -      taskEntity.entity = entity;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 316 -      return taskEntity;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 317 -    }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 318 -    taskEntity = new DownloadTaskEntity();</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 319 -    taskEntity.entity = entity;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 320 -    taskEntity.headers = mTaskEntity.headers;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 321 -    taskEntity.requestEnum = mTaskEntity.requestEnum;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 322 -    taskEntity.redirectUrlKey = mTaskEntity.redirectUrlKey;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 323 -    taskEntity.removeFile = mTaskEntity.removeFile;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 324 -    taskEntity.groupName = mTaskEntity.key;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 325 -    taskEntity.isGroupTask = true;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 326 -    taskEntity.key = entity.getDownloadPath();</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 327 -    taskEntity.save();</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 328 -    return taskEntity;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 329 -  }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 330 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 331 -  /**</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 332 -   * 子任务事件监听</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 333 -   */</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 334 -  private class ChildDownloadListener implements IDownloadListener {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 335 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 336 -    DownloadTaskEntity taskEntity;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 337 -    DownloadEntity entity;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 338 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 339 -    long lastLen = 0;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 340 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 341 -    ChildDownloadListener(DownloadTaskEntity entity) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 342 -      this.taskEntity = entity;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 343 -      this.entity = taskEntity.getEntity();</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 344 -      lastLen = this.entity.getCurrentProgress();</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 345 -      this.entity.setFailNum(0);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 346 -    }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 347 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 348 -    @Override public void onPre() {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 349 -      saveData(IEntity.STATE_PRE, -1);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 350 -    }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 351 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 352 -    @Override public void onPostPre(long fileSize) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 353 -      entity.setFileSize(fileSize);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 354 -      entity.setConvertFileSize(CommonUtil.formatFileSize(fileSize));</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 355 -      saveData(IEntity.STATE_POST_PRE, -1);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 356 -    }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 357 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 358 -    @Override public void onResume(long resumeLocation) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 359 -      saveData(IEntity.STATE_POST_PRE, IEntity.STATE_RUNNING);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 360 -      lastLen = resumeLocation;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 361 -    }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 362 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 363 -    @Override public void onStart(long startLocation) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 364 -      saveData(IEntity.STATE_POST_PRE, IEntity.STATE_RUNNING);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 365 -      lastLen = startLocation;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 366 -    }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 367 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 368 -    @Override public void onProgress(long currentLocation) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 369 -      long speed = currentLocation - lastLen;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 370 -      mCurrentLocation += speed;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 371 -      lastLen = currentLocation;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 372 -      entity.setCurrentProgress(currentLocation);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 373 -      handleSpeed(speed);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 374 -    }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 375 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 376 -    @Override public void onStop(long stopLocation) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 377 -      saveData(IEntity.STATE_STOP, stopLocation);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 378 -      handleSpeed(0);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 379 -      mListener.onSubStop(entity);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 380 -    }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 381 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 382 -    @Override public void onCancel() {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 383 -      saveData(IEntity.STATE_CANCEL, -1);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 384 -      handleSpeed(0);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 385 -      mListener.onSubCancel(entity);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 386 -    }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 387 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 388 -    @Override public void onComplete() {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 389 -      saveData(IEntity.STATE_COMPLETE, entity.getFileSize());</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 390 -      mCompleteNum++;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 391 -      handleSpeed(0);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 392 -      mListener.onSubComplete(entity);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 393 -      //如果子任务完成的数量和总任务数一致，表示任务组任务已经完成</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 394 -      if (mCompleteNum &gt;= mTaskEntity.getEntity().getSubTask().size()){</span>
+
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 395 -        closeTimer(false);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 396 -        mListener.onComplete();</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 397 -      }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 398 -      //如果子任务完成数量加上失败的数量和总任务数一致，则任务组停止下载</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 399 -      if (mCompleteNum + mFailNum &gt;= mActualTaskNum) {</span>
+
+
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 400 -        closeTimer(false);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 401 -        mListener.onComplete();</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 402 -      }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 403 -    }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 404 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 405 -    @Override public void onFail() {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 406 -      entity.setFailNum(entity.getFailNum() + 1);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 407 -      saveData(IEntity.STATE_FAIL, lastLen);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 408 -      handleSpeed(0);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 409 -      reTry();</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 410 -    }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 411 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 412 -    /**</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 413 -     * 失败后重试下载，如果失败次数超过5次，不再重试</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 414 -     */</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 415 -    private void reTry() {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 416 -      if (entity.getFailNum() &lt; 5) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 417 -        reStartTask();</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 418 -      } else {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 419 -        mFailNum++;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 420 -        mListener.onSubFail(entity);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 421 -        //如果失败的任务数大于实际的下载任务数，任务组停止下载</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 422 -        if (mFailNum &gt;= mActualTaskNum) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 423 -          closeTimer(false);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 424 -          mListener.onStop(mCurrentLocation);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 425 -        }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 426 -      }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 427 -    }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 428 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 429 -    private void reStartTask() {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 430 -      Timer timer = new Timer();</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 431 -      timer.schedule(new TimerTask() {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 432 -        @Override public void run() {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 433 -          Downloader dt = mDownloaderMap.get(entity.getDownloadUrl());</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 434 -          dt.startDownload();</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 435 -        }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 436 -      }, 3000);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 437 -    }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 438 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 439 -    private void handleSpeed(long speed) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 440 -      entity.setSpeed(speed);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 441 -      entity.setConvertSpeed(speed &lt;= 0 ? &quot;&quot; : CommonUtil.formatFileSize(speed) + &quot;/s&quot;);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 442 -    }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 443 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 444 -    private void saveData(int state, long location) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 445 -      entity.setState(state);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 446 -      entity.setComplete(state == IEntity.STATE_COMPLETE);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 447 -      if (entity.isComplete()) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 448 -        entity.setCompleteTime(System.currentTimeMillis());</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 449 -        entity.setCurrentProgress(entity.getFileSize());</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 450 -      } else if (location &gt; 0) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 451 -        entity.setCurrentProgress(location);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 452 -      }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 453 -      entity.update();</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 454 -    }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 455 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 456 -    @Override public void supportBreakpoint(boolean support) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 457 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 458 -    }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 459 +    return new HttpFileInfoThread(taskEntity, callback);</span>
+ 460    }
+ 461  }</pre></td>
+                        </tr>
+                    </table>
+                </div>
+              </body>
+            </html>
+            

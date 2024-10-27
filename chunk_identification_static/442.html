@@ -1,0 +1,1749 @@
+<!DOCTYPE html>
+    <html lang="en">
+              <head>
+                <meta charset="utf-8">
+                <title>442</title>
+                    <style>
+                        #top {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        #bottom {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        abbr {
+                          /* Here is the delay */
+                          transition-delay:0s;
+                        }
+                    </style>
+              </head>
+              <body>
+                <span style="height: 4vh">
+                    442
+                    <a href="441.html">prev</a>
+                    <a href="443.html">next</a>
+                    <a href="442_chunks.html">chunks</a>
+                    <a href="index.html">index</a>
+                    DTStack/flinkStreamSQL_5553ee5c6410a412ab4ed61d9499805adee8995a_cassandra/cassandra-side/cassandra-all-side/src/main/java/com/dtstack/flink/sql/side/cassandra/CassandraAllReqRow.java
+                    <textarea rows=1 onclick='navigator.clipboard.writeText(this.value)'>cd C:\studies\se\mega\git-analyzer-plus\notebooks\debug
+del /Q *
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;5553ee5c6410a412ab4ed61d9499805adee8995a:cassandra/cassandra-side/cassandra-all-side/src/main/java/com/dtstack/flink/sql/side/cassandra/CassandraAllReqRow.java&quot; &gt; committed.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;5553ee5c6410a412ab4ed61d9499805adee8995a^1:cassandra/cassandra-side/cassandra-all-side/src/main/java/com/dtstack/flink/sql/side/cassandra/CassandraAllReqRow.java&quot; &gt; ours.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;5553ee5c6410a412ab4ed61d9499805adee8995a^2:cassandra/cassandra-side/cassandra-all-side/src/main/java/com/dtstack/flink/sql/side/cassandra/CassandraAllReqRow.java&quot; &gt; theirs.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;e0a10435dcb243a911c0405daebc6aa667d5119d:cassandra/cassandra-side/cassandra-all-side/src/main/java/com/dtstack/flink/sql/side/cassandra/CassandraAllReqRow.java&quot; &gt; base.java
+copy ours.java 1ours.java
+copy ours.java 2ours.java
+copy theirs.java 1theirs.java
+copy theirs.java 2theirs.java
+copy base.java 1base.java
+copy base.java 2base.java
+&quot;C:\Program Files\Java\jdk1.8.0_241\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\jFSTMerge\build\libs\jFSTMerge-all.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\jfstmerge.java --show-base
+&quot;C:\Program Files\Eclipse Adoptium\jdk-17.0.11.9-hotspot\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\spork\target\spork-0.5.0-SNAPSHOT.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\spork.java
+del /Q 1*.java
+del /Q 2*.java
+del /Q jfstmerge.java.merge
+</textarea>
+                    {strict: [[b], [bj]], subset: [[b], [bj]]}
+                </span>
+                <div id="top">
+
+                    <table>
+                        <tr>
+                            <th>line based (standard git)</th>
+                            <th>jfstmerge</th>
+                            <th>spork</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1 /*
+   2  * Licensed to the Apache Software Foundation (ASF) under one
+   3  * or more contributor license agreements.  See the NOTICE file
+   4  * distributed with this work for additional information
+   5  * regarding copyright ownership.  The ASF licenses this file
+   6  * to you under the Apache License, Version 2.0 (the
+   7  * &quot;License&quot;); you may not use this file except in compliance
+   8  * with the License.  You may obtain a copy of the License at
+   9  *
+  10  *     http://www.apache.org/licenses/LICENSE-2.0
+  11  *
+  12  * Unless required by applicable law or agreed to in writing, software
+  13  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15  * See the License for the specific language governing permissions and
+  16  * limitations under the License.
+  17  */
+  18 
+  19 package com.dtstack.flink.sql.side.cassandra;
+  20 
+  21 import com.datastax.driver.core.*;
+  22 import com.datastax.driver.core.policies.DowngradingConsistencyRetryPolicy;
+  23 import com.datastax.driver.core.policies.RetryPolicy;
+  24 import com.dtstack.flink.sql.side.AbstractSideTableInfo;
+  25 import com.dtstack.flink.sql.side.BaseAllReqRow;
+  26 import com.dtstack.flink.sql.side.FieldInfo;
+  27 import com.dtstack.flink.sql.side.JoinInfo;
+  28 import com.dtstack.flink.sql.side.cassandra.table.CassandraSideTableInfo;
+  29 import com.dtstack.flink.sql.util.RowDataComplete;
+  30 import com.google.common.collect.Lists;
+  31 import com.google.common.collect.Maps;
+  32 import org.apache.calcite.sql.JoinType;
+  33 import org.apache.commons.collections.CollectionUtils;
+  34 import org.apache.commons.lang3.StringUtils;
+  35 import org.apache.flink.api.java.tuple.Tuple2;
+  36 import org.apache.flink.api.java.typeutils.RowTypeInfo;
+  37 import org.apache.flink.table.dataformat.BaseRow;
+  38 import org.apache.flink.types.Row;
+  39 import org.apache.flink.util.Collector;
+  40 import org.slf4j.Logger;
+  41 import org.slf4j.LoggerFactory;
+  42 
+  43 import java.net.InetAddress;
+  44 import java.sql.SQLException;
+  45 &lt;&lt;&lt;&lt;&lt;&lt;&lt; GitAnalyzerPlus_ours
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  46 import java.util.ArrayList;</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  47 import java.util.Calendar;</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  48 import java.util.List;</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  49 import java.util.Map;</span>
+  50 ||||||| GitAnalyzerPlus_base
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  51 import org.apache.commons.collections.CollectionUtils;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  52 import org.apache.commons.lang3.StringUtils;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  53 import org.slf4j.Logger;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  54 import org.slf4j.LoggerFactory;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  55 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  56 import java.net.InetAddress;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  57 import java.sql.SQLException;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  58 import java.sql.Timestamp;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  59 import java.util.ArrayList;</span>
+  60 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  61 import java.sql.Timestamp;</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  62 import java.util.*;</span>
+  63 &gt;&gt;&gt;&gt;&gt;&gt;&gt; GitAnalyzerPlus_theirs
+  64 import java.util.concurrent.atomic.AtomicReference;
+  65 
+  66 /**
+  67  * Reason:
+  68  * Date: 2018/11/22
+  69  *
+  70  * @author xuqianjin
+  71  */
+  72 public class CassandraAllReqRow extends BaseAllReqRow {
+  73 
+  74     private static final long serialVersionUID = 54015343561288219L;
+  75 
+  76     private static final Logger LOG = LoggerFactory.getLogger(CassandraAllReqRow.class);
+  77 
+  78     private static final int CONN_RETRY_NUM = 3;
+  79 
+  80     private static final int FETCH_SIZE = 1000;
+  81 
+  82     private transient Cluster cluster;
+  83     private transient Session session = null;
+  84 
+  85     private AtomicReference&lt;Map&lt;String, List&lt;Map&lt;String, Object&gt;&gt;&gt;&gt; cacheRef = new AtomicReference&lt;&gt;();
+  86 
+<abbr title="  87     public CassandraAllReqRow(RowTypeInfo rowTypeInfo, JoinInfo joinInfo, List&lt;FieldInfo&gt; outFieldInfoList, AbstractSideTableInfo sideTableInfo) {">  87     public CassandraAllReqRow(RowTypeInfo rowTypeInfo, JoinInfo joinInfo, List&lt;FieldInfo&gt; outFieldInfoLis🔵</abbr>
+<abbr title="  88         super(new com.dtstack.flink.sql.side.cassandra.CassandraAllSideInfo(rowTypeInfo, joinInfo, outFieldInfoList, sideTableInfo));">  88         super(new com.dtstack.flink.sql.side.cassandra.CassandraAllSideInfo(rowTypeInfo, joinInfo, outFie🔵</abbr>
+  89     }
+  90 
+  91     @Override
+  92     public Row fillData(Row input, Object sideInput) {
+  93         Map&lt;String, Object&gt; cacheInfo = (Map&lt;String, Object&gt;) sideInput;
+  94         Row row = new Row(sideInfo.getOutFieldInfoList().size());
+  95         for (Map.Entry&lt;Integer, Integer&gt; entry : sideInfo.getInFieldIndex().entrySet()) {
+  96             Object obj = input.getField(entry.getValue());
+  97 &lt;&lt;&lt;&lt;&lt;&lt;&lt; GitAnalyzerPlus_ours
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  98             obj = convertTimeIndictorTypeInfo(entry.getValue(), obj);</span>
+  99 ||||||| GitAnalyzerPlus_base
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 100     }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 101 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 102     @Override</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 103     public Row fillData(Row input, Object sideInput) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 104         Map&lt;String, Object&gt; cacheInfo = (Map&lt;String, Object&gt;) sideInput;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 105         Row row = new Row(sideInfo.getOutFieldInfoList().size());</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 106         for (Map.Entry&lt;Integer, Integer&gt; entry : sideInfo.getInFieldIndex().entrySet()) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 107             Object obj = input.getField(entry.getValue());</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"><abbr title=" 108             boolean isTimeIndicatorTypeInfo = TimeIndicatorTypeInfo.class.isAssignableFrom(sideInfo.getRowTypeInfo().getTypeAt(entry.getValue()).getClass());"> 108             boolean isTimeIndicatorTypeInfo = TimeIndicatorTypeInfo.class.isAssignableFrom(sideInfo.getRo🔵</abbr></span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 109 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"><abbr title=" 110             //Type information for indicating event or processing time. However, it behaves like a regular SQL timestamp but is serialized as Long."> 110             //Type information for indicating event or processing time. However, it behaves like a regula🔵</abbr></span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 111             if (obj instanceof Timestamp &amp;&amp; isTimeIndicatorTypeInfo) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 112                 obj = ((Timestamp) obj).getTime();</span>
+ 113 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"><abbr title=" 114             boolean isTimeIndicatorTypeInfo = TimeIndicatorTypeInfo.class.isAssignableFrom(sideInfo.getRowTypeInfo().getTypeAt(entry.getValue()).getClass());"> 114             boolean isTimeIndicatorTypeInfo = TimeIndicatorTypeInfo.class.isAssignableFrom(sideInfo.getRo🔵</abbr></span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 115 </span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"><abbr title=" 116             //Type information for indicating event or processing time. However, it behaves like a regular SQL timestamp but is serialized as Long."> 116             //Type information for indicating event or processing time. However, it behaves like a regula🔵</abbr></span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 117             if (obj instanceof Timestamp &amp;&amp; isTimeIndicatorTypeInfo) {</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 118                 //去除上一层OutputRowtimeProcessFunction 调用时区导致的影响</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"><abbr title=" 119                 obj = ((Timestamp) obj).getTime() + (long)LOCAL_TZ.getOffset(((Timestamp) obj).getTime());"> 119                 obj = ((Timestamp) obj).getTime() + (long)LOCAL_TZ.getOffset(((Timestamp) obj).getTime())🔵</abbr></span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 120             }</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 121 </span>
+ 122 &gt;&gt;&gt;&gt;&gt;&gt;&gt; GitAnalyzerPlus_theirs
+ 123             row.setField(entry.getKey(), obj);
+ 124         }
+ 125 
+ 126         for (Map.Entry&lt;Integer, String&gt; entry : sideInfo.getSideFieldNameIndex().entrySet()) {
+ 127             if (cacheInfo == null) {
+ 128                 row.setField(entry.getKey(), null);
+ 129             } else {
+ 130                 row.setField(entry.getKey(), cacheInfo.get(entry.getValue()));
+ 131             }
+ 132         }
+ 133 
+ 134         return row;
+ 135     }
+ 136 
+ 137     @Override
+ 138     protected void initCache() throws SQLException {
+ 139         Map&lt;String, List&lt;Map&lt;String, Object&gt;&gt;&gt; newCache = Maps.newConcurrentMap();
+ 140         cacheRef.set(newCache);
+ 141         loadData(newCache);
+ 142     }
+ 143 
+ 144     @Override
+ 145     protected void reloadCache() {
+ 146         //reload cacheRef and replace to old cacheRef
+ 147         Map&lt;String, List&lt;Map&lt;String, Object&gt;&gt;&gt; newCache = Maps.newConcurrentMap();
+ 148         try {
+ 149             loadData(newCache);
+ 150         } catch (SQLException e) {
+ 151             LOG.error(&quot;&quot;, e);
+ 152         }
+ 153 
+ 154         cacheRef.set(newCache);
+ 155         LOG.info(&quot;----- cassandra all cacheRef reload end:{}&quot;, Calendar.getInstance());
+ 156     }
+ 157 
+ 158 
+ 159     @Override
+ 160     public void flatMap(Row input, Collector&lt;BaseRow&gt; out) throws Exception {
+ 161         List&lt;Object&gt; inputParams = Lists.newArrayList();
+ 162         for (Integer conValIndex : sideInfo.getEqualValIndex()) {
+ 163             Object equalObj = input.getField(conValIndex);
+ 164             if (equalObj == null) {
+ 165                 if (sideInfo.getJoinType() == JoinType.LEFT) {
+ 166                     Row row = fillData(input, null);
+ 167                     RowDataComplete.collectRow(out, row);
+ 168                 }
+ 169                 return;
+ 170             }
+ 171 
+ 172             inputParams.add(equalObj);
+ 173         }
+ 174 
+ 175         String key = buildKey(inputParams);
+ 176         List&lt;Map&lt;String, Object&gt;&gt; cacheList = cacheRef.get().get(key);
+ 177         if (CollectionUtils.isEmpty(cacheList)) {
+ 178             if (sideInfo.getJoinType() == JoinType.LEFT) {
+ 179                 Row row = fillData(input, null);
+ 180                 RowDataComplete.collectRow(out, row);
+ 181             } else {
+ 182                 return;
+ 183             }
+ 184 
+ 185             return;
+ 186         }
+ 187 
+ 188         for (Map&lt;String, Object&gt; one : cacheList) {
+ 189             Row row = fillData(input, one);
+ 190             RowDataComplete.collectRow(out, row);
+ 191         }
+ 192 
+ 193     }
+ 194 
+ 195     private String buildKey(List&lt;Object&gt; equalValList) {
+ 196         StringBuilder sb = new StringBuilder(&quot;&quot;);
+ 197         for (Object equalVal : equalValList) {
+ 198             sb.append(equalVal).append(&quot;_&quot;);
+ 199         }
+ 200 
+ 201         return sb.toString();
+ 202     }
+ 203 
+ 204     private String buildKey(Map&lt;String, Object&gt; val, List&lt;String&gt; equalFieldList) {
+ 205         StringBuilder sb = new StringBuilder(&quot;&quot;);
+ 206         for (String equalField : equalFieldList) {
+ 207             sb.append(val.get(equalField)).append(&quot;_&quot;);
+ 208         }
+ 209 
+ 210         return sb.toString();
+ 211     }
+ 212 
+ 213     private Session getConn(CassandraSideTableInfo tableInfo) {
+ 214         try {
+ 215             if (session == null) {
+ 216                 QueryOptions queryOptions = new QueryOptions();
+ 217                 //The default consistency level for queries: ConsistencyLevel.TWO.
+ 218                 queryOptions.setConsistencyLevel(ConsistencyLevel.QUORUM);
+<abbr title=" 219                 Integer maxRequestsPerConnection = tableInfo.getMaxRequestsPerConnection() == null ? 1 : tableInfo.getMaxRequestsPerConnection();"> 219                 Integer maxRequestsPerConnection = tableInfo.getMaxRequestsPerConnection() == null ? 1 : 🔵</abbr>
+<abbr title=" 220                 Integer coreConnectionsPerHost = tableInfo.getCoreConnectionsPerHost() == null ? 8 : tableInfo.getCoreConnectionsPerHost();"> 220                 Integer coreConnectionsPerHost = tableInfo.getCoreConnectionsPerHost() == null ? 8 : tabl🔵</abbr>
+<abbr title=" 221                 Integer maxConnectionsPerHost = tableInfo.getMaxConnectionsPerHost() == null ? 32768 : tableInfo.getMaxConnectionsPerHost();"> 221                 Integer maxConnectionsPerHost = tableInfo.getMaxConnectionsPerHost() == null ? 32768 : ta🔵</abbr>
+<abbr title=" 222                 Integer maxQueueSize = tableInfo.getMaxQueueSize() == null ? 100000 : tableInfo.getMaxQueueSize();"> 222                 Integer maxQueueSize = tableInfo.getMaxQueueSize() == null ? 100000 : tableInfo.getMaxQue🔵</abbr>
+<abbr title=" 223                 Integer readTimeoutMillis = tableInfo.getReadTimeoutMillis() == null ? 60000 : tableInfo.getReadTimeoutMillis();"> 223                 Integer readTimeoutMillis = tableInfo.getReadTimeoutMillis() == null ? 60000 : tableInfo.🔵</abbr>
+<abbr title=" 224                 Integer connectTimeoutMillis = tableInfo.getConnectTimeoutMillis() == null ? 60000 : tableInfo.getConnectTimeoutMillis();"> 224                 Integer connectTimeoutMillis = tableInfo.getConnectTimeoutMillis() == null ? 60000 : tabl🔵</abbr>
+<abbr title=" 225                 Integer poolTimeoutMillis = tableInfo.getPoolTimeoutMillis() == null ? 60000 : tableInfo.getPoolTimeoutMillis();"> 225                 Integer poolTimeoutMillis = tableInfo.getPoolTimeoutMillis() == null ? 60000 : tableInfo.🔵</abbr>
+ 226                 Integer cassandraPort = 0;
+ 227                 String address = tableInfo.getAddress();
+ 228                 String userName = tableInfo.getUserName();
+ 229                 String password = tableInfo.getPassword();
+ 230                 String database = tableInfo.getDatabase();
+ 231 
+ 232                 ArrayList serversList = new ArrayList();
+ 233                 //Read timeout or connection timeout Settings
+ 234                 SocketOptions so = new SocketOptions()
+ 235                         .setReadTimeoutMillis(readTimeoutMillis)
+ 236                         .setConnectTimeoutMillis(connectTimeoutMillis);
+ 237 
+ 238                 //The cluster USES hostdistance.local in the same machine room
+ 239                 //Hostdistance. REMOTE is used for different machine rooms
+ 240                 //Ignore use HostDistance. IGNORED
+ 241                 PoolingOptions poolingOptions = new PoolingOptions()
+ 242                         //Each connection allows a maximum of 64 concurrent requests
+ 243                         .setMaxRequestsPerConnection(HostDistance.LOCAL, maxRequestsPerConnection)
+ 244                         //Have at least two connections to each machine in the cluster
+ 245                         .setCoreConnectionsPerHost(HostDistance.LOCAL, coreConnectionsPerHost)
+ 246                         //There are up to eight connections to each machine in the cluster
+ 247                         .setMaxConnectionsPerHost(HostDistance.LOCAL, maxConnectionsPerHost)
+ 248                         .setMaxQueueSize(maxQueueSize)
+ 249                         .setPoolTimeoutMillis(poolTimeoutMillis);
+ 250                 //重试策略
+ 251                 RetryPolicy retryPolicy = DowngradingConsistencyRetryPolicy.INSTANCE;
+ 252 
+ 253                 for (String server : StringUtils.split(address, &quot;,&quot;)) {
+ 254                     cassandraPort = Integer.parseInt(StringUtils.split(server, &quot;:&quot;)[1]);
+ 255                     serversList.add(InetAddress.getByName(StringUtils.split(server, &quot;:&quot;)[0]));
+ 256                 }
+ 257 
+ 258                 if (userName == null || userName.isEmpty() || password == null || password.isEmpty()) {
+<abbr title=" 259                     cluster = Cluster.builder().addContactPoints(serversList).withRetryPolicy(retryPolicy)"> 259                     cluster = Cluster.builder().addContactPoints(serversList).withRetryPolicy(retryPolicy🔵</abbr>
+ 260                             .withPort(cassandraPort)
+ 261                             .withPoolingOptions(poolingOptions).withSocketOptions(so)
+ 262                             .withQueryOptions(queryOptions).build();
+ 263                 } else {
+<abbr title=" 264                     cluster = Cluster.builder().addContactPoints(serversList).withRetryPolicy(retryPolicy)"> 264                     cluster = Cluster.builder().addContactPoints(serversList).withRetryPolicy(retryPolicy🔵</abbr>
+ 265                             .withPort(cassandraPort)
+ 266                             .withPoolingOptions(poolingOptions).withSocketOptions(so)
+ 267                             .withCredentials(userName, password)
+ 268                             .withQueryOptions(queryOptions).build();
+ 269                 }
+ 270                 // 建立连接 连接已存在的键空间
+ 271                 session = cluster.connect(database);
+ 272                 LOG.info(&quot;connect cassandra is successed!&quot;);
+ 273             }
+ 274         } catch (Exception e) {
+ 275             LOG.error(&quot;connect cassandra is error:&quot; + e.getMessage());
+ 276         }
+ 277         return session;
+ 278     }
+ 279 
+ 280 
+ 281     private void loadData(Map&lt;String, List&lt;Map&lt;String, Object&gt;&gt;&gt; tmpCache) throws SQLException {
+ 282         CassandraSideTableInfo tableInfo = (CassandraSideTableInfo) sideInfo.getSideTableInfo();
+ 283         Session session = null;
+ 284 
+ 285         try {
+ 286             for (int i = 0; i &lt; CONN_RETRY_NUM; i++) {
+ 287                 try {
+ 288                     session = getConn(tableInfo);
+ 289                     break;
+ 290                 } catch (Exception e) {
+ 291                     if (i == CONN_RETRY_NUM - 1) {
+ 292                         throw new RuntimeException(&quot;&quot;, e);
+ 293                     }
+ 294                     try {
+<abbr title=" 295                         String connInfo = &quot;address:&quot; + tableInfo.getAddress() + &quot;;userName:&quot; + tableInfo.getUserName()"> 295                         String connInfo = &quot;address:&quot; + tableInfo.getAddress() + &quot;;userName:&quot; + tableInfo.🔵</abbr>
+ 296                                 + &quot;,pwd:&quot; + tableInfo.getPassword();
+ 297                         LOG.warn(&quot;get conn fail, wait for 5 sec and try again, connInfo:&quot; + connInfo);
+ 298                         Thread.sleep(LOAD_DATA_ERROR_SLEEP_TIME);
+ 299                     } catch (InterruptedException e1) {
+ 300                         LOG.error(&quot;&quot;, e1);
+ 301                     }
+ 302                 }
+ 303 
+ 304             }
+ 305 
+ 306             //load data from table
+ 307             String sql = sideInfo.getSqlCondition() + &quot; limit &quot; + FETCH_SIZE;
+ 308             ResultSet resultSet = session.execute(sql);
+ 309             String[] sideFieldNames = StringUtils.split(sideInfo.getSideSelectFields(), &quot;,&quot;);
+ 310             for (com.datastax.driver.core.Row row : resultSet) {
+ 311                 Map&lt;String, Object&gt; oneRow = Maps.newHashMap();
+ 312                 for (String fieldName : sideFieldNames) {
+ 313                     oneRow.put(fieldName.trim(), row.getObject(fieldName.trim()));
+ 314                 }
+ 315                 String cacheKey = buildKey(oneRow, sideInfo.getEqualFieldList());
+<abbr title=" 316                 List&lt;Map&lt;String, Object&gt;&gt; list = tmpCache.computeIfAbsent(cacheKey, key -&gt; Lists.newArrayList());"> 316                 List&lt;Map&lt;String, Object&gt;&gt; list = tmpCache.computeIfAbsent(cacheKey, key -&gt; Lists.newArray🔵</abbr>
+ 317                 list.add(oneRow);
+ 318             }
+ 319         } catch (Exception e) {
+ 320             LOG.error(&quot;&quot;, e);
+ 321         } finally {
+ 322             try {
+ 323                 if (session != null) {
+ 324                     session.close();
+ 325                 }
+ 326             } catch (Exception e) {
+ 327                 LOG.error(&quot;Error while closing session.&quot;, e);
+ 328             }
+ 329             try {
+ 330                 if (cluster != null) {
+ 331                     cluster.close();
+ 332                 }
+ 333             } catch (Exception e) {
+ 334                 LOG.error(&quot;Error while closing cluster.&quot;, e);
+ 335             }
+ 336         }
+ 337     }
+ 338 }</pre></td>
+                            <td><pre>   1 /*
+   2  * Licensed to the Apache Software Foundation (ASF) under one
+   3  * or more contributor license agreements.  See the NOTICE file
+   4  * distributed with this work for additional information
+   5  * regarding copyright ownership.  The ASF licenses this file
+   6  * to you under the Apache License, Version 2.0 (the
+   7  * &quot;License&quot;); you may not use this file except in compliance
+   8  * with the License.  You may obtain a copy of the License at
+   9  *
+  10  *     http://www.apache.org/licenses/LICENSE-2.0
+  11  *
+  12  * Unless required by applicable law or agreed to in writing, software
+  13  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15  * See the License for the specific language governing permissions and
+  16  * limitations under the License.
+  17  */
+  18 
+  19 package com.dtstack.flink.sql.side.cassandra;
+  20 
+  21 import com.datastax.driver.core.*;
+  22 import org.apache.flink.api.java.typeutils.RowTypeInfo;
+  23 import org.apache.flink.table.dataformat.BaseRow;
+  24 import org.apache.flink.types.Row;
+  25 import org.apache.flink.util.Collector;
+  26 import com.datastax.driver.core.policies.DowngradingConsistencyRetryPolicy;
+  27 import com.datastax.driver.core.policies.RetryPolicy;
+  28 import com.dtstack.flink.sql.side.BaseAllReqRow;
+  29 import com.dtstack.flink.sql.side.FieldInfo;
+  30 import com.dtstack.flink.sql.side.JoinInfo;
+  31 import com.dtstack.flink.sql.side.AbstractSideTableInfo;
+  32 import com.dtstack.flink.sql.side.cassandra.table.CassandraSideTableInfo;
+  33 import com.dtstack.flink.sql.util.RowDataComplete;
+  34 import com.google.common.collect.Lists;
+  35 import com.google.common.collect.Maps;
+  36 import org.apache.calcite.sql.JoinType;
+  37 import org.apache.commons.collections.CollectionUtils;
+  38 import org.apache.commons.lang3.StringUtils;
+  39 import org.apache.flink.api.java.tuple.Tuple2;
+  40 import org.slf4j.Logger;
+  41 import org.slf4j.LoggerFactory;
+  42 
+  43 import java.net.InetAddress;
+  44 import java.sql.SQLException;
+  45 import java.util.*;
+  46 import java.util.concurrent.atomic.AtomicReference;
+  47 
+  48 /**
+  49  * Reason:
+  50  * Date: 2018/11/22
+  51  *
+  52  * @author xuqianjin
+  53  */
+  54 public class CassandraAllReqRow extends BaseAllReqRow {
+  55 
+  56     private static final long serialVersionUID = 54015343561288219L;
+  57 
+  58     private static final Logger LOG = LoggerFactory.getLogger(CassandraAllReqRow.class);
+  59 
+  60     private static final int CONN_RETRY_NUM = 3;
+  61 
+  62     private static final int FETCH_SIZE = 1000;
+  63 
+  64     private transient Cluster cluster;
+  65     private transient Session session = null;
+  66 
+  67     private AtomicReference&lt;Map&lt;String, List&lt;Map&lt;String, Object&gt;&gt;&gt;&gt; cacheRef = new AtomicReference&lt;&gt;();
+  68 
+<abbr title="  69     public CassandraAllReqRow(RowTypeInfo rowTypeInfo, JoinInfo joinInfo, List&lt;FieldInfo&gt; outFieldInfoList, AbstractSideTableInfo sideTableInfo) {">  69     public CassandraAllReqRow(RowTypeInfo rowTypeInfo, JoinInfo joinInfo, List&lt;FieldInfo&gt; outFieldInfoLis🔵</abbr>
+<abbr title="  70         super(new com.dtstack.flink.sql.side.cassandra.CassandraAllSideInfo(rowTypeInfo, joinInfo, outFieldInfoList, sideTableInfo));">  70         super(new com.dtstack.flink.sql.side.cassandra.CassandraAllSideInfo(rowTypeInfo, joinInfo, outFie🔵</abbr>
+  71     }
+  72 
+  73     @Override
+  74     public Row fillData(Row input, Object sideInput) {
+  75         Map&lt;String, Object&gt; cacheInfo = (Map&lt;String, Object&gt;) sideInput;
+  76         Row row = new Row(sideInfo.getOutFieldInfoList().size());
+  77         for (Map.Entry&lt;Integer, Integer&gt; entry : sideInfo.getInFieldIndex().entrySet()) {
+  78             Object obj = input.getField(entry.getValue());
+  79 &lt;&lt;&lt;&lt;&lt;&lt;&lt; MINE
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  80             obj = convertTimeIndictorTypeInfo(entry.getValue(), obj);</span>
+  81 ||||||| BASE
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"><abbr title="  82             boolean isTimeIndicatorTypeInfo = TimeIndicatorTypeInfo.class.isAssignableFrom(sideInfo.getRowTypeInfo().getTypeAt(entry.getValue()).getClass());">  82             boolean isTimeIndicatorTypeInfo = TimeIndicatorTypeInfo.class.isAssignableFrom(sideInfo.getRo🔵</abbr></span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  83 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"><abbr title="  84             //Type information for indicating event or processing time. However, it behaves like a regular SQL timestamp but is serialized as Long.">  84             //Type information for indicating event or processing time. However, it behaves like a regula🔵</abbr></span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  85             if (obj instanceof Timestamp &amp;&amp; isTimeIndicatorTypeInfo) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  86                 obj = ((Timestamp) obj).getTime();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  87             }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  88             row.setField(entry.getKey(), obj);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  89         }</span>
+  90 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"><abbr title="  91             boolean isTimeIndicatorTypeInfo = TimeIndicatorTypeInfo.class.isAssignableFrom(sideInfo.getRowTypeInfo().getTypeAt(entry.getValue()).getClass());">  91             boolean isTimeIndicatorTypeInfo = TimeIndicatorTypeInfo.class.isAssignableFrom(sideInfo.getRo🔵</abbr></span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  92 </span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"><abbr title="  93             //Type information for indicating event or processing time. However, it behaves like a regular SQL timestamp but is serialized as Long.">  93             //Type information for indicating event or processing time. However, it behaves like a regula🔵</abbr></span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  94             if (obj instanceof Timestamp &amp;&amp; isTimeIndicatorTypeInfo) {</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  95                 //去除上一层OutputRowtimeProcessFunction 调用时区导致的影响</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"><abbr title="  96                 obj = ((Timestamp) obj).getTime() + (long)LOCAL_TZ.getOffset(((Timestamp) obj).getTime());">  96                 obj = ((Timestamp) obj).getTime() + (long)LOCAL_TZ.getOffset(((Timestamp) obj).getTime())🔵</abbr></span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  97             }</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  98 </span>
+  99 &gt;&gt;&gt;&gt;&gt;&gt;&gt; YOURS
+ 100             row.setField(entry.getKey(), obj);
+ 101         }
+ 102 
+ 103         for (Map.Entry&lt;Integer, String&gt; entry : sideInfo.getSideFieldNameIndex().entrySet()) {
+ 104             if (cacheInfo == null) {
+ 105                 row.setField(entry.getKey(), null);
+ 106             } else {
+ 107                 row.setField(entry.getKey(), cacheInfo.get(entry.getValue()));
+ 108             }
+ 109         }
+ 110 
+ 111         return row;
+ 112     }
+ 113 
+ 114     @Override
+ 115     protected void initCache() throws SQLException {
+ 116         Map&lt;String, List&lt;Map&lt;String, Object&gt;&gt;&gt; newCache = Maps.newConcurrentMap();
+ 117         cacheRef.set(newCache);
+ 118         loadData(newCache);
+ 119     }
+ 120 
+ 121     @Override
+ 122     protected void reloadCache() {
+ 123         //reload cacheRef and replace to old cacheRef
+ 124         Map&lt;String, List&lt;Map&lt;String, Object&gt;&gt;&gt; newCache = Maps.newConcurrentMap();
+ 125         try {
+ 126             loadData(newCache);
+ 127         } catch (SQLException e) {
+ 128             LOG.error(&quot;&quot;, e);
+ 129         }
+ 130 
+ 131         cacheRef.set(newCache);
+ 132         LOG.info(&quot;----- cassandra all cacheRef reload end:{}&quot;, Calendar.getInstance());
+ 133     }
+ 134 
+ 135 
+ 136     @Override
+ 137     public void flatMap(Row input, Collector&lt;BaseRow&gt; out) throws Exception {
+ 138         List&lt;Object&gt; inputParams = Lists.newArrayList();
+ 139         for (Integer conValIndex : sideInfo.getEqualValIndex()) {
+ 140             Object equalObj = input.getField(conValIndex);
+ 141             if (equalObj == null) {
+ 142                 if(sideInfo.getJoinType() == JoinType.LEFT){
+ 143                     Row row = fillData(input, null);
+ 144                     RowDataComplete.collectRow(out, row);
+ 145                 }
+ 146                 return;
+ 147             }
+ 148 
+ 149             inputParams.add(equalObj);
+ 150         }
+ 151 
+ 152         String key = buildKey(inputParams);
+ 153         List&lt;Map&lt;String, Object&gt;&gt; cacheList = cacheRef.get().get(key);
+ 154         if (CollectionUtils.isEmpty(cacheList)) {
+ 155             if (sideInfo.getJoinType() == JoinType.LEFT) {
+ 156                 Row row = fillData(input, null);
+ 157                 RowDataComplete.collectRow(out, row);
+ 158             } else {
+ 159                 return;
+ 160             }
+ 161 
+ 162             return;
+ 163         }
+ 164 
+ 165         for (Map&lt;String, Object&gt; one : cacheList) {
+ 166             Row row = fillData(input, one);
+ 167             RowDataComplete.collectRow(out, row);
+ 168         }
+ 169 
+ 170     }
+ 171 
+ 172     private String buildKey(List&lt;Object&gt; equalValList) {
+ 173         StringBuilder sb = new StringBuilder(&quot;&quot;);
+ 174         for (Object equalVal : equalValList) {
+ 175             sb.append(equalVal).append(&quot;_&quot;);
+ 176         }
+ 177 
+ 178         return sb.toString();
+ 179     }
+ 180 
+ 181     private String buildKey(Map&lt;String, Object&gt; val, List&lt;String&gt; equalFieldList) {
+ 182         StringBuilder sb = new StringBuilder(&quot;&quot;);
+ 183         for (String equalField : equalFieldList) {
+ 184             sb.append(val.get(equalField)).append(&quot;_&quot;);
+ 185         }
+ 186 
+ 187         return sb.toString();
+ 188     }
+ 189 
+ 190     private Session getConn(CassandraSideTableInfo tableInfo) {
+ 191         try {
+ 192             if (session == null) {
+ 193                 QueryOptions queryOptions = new QueryOptions();
+ 194                 //The default consistency level for queries: ConsistencyLevel.TWO.
+ 195                 queryOptions.setConsistencyLevel(ConsistencyLevel.QUORUM);
+<abbr title=" 196                 Integer maxRequestsPerConnection = tableInfo.getMaxRequestsPerConnection() == null ? 1 : tableInfo.getMaxRequestsPerConnection();"> 196                 Integer maxRequestsPerConnection = tableInfo.getMaxRequestsPerConnection() == null ? 1 : 🔵</abbr>
+<abbr title=" 197                 Integer coreConnectionsPerHost = tableInfo.getCoreConnectionsPerHost() == null ? 8 : tableInfo.getCoreConnectionsPerHost();"> 197                 Integer coreConnectionsPerHost = tableInfo.getCoreConnectionsPerHost() == null ? 8 : tabl🔵</abbr>
+<abbr title=" 198                 Integer maxConnectionsPerHost = tableInfo.getMaxConnectionsPerHost() == null ? 32768 : tableInfo.getMaxConnectionsPerHost();"> 198                 Integer maxConnectionsPerHost = tableInfo.getMaxConnectionsPerHost() == null ? 32768 : ta🔵</abbr>
+<abbr title=" 199                 Integer maxQueueSize = tableInfo.getMaxQueueSize() == null ? 100000 : tableInfo.getMaxQueueSize();"> 199                 Integer maxQueueSize = tableInfo.getMaxQueueSize() == null ? 100000 : tableInfo.getMaxQue🔵</abbr>
+<abbr title=" 200                 Integer readTimeoutMillis = tableInfo.getReadTimeoutMillis() == null ? 60000 : tableInfo.getReadTimeoutMillis();"> 200                 Integer readTimeoutMillis = tableInfo.getReadTimeoutMillis() == null ? 60000 : tableInfo.🔵</abbr>
+<abbr title=" 201                 Integer connectTimeoutMillis = tableInfo.getConnectTimeoutMillis() == null ? 60000 : tableInfo.getConnectTimeoutMillis();"> 201                 Integer connectTimeoutMillis = tableInfo.getConnectTimeoutMillis() == null ? 60000 : tabl🔵</abbr>
+<abbr title=" 202                 Integer poolTimeoutMillis = tableInfo.getPoolTimeoutMillis() == null ? 60000 : tableInfo.getPoolTimeoutMillis();"> 202                 Integer poolTimeoutMillis = tableInfo.getPoolTimeoutMillis() == null ? 60000 : tableInfo.🔵</abbr>
+ 203                 Integer cassandraPort = 0;
+ 204                 String address = tableInfo.getAddress();
+ 205                 String userName = tableInfo.getUserName();
+ 206                 String password = tableInfo.getPassword();
+ 207                 String database = tableInfo.getDatabase();
+ 208 
+ 209                 ArrayList serversList = new ArrayList();
+ 210                 //Read timeout or connection timeout Settings
+ 211                 SocketOptions so = new SocketOptions()
+ 212                         .setReadTimeoutMillis(readTimeoutMillis)
+ 213                         .setConnectTimeoutMillis(connectTimeoutMillis);
+ 214 
+ 215                 //The cluster USES hostdistance.local in the same machine room
+ 216                 //Hostdistance. REMOTE is used for different machine rooms
+ 217                 //Ignore use HostDistance. IGNORED
+ 218                 PoolingOptions poolingOptions = new PoolingOptions()
+ 219                         //Each connection allows a maximum of 64 concurrent requests
+ 220                         .setMaxRequestsPerConnection(HostDistance.LOCAL, maxRequestsPerConnection)
+ 221                         //Have at least two connections to each machine in the cluster
+ 222                         .setCoreConnectionsPerHost(HostDistance.LOCAL, coreConnectionsPerHost)
+ 223                         //There are up to eight connections to each machine in the cluster
+ 224                         .setMaxConnectionsPerHost(HostDistance.LOCAL, maxConnectionsPerHost)
+ 225                         .setMaxQueueSize(maxQueueSize)
+ 226                         .setPoolTimeoutMillis(poolTimeoutMillis);
+ 227                 //重试策略
+ 228                 RetryPolicy retryPolicy = DowngradingConsistencyRetryPolicy.INSTANCE;
+ 229 
+ 230                 for (String server : StringUtils.split(address, &quot;,&quot;)) {
+ 231                     cassandraPort = Integer.parseInt(StringUtils.split(server, &quot;:&quot;)[1]);
+ 232                     serversList.add(InetAddress.getByName(StringUtils.split(server, &quot;:&quot;)[0]));
+ 233                 }
+ 234 
+ 235                 if (userName == null || userName.isEmpty() || password == null || password.isEmpty()) {
+<abbr title=" 236                     cluster = Cluster.builder().addContactPoints(serversList).withRetryPolicy(retryPolicy)"> 236                     cluster = Cluster.builder().addContactPoints(serversList).withRetryPolicy(retryPolicy🔵</abbr>
+ 237                             .withPort(cassandraPort)
+ 238                             .withPoolingOptions(poolingOptions).withSocketOptions(so)
+ 239                             .withQueryOptions(queryOptions).build();
+ 240                 } else {
+<abbr title=" 241                     cluster = Cluster.builder().addContactPoints(serversList).withRetryPolicy(retryPolicy)"> 241                     cluster = Cluster.builder().addContactPoints(serversList).withRetryPolicy(retryPolicy🔵</abbr>
+ 242                             .withPort(cassandraPort)
+ 243                             .withPoolingOptions(poolingOptions).withSocketOptions(so)
+ 244                             .withCredentials(userName, password)
+ 245                             .withQueryOptions(queryOptions).build();
+ 246                 }
+ 247                 // 建立连接 连接已存在的键空间
+ 248                 session = cluster.connect(database);
+ 249                 LOG.info(&quot;connect cassandra is successed!&quot;);
+ 250             }
+ 251         } catch (Exception e) {
+ 252             LOG.error(&quot;connect cassandra is error:&quot; + e.getMessage());
+ 253         }
+ 254         return session;
+ 255     }
+ 256 
+ 257 
+ 258     private void loadData(Map&lt;String, List&lt;Map&lt;String, Object&gt;&gt;&gt; tmpCache) throws SQLException {
+ 259         CassandraSideTableInfo tableInfo = (CassandraSideTableInfo) sideInfo.getSideTableInfo();
+ 260         Session session = null;
+ 261 
+ 262         try {
+ 263             for (int i = 0; i &lt; CONN_RETRY_NUM; i++) {
+ 264                 try {
+ 265                     session = getConn(tableInfo);
+ 266                     break;
+ 267                 } catch (Exception e) {
+ 268                     if (i == CONN_RETRY_NUM - 1) {
+ 269                         throw new RuntimeException(&quot;&quot;, e);
+ 270                     }
+ 271                     try {
+<abbr title=" 272                         String connInfo = &quot;address:&quot; + tableInfo.getAddress() + &quot;;userName:&quot; + tableInfo.getUserName()"> 272                         String connInfo = &quot;address:&quot; + tableInfo.getAddress() + &quot;;userName:&quot; + tableInfo.🔵</abbr>
+ 273                                 + &quot;,pwd:&quot; + tableInfo.getPassword();
+ 274                         LOG.warn(&quot;get conn fail, wait for 5 sec and try again, connInfo:&quot; + connInfo);
+ 275                         Thread.sleep(LOAD_DATA_ERROR_SLEEP_TIME);
+ 276                     } catch (InterruptedException e1) {
+ 277                         LOG.error(&quot;&quot;, e1);
+ 278                     }
+ 279                 }
+ 280 
+ 281             }
+ 282 
+ 283             //load data from table
+ 284             String sql = sideInfo.getSqlCondition() + &quot; limit &quot; + FETCH_SIZE;
+ 285             ResultSet resultSet = session.execute(sql);
+ 286             String[] sideFieldNames = StringUtils.split(sideInfo.getSideSelectFields(), &quot;,&quot;);
+ 287             for (com.datastax.driver.core.Row row : resultSet) {
+ 288                 Map&lt;String, Object&gt; oneRow = Maps.newHashMap();
+ 289                 for (String fieldName : sideFieldNames) {
+ 290                     oneRow.put(fieldName.trim(), row.getObject(fieldName.trim()));
+ 291                 }
+ 292                 String cacheKey = buildKey(oneRow, sideInfo.getEqualFieldList());
+<abbr title=" 293                 List&lt;Map&lt;String, Object&gt;&gt; list = tmpCache.computeIfAbsent(cacheKey, key -&gt; Lists.newArrayList());"> 293                 List&lt;Map&lt;String, Object&gt;&gt; list = tmpCache.computeIfAbsent(cacheKey, key -&gt; Lists.newArray🔵</abbr>
+ 294                 list.add(oneRow);
+ 295             }
+ 296         } catch (Exception e) {
+ 297             LOG.error(&quot;&quot;, e);
+ 298         } finally {
+ 299             try {
+ 300                 if (session != null) {
+ 301                     session.close();
+ 302                 }
+ 303             } catch (Exception e) {
+ 304                 LOG.error(&quot;Error while closing session.&quot;, e);
+ 305             }
+ 306             try {
+ 307                 if (cluster != null) {
+ 308                     cluster.close();
+ 309                 }
+ 310             } catch (Exception e) {
+ 311                 LOG.error(&quot;Error while closing cluster.&quot;, e);
+ 312             }
+ 313         }
+ 314     }
+ 315 }
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ </pre></td>
+                            <td><pre>   1 /*
+   2  * Licensed to the Apache Software Foundation (ASF) under one
+   3  * or more contributor license agreements.  See the NOTICE file
+   4  * distributed with this work for additional information
+   5  * regarding copyright ownership.  The ASF licenses this file
+   6  * to you under the Apache License, Version 2.0 (the
+   7  * &quot;License&quot;); you may not use this file except in compliance
+   8  * with the License.  You may obtain a copy of the License at
+   9  *
+  10  *     http://www.apache.org/licenses/LICENSE-2.0
+  11  *
+  12  * Unless required by applicable law or agreed to in writing, software
+  13  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15  * See the License for the specific language governing permissions and
+  16  * limitations under the License.
+  17  */
+  18 package com.dtstack.flink.sql.side.cassandra;
+  19 
+  20 import com.datastax.driver.core.*;
+  21 import com.datastax.driver.core.policies.DowngradingConsistencyRetryPolicy;
+  22 import com.datastax.driver.core.policies.RetryPolicy;
+  23 import com.dtstack.flink.sql.side.AbstractSideTableInfo;
+  24 import com.dtstack.flink.sql.side.BaseAllReqRow;
+  25 import com.dtstack.flink.sql.side.FieldInfo;
+  26 import com.dtstack.flink.sql.side.JoinInfo;
+  27 import com.dtstack.flink.sql.side.cassandra.table.CassandraSideTableInfo;
+  28 import com.dtstack.flink.sql.util.RowDataComplete;
+  29 import com.google.common.collect.Lists;
+  30 import com.google.common.collect.Maps;
+  31 import java.net.InetAddress;
+  32 import java.sql.SQLException;
+  33 import java.util.*;
+  34 import java.util.concurrent.atomic.AtomicReference;
+  35 import org.apache.calcite.sql.JoinType;
+  36 import org.apache.commons.collections.CollectionUtils;
+  37 import org.apache.commons.lang3.StringUtils;
+  38 import org.apache.flink.api.java.tuple.Tuple2;
+  39 import org.apache.flink.api.java.typeutils.RowTypeInfo;
+  40 import org.apache.flink.table.dataformat.BaseRow;
+  41 import org.apache.flink.types.Row;
+  42 import org.apache.flink.util.Collector;
+  43 import org.slf4j.Logger;
+  44 import org.slf4j.LoggerFactory;
+  45 
+  46 
+  47 /**
+  48  * Reason:
+  49  * Date: 2018/11/22
+  50  *
+  51  * @author xuqianjin
+  52  */
+  53 public class CassandraAllReqRow extends BaseAllReqRow {
+  54     private static final long serialVersionUID = 54015343561288219L;
+  55 
+  56     private static final Logger LOG = LoggerFactory.getLogger(CassandraAllReqRow.class);
+  57 
+  58     private static final int CONN_RETRY_NUM = 3;
+  59 
+  60     private static final int FETCH_SIZE = 1000;
+  61 
+  62     private transient Cluster cluster;
+  63 
+  64     private transient Session session = null;
+  65 
+  66     private AtomicReference&lt;Map&lt;String, List&lt;Map&lt;String, Object&gt;&gt;&gt;&gt; cacheRef = new AtomicReference&lt;&gt;();
+  67 
+<abbr title="  68     public CassandraAllReqRow(RowTypeInfo rowTypeInfo, JoinInfo joinInfo, List&lt;FieldInfo&gt; outFieldInfoList, AbstractSideTableInfo sideTableInfo) {">  68     public CassandraAllReqRow(RowTypeInfo rowTypeInfo, JoinInfo joinInfo, List&lt;FieldInfo&gt; outFieldInfoLis🔵</abbr>
+  69         super(new CassandraAllSideInfo(rowTypeInfo, joinInfo, outFieldInfoList, sideTableInfo));
+  70     }
+  71 
+  72     @Override
+  73     public Row fillData(Row input, Object sideInput) {
+  74         Map&lt;String, Object&gt; cacheInfo = ((Map&lt;String, Object&gt;) (sideInput));
+  75         Row row = new Row(sideInfo.getOutFieldInfoList().size());
+  76         for (Map.Entry&lt;Integer, Integer&gt; entry : sideInfo.getInFieldIndex().entrySet()) {
+  77             Object obj = input.getField(entry.getValue());
+  78             obj = convertTimeIndictorTypeInfo(entry.getValue(), obj);
+  79             row.setField(entry.getKey(), obj);
+  80         }
+  81         for (Map.Entry&lt;Integer, String&gt; entry : sideInfo.getSideFieldNameIndex().entrySet()) {
+  82             if (cacheInfo == null) {
+  83                 row.setField(entry.getKey(), null);
+  84             } else {
+  85                 row.setField(entry.getKey(), cacheInfo.get(entry.getValue()));
+  86             }
+  87         }
+  88         return row;
+  89     }
+  90 
+  91     @Override
+  92     protected void initCache() throws SQLException {
+  93         Map&lt;String, List&lt;Map&lt;String, Object&gt;&gt;&gt; newCache = Maps.newConcurrentMap();
+  94         cacheRef.set(newCache);
+  95         loadData(newCache);
+  96     }
+  97 
+  98     @Override
+  99     protected void reloadCache() {
+ 100         //reload cacheRef and replace to old cacheRef
+ 101         Map&lt;String, List&lt;Map&lt;String, Object&gt;&gt;&gt; newCache = Maps.newConcurrentMap();
+ 102         try {
+ 103             loadData(newCache);
+ 104         } catch (SQLException e) {
+ 105             LOG.error(&quot;&quot;, e);
+ 106         }
+ 107 
+ 108         cacheRef.set(newCache);
+ 109         LOG.info(&quot;----- cassandra all cacheRef reload end:{}&quot;, Calendar.getInstance());
+ 110     }
+ 111 
+ 112     @Override
+ 113     public void flatMap(Row input, Collector&lt;BaseRow&gt; out) throws Exception {
+ 114         List&lt;Object&gt; inputParams = Lists.newArrayList();
+ 115         for (Integer conValIndex : sideInfo.getEqualValIndex()) {
+ 116             Object equalObj = input.getField(conValIndex);
+ 117             if (equalObj == null) {
+ 118                 if (sideInfo.getJoinType() == JoinType.LEFT) {
+ 119                     Row row = fillData(input, null);
+ 120                     RowDataComplete.collectRow(out, row);
+ 121                 }
+ 122                 return;
+ 123             }
+ 124             inputParams.add(equalObj);
+ 125         }
+ 126         String key = buildKey(inputParams);
+ 127         List&lt;Map&lt;String, Object&gt;&gt; cacheList = cacheRef.get().get(key);
+ 128         if (CollectionUtils.isEmpty(cacheList)) {
+ 129             if (sideInfo.getJoinType() == JoinType.LEFT) {
+ 130                 Row row = fillData(input, null);
+ 131                 RowDataComplete.collectRow(out, row);
+ 132             } else {
+ 133                 return;
+ 134             }
+ 135             return;
+ 136         }
+ 137         for (Map&lt;String, Object&gt; one : cacheList) {
+ 138             Row row = fillData(input, one);
+ 139             RowDataComplete.collectRow(out, row);
+ 140         }
+ 141     }
+ 142 
+ 143     private String buildKey(List&lt;Object&gt; equalValList) {
+ 144         StringBuilder sb = new StringBuilder(&quot;&quot;);
+ 145         for (Object equalVal : equalValList) {
+ 146             sb.append(equalVal).append(&quot;_&quot;);
+ 147         }
+ 148 
+ 149         return sb.toString();
+ 150     }
+ 151 
+ 152     private String buildKey(Map&lt;String, Object&gt; val, List&lt;String&gt; equalFieldList) {
+ 153         StringBuilder sb = new StringBuilder(&quot;&quot;);
+ 154         for (String equalField : equalFieldList) {
+ 155             sb.append(val.get(equalField)).append(&quot;_&quot;);
+ 156         }
+ 157 
+ 158         return sb.toString();
+ 159     }
+ 160 
+ 161     private Session getConn(CassandraSideTableInfo tableInfo) {
+ 162         try {
+ 163             if (session == null) {
+ 164                 QueryOptions queryOptions = new QueryOptions();
+ 165                 //The default consistency level for queries: ConsistencyLevel.TWO.
+ 166                 queryOptions.setConsistencyLevel(ConsistencyLevel.QUORUM);
+<abbr title=" 167                 Integer maxRequestsPerConnection = (tableInfo.getMaxRequestsPerConnection() == null) ? 1 : tableInfo.getMaxRequestsPerConnection();"> 167                 Integer maxRequestsPerConnection = (tableInfo.getMaxRequestsPerConnection() == null) ? 1 🔵</abbr>
+<abbr title=" 168                 Integer coreConnectionsPerHost = (tableInfo.getCoreConnectionsPerHost() == null) ? 8 : tableInfo.getCoreConnectionsPerHost();"> 168                 Integer coreConnectionsPerHost = (tableInfo.getCoreConnectionsPerHost() == null) ? 8 : ta🔵</abbr>
+<abbr title=" 169                 Integer maxConnectionsPerHost = (tableInfo.getMaxConnectionsPerHost() == null) ? 32768 : tableInfo.getMaxConnectionsPerHost();"> 169                 Integer maxConnectionsPerHost = (tableInfo.getMaxConnectionsPerHost() == null) ? 32768 : 🔵</abbr>
+<abbr title=" 170                 Integer maxQueueSize = (tableInfo.getMaxQueueSize() == null) ? 100000 : tableInfo.getMaxQueueSize();"> 170                 Integer maxQueueSize = (tableInfo.getMaxQueueSize() == null) ? 100000 : tableInfo.getMaxQ🔵</abbr>
+<abbr title=" 171                 Integer readTimeoutMillis = (tableInfo.getReadTimeoutMillis() == null) ? 60000 : tableInfo.getReadTimeoutMillis();"> 171                 Integer readTimeoutMillis = (tableInfo.getReadTimeoutMillis() == null) ? 60000 : tableInf🔵</abbr>
+<abbr title=" 172                 Integer connectTimeoutMillis = (tableInfo.getConnectTimeoutMillis() == null) ? 60000 : tableInfo.getConnectTimeoutMillis();"> 172                 Integer connectTimeoutMillis = (tableInfo.getConnectTimeoutMillis() == null) ? 60000 : ta🔵</abbr>
+<abbr title=" 173                 Integer poolTimeoutMillis = (tableInfo.getPoolTimeoutMillis() == null) ? 60000 : tableInfo.getPoolTimeoutMillis();"> 173                 Integer poolTimeoutMillis = (tableInfo.getPoolTimeoutMillis() == null) ? 60000 : tableInf🔵</abbr>
+ 174                 Integer cassandraPort = 0;
+ 175                 String address = tableInfo.getAddress();
+ 176                 String userName = tableInfo.getUserName();
+ 177                 String password = tableInfo.getPassword();
+ 178                 String database = tableInfo.getDatabase();
+ 179                 ArrayList serversList = new ArrayList();
+ 180                 //Read timeout or connection timeout Settings
+<abbr title=" 181                 SocketOptions so = new SocketOptions().setReadTimeoutMillis(readTimeoutMillis).setConnectTimeoutMillis(connectTimeoutMillis);"> 181                 SocketOptions so = new SocketOptions().setReadTimeoutMillis(readTimeoutMillis).setConnect🔵</abbr>
+ 182                 //The cluster USES hostdistance.local in the same machine room
+ 183                 //Hostdistance. REMOTE is used for different machine rooms
+ 184                 //Ignore use HostDistance. IGNORED
+<abbr title=" 185                 PoolingOptions poolingOptions = //There are up to eight connections to each machine in the cluster"> 185                 PoolingOptions poolingOptions = //There are up to eight connections to each machine in th🔵</abbr>
+ 186                         //Have at least two connections to each machine in the cluster
+ 187                         //Each connection allows a maximum of 64 concurrent requests
+<abbr title=" 188                 new PoolingOptions().setMaxRequestsPerConnection(HostDistance.LOCAL, maxRequestsPerConnection).setCoreConnectionsPerHost(HostDistance.LOCAL, coreConnectionsPerHost).setMaxConnectionsPerHost(HostDistance.LOCAL, maxConnectionsPerHost).setMaxQueueSize(maxQueueSize).setPoolTimeoutMillis(poolTimeoutMillis);"> 188                 new PoolingOptions().setMaxRequestsPerConnection(HostDistance.LOCAL, maxRequestsPerConnec🔵</abbr>
+ 189                 // 重试策略
+ 190                 RetryPolicy retryPolicy = DowngradingConsistencyRetryPolicy.INSTANCE;
+ 191                 for (String server : StringUtils.split(address, &quot;,&quot;)) {
+ 192                     cassandraPort = Integer.parseInt(StringUtils.split(server, &quot;:&quot;)[1]);
+ 193                     serversList.add(InetAddress.getByName(StringUtils.split(server, &quot;:&quot;)[0]));
+ 194                 }
+<abbr title=" 195                 if ((((userName == null) || userName.isEmpty()) || (password == null)) || password.isEmpty()) {"> 195                 if ((((userName == null) || userName.isEmpty()) || (password == null)) || password.isEmpt🔵</abbr>
+<abbr title=" 196                     cluster = Cluster.builder().addContactPoints(serversList).withRetryPolicy(retryPolicy).withPort(cassandraPort).withPoolingOptions(poolingOptions).withSocketOptions(so).withQueryOptions(queryOptions).build();"> 196                     cluster = Cluster.builder().addContactPoints(serversList).withRetryPolicy(retryPolicy🔵</abbr>
+ 197                 } else {
+<abbr title=" 198                     cluster = Cluster.builder().addContactPoints(serversList).withRetryPolicy(retryPolicy).withPort(cassandraPort).withPoolingOptions(poolingOptions).withSocketOptions(so).withCredentials(userName, password).withQueryOptions(queryOptions).build();"> 198                     cluster = Cluster.builder().addContactPoints(serversList).withRetryPolicy(retryPolicy🔵</abbr>
+ 199                 }
+ 200                 // 建立连接 连接已存在的键空间
+ 201                 session = cluster.connect(database);
+ 202                 LOG.info(&quot;connect cassandra is successed!&quot;);
+ 203             }
+ 204         } catch (java.lang.Exception e) {
+ 205             LOG.error(&quot;connect cassandra is error:&quot; + e.getMessage());
+ 206         }
+ 207         return session;
+ 208     }
+ 209 
+ 210     private void loadData(Map&lt;String, List&lt;Map&lt;String, Object&gt;&gt;&gt; tmpCache) throws SQLException {
+ 211         CassandraSideTableInfo tableInfo = ((CassandraSideTableInfo) (sideInfo.getSideTableInfo()));
+ 212         Session session = null;
+ 213         try {
+ 214             for (int i = 0; i &lt; CONN_RETRY_NUM; i++) {
+ 215                 try {
+ 216                     session = getConn(tableInfo);
+ 217                     break;
+ 218                 } catch (java.lang.Exception e) {
+ 219                     if (i == (CONN_RETRY_NUM - 1)) {
+ 220                         throw new RuntimeException(&quot;&quot;, e);
+ 221                     }
+ 222                     try {
+<abbr title=" 223                         String connInfo = ((((&quot;address:&quot; + tableInfo.getAddress()) + &quot;;userName:&quot;) + tableInfo.getUserName()) + &quot;,pwd:&quot;) + tableInfo.getPassword();"> 223                         String connInfo = ((((&quot;address:&quot; + tableInfo.getAddress()) + &quot;;userName:&quot;) + tabl🔵</abbr>
+ 224                         LOG.warn(&quot;get conn fail, wait for 5 sec and try again, connInfo:&quot; + connInfo);
+ 225                         Thread.sleep(LOAD_DATA_ERROR_SLEEP_TIME);
+ 226                     } catch (java.lang.InterruptedException e1) {
+ 227                         LOG.error(&quot;&quot;, e1);
+ 228                     }
+ 229                 }
+ 230             }
+ 231             //load data from table
+ 232             String sql = (sideInfo.getSqlCondition() + &quot; limit &quot;) + FETCH_SIZE;
+ 233             ResultSet resultSet = session.execute(sql);
+ 234             String[] sideFieldNames = StringUtils.split(sideInfo.getSideSelectFields(), &quot;,&quot;);
+ 235             for (Row row : resultSet) {
+ 236                 Map&lt;String, Object&gt; oneRow = Maps.newHashMap();
+ 237                 for (String fieldName : sideFieldNames) {
+ 238                     oneRow.put(fieldName.trim(), row.getObject(fieldName.trim()));
+ 239                 }
+ 240                 String cacheKey = buildKey(oneRow, sideInfo.getEqualFieldList());
+<abbr title=" 241                 List&lt;Map&lt;String, Object&gt;&gt; list = tmpCache.computeIfAbsent(cacheKey, ( key) -&gt; Lists.newArrayList());"> 241                 List&lt;Map&lt;String, Object&gt;&gt; list = tmpCache.computeIfAbsent(cacheKey, ( key) -&gt; Lists.newAr🔵</abbr>
+ 242                 list.add(oneRow);
+ 243             }
+ 244         } catch (java.lang.Exception e) {
+ 245             LOG.error(&quot;&quot;, e);
+ 246         } finally {
+ 247             try {
+ 248                 if (session != null) {
+ 249                     session.close();
+ 250                 }
+ 251             } catch (java.lang.Exception e) {
+ 252                 LOG.error(&quot;Error while closing session.&quot;, e);
+ 253             }
+ 254             try {
+ 255                 if (cluster != null) {
+ 256                     cluster.close();
+ 257                 }
+ 258             } catch (java.lang.Exception e) {
+ 259                 LOG.error(&quot;Error while closing cluster.&quot;, e);
+ 260             }
+ 261         }
+ 262     }
+ 263 }
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ </pre></td>
+                        </tr>
+                    </table>
+                </div>
+                <div id="bottom">
+                    <table style="margin:auto">
+                        <tr>
+                            <th>ours vs. base</th>
+                            <th>theirs vs. base</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1  /*
+   2   * Licensed to the Apache Software Foundation (ASF) under one
+   3   * or more contributor license agreements.  See the NOTICE file
+   4   * distributed with this work for additional information
+   5   * regarding copyright ownership.  The ASF licenses this file
+   6   * to you under the Apache License, Version 2.0 (the
+   7   * &quot;License&quot;); you may not use this file except in compliance
+   8   * with the License.  You may obtain a copy of the License at
+   9   *
+  10   *     http://www.apache.org/licenses/LICENSE-2.0
+  11   *
+  12   * Unless required by applicable law or agreed to in writing, software
+  13   * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15   * See the License for the specific language governing permissions and
+  16   * limitations under the License.
+  17   */
+  18  
+  19  package com.dtstack.flink.sql.side.cassandra;
+  20  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  21 -import org.apache.flink.api.java.typeutils.RowTypeInfo;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  22 -import org.apache.flink.table.runtime.types.CRow;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  23 -import org.apache.flink.table.typeutils.TimeIndicatorTypeInfo;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  24 -import org.apache.flink.types.Row;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  25 -import org.apache.flink.util.Collector;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  26 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  27 -import com.datastax.driver.core.Cluster;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  28 -import com.datastax.driver.core.ConsistencyLevel;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  29 -import com.datastax.driver.core.HostDistance;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  30 -import com.datastax.driver.core.PoolingOptions;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  31 -import com.datastax.driver.core.QueryOptions;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  32 -import com.datastax.driver.core.ResultSet;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  33 -import com.datastax.driver.core.Session;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  34 -import com.datastax.driver.core.SocketOptions;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  35 +import com.datastax.driver.core.*;</span>
+  36  import com.datastax.driver.core.policies.DowngradingConsistencyRetryPolicy;
+  37  import com.datastax.driver.core.policies.RetryPolicy;
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  38 +import com.dtstack.flink.sql.side.AbstractSideTableInfo;</span>
+  39  import com.dtstack.flink.sql.side.BaseAllReqRow;
+  40  import com.dtstack.flink.sql.side.FieldInfo;
+  41  import com.dtstack.flink.sql.side.JoinInfo;
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  42 -import com.dtstack.flink.sql.side.AbstractSideTableInfo;</span>
+  43  import com.dtstack.flink.sql.side.cassandra.table.CassandraSideTableInfo;
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  44 +import com.dtstack.flink.sql.util.RowDataComplete;</span>
+  45  import com.google.common.collect.Lists;
+  46  import com.google.common.collect.Maps;
+  47  import org.apache.calcite.sql.JoinType;
+  48  import org.apache.commons.collections.CollectionUtils;
+  49  import org.apache.commons.lang3.StringUtils;
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  50 +import org.apache.flink.api.java.tuple.Tuple2;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  51 +import org.apache.flink.api.java.typeutils.RowTypeInfo;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  52 +import org.apache.flink.table.dataformat.BaseRow;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  53 +import org.apache.flink.types.Row;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  54 +import org.apache.flink.util.Collector;</span>
+  55  import org.slf4j.Logger;
+  56  import org.slf4j.LoggerFactory;
+  57  
+  58  import java.net.InetAddress;
+  59  import java.sql.SQLException;
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  60 -import java.sql.Timestamp;</span>
+  61  import java.util.ArrayList;
+  62  import java.util.Calendar;
+  63  import java.util.List;
+  64  import java.util.Map;
+
+  65  import java.util.concurrent.atomic.AtomicReference;
+  66  
+  67  /**
+  68   * Reason:
+  69   * Date: 2018/11/22
+  70   *
+  71   * @author xuqianjin
+  72   */
+  73  public class CassandraAllReqRow extends BaseAllReqRow {
+  74  
+  75      private static final long serialVersionUID = 54015343561288219L;
+  76  
+  77      private static final Logger LOG = LoggerFactory.getLogger(CassandraAllReqRow.class);
+  78  
+  79      private static final int CONN_RETRY_NUM = 3;
+  80  
+  81      private static final int FETCH_SIZE = 1000;
+  82  
+  83      private transient Cluster cluster;
+  84      private transient Session session = null;
+  85  
+  86      private AtomicReference&lt;Map&lt;String, List&lt;Map&lt;String, Object&gt;&gt;&gt;&gt; cacheRef = new AtomicReference&lt;&gt;();
+  87  
+<abbr title="  88      public CassandraAllReqRow(RowTypeInfo rowTypeInfo, JoinInfo joinInfo, List&lt;FieldInfo&gt; outFieldInfoList, AbstractSideTableInfo sideTableInfo) {">  88      public CassandraAllReqRow(RowTypeInfo rowTypeInfo, JoinInfo joinInfo, List&lt;FieldInfo&gt; outFieldInfoList, Abstra🔵</abbr>
+<abbr title="  89          super(new com.dtstack.flink.sql.side.cassandra.CassandraAllSideInfo(rowTypeInfo, joinInfo, outFieldInfoList, sideTableInfo));">  89          super(new com.dtstack.flink.sql.side.cassandra.CassandraAllSideInfo(rowTypeInfo, joinInfo, outFieldInfoLis🔵</abbr>
+  90      }
+  91  
+  92      @Override
+  93      public Row fillData(Row input, Object sideInput) {
+  94          Map&lt;String, Object&gt; cacheInfo = (Map&lt;String, Object&gt;) sideInput;
+  95          Row row = new Row(sideInfo.getOutFieldInfoList().size());
+  96          for (Map.Entry&lt;Integer, Integer&gt; entry : sideInfo.getInFieldIndex().entrySet()) {
+  97              Object obj = input.getField(entry.getValue());
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"><abbr title="  98 -            boolean isTimeIndicatorTypeInfo = TimeIndicatorTypeInfo.class.isAssignableFrom(sideInfo.getRowTypeInfo().getTypeAt(entry.getValue()).getClass());">  98 -            boolean isTimeIndicatorTypeInfo = TimeIndicatorTypeInfo.class.isAssignableFrom(sideInfo.getRowTypeInfo🔵</abbr></span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  99 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"><abbr title=" 100 -            //Type information for indicating event or processing time. However, it behaves like a regular SQL timestamp but is serialized as Long."> 100 -            //Type information for indicating event or processing time. However, it behaves like a regular SQL tim🔵</abbr></span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 101 -            if (obj instanceof Timestamp &amp;&amp; isTimeIndicatorTypeInfo) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 102 -                obj = ((Timestamp) obj).getTime();</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 103 -            }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 104 +            obj = convertTimeIndictorTypeInfo(entry.getValue(), obj);</span>
+
+
+
+ 105              row.setField(entry.getKey(), obj);
+ 106          }
+ 107  
+ 108          for (Map.Entry&lt;Integer, String&gt; entry : sideInfo.getSideFieldNameIndex().entrySet()) {
+ 109              if (cacheInfo == null) {
+ 110                  row.setField(entry.getKey(), null);
+ 111              } else {
+ 112                  row.setField(entry.getKey(), cacheInfo.get(entry.getValue()));
+ 113              }
+ 114          }
+ 115  
+ 116          return row;
+ 117      }
+ 118  
+ 119      @Override
+ 120      protected void initCache() throws SQLException {
+ 121          Map&lt;String, List&lt;Map&lt;String, Object&gt;&gt;&gt; newCache = Maps.newConcurrentMap();
+ 122          cacheRef.set(newCache);
+ 123          loadData(newCache);
+ 124      }
+ 125  
+ 126      @Override
+ 127      protected void reloadCache() {
+ 128          //reload cacheRef and replace to old cacheRef
+ 129          Map&lt;String, List&lt;Map&lt;String, Object&gt;&gt;&gt; newCache = Maps.newConcurrentMap();
+ 130          try {
+ 131              loadData(newCache);
+ 132          } catch (SQLException e) {
+ 133              LOG.error(&quot;&quot;, e);
+ 134          }
+ 135  
+ 136          cacheRef.set(newCache);
+ 137          LOG.info(&quot;----- cassandra all cacheRef reload end:{}&quot;, Calendar.getInstance());
+ 138      }
+ 139  
+ 140  
+ 141      @Override
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 142 -    public void flatMap(CRow input, Collector&lt;CRow&gt; out) throws Exception {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 143 +    public void flatMap(Row input, Collector&lt;BaseRow&gt; out) throws Exception {</span>
+ 144          List&lt;Object&gt; inputParams = Lists.newArrayList();
+ 145          for (Integer conValIndex : sideInfo.getEqualValIndex()) {
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 146 -            Object equalObj = input.row().getField(conValIndex);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 147 +            Object equalObj = input.getField(conValIndex);</span>
+ 148              if (equalObj == null) {
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 149 -                if(sideInfo.getJoinType() == JoinType.LEFT){</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 150 -                    Row data = fillData(input.row(), null);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 151 -                    out.collect(new CRow(data, input.change()));</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 152 +                if (sideInfo.getJoinType() == JoinType.LEFT) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 153 +                    Row row = fillData(input, null);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 154 +                    RowDataComplete.collectRow(out, row);</span>
+ 155                  }
+ 156                  return;
+ 157              }
+ 158  
+ 159              inputParams.add(equalObj);
+ 160          }
+ 161  
+ 162          String key = buildKey(inputParams);
+ 163          List&lt;Map&lt;String, Object&gt;&gt; cacheList = cacheRef.get().get(key);
+ 164          if (CollectionUtils.isEmpty(cacheList)) {
+ 165              if (sideInfo.getJoinType() == JoinType.LEFT) {
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 166 -                Row row = fillData(input.row(), null);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 167 -                out.collect(new CRow(row, input.change()));</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 168 +                Row row = fillData(input, null);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 169 +                RowDataComplete.collectRow(out, row);</span>
+ 170              } else {
+ 171                  return;
+ 172              }
+ 173  
+ 174              return;
+ 175          }
+ 176  
+ 177          for (Map&lt;String, Object&gt; one : cacheList) {
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 178 -            out.collect(new CRow(fillData(input.row(), one), input.change()));</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 179 +            Row row = fillData(input, one);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 180 +            RowDataComplete.collectRow(out, row);</span>
+ 181          }
+ 182  
+ 183      }
+ 184  
+ 185      private String buildKey(List&lt;Object&gt; equalValList) {
+ 186          StringBuilder sb = new StringBuilder(&quot;&quot;);
+ 187          for (Object equalVal : equalValList) {
+ 188              sb.append(equalVal).append(&quot;_&quot;);
+ 189          }
+ 190  
+ 191          return sb.toString();
+ 192      }
+ 193  
+ 194      private String buildKey(Map&lt;String, Object&gt; val, List&lt;String&gt; equalFieldList) {
+ 195          StringBuilder sb = new StringBuilder(&quot;&quot;);
+ 196          for (String equalField : equalFieldList) {
+ 197              sb.append(val.get(equalField)).append(&quot;_&quot;);
+ 198          }
+ 199  
+ 200          return sb.toString();
+ 201      }
+ 202  
+ 203      private Session getConn(CassandraSideTableInfo tableInfo) {
+ 204          try {
+ 205              if (session == null) {
+ 206                  QueryOptions queryOptions = new QueryOptions();
+ 207                  //The default consistency level for queries: ConsistencyLevel.TWO.
+ 208                  queryOptions.setConsistencyLevel(ConsistencyLevel.QUORUM);
+<abbr title=" 209                  Integer maxRequestsPerConnection = tableInfo.getMaxRequestsPerConnection() == null ? 1 : tableInfo.getMaxRequestsPerConnection();"> 209                  Integer maxRequestsPerConnection = tableInfo.getMaxRequestsPerConnection() == null ? 1 : tableInfo🔵</abbr>
+<abbr title=" 210                  Integer coreConnectionsPerHost = tableInfo.getCoreConnectionsPerHost() == null ? 8 : tableInfo.getCoreConnectionsPerHost();"> 210                  Integer coreConnectionsPerHost = tableInfo.getCoreConnectionsPerHost() == null ? 8 : tableInfo.get🔵</abbr>
+<abbr title=" 211                  Integer maxConnectionsPerHost = tableInfo.getMaxConnectionsPerHost() == null ? 32768 : tableInfo.getMaxConnectionsPerHost();"> 211                  Integer maxConnectionsPerHost = tableInfo.getMaxConnectionsPerHost() == null ? 32768 : tableInfo.g🔵</abbr>
+ 212                  Integer maxQueueSize = tableInfo.getMaxQueueSize() == null ? 100000 : tableInfo.getMaxQueueSize();
+<abbr title=" 213                  Integer readTimeoutMillis = tableInfo.getReadTimeoutMillis() == null ? 60000 : tableInfo.getReadTimeoutMillis();"> 213                  Integer readTimeoutMillis = tableInfo.getReadTimeoutMillis() == null ? 60000 : tableInfo.getReadTi🔵</abbr>
+<abbr title=" 214                  Integer connectTimeoutMillis = tableInfo.getConnectTimeoutMillis() == null ? 60000 : tableInfo.getConnectTimeoutMillis();"> 214                  Integer connectTimeoutMillis = tableInfo.getConnectTimeoutMillis() == null ? 60000 : tableInfo.get🔵</abbr>
+<abbr title=" 215                  Integer poolTimeoutMillis = tableInfo.getPoolTimeoutMillis() == null ? 60000 : tableInfo.getPoolTimeoutMillis();"> 215                  Integer poolTimeoutMillis = tableInfo.getPoolTimeoutMillis() == null ? 60000 : tableInfo.getPoolTi🔵</abbr>
+ 216                  Integer cassandraPort = 0;
+ 217                  String address = tableInfo.getAddress();
+ 218                  String userName = tableInfo.getUserName();
+ 219                  String password = tableInfo.getPassword();
+ 220                  String database = tableInfo.getDatabase();
+ 221  
+ 222                  ArrayList serversList = new ArrayList();
+ 223                  //Read timeout or connection timeout Settings
+ 224                  SocketOptions so = new SocketOptions()
+ 225                          .setReadTimeoutMillis(readTimeoutMillis)
+ 226                          .setConnectTimeoutMillis(connectTimeoutMillis);
+ 227  
+ 228                  //The cluster USES hostdistance.local in the same machine room
+ 229                  //Hostdistance. REMOTE is used for different machine rooms
+ 230                  //Ignore use HostDistance. IGNORED
+ 231                  PoolingOptions poolingOptions = new PoolingOptions()
+ 232                          //Each connection allows a maximum of 64 concurrent requests
+ 233                          .setMaxRequestsPerConnection(HostDistance.LOCAL, maxRequestsPerConnection)
+ 234                          //Have at least two connections to each machine in the cluster
+ 235                          .setCoreConnectionsPerHost(HostDistance.LOCAL, coreConnectionsPerHost)
+ 236                          //There are up to eight connections to each machine in the cluster
+ 237                          .setMaxConnectionsPerHost(HostDistance.LOCAL, maxConnectionsPerHost)
+ 238                          .setMaxQueueSize(maxQueueSize)
+ 239                          .setPoolTimeoutMillis(poolTimeoutMillis);
+ 240                  //重试策略
+ 241                  RetryPolicy retryPolicy = DowngradingConsistencyRetryPolicy.INSTANCE;
+ 242  
+ 243                  for (String server : StringUtils.split(address, &quot;,&quot;)) {
+ 244                      cassandraPort = Integer.parseInt(StringUtils.split(server, &quot;:&quot;)[1]);
+ 245                      serversList.add(InetAddress.getByName(StringUtils.split(server, &quot;:&quot;)[0]));
+ 246                  }
+ 247  
+ 248                  if (userName == null || userName.isEmpty() || password == null || password.isEmpty()) {
+ 249                      cluster = Cluster.builder().addContactPoints(serversList).withRetryPolicy(retryPolicy)
+ 250                              .withPort(cassandraPort)
+ 251                              .withPoolingOptions(poolingOptions).withSocketOptions(so)
+ 252                              .withQueryOptions(queryOptions).build();
+ 253                  } else {
+ 254                      cluster = Cluster.builder().addContactPoints(serversList).withRetryPolicy(retryPolicy)
+ 255                              .withPort(cassandraPort)
+ 256                              .withPoolingOptions(poolingOptions).withSocketOptions(so)
+ 257                              .withCredentials(userName, password)
+ 258                              .withQueryOptions(queryOptions).build();
+ 259                  }
+ 260                  // 建立连接 连接已存在的键空间
+ 261                  session = cluster.connect(database);
+ 262                  LOG.info(&quot;connect cassandra is successed!&quot;);
+ 263              }
+ 264          } catch (Exception e) {
+ 265              LOG.error(&quot;connect cassandra is error:&quot; + e.getMessage());
+ 266          }
+ 267          return session;
+ 268      }
+ 269  
+ 270  
+ 271      private void loadData(Map&lt;String, List&lt;Map&lt;String, Object&gt;&gt;&gt; tmpCache) throws SQLException {
+ 272          CassandraSideTableInfo tableInfo = (CassandraSideTableInfo) sideInfo.getSideTableInfo();
+ 273          Session session = null;
+ 274  
+ 275          try {
+ 276              for (int i = 0; i &lt; CONN_RETRY_NUM; i++) {
+ 277                  try {
+ 278                      session = getConn(tableInfo);
+ 279                      break;
+ 280                  } catch (Exception e) {
+ 281                      if (i == CONN_RETRY_NUM - 1) {
+ 282                          throw new RuntimeException(&quot;&quot;, e);
+ 283                      }
+ 284                      try {
+<abbr title=" 285                          String connInfo = &quot;address:&quot; + tableInfo.getAddress() + &quot;;userName:&quot; + tableInfo.getUserName()"> 285                          String connInfo = &quot;address:&quot; + tableInfo.getAddress() + &quot;;userName:&quot; + tableInfo.getUserNa🔵</abbr>
+ 286                                  + &quot;,pwd:&quot; + tableInfo.getPassword();
+ 287                          LOG.warn(&quot;get conn fail, wait for 5 sec and try again, connInfo:&quot; + connInfo);
+ 288                          Thread.sleep(LOAD_DATA_ERROR_SLEEP_TIME);
+ 289                      } catch (InterruptedException e1) {
+ 290                          LOG.error(&quot;&quot;, e1);
+ 291                      }
+ 292                  }
+ 293  
+ 294              }
+ 295  
+ 296              //load data from table
+ 297              String sql = sideInfo.getSqlCondition() + &quot; limit &quot; + FETCH_SIZE;
+ 298              ResultSet resultSet = session.execute(sql);
+ 299              String[] sideFieldNames = StringUtils.split(sideInfo.getSideSelectFields(), &quot;,&quot;);
+ 300              for (com.datastax.driver.core.Row row : resultSet) {
+ 301                  Map&lt;String, Object&gt; oneRow = Maps.newHashMap();
+ 302                  for (String fieldName : sideFieldNames) {
+ 303                      oneRow.put(fieldName.trim(), row.getObject(fieldName.trim()));
+ 304                  }
+ 305                  String cacheKey = buildKey(oneRow, sideInfo.getEqualFieldList());
+ 306                  List&lt;Map&lt;String, Object&gt;&gt; list = tmpCache.computeIfAbsent(cacheKey, key -&gt; Lists.newArrayList());
+ 307                  list.add(oneRow);
+ 308              }
+ 309          } catch (Exception e) {
+ 310              LOG.error(&quot;&quot;, e);
+ 311          } finally {
+ 312              try {
+ 313                  if (session != null) {
+ 314                      session.close();
+ 315                  }
+ 316              } catch (Exception e) {
+ 317                  LOG.error(&quot;Error while closing session.&quot;, e);
+ 318              }
+ 319              try {
+ 320                  if (cluster != null) {
+ 321                      cluster.close();
+ 322                  }
+ 323              } catch (Exception e) {
+ 324                  LOG.error(&quot;Error while closing cluster.&quot;, e);
+ 325              }
+ 326          }
+ 327      }
+ 328  }</pre></td>
+                            <td><pre>   1  /*
+   2   * Licensed to the Apache Software Foundation (ASF) under one
+   3   * or more contributor license agreements.  See the NOTICE file
+   4   * distributed with this work for additional information
+   5   * regarding copyright ownership.  The ASF licenses this file
+   6   * to you under the Apache License, Version 2.0 (the
+   7   * &quot;License&quot;); you may not use this file except in compliance
+   8   * with the License.  You may obtain a copy of the License at
+   9   *
+  10   *     http://www.apache.org/licenses/LICENSE-2.0
+  11   *
+  12   * Unless required by applicable law or agreed to in writing, software
+  13   * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15   * See the License for the specific language governing permissions and
+  16   * limitations under the License.
+  17   */
+  18  
+  19  package com.dtstack.flink.sql.side.cassandra;
+  20  
+  21  import org.apache.flink.api.java.typeutils.RowTypeInfo;
+  22  import org.apache.flink.table.runtime.types.CRow;
+  23  import org.apache.flink.table.typeutils.TimeIndicatorTypeInfo;
+  24  import org.apache.flink.types.Row;
+  25  import org.apache.flink.util.Collector;
+  26  
+  27  import com.datastax.driver.core.Cluster;
+  28  import com.datastax.driver.core.ConsistencyLevel;
+  29  import com.datastax.driver.core.HostDistance;
+  30  import com.datastax.driver.core.PoolingOptions;
+  31  import com.datastax.driver.core.QueryOptions;
+  32  import com.datastax.driver.core.ResultSet;
+  33  import com.datastax.driver.core.Session;
+  34  import com.datastax.driver.core.SocketOptions;
+
+  35  import com.datastax.driver.core.policies.DowngradingConsistencyRetryPolicy;
+  36  import com.datastax.driver.core.policies.RetryPolicy;
+
+  37  import com.dtstack.flink.sql.side.BaseAllReqRow;
+  38  import com.dtstack.flink.sql.side.FieldInfo;
+  39  import com.dtstack.flink.sql.side.JoinInfo;
+  40  import com.dtstack.flink.sql.side.AbstractSideTableInfo;
+  41  import com.dtstack.flink.sql.side.cassandra.table.CassandraSideTableInfo;
+
+  42  import com.google.common.collect.Lists;
+  43  import com.google.common.collect.Maps;
+  44  import org.apache.calcite.sql.JoinType;
+  45  import org.apache.commons.collections.CollectionUtils;
+  46  import org.apache.commons.lang3.StringUtils;
+
+
+
+
+
+  47  import org.slf4j.Logger;
+  48  import org.slf4j.LoggerFactory;
+  49  
+  50  import java.net.InetAddress;
+  51  import java.sql.SQLException;
+  52  import java.sql.Timestamp;
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  53 -import java.util.ArrayList;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  54 -import java.util.Calendar;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  55 -import java.util.List;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  56 -import java.util.Map;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  57 +import java.util.*;</span>
+  58  import java.util.concurrent.atomic.AtomicReference;
+  59  
+  60  /**
+  61   * Reason:
+  62   * Date: 2018/11/22
+  63   *
+  64   * @author xuqianjin
+  65   */
+  66  public class CassandraAllReqRow extends BaseAllReqRow {
+  67  
+  68      private static final long serialVersionUID = 54015343561288219L;
+  69  
+  70      private static final Logger LOG = LoggerFactory.getLogger(CassandraAllReqRow.class);
+  71  
+  72      private static final int CONN_RETRY_NUM = 3;
+  73  
+  74      private static final int FETCH_SIZE = 1000;
+  75  
+  76      private transient Cluster cluster;
+  77      private transient Session session = null;
+  78  
+  79      private AtomicReference&lt;Map&lt;String, List&lt;Map&lt;String, Object&gt;&gt;&gt;&gt; cacheRef = new AtomicReference&lt;&gt;();
+  80  
+<abbr title="  81      public CassandraAllReqRow(RowTypeInfo rowTypeInfo, JoinInfo joinInfo, List&lt;FieldInfo&gt; outFieldInfoList, AbstractSideTableInfo sideTableInfo) {">  81      public CassandraAllReqRow(RowTypeInfo rowTypeInfo, JoinInfo joinInfo, List&lt;FieldInfo&gt; outFieldInfoList, Abstra🔵</abbr>
+<abbr title="  82          super(new com.dtstack.flink.sql.side.cassandra.CassandraAllSideInfo(rowTypeInfo, joinInfo, outFieldInfoList, sideTableInfo));">  82          super(new com.dtstack.flink.sql.side.cassandra.CassandraAllSideInfo(rowTypeInfo, joinInfo, outFieldInfoLis🔵</abbr>
+  83      }
+  84  
+  85      @Override
+  86      public Row fillData(Row input, Object sideInput) {
+  87          Map&lt;String, Object&gt; cacheInfo = (Map&lt;String, Object&gt;) sideInput;
+  88          Row row = new Row(sideInfo.getOutFieldInfoList().size());
+  89          for (Map.Entry&lt;Integer, Integer&gt; entry : sideInfo.getInFieldIndex().entrySet()) {
+  90              Object obj = input.getField(entry.getValue());
+<abbr title="  91              boolean isTimeIndicatorTypeInfo = TimeIndicatorTypeInfo.class.isAssignableFrom(sideInfo.getRowTypeInfo().getTypeAt(entry.getValue()).getClass());">  91              boolean isTimeIndicatorTypeInfo = TimeIndicatorTypeInfo.class.isAssignableFrom(sideInfo.getRowTypeInfo🔵</abbr>
+  92  
+<abbr title="  93              //Type information for indicating event or processing time. However, it behaves like a regular SQL timestamp but is serialized as Long.">  93              //Type information for indicating event or processing time. However, it behaves like a regular SQL tim🔵</abbr>
+  94              if (obj instanceof Timestamp &amp;&amp; isTimeIndicatorTypeInfo) {
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  95 -                obj = ((Timestamp) obj).getTime();</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  96 -            }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  97 +                //去除上一层OutputRowtimeProcessFunction 调用时区导致的影响</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  98 +                obj = ((Timestamp) obj).getTime() + (long)LOCAL_TZ.getOffset(((Timestamp) obj).getTime());</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  99 +            }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 100 +</span>
+ 101              row.setField(entry.getKey(), obj);
+ 102          }
+ 103  
+ 104          for (Map.Entry&lt;Integer, String&gt; entry : sideInfo.getSideFieldNameIndex().entrySet()) {
+ 105              if (cacheInfo == null) {
+ 106                  row.setField(entry.getKey(), null);
+ 107              } else {
+ 108                  row.setField(entry.getKey(), cacheInfo.get(entry.getValue()));
+ 109              }
+ 110          }
+ 111  
+ 112          return row;
+ 113      }
+ 114  
+ 115      @Override
+ 116      protected void initCache() throws SQLException {
+ 117          Map&lt;String, List&lt;Map&lt;String, Object&gt;&gt;&gt; newCache = Maps.newConcurrentMap();
+ 118          cacheRef.set(newCache);
+ 119          loadData(newCache);
+ 120      }
+ 121  
+ 122      @Override
+ 123      protected void reloadCache() {
+ 124          //reload cacheRef and replace to old cacheRef
+ 125          Map&lt;String, List&lt;Map&lt;String, Object&gt;&gt;&gt; newCache = Maps.newConcurrentMap();
+ 126          try {
+ 127              loadData(newCache);
+ 128          } catch (SQLException e) {
+ 129              LOG.error(&quot;&quot;, e);
+ 130          }
+ 131  
+ 132          cacheRef.set(newCache);
+ 133          LOG.info(&quot;----- cassandra all cacheRef reload end:{}&quot;, Calendar.getInstance());
+ 134      }
+ 135  
+ 136  
+ 137      @Override
+ 138      public void flatMap(CRow input, Collector&lt;CRow&gt; out) throws Exception {
+
+ 139          List&lt;Object&gt; inputParams = Lists.newArrayList();
+ 140          for (Integer conValIndex : sideInfo.getEqualValIndex()) {
+ 141              Object equalObj = input.row().getField(conValIndex);
+
+ 142              if (equalObj == null) {
+ 143                  if(sideInfo.getJoinType() == JoinType.LEFT){
+ 144                      Row data = fillData(input.row(), null);
+ 145                      out.collect(new CRow(data, input.change()));
+
+
+
+ 146                  }
+ 147                  return;
+ 148              }
+ 149  
+ 150              inputParams.add(equalObj);
+ 151          }
+ 152  
+ 153          String key = buildKey(inputParams);
+ 154          List&lt;Map&lt;String, Object&gt;&gt; cacheList = cacheRef.get().get(key);
+ 155          if (CollectionUtils.isEmpty(cacheList)) {
+ 156              if (sideInfo.getJoinType() == JoinType.LEFT) {
+ 157                  Row row = fillData(input.row(), null);
+ 158                  out.collect(new CRow(row, input.change()));
+
+
+ 159              } else {
+ 160                  return;
+ 161              }
+ 162  
+ 163              return;
+ 164          }
+ 165  
+ 166          for (Map&lt;String, Object&gt; one : cacheList) {
+ 167              out.collect(new CRow(fillData(input.row(), one), input.change()));
+
+
+ 168          }
+ 169  
+ 170      }
+ 171  
+ 172      private String buildKey(List&lt;Object&gt; equalValList) {
+ 173          StringBuilder sb = new StringBuilder(&quot;&quot;);
+ 174          for (Object equalVal : equalValList) {
+ 175              sb.append(equalVal).append(&quot;_&quot;);
+ 176          }
+ 177  
+ 178          return sb.toString();
+ 179      }
+ 180  
+ 181      private String buildKey(Map&lt;String, Object&gt; val, List&lt;String&gt; equalFieldList) {
+ 182          StringBuilder sb = new StringBuilder(&quot;&quot;);
+ 183          for (String equalField : equalFieldList) {
+ 184              sb.append(val.get(equalField)).append(&quot;_&quot;);
+ 185          }
+ 186  
+ 187          return sb.toString();
+ 188      }
+ 189  
+ 190      private Session getConn(CassandraSideTableInfo tableInfo) {
+ 191          try {
+ 192              if (session == null) {
+ 193                  QueryOptions queryOptions = new QueryOptions();
+ 194                  //The default consistency level for queries: ConsistencyLevel.TWO.
+ 195                  queryOptions.setConsistencyLevel(ConsistencyLevel.QUORUM);
+<abbr title=" 196                  Integer maxRequestsPerConnection = tableInfo.getMaxRequestsPerConnection() == null ? 1 : tableInfo.getMaxRequestsPerConnection();"> 196                  Integer maxRequestsPerConnection = tableInfo.getMaxRequestsPerConnection() == null ? 1 : tableInfo🔵</abbr>
+<abbr title=" 197                  Integer coreConnectionsPerHost = tableInfo.getCoreConnectionsPerHost() == null ? 8 : tableInfo.getCoreConnectionsPerHost();"> 197                  Integer coreConnectionsPerHost = tableInfo.getCoreConnectionsPerHost() == null ? 8 : tableInfo.get🔵</abbr>
+<abbr title=" 198                  Integer maxConnectionsPerHost = tableInfo.getMaxConnectionsPerHost() == null ? 32768 : tableInfo.getMaxConnectionsPerHost();"> 198                  Integer maxConnectionsPerHost = tableInfo.getMaxConnectionsPerHost() == null ? 32768 : tableInfo.g🔵</abbr>
+ 199                  Integer maxQueueSize = tableInfo.getMaxQueueSize() == null ? 100000 : tableInfo.getMaxQueueSize();
+<abbr title=" 200                  Integer readTimeoutMillis = tableInfo.getReadTimeoutMillis() == null ? 60000 : tableInfo.getReadTimeoutMillis();"> 200                  Integer readTimeoutMillis = tableInfo.getReadTimeoutMillis() == null ? 60000 : tableInfo.getReadTi🔵</abbr>
+<abbr title=" 201                  Integer connectTimeoutMillis = tableInfo.getConnectTimeoutMillis() == null ? 60000 : tableInfo.getConnectTimeoutMillis();"> 201                  Integer connectTimeoutMillis = tableInfo.getConnectTimeoutMillis() == null ? 60000 : tableInfo.get🔵</abbr>
+<abbr title=" 202                  Integer poolTimeoutMillis = tableInfo.getPoolTimeoutMillis() == null ? 60000 : tableInfo.getPoolTimeoutMillis();"> 202                  Integer poolTimeoutMillis = tableInfo.getPoolTimeoutMillis() == null ? 60000 : tableInfo.getPoolTi🔵</abbr>
+ 203                  Integer cassandraPort = 0;
+ 204                  String address = tableInfo.getAddress();
+ 205                  String userName = tableInfo.getUserName();
+ 206                  String password = tableInfo.getPassword();
+ 207                  String database = tableInfo.getDatabase();
+ 208  
+ 209                  ArrayList serversList = new ArrayList();
+ 210                  //Read timeout or connection timeout Settings
+ 211                  SocketOptions so = new SocketOptions()
+ 212                          .setReadTimeoutMillis(readTimeoutMillis)
+ 213                          .setConnectTimeoutMillis(connectTimeoutMillis);
+ 214  
+ 215                  //The cluster USES hostdistance.local in the same machine room
+ 216                  //Hostdistance. REMOTE is used for different machine rooms
+ 217                  //Ignore use HostDistance. IGNORED
+ 218                  PoolingOptions poolingOptions = new PoolingOptions()
+ 219                          //Each connection allows a maximum of 64 concurrent requests
+ 220                          .setMaxRequestsPerConnection(HostDistance.LOCAL, maxRequestsPerConnection)
+ 221                          //Have at least two connections to each machine in the cluster
+ 222                          .setCoreConnectionsPerHost(HostDistance.LOCAL, coreConnectionsPerHost)
+ 223                          //There are up to eight connections to each machine in the cluster
+ 224                          .setMaxConnectionsPerHost(HostDistance.LOCAL, maxConnectionsPerHost)
+ 225                          .setMaxQueueSize(maxQueueSize)
+ 226                          .setPoolTimeoutMillis(poolTimeoutMillis);
+ 227                  //重试策略
+ 228                  RetryPolicy retryPolicy = DowngradingConsistencyRetryPolicy.INSTANCE;
+ 229  
+ 230                  for (String server : StringUtils.split(address, &quot;,&quot;)) {
+ 231                      cassandraPort = Integer.parseInt(StringUtils.split(server, &quot;:&quot;)[1]);
+ 232                      serversList.add(InetAddress.getByName(StringUtils.split(server, &quot;:&quot;)[0]));
+ 233                  }
+ 234  
+ 235                  if (userName == null || userName.isEmpty() || password == null || password.isEmpty()) {
+ 236                      cluster = Cluster.builder().addContactPoints(serversList).withRetryPolicy(retryPolicy)
+ 237                              .withPort(cassandraPort)
+ 238                              .withPoolingOptions(poolingOptions).withSocketOptions(so)
+ 239                              .withQueryOptions(queryOptions).build();
+ 240                  } else {
+ 241                      cluster = Cluster.builder().addContactPoints(serversList).withRetryPolicy(retryPolicy)
+ 242                              .withPort(cassandraPort)
+ 243                              .withPoolingOptions(poolingOptions).withSocketOptions(so)
+ 244                              .withCredentials(userName, password)
+ 245                              .withQueryOptions(queryOptions).build();
+ 246                  }
+ 247                  // 建立连接 连接已存在的键空间
+ 248                  session = cluster.connect(database);
+ 249                  LOG.info(&quot;connect cassandra is successed!&quot;);
+ 250              }
+ 251          } catch (Exception e) {
+ 252              LOG.error(&quot;connect cassandra is error:&quot; + e.getMessage());
+ 253          }
+ 254          return session;
+ 255      }
+ 256  
+ 257  
+ 258      private void loadData(Map&lt;String, List&lt;Map&lt;String, Object&gt;&gt;&gt; tmpCache) throws SQLException {
+ 259          CassandraSideTableInfo tableInfo = (CassandraSideTableInfo) sideInfo.getSideTableInfo();
+ 260          Session session = null;
+ 261  
+ 262          try {
+ 263              for (int i = 0; i &lt; CONN_RETRY_NUM; i++) {
+ 264                  try {
+ 265                      session = getConn(tableInfo);
+ 266                      break;
+ 267                  } catch (Exception e) {
+ 268                      if (i == CONN_RETRY_NUM - 1) {
+ 269                          throw new RuntimeException(&quot;&quot;, e);
+ 270                      }
+ 271                      try {
+<abbr title=" 272                          String connInfo = &quot;address:&quot; + tableInfo.getAddress() + &quot;;userName:&quot; + tableInfo.getUserName()"> 272                          String connInfo = &quot;address:&quot; + tableInfo.getAddress() + &quot;;userName:&quot; + tableInfo.getUserNa🔵</abbr>
+ 273                                  + &quot;,pwd:&quot; + tableInfo.getPassword();
+ 274                          LOG.warn(&quot;get conn fail, wait for 5 sec and try again, connInfo:&quot; + connInfo);
+ 275                          Thread.sleep(LOAD_DATA_ERROR_SLEEP_TIME);
+ 276                      } catch (InterruptedException e1) {
+ 277                          LOG.error(&quot;&quot;, e1);
+ 278                      }
+ 279                  }
+ 280  
+ 281              }
+ 282  
+ 283              //load data from table
+ 284              String sql = sideInfo.getSqlCondition() + &quot; limit &quot; + FETCH_SIZE;
+ 285              ResultSet resultSet = session.execute(sql);
+ 286              String[] sideFieldNames = StringUtils.split(sideInfo.getSideSelectFields(), &quot;,&quot;);
+ 287              for (com.datastax.driver.core.Row row : resultSet) {
+ 288                  Map&lt;String, Object&gt; oneRow = Maps.newHashMap();
+ 289                  for (String fieldName : sideFieldNames) {
+ 290                      oneRow.put(fieldName.trim(), row.getObject(fieldName.trim()));
+ 291                  }
+ 292                  String cacheKey = buildKey(oneRow, sideInfo.getEqualFieldList());
+ 293                  List&lt;Map&lt;String, Object&gt;&gt; list = tmpCache.computeIfAbsent(cacheKey, key -&gt; Lists.newArrayList());
+ 294                  list.add(oneRow);
+ 295              }
+ 296          } catch (Exception e) {
+ 297              LOG.error(&quot;&quot;, e);
+ 298          } finally {
+ 299              try {
+ 300                  if (session != null) {
+ 301                      session.close();
+ 302                  }
+ 303              } catch (Exception e) {
+ 304                  LOG.error(&quot;Error while closing session.&quot;, e);
+ 305              }
+ 306              try {
+ 307                  if (cluster != null) {
+ 308                      cluster.close();
+ 309                  }
+ 310              } catch (Exception e) {
+ 311                  LOG.error(&quot;Error while closing cluster.&quot;, e);
+ 312              }
+ 313          }
+ 314      }
+ 315  }</pre></td>
+                        </tr>
+                    </table>
+                </div>
+              </body>
+            </html>
+            

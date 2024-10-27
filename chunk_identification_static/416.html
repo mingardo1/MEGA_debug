@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+    <html lang="en">
+              <head>
+                <meta charset="utf-8">
+                <title>416</title>
+                    <style>
+                        #top {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        #bottom {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        abbr {
+                          /* Here is the delay */
+                          transition-delay:0s;
+                        }
+                    </style>
+              </head>
+              <body>
+                <span style="height: 4vh">
+                    416
+                    <a href="415.html">prev</a>
+                    <a href="417.html">next</a>
+                    <a href="416_chunks.html">chunks</a>
+                    <a href="index.html">index</a>
+                    DTStack/flinkStreamSQL_1d6d097fef4d57b58b9e725caa19e8a0a44251e3_launcher/src/main/java/com/dtstack/flink/sql/launcher/LauncherMain.java
+                    <textarea rows=1 onclick='navigator.clipboard.writeText(this.value)'>cd C:\studies\se\mega\git-analyzer-plus\notebooks\debug
+del /Q *
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;1d6d097fef4d57b58b9e725caa19e8a0a44251e3:launcher/src/main/java/com/dtstack/flink/sql/launcher/LauncherMain.java&quot; &gt; committed.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;1d6d097fef4d57b58b9e725caa19e8a0a44251e3^1:launcher/src/main/java/com/dtstack/flink/sql/launcher/LauncherMain.java&quot; &gt; ours.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;1d6d097fef4d57b58b9e725caa19e8a0a44251e3^2:launcher/src/main/java/com/dtstack/flink/sql/launcher/LauncherMain.java&quot; &gt; theirs.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;d124305ffe07b66f8eee430b3c0ac1072281dc14:launcher/src/main/java/com/dtstack/flink/sql/launcher/LauncherMain.java&quot; &gt; base.java
+copy ours.java 1ours.java
+copy ours.java 2ours.java
+copy theirs.java 1theirs.java
+copy theirs.java 2theirs.java
+copy base.java 1base.java
+copy base.java 2base.java
+&quot;C:\Program Files\Java\jdk1.8.0_241\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\jFSTMerge\build\libs\jFSTMerge-all.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\jfstmerge.java --show-base
+&quot;C:\Program Files\Eclipse Adoptium\jdk-17.0.11.9-hotspot\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\spork\target\spork-0.5.0-SNAPSHOT.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\spork.java
+del /Q 1*.java
+del /Q 2*.java
+del /Q jfstmerge.java.merge
+</textarea>
+                    {strict: [[sbj]], subset: [[sbj]]}
+                </span>
+                <div id="top">
+
+                    <table>
+                        <tr>
+                            <th>line based (standard git)</th>
+                            <th>jfstmerge</th>
+                            <th>spork</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1 /*
+   2  * Licensed to the Apache Software Foundation (ASF) under one
+   3  * or more contributor license agreements.  See the NOTICE file
+   4  * distributed with this work for additional information
+   5  * regarding copyright ownership.  The ASF licenses this file
+   6  * to you under the Apache License, Version 2.0 (the
+   7  * &quot;License&quot;); you may not use this file except in compliance
+   8  * with the License.  You may obtain a copy of the License at
+   9  *
+  10  *     http://www.apache.org/licenses/LICENSE-2.0
+  11  *
+  12  * Unless required by applicable law or agreed to in writing, software
+  13  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15  * See the License for the specific language governing permissions and
+  16  * limitations under the License.
+  17  */
+  18 
+  19  
+  20 
+  21 package com.dtstack.flink.sql.launcher;
+  22 
+  23 import com.dtstack.flink.sql.constrant.ConfigConstrant;
+  24 import com.google.common.collect.Lists;
+  25 import com.alibaba.fastjson.JSON;
+  26 import com.alibaba.fastjson.TypeReference;
+  27 import com.dtstack.flink.sql.enums.ClusterMode;
+  28 import com.dtstack.flink.sql.Main;
+  29 import com.dtstack.flink.sql.launcher.perjob.PerJobSubmitter;
+  30 import com.dtstack.flink.sql.option.OptionParser;
+  31 import com.dtstack.flink.sql.option.Options;
+  32 import com.dtstack.flink.sql.util.PluginUtil;
+  33 import org.apache.commons.io.Charsets;
+  34 import org.apache.commons.lang.BooleanUtils;
+  35 import org.apache.commons.lang.StringUtils;
+  36 import org.apache.flink.client.program.ClusterClient;
+  37 import org.apache.flink.client.program.PackagedProgram;
+  38 import org.apache.flink.client.program.PackagedProgramUtils;
+  39 import org.apache.flink.configuration.Configuration;
+  40 import org.apache.flink.configuration.GlobalConfiguration;
+  41 import org.apache.flink.runtime.jobgraph.JobGraph;
+  42 import org.apache.flink.runtime.jobgraph.SavepointRestoreSettings;
+  43 import org.apache.flink.util.FileUtils;
+  44 
+  45 import java.io.File;
+  46 import java.io.IOException;
+  47 import java.net.URLDecoder;
+  48 import java.nio.charset.StandardCharsets;
+  49 import java.util.LinkedList;
+  50 import java.util.List;
+  51 import java.util.Map;
+  52 import java.util.Properties;
+  53 
+  54 /**
+  55  * Date: 2017/2/20
+  56  * Company: www.dtstack.com
+  57  * @author xuchao
+  58  */
+  59 
+  60 public class LauncherMain {
+  61     private static final String CORE_JAR = &quot;core&quot;;
+  62 
+  63     private static String SP = File.separator;
+  64 
+  65     private static String getLocalCoreJarPath(String localSqlRootJar) throws Exception {
+  66         String jarPath = PluginUtil.getCoreJarFileName(localSqlRootJar, CORE_JAR);
+  67         return localSqlRootJar + SP + jarPath;
+  68     }
+  69 
+  70     public static void main(String[] args) throws Exception {
+  71         if (args.length == 1 &amp;&amp; args[0].endsWith(&quot;.json&quot;)){
+  72             args = parseJson(args);
+  73         }
+  74         OptionParser optionParser = new OptionParser(args);
+  75         Options launcherOptions = optionParser.getOptions();
+  76         String mode = launcherOptions.getMode();
+  77         List&lt;String&gt; argList = optionParser.getProgramExeArgList();
+  78 
+  79         String confProp = launcherOptions.getConfProp();
+  80         confProp = URLDecoder.decode(confProp, Charsets.UTF_8.toString());
+  81         Properties confProperties = PluginUtil.jsonStrToObject(confProp, Properties.class);
+  82 
+  83         if(mode.equals(ClusterMode.local.name())) {
+  84             String[] localArgs = argList.toArray(new String[0]);
+  85             Main.main(localArgs);
+  86             return;
+  87         }
+  88 
+  89         String pluginRoot = launcherOptions.getLocalSqlPluginPath();
+  90         File jarFile = new File(getLocalCoreJarPath(pluginRoot));
+  91         String[] remoteArgs = argList.toArray(new String[0]);
+  92         PackagedProgram program = new PackagedProgram(jarFile, Lists.newArrayList(), remoteArgs);
+  93 
+  94         String savePointPath = confProperties.getProperty(ConfigConstrant.SAVE_POINT_PATH_KEY);
+  95         if(StringUtils.isNotBlank(savePointPath)){
+<abbr title="  96             String allowNonRestoredState = confProperties.getOrDefault(ConfigConstrant.ALLOW_NON_RESTORED_STATE_KEY, &quot;false&quot;).toString();">  96             String allowNonRestoredState = confProperties.getOrDefault(ConfigConstrant.ALLOW_NON_RESTORED🔵</abbr>
+<abbr title="  97             program.setSavepointRestoreSettings(SavepointRestoreSettings.forPath(savePointPath, BooleanUtils.toBoolean(allowNonRestoredState)));">  97             program.setSavepointRestoreSettings(SavepointRestoreSettings.forPath(savePointPath, BooleanUt🔵</abbr>
+  98         }
+  99 
+ 100         if(mode.equals(ClusterMode.yarnPer.name())){
+ 101             String flinkConfDir = launcherOptions.getFlinkconf();
+<abbr title=" 102             Configuration config = StringUtils.isEmpty(flinkConfDir) ? new Configuration() : GlobalConfiguration.loadConfiguration(flinkConfDir);"> 102             Configuration config = StringUtils.isEmpty(flinkConfDir) ? new Configuration() : GlobalConfig🔵</abbr>
+ 103             JobGraph jobGraph = PackagedProgramUtils.createJobGraph(program, config, 1);
+ 104             PerJobSubmitter.submit(launcherOptions, jobGraph, config);
+ 105         } else {
+ 106             ClusterClient clusterClient = ClusterClientFactory.createClusterClient(launcherOptions);
+ 107             clusterClient.run(program, 1);
+ 108             clusterClient.shutdown();
+ 109         }
+ 110 
+ 111     }
+ 112 
+ 113 &lt;&lt;&lt;&lt;&lt;&lt;&lt; GitAnalyzerPlus_ours
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 114     private static String[] parseJson(String[] args) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 115         BufferedReader reader = null;</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 116         StringBuilder lastStr = new StringBuilder();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 117         try{</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 118             FileInputStream fileInputStream = new FileInputStream(args[0]);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"><abbr title=" 119             InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream, StandardCharsets.UTF_8);"> 119             InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream, StandardCharsets🔵</abbr></span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 120             reader = new BufferedReader(inputStreamReader);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 121             String tempString = null;</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 122             while((tempString = reader.readLine()) != null){</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 123                 lastStr.append(tempString);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 124             }</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 125             reader.close();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 126         }catch(IOException e){</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 127             e.printStackTrace();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 128         }finally{</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 129             if(reader != null){</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 130                 try {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 131                     reader.close();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 132                 } catch (IOException e) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 133                     e.printStackTrace();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 134                 }</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 135             }</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 136         }</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"><abbr title=" 137         Map&lt;String, Object&gt; map = JSON.parseObject(lastStr.toString(), new TypeReference&lt;Map&lt;String, Object&gt;&gt;(){} );"> 137         Map&lt;String, Object&gt; map = JSON.parseObject(lastStr.toString(), new TypeReference&lt;Map&lt;String, Obje🔵</abbr></span>
+ 138 ||||||| GitAnalyzerPlus_base
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 139         }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 140 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 141     }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 142 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 143     private static String[] parseJson(String[] args) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 144         BufferedReader reader = null;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 145         String lastStr = &quot;&quot;;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 146         try{</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 147             FileInputStream fileInputStream = new FileInputStream(args[0]);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 148             InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream, &quot;UTF-8&quot;);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 149             reader = new BufferedReader(inputStreamReader);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 150             String tempString = null;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 151             while((tempString = reader.readLine()) != null){</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 152                 lastStr += tempString;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 153             }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 154             reader.close();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 155         }catch(IOException e){</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 156             e.printStackTrace();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 157         }finally{</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 158             if(reader != null){</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 159                 try {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 160                     reader.close();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 161                 } catch (IOException e) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 162                     e.printStackTrace();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 163                 }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 164             }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 165         }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 166         Map&lt;String, Object&gt; map = JSON.parseObject(lastStr, new TypeReference&lt;Map&lt;String, Object&gt;&gt;(){} );</span>
+ 167 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 168     private static String[] parseJson(String[] args) throws IOException {</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 169         String lastStr = FileUtils.readFileUtf8(new File(args[0]));</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 170         Map&lt;String, Object&gt; map = JSON.parseObject(lastStr, new TypeReference&lt;Map&lt;String, Object&gt;&gt;() {</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 171         });</span>
+ 172 &gt;&gt;&gt;&gt;&gt;&gt;&gt; GitAnalyzerPlus_theirs
+ 173         List&lt;String&gt; list = new LinkedList&lt;&gt;();
+ 174         for (Map.Entry&lt;String, Object&gt; entry : map.entrySet()) {
+ 175             list.add(&quot;-&quot; + entry.getKey());
+ 176             list.add(entry.getValue().toString());
+ 177         }
+ 178         return list.toArray(new String[0]);
+ 179     }
+ 180 }</pre></td>
+                            <td><pre>   1 /*
+   2  * Licensed to the Apache Software Foundation (ASF) under one
+   3  * or more contributor license agreements.  See the NOTICE file
+   4  * distributed with this work for additional information
+   5  * regarding copyright ownership.  The ASF licenses this file
+   6  * to you under the Apache License, Version 2.0 (the
+   7  * &quot;License&quot;); you may not use this file except in compliance
+   8  * with the License.  You may obtain a copy of the License at
+   9  *
+  10  *     http://www.apache.org/licenses/LICENSE-2.0
+  11  *
+  12  * Unless required by applicable law or agreed to in writing, software
+  13  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15  * See the License for the specific language governing permissions and
+  16  * limitations under the License.
+  17  */
+  18 
+  19 
+  20 
+  21 package com.dtstack.flink.sql.launcher;
+  22 
+  23 import com.dtstack.flink.sql.constrant.ConfigConstrant;
+  24 import com.google.common.collect.Lists;
+  25 import com.alibaba.fastjson.JSON;
+  26 import com.alibaba.fastjson.TypeReference;
+  27 import com.dtstack.flink.sql.enums.ClusterMode;
+  28 import com.dtstack.flink.sql.Main;
+  29 import com.dtstack.flink.sql.launcher.perjob.PerJobSubmitter;
+  30 import com.dtstack.flink.sql.option.OptionParser;
+  31 import com.dtstack.flink.sql.option.Options;
+  32 import com.dtstack.flink.sql.util.PluginUtil;
+  33 import org.apache.commons.io.Charsets;
+  34 import org.apache.commons.lang.BooleanUtils;
+  35 import org.apache.commons.lang.StringUtils;
+  36 import org.apache.flink.client.program.ClusterClient;
+  37 import org.apache.flink.client.program.PackagedProgram;
+  38 import org.apache.flink.client.program.PackagedProgramUtils;
+  39 import org.apache.flink.configuration.Configuration;
+  40 import org.apache.flink.configuration.GlobalConfiguration;
+  41 import org.apache.flink.runtime.jobgraph.JobGraph;
+  42 import org.apache.flink.runtime.jobgraph.SavepointRestoreSettings;
+  43 import org.apache.flink.util.FileUtils;
+  44 
+  45 import java.io.File;
+  46 import java.io.IOException;
+  47 import java.net.URLDecoder;
+  48 import java.nio.charset.StandardCharsets;
+  49 import java.util.LinkedList;
+  50 import java.util.List;
+  51 import java.util.Map;
+  52 import java.util.Properties;
+  53 
+  54 /**
+  55  * Date: 2017/2/20
+  56  * Company: www.dtstack.com
+  57  * @author xuchao
+  58  */
+  59 
+  60 public class LauncherMain {
+  61     private static final String CORE_JAR = &quot;core&quot;;
+  62 
+  63     private static String SP = File.separator;
+  64 
+  65     private static String getLocalCoreJarPath(String localSqlRootJar) throws Exception {
+  66         String jarPath = PluginUtil.getCoreJarFileName(localSqlRootJar, CORE_JAR);
+  67         return localSqlRootJar + SP + jarPath;
+  68     }
+  69 
+  70     public static void main(String[] args) throws Exception {
+  71         if (args.length == 1 &amp;&amp; args[0].endsWith(&quot;.json&quot;)){
+  72             args = parseJson(args);
+  73         }
+  74         OptionParser optionParser = new OptionParser(args);
+  75         Options launcherOptions = optionParser.getOptions();
+  76         String mode = launcherOptions.getMode();
+  77         List&lt;String&gt; argList = optionParser.getProgramExeArgList();
+  78 
+  79         String confProp = launcherOptions.getConfProp();
+  80         confProp = URLDecoder.decode(confProp, Charsets.UTF_8.toString());
+  81         Properties confProperties = PluginUtil.jsonStrToObject(confProp, Properties.class);
+  82 
+  83         if(mode.equals(ClusterMode.local.name())) {
+  84             String[] localArgs = argList.toArray(new String[0]);
+  85             Main.main(localArgs);
+  86             return;
+  87         }
+  88 
+  89         String pluginRoot = launcherOptions.getLocalSqlPluginPath();
+  90         File jarFile = new File(getLocalCoreJarPath(pluginRoot));
+  91         String[] remoteArgs = argList.toArray(new String[0]);
+  92         PackagedProgram program = new PackagedProgram(jarFile, Lists.newArrayList(), remoteArgs);
+  93 
+  94         String savePointPath = confProperties.getProperty(ConfigConstrant.SAVE_POINT_PATH_KEY);
+  95         if(StringUtils.isNotBlank(savePointPath)){
+<abbr title="  96             String allowNonRestoredState = confProperties.getOrDefault(ConfigConstrant.ALLOW_NON_RESTORED_STATE_KEY, &quot;false&quot;).toString();">  96             String allowNonRestoredState = confProperties.getOrDefault(ConfigConstrant.ALLOW_NON_RESTORED🔵</abbr>
+<abbr title="  97             program.setSavepointRestoreSettings(SavepointRestoreSettings.forPath(savePointPath, BooleanUtils.toBoolean(allowNonRestoredState)));">  97             program.setSavepointRestoreSettings(SavepointRestoreSettings.forPath(savePointPath, BooleanUt🔵</abbr>
+  98         }
+  99 
+ 100         if(mode.equals(ClusterMode.yarnPer.name())){
+ 101             String flinkConfDir = launcherOptions.getFlinkconf();
+<abbr title=" 102             Configuration config = StringUtils.isEmpty(flinkConfDir) ? new Configuration() : GlobalConfiguration.loadConfiguration(flinkConfDir);"> 102             Configuration config = StringUtils.isEmpty(flinkConfDir) ? new Configuration() : GlobalConfig🔵</abbr>
+ 103             JobGraph jobGraph = PackagedProgramUtils.createJobGraph(program, config, 1);
+ 104             PerJobSubmitter.submit(launcherOptions, jobGraph, config);
+ 105         } else {
+ 106             ClusterClient clusterClient = ClusterClientFactory.createClusterClient(launcherOptions);
+ 107             clusterClient.run(program, 1);
+ 108             clusterClient.shutdown();
+ 109         }
+ 110 
+ 111     }
+ 112 
+ 113 &lt;&lt;&lt;&lt;&lt;&lt;&lt; MINE
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 114 private static String[] parseJson(String[] args) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 115         BufferedReader reader = null;</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 116         StringBuilder lastStr = new StringBuilder();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 117         try{</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 118             FileInputStream fileInputStream = new FileInputStream(args[0]);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"><abbr title=" 119             InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream, StandardCharsets.UTF_8);"> 119             InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream, StandardCharsets🔵</abbr></span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 120             reader = new BufferedReader(inputStreamReader);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 121             String tempString = null;</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 122             while((tempString = reader.readLine()) != null){</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 123                 lastStr.append(tempString);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 124             }</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 125             reader.close();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 126         }catch(IOException e){</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 127             e.printStackTrace();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 128         }finally{</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 129             if(reader != null){</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 130                 try {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 131                     reader.close();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 132                 } catch (IOException e) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 133                     e.printStackTrace();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 134                 }</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 135             }</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 136         }</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"><abbr title=" 137         Map&lt;String, Object&gt; map = JSON.parseObject(lastStr.toString(), new TypeReference&lt;Map&lt;String, Object&gt;&gt;(){} );"> 137         Map&lt;String, Object&gt; map = JSON.parseObject(lastStr.toString(), new TypeReference&lt;Map&lt;String, Obje🔵</abbr></span>
+ 138 ||||||| BASE
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 139 private static String[] parseJson(String[] args) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 140         BufferedReader reader = null;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 141         String lastStr = &quot;&quot;;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 142         try{</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 143             FileInputStream fileInputStream = new FileInputStream(args[0]);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 144             InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream, &quot;UTF-8&quot;);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 145             reader = new BufferedReader(inputStreamReader);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 146             String tempString = null;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 147             while((tempString = reader.readLine()) != null){</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 148                 lastStr += tempString;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 149             }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 150             reader.close();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 151         }catch(IOException e){</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 152             e.printStackTrace();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 153         }finally{</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 154             if(reader != null){</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 155                 try {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 156                     reader.close();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 157                 } catch (IOException e) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 158                     e.printStackTrace();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 159                 }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 160             }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 161         }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 162         Map&lt;String, Object&gt; map = JSON.parseObject(lastStr, new TypeReference&lt;Map&lt;String, Object&gt;&gt;(){} );</span>
+ 163 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 164 private static String[] parseJson(String[] args) throws IOException {</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 165         String lastStr = FileUtils.readFileUtf8(new File(args[0]));</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 166         Map&lt;String, Object&gt; map = JSON.parseObject(lastStr, new TypeReference&lt;Map&lt;String, Object&gt;&gt;() {</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 167         });</span>
+ 168 &gt;&gt;&gt;&gt;&gt;&gt;&gt; YOURS
+ 169         List&lt;String&gt; list = new LinkedList&lt;&gt;();
+ 170         for (Map.Entry&lt;String, Object&gt; entry : map.entrySet()) {
+ 171             list.add(&quot;-&quot; + entry.getKey());
+ 172             list.add(entry.getValue().toString());
+ 173         }
+ 174         return list.toArray(new String[0]);
+ 175     }
+ 176 }
+ 
+ 
+ </pre></td>
+                            <td><pre>   1 /*
+   2  * Licensed to the Apache Software Foundation (ASF) under one
+   3  * or more contributor license agreements.  See the NOTICE file
+   4  * distributed with this work for additional information
+   5  * regarding copyright ownership.  The ASF licenses this file
+   6  * to you under the Apache License, Version 2.0 (the
+   7  * &quot;License&quot;); you may not use this file except in compliance
+   8  * with the License.  You may obtain a copy of the License at
+   9  *
+  10  *     http://www.apache.org/licenses/LICENSE-2.0
+  11  *
+  12  * Unless required by applicable law or agreed to in writing, software
+  13  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15  * See the License for the specific language governing permissions and
+  16  * limitations under the License.
+  17  */
+  18 package com.dtstack.flink.sql.launcher;
+  19 
+  20 import com.alibaba.fastjson.JSON;
+  21 import com.alibaba.fastjson.TypeReference;
+  22 import com.dtstack.flink.sql.Main;
+  23 import com.dtstack.flink.sql.constrant.ConfigConstrant;
+  24 import com.dtstack.flink.sql.enums.ClusterMode;
+  25 import com.dtstack.flink.sql.launcher.perjob.PerJobSubmitter;
+  26 import com.dtstack.flink.sql.option.OptionParser;
+  27 import com.dtstack.flink.sql.option.Options;
+  28 import com.dtstack.flink.sql.util.PluginUtil;
+  29 import com.google.common.collect.Lists;
+  30 import java.io.File;
+  31 import java.io.IOException;
+  32 import java.net.URLDecoder;
+  33 import java.nio.charset.StandardCharsets;
+  34 import java.util.LinkedList;
+  35 import java.util.List;
+  36 import java.util.Map;
+  37 import java.util.Properties;
+  38 import org.apache.commons.io.Charsets;
+  39 import org.apache.commons.lang.BooleanUtils;
+  40 import org.apache.commons.lang.StringUtils;
+  41 import org.apache.flink.client.program.ClusterClient;
+  42 import org.apache.flink.client.program.PackagedProgram;
+  43 import org.apache.flink.client.program.PackagedProgramUtils;
+  44 import org.apache.flink.configuration.Configuration;
+  45 import org.apache.flink.configuration.GlobalConfiguration;
+  46 import org.apache.flink.runtime.jobgraph.JobGraph;
+  47 import org.apache.flink.runtime.jobgraph.SavepointRestoreSettings;
+  48 import org.apache.flink.util.FileUtils;
+  49 
+  50 
+  51 /**
+  52  * Date: 2017/2/20
+  53  * Company: www.dtstack.com
+  54  * @author xuchao
+  55  */
+  56 public class LauncherMain {
+  57 
+  58 &lt;&lt;&lt;&lt;&lt;&lt;&lt; LEFT
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  59     private static String[] parseJson(String[] args) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  60         BufferedReader reader = null;</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  61         StringBuilder lastStr = new StringBuilder();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  62         try{</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  63             FileInputStream fileInputStream = new FileInputStream(args[0]);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"><abbr title="  64             InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream, StandardCharsets.UTF_8);">  64             InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream, StandardCharsets🔵</abbr></span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  65             reader = new BufferedReader(inputStreamReader);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  66             String tempString = null;</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  67             while((tempString = reader.readLine()) != null){</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  68                 lastStr.append(tempString);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  69             }</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  70             reader.close();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  71         }catch(IOException e){</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  72             e.printStackTrace();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  73         }finally{</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  74             if(reader != null){</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  75                 try {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  76                     reader.close();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  77                 } catch (IOException e) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  78                     e.printStackTrace();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  79                 }</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  80             }</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  81         }</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"><abbr title="  82         Map&lt;String, Object&gt; map = JSON.parseObject(lastStr.toString(), new TypeReference&lt;Map&lt;String, Object&gt;&gt;(){} );">  82         Map&lt;String, Object&gt; map = JSON.parseObject(lastStr.toString(), new TypeReference&lt;Map&lt;String, Obje🔵</abbr></span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  83 </span>
+  84 ||||||| BASE
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"><abbr title="  85 /*d94z9sk0k4hf9j3ijd - note the base isn&#x27;t actually empty, spork simply doesn&#x27;t generate a base - gd930kwohrp23k5b6vdk93d3r*/">  85 /*d94z9sk0k4hf9j3ijd - note the base isn&#x27;t actually empty, spork simply doesn&#x27;t generate a base - gd930kw🔵</abbr></span>
+  86 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  87 </span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  88     private static String[] parseJson(String[] args) throws IOException {</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  89         String lastStr = FileUtils.readFileUtf8(new File(args[0]));</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  90         Map&lt;String, Object&gt; map = JSON.parseObject(lastStr, new TypeReference&lt;Map&lt;String, Object&gt;&gt;() {</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  91         });</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  92 </span>
+  93 &gt;&gt;&gt;&gt;&gt;&gt;&gt; RIGHT
+  94         List&lt;String&gt; list = new LinkedList&lt;&gt;();
+  95         for (Map.Entry&lt;String, Object&gt; entry : map.entrySet()) {
+  96             list.add(&quot;-&quot; + entry.getKey());
+  97             list.add(entry.getValue().toString());
+  98         }
+  99         return list.toArray(new String[0]);
+ 100     }
+ 101 
+ 102     private static final String CORE_JAR = &quot;core&quot;;
+ 103 
+ 104     private static String SP = File.separator;
+ 105 
+ 106     private static String getLocalCoreJarPath(String localSqlRootJar) throws Exception {
+ 107         String jarPath = PluginUtil.getCoreJarFileName(localSqlRootJar, CORE_JAR);
+ 108         return (localSqlRootJar + SP) + jarPath;
+ 109     }
+ 110 
+ 111     public static void main(String[] args) throws Exception {
+ 112         if ((args.length == 1) &amp;&amp; args[0].endsWith(&quot;.json&quot;)) {
+ 113             args = parseJson(args);
+ 114         }
+ 115         OptionParser optionParser = new OptionParser(args);
+ 116         Options launcherOptions = optionParser.getOptions();
+ 117         String mode = launcherOptions.getMode();
+ 118         List&lt;String&gt; argList = optionParser.getProgramExeArgList();
+ 119         String confProp = launcherOptions.getConfProp();
+ 120         confProp = URLDecoder.decode(confProp, Charsets.UTF_8.toString());
+ 121         Properties confProperties = PluginUtil.jsonStrToObject(confProp, Properties.class);
+ 122         if (mode.equals(ClusterMode.local.name())) {
+ 123             String[] localArgs = argList.toArray(new String[0]);
+ 124             Main.main(localArgs);
+ 125             return;
+ 126         }
+ 127         String pluginRoot = launcherOptions.getLocalSqlPluginPath();
+ 128         File jarFile = new File(getLocalCoreJarPath(pluginRoot));
+ 129         String[] remoteArgs = argList.toArray(new String[0]);
+ 130         PackagedProgram program = new PackagedProgram(jarFile, Lists.newArrayList(), remoteArgs);
+ 131         String savePointPath = confProperties.getProperty(ConfigConstrant.SAVE_POINT_PATH_KEY);
+ 132         if (StringUtils.isNotBlank(savePointPath)) {
+<abbr title=" 133             String allowNonRestoredState = confProperties.getOrDefault(ConfigConstrant.ALLOW_NON_RESTORED_STATE_KEY, &quot;false&quot;).toString();"> 133             String allowNonRestoredState = confProperties.getOrDefault(ConfigConstrant.ALLOW_NON_RESTORED🔵</abbr>
+<abbr title=" 134             program.setSavepointRestoreSettings(SavepointRestoreSettings.forPath(savePointPath, BooleanUtils.toBoolean(allowNonRestoredState)));"> 134             program.setSavepointRestoreSettings(SavepointRestoreSettings.forPath(savePointPath, BooleanUt🔵</abbr>
+ 135         }
+ 136         if (mode.equals(ClusterMode.yarnPer.name())) {
+ 137             String flinkConfDir = launcherOptions.getFlinkconf();
+<abbr title=" 138             Configuration config = (StringUtils.isEmpty(flinkConfDir)) ? new Configuration() : GlobalConfiguration.loadConfiguration(flinkConfDir);"> 138             Configuration config = (StringUtils.isEmpty(flinkConfDir)) ? new Configuration() : GlobalConf🔵</abbr>
+ 139             JobGraph jobGraph = PackagedProgramUtils.createJobGraph(program, config, 1);
+ 140             PerJobSubmitter.submit(launcherOptions, jobGraph, config);
+ 141         } else {
+ 142             ClusterClient clusterClient = ClusterClientFactory.createClusterClient(launcherOptions);
+ 143             clusterClient.run(program, 1);
+ 144             clusterClient.shutdown();
+ 145         }
+ 146     }
+ 147 }
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ </pre></td>
+                        </tr>
+                    </table>
+                </div>
+                <div id="bottom">
+                    <table style="margin:auto">
+                        <tr>
+                            <th>ours vs. base</th>
+                            <th>theirs vs. base</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1  /*
+   2   * Licensed to the Apache Software Foundation (ASF) under one
+   3   * or more contributor license agreements.  See the NOTICE file
+   4   * distributed with this work for additional information
+   5   * regarding copyright ownership.  The ASF licenses this file
+   6   * to you under the Apache License, Version 2.0 (the
+   7   * &quot;License&quot;); you may not use this file except in compliance
+   8   * with the License.  You may obtain a copy of the License at
+   9   *
+  10   *     http://www.apache.org/licenses/LICENSE-2.0
+  11   *
+  12   * Unless required by applicable law or agreed to in writing, software
+  13   * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15   * See the License for the specific language governing permissions and
+  16   * limitations under the License.
+  17   */
+  18  
+  19  
+  20  
+  21  package com.dtstack.flink.sql.launcher;
+  22  
+  23  import com.aiweiergou.tool.logger.api.ChangeLogLevelProcess;
+  24  import com.dtstack.flink.sql.constrant.ConfigConstrant;
+  25  import com.google.common.collect.Lists;
+  26  import com.alibaba.fastjson.JSON;
+  27  import com.alibaba.fastjson.TypeReference;
+  28  import com.dtstack.flink.sql.enums.ClusterMode;
+  29  import com.dtstack.flink.sql.Main;
+  30  import com.dtstack.flink.sql.launcher.perjob.PerJobSubmitter;
+  31  import com.dtstack.flink.sql.option.OptionParser;
+  32  import com.dtstack.flink.sql.option.Options;
+  33  import com.dtstack.flink.sql.util.PluginUtil;
+  34  import org.apache.commons.io.Charsets;
+  35  import org.apache.commons.lang.BooleanUtils;
+  36  import org.apache.commons.lang.StringUtils;
+  37  import org.apache.flink.client.program.ClusterClient;
+  38  import org.apache.flink.client.program.PackagedProgram;
+  39  import org.apache.flink.client.program.PackagedProgramUtils;
+  40  import org.apache.flink.configuration.Configuration;
+  41  import org.apache.flink.configuration.GlobalConfiguration;
+  42  import org.apache.flink.runtime.jobgraph.JobGraph;
+  43  import org.apache.flink.runtime.jobgraph.SavepointRestoreSettings;
+
+  44  
+  45  import java.io.BufferedReader;
+  46  import java.io.File;
+  47  import java.io.FileInputStream;
+  48  import java.io.IOException;
+  49  import java.io.InputStreamReader;
+  50  import java.net.URLDecoder;
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  51 +import java.nio.charset.StandardCharsets;</span>
+  52  import java.util.LinkedList;
+  53  import java.util.List;
+  54  import java.util.Map;
+  55  import java.util.Properties;
+  56  
+  57  /**
+  58   * Date: 2017/2/20
+  59   * Company: www.dtstack.com
+  60   * @author xuchao
+  61   */
+  62  
+  63  public class LauncherMain {
+  64      private static final String CORE_JAR = &quot;core&quot;;
+  65  
+  66      private static String SP = File.separator;
+  67  
+  68  
+  69      private static String getLocalCoreJarPath(String localSqlRootJar) throws Exception {
+  70          String jarPath = PluginUtil.getCoreJarFileName(localSqlRootJar, CORE_JAR);
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  71 -        String corePath = localSqlRootJar + SP + jarPath;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  72 -        return corePath;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  73 +        return localSqlRootJar + SP + jarPath;</span>
+  74      }
+  75  
+  76      public static void main(String[] args) throws Exception {
+  77          if (args.length == 1 &amp;&amp; args[0].endsWith(&quot;.json&quot;)){
+  78              args = parseJson(args);
+  79          }
+  80          OptionParser optionParser = new OptionParser(args);
+  81          Options launcherOptions = optionParser.getOptions();
+  82          String mode = launcherOptions.getMode();
+  83          List&lt;String&gt; argList = optionParser.getProgramExeArgList();
+  84  
+  85          String confProp = launcherOptions.getConfProp();
+  86          confProp = URLDecoder.decode(confProp, Charsets.UTF_8.toString());
+  87          Properties confProperties = PluginUtil.jsonStrToObject(confProp, Properties.class);
+  88  
+  89          if(mode.equals(ClusterMode.local.name())) {
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  90 -            String[] localArgs = argList.toArray(new String[argList.size()]);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  91 +            String[] localArgs = argList.toArray(new String[0]);</span>
+  92              Main.main(localArgs);
+  93              return;
+  94          }
+  95  
+  96          String pluginRoot = launcherOptions.getLocalSqlPluginPath();
+  97          File jarFile = new File(getLocalCoreJarPath(pluginRoot));
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  98 -        String[] remoteArgs = argList.toArray(new String[argList.size()]);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  99 +        String[] remoteArgs = argList.toArray(new String[0]);</span>
+ 100          PackagedProgram program = new PackagedProgram(jarFile, Lists.newArrayList(), remoteArgs);
+ 101  
+ 102          String savePointPath = confProperties.getProperty(ConfigConstrant.SAVE_POINT_PATH_KEY);
+ 103          if(StringUtils.isNotBlank(savePointPath)){
+<abbr title=" 104              String allowNonRestoredState = confProperties.getOrDefault(ConfigConstrant.ALLOW_NON_RESTORED_STATE_KEY, &quot;false&quot;).toString();"> 104              String allowNonRestoredState = confProperties.getOrDefault(ConfigConstrant.ALLOW_NON_RESTORED_STATE_KE🔵</abbr>
+<abbr title=" 105              program.setSavepointRestoreSettings(SavepointRestoreSettings.forPath(savePointPath, BooleanUtils.toBoolean(allowNonRestoredState)));"> 105              program.setSavepointRestoreSettings(SavepointRestoreSettings.forPath(savePointPath, BooleanUtils.toBoo🔵</abbr>
+ 106          }
+ 107  
+ 108          if(mode.equals(ClusterMode.yarnPer.name())){
+ 109              String flinkConfDir = launcherOptions.getFlinkconf();
+<abbr title=" 110              Configuration config = StringUtils.isEmpty(flinkConfDir) ? new Configuration() : GlobalConfiguration.loadConfiguration(flinkConfDir);"> 110              Configuration config = StringUtils.isEmpty(flinkConfDir) ? new Configuration() : GlobalConfiguration.l🔵</abbr>
+ 111              JobGraph jobGraph = PackagedProgramUtils.createJobGraph(program, config, 1);
+ 112              PerJobSubmitter.submit(launcherOptions, jobGraph, config);
+ 113          } else {
+ 114              ClusterClient clusterClient = ClusterClientFactory.createClusterClient(launcherOptions);
+ 115              clusterClient.run(program, 1);
+ 116              clusterClient.shutdown();
+ 117          }
+ 118  
+ 119      }
+ 120  
+ 121      private static String[] parseJson(String[] args) {
+ 122          BufferedReader reader = null;
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 123 -        String lastStr = &quot;&quot;;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 124 +        StringBuilder lastStr = new StringBuilder();</span>
+ 125          try{
+ 126              FileInputStream fileInputStream = new FileInputStream(args[0]);
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 127 -            InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream, &quot;UTF-8&quot;);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 128 +            InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream, StandardCharsets.UTF_8);</span>
+ 129              reader = new BufferedReader(inputStreamReader);
+ 130              String tempString = null;
+ 131              while((tempString = reader.readLine()) != null){
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 132 -                lastStr += tempString;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 133 +                lastStr.append(tempString);</span>
+ 134              }
+ 135              reader.close();
+ 136          }catch(IOException e){
+ 137              e.printStackTrace();
+ 138          }finally{
+ 139              if(reader != null){
+ 140                  try {
+ 141                      reader.close();
+ 142                  } catch (IOException e) {
+ 143                      e.printStackTrace();
+ 144                  }
+ 145              }
+ 146          }
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 147 -        Map&lt;String, Object&gt; map = JSON.parseObject(lastStr, new TypeReference&lt;Map&lt;String, Object&gt;&gt;(){} );</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"><abbr title=" 148 +        Map&lt;String, Object&gt; map = JSON.parseObject(lastStr.toString(), new TypeReference&lt;Map&lt;String, Object&gt;&gt;(){} );"> 148 +        Map&lt;String, Object&gt; map = JSON.parseObject(lastStr.toString(), new TypeReference&lt;Map&lt;String, Object&gt;&gt;(){} 🔵</abbr></span>
+
+
+
+ 149          List&lt;String&gt; list = new LinkedList&lt;&gt;();
+ 150  
+ 151          for (Map.Entry&lt;String, Object&gt; entry : map.entrySet()) {
+ 152              list.add(&quot;-&quot; + entry.getKey());
+ 153              list.add(entry.getValue().toString());
+ 154          }
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 155 -        String[] array = list.toArray(new String[list.size()]);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 156 -        return array;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 157 +        return list.toArray(new String[0]);</span>
+ 158      }
+ 159  }</pre></td>
+                            <td><pre>   1  /*
+   2   * Licensed to the Apache Software Foundation (ASF) under one
+   3   * or more contributor license agreements.  See the NOTICE file
+   4   * distributed with this work for additional information
+   5   * regarding copyright ownership.  The ASF licenses this file
+   6   * to you under the Apache License, Version 2.0 (the
+   7   * &quot;License&quot;); you may not use this file except in compliance
+   8   * with the License.  You may obtain a copy of the License at
+   9   *
+  10   *     http://www.apache.org/licenses/LICENSE-2.0
+  11   *
+  12   * Unless required by applicable law or agreed to in writing, software
+  13   * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15   * See the License for the specific language governing permissions and
+  16   * limitations under the License.
+  17   */
+  18  
+  19  
+  20  
+  21  package com.dtstack.flink.sql.launcher;
+  22  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  23 -import com.aiweiergou.tool.logger.api.ChangeLogLevelProcess;</span>
+  24  import com.dtstack.flink.sql.constrant.ConfigConstrant;
+  25  import com.google.common.collect.Lists;
+  26  import com.alibaba.fastjson.JSON;
+  27  import com.alibaba.fastjson.TypeReference;
+  28  import com.dtstack.flink.sql.enums.ClusterMode;
+  29  import com.dtstack.flink.sql.Main;
+  30  import com.dtstack.flink.sql.launcher.perjob.PerJobSubmitter;
+  31  import com.dtstack.flink.sql.option.OptionParser;
+  32  import com.dtstack.flink.sql.option.Options;
+  33  import com.dtstack.flink.sql.util.PluginUtil;
+  34  import org.apache.commons.io.Charsets;
+  35  import org.apache.commons.lang.BooleanUtils;
+  36  import org.apache.commons.lang.StringUtils;
+  37  import org.apache.flink.client.program.ClusterClient;
+  38  import org.apache.flink.client.program.PackagedProgram;
+  39  import org.apache.flink.client.program.PackagedProgramUtils;
+  40  import org.apache.flink.configuration.Configuration;
+  41  import org.apache.flink.configuration.GlobalConfiguration;
+  42  import org.apache.flink.runtime.jobgraph.JobGraph;
+  43  import org.apache.flink.runtime.jobgraph.SavepointRestoreSettings;
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  44 +import org.apache.flink.util.FileUtils;</span>
+  45  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  46 -import java.io.BufferedReader;</span>
+  47  import java.io.File;
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  48 -import java.io.FileInputStream;</span>
+  49  import java.io.IOException;
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  50 -import java.io.InputStreamReader;</span>
+  51  import java.net.URLDecoder;
+
+  52  import java.util.LinkedList;
+  53  import java.util.List;
+  54  import java.util.Map;
+  55  import java.util.Properties;
+  56  
+  57  /**
+  58   * Date: 2017/2/20
+  59   * Company: www.dtstack.com
+  60   * @author xuchao
+  61   */
+  62  
+  63  public class LauncherMain {
+  64      private static final String CORE_JAR = &quot;core&quot;;
+  65  
+  66      private static String SP = File.separator;
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  67 -</span>
+  68  
+  69      private static String getLocalCoreJarPath(String localSqlRootJar) throws Exception {
+  70          String jarPath = PluginUtil.getCoreJarFileName(localSqlRootJar, CORE_JAR);
+  71          String corePath = localSqlRootJar + SP + jarPath;
+  72          return corePath;
+
+  73      }
+  74  
+  75      public static void main(String[] args) throws Exception {
+  76          if (args.length == 1 &amp;&amp; args[0].endsWith(&quot;.json&quot;)){
+  77              args = parseJson(args);
+  78          }
+  79          OptionParser optionParser = new OptionParser(args);
+  80          Options launcherOptions = optionParser.getOptions();
+  81          String mode = launcherOptions.getMode();
+  82          List&lt;String&gt; argList = optionParser.getProgramExeArgList();
+  83  
+  84          String confProp = launcherOptions.getConfProp();
+  85          confProp = URLDecoder.decode(confProp, Charsets.UTF_8.toString());
+  86          Properties confProperties = PluginUtil.jsonStrToObject(confProp, Properties.class);
+  87  
+  88          if(mode.equals(ClusterMode.local.name())) {
+  89              String[] localArgs = argList.toArray(new String[argList.size()]);
+
+  90              Main.main(localArgs);
+  91              return;
+  92          }
+  93  
+  94          String pluginRoot = launcherOptions.getLocalSqlPluginPath();
+  95          File jarFile = new File(getLocalCoreJarPath(pluginRoot));
+  96          String[] remoteArgs = argList.toArray(new String[argList.size()]);
+
+  97          PackagedProgram program = new PackagedProgram(jarFile, Lists.newArrayList(), remoteArgs);
+  98  
+  99          String savePointPath = confProperties.getProperty(ConfigConstrant.SAVE_POINT_PATH_KEY);
+ 100          if(StringUtils.isNotBlank(savePointPath)){
+<abbr title=" 101              String allowNonRestoredState = confProperties.getOrDefault(ConfigConstrant.ALLOW_NON_RESTORED_STATE_KEY, &quot;false&quot;).toString();"> 101              String allowNonRestoredState = confProperties.getOrDefault(ConfigConstrant.ALLOW_NON_RESTORED_STATE_KE🔵</abbr>
+<abbr title=" 102              program.setSavepointRestoreSettings(SavepointRestoreSettings.forPath(savePointPath, BooleanUtils.toBoolean(allowNonRestoredState)));"> 102              program.setSavepointRestoreSettings(SavepointRestoreSettings.forPath(savePointPath, BooleanUtils.toBoo🔵</abbr>
+ 103          }
+ 104  
+ 105          if(mode.equals(ClusterMode.yarnPer.name())){
+ 106              String flinkConfDir = launcherOptions.getFlinkconf();
+<abbr title=" 107              Configuration config = StringUtils.isEmpty(flinkConfDir) ? new Configuration() : GlobalConfiguration.loadConfiguration(flinkConfDir);"> 107              Configuration config = StringUtils.isEmpty(flinkConfDir) ? new Configuration() : GlobalConfiguration.l🔵</abbr>
+ 108              JobGraph jobGraph = PackagedProgramUtils.createJobGraph(program, config, 1);
+ 109              PerJobSubmitter.submit(launcherOptions, jobGraph, config);
+ 110          } else {
+ 111              ClusterClient clusterClient = ClusterClientFactory.createClusterClient(launcherOptions);
+ 112              clusterClient.run(program, 1);
+ 113              clusterClient.shutdown();
+ 114          }
+ 115  
+ 116      }
+ 117  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 118 -    private static String[] parseJson(String[] args) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 119 -        BufferedReader reader = null;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 120 -        String lastStr = &quot;&quot;;</span>
+
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 121 -        try{</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 122 -            FileInputStream fileInputStream = new FileInputStream(args[0]);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 123 -            InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream, &quot;UTF-8&quot;);</span>
+
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 124 -            reader = new BufferedReader(inputStreamReader);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 125 -            String tempString = null;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 126 -            while((tempString = reader.readLine()) != null){</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 127 -                lastStr += tempString;</span>
+
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 128 -            }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 129 -            reader.close();</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 130 -        }catch(IOException e){</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 131 -            e.printStackTrace();</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 132 -        }finally{</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 133 -            if(reader != null){</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 134 -                try {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 135 -                    reader.close();</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 136 -                } catch (IOException e) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 137 -                    e.printStackTrace();</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 138 -                }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 139 -            }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 140 -        }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 141 -        Map&lt;String, Object&gt; map = JSON.parseObject(lastStr, new TypeReference&lt;Map&lt;String, Object&gt;&gt;(){} );</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 142 +    private static String[] parseJson(String[] args) throws IOException {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 143 +        String lastStr = FileUtils.readFileUtf8(new File(args[0]));</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 144 +        Map&lt;String, Object&gt; map = JSON.parseObject(lastStr, new TypeReference&lt;Map&lt;String, Object&gt;&gt;() {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 145 +        });</span>
+ 146          List&lt;String&gt; list = new LinkedList&lt;&gt;();
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 147 -</span>
+ 148          for (Map.Entry&lt;String, Object&gt; entry : map.entrySet()) {
+ 149              list.add(&quot;-&quot; + entry.getKey());
+ 150              list.add(entry.getValue().toString());
+ 151          }
+ 152          String[] array = list.toArray(new String[list.size()]);
+ 153          return array;
+
+ 154      }
+ 155  }</pre></td>
+                        </tr>
+                    </table>
+                </div>
+              </body>
+            </html>
+            

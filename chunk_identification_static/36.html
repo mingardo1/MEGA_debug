@@ -1,0 +1,1226 @@
+<!DOCTYPE html>
+    <html lang="en">
+              <head>
+                <meta charset="utf-8">
+                <title>36</title>
+                    <style>
+                        #top {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        #bottom {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        abbr {
+                          /* Here is the delay */
+                          transition-delay:0s;
+                        }
+                    </style>
+              </head>
+              <body>
+                <span style="height: 4vh">
+                    36
+                    <a href="35.html">prev</a>
+                    <a href="37.html">next</a>
+                    <a href="36_chunks.html">chunks</a>
+                    <a href="index.html">index</a>
+                    AriaLyy/Aria_2c75967bfc740973ac4528fbffe7752ada171bdf_Aria/src/main/java/com/arialyy/aria/core/upload/UploadUtil.java
+                    <textarea rows=1 onclick='navigator.clipboard.writeText(this.value)'>cd C:\studies\se\mega\git-analyzer-plus\notebooks\debug
+del /Q *
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\AriaLyy\Aria show &quot;2c75967bfc740973ac4528fbffe7752ada171bdf:Aria/src/main/java/com/arialyy/aria/core/upload/UploadUtil.java&quot; &gt; committed.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\AriaLyy\Aria show &quot;2c75967bfc740973ac4528fbffe7752ada171bdf^1:Aria/src/main/java/com/arialyy/aria/core/upload/UploadUtil.java&quot; &gt; ours.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\AriaLyy\Aria show &quot;2c75967bfc740973ac4528fbffe7752ada171bdf^2:Aria/src/main/java/com/arialyy/aria/core/upload/UploadUtil.java&quot; &gt; theirs.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\AriaLyy\Aria show &quot;a3cc5e6e4992f0c2b998a53e3e62e2c50960d0fe:Aria/src/main/java/com/arialyy/aria/core/upload/UploadUtil.java&quot; &gt; base.java
+copy ours.java 1ours.java
+copy ours.java 2ours.java
+copy theirs.java 1theirs.java
+copy theirs.java 2theirs.java
+copy base.java 1base.java
+copy base.java 2base.java
+&quot;C:\Program Files\Java\jdk1.8.0_241\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\jFSTMerge\build\libs\jFSTMerge-all.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\jfstmerge.java --show-base
+&quot;C:\Program Files\Eclipse Adoptium\jdk-17.0.11.9-hotspot\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\spork\target\spork-0.5.0-SNAPSHOT.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\spork.java
+del /Q 1*.java
+del /Q 2*.java
+del /Q jfstmerge.java.merge
+</textarea>
+                    {strict: [[bj]], subset: [[bj]]}
+                </span>
+                <div id="top">
+
+                    <table>
+                        <tr>
+                            <th>line based (standard git)</th>
+                            <th>jfstmerge</th>
+                            <th>spork</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1 /*
+   2  * Copyright (C) 2016 AriaLyy(https://github.com/AriaLyy/Aria)
+   3  *
+   4  * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+   5  * you may not use this file except in compliance with the License.
+   6  * You may obtain a copy of the License at
+   7  *
+   8  *      http://www.apache.org/licenses/LICENSE-2.0
+   9  *
+  10  * Unless required by applicable law or agreed to in writing, software
+  11  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  12  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  13  * See the License for the specific language governing permissions and
+  14  * limitations under the License.
+  15  */
+  16 package com.arialyy.aria.core.upload;
+  17 
+  18 import android.util.Log;
+  19 import com.arialyy.aria.util.CheckUtil;
+  20 import java.io.BufferedReader;
+  21 import java.io.File;
+  22 import java.io.FileInputStream;
+  23 import java.io.IOException;
+  24 import java.io.InputStreamReader;
+  25 import java.io.OutputStream;
+  26 import java.io.OutputStreamWriter;
+  27 import java.io.PrintWriter;
+  28 import java.net.HttpURLConnection;
+  29 import java.net.URL;
+  30 import java.net.URLConnection;
+  31 import java.util.Set;
+  32 import java.util.UUID;
+  33 
+  34 /**
+  35  * Created by Aria.Lao on 2017/2/9.
+  36  * 上传工具
+  37  */
+  38 public class UploadUtil implements Runnable {
+  39   private static final String TAG = &quot;UploadUtil&quot;;
+  40   private final String BOUNDARY = UUID.randomUUID().toString(); // 边界标识 随机生成
+  41   private final String PREFIX = &quot;--&quot;, LINE_END = &quot;\r\n&quot;;
+  42   private UploadEntity mUploadEntity;
+  43   private UploadTaskEntity mTaskEntity;
+  44   private IUploadListener mListener;
+  45   private HttpURLConnection mHttpConn;
+  46   private long mCurrentLocation = 0;
+  47   private boolean isCancel = false;
+  48   private boolean isRunning = false;
+  49 
+  50   public UploadUtil(UploadTaskEntity taskEntity, IUploadListener listener) {
+  51     mTaskEntity = taskEntity;
+  52     CheckUtil.checkUploadEntity(taskEntity.uploadEntity);
+  53     mUploadEntity = taskEntity.uploadEntity;
+  54     if (listener == null) {
+  55       throw new IllegalArgumentException(&quot;上传监听不能为空&quot;);
+  56     }
+  57     mListener = listener;
+  58   }
+  59 
+  60   public void start() {
+  61     Log.d(TAG, &quot;start&quot;);
+  62     isCancel = false;
+  63     isRunning = false;
+  64     new Thread(this).start();
+  65   }
+  66 
+  67   public void cancel() {
+  68     isCancel = true;
+  69     isRunning = false;
+  70   }
+  71 
+  72   @Override public void run() {
+  73     Log.e(TAG, &quot;run&quot;);
+  74     File uploadFile = new File(mUploadEntity.getFilePath());
+  75     if (!uploadFile.exists()) {
+  76       Log.e(TAG, &quot;【&quot; + mUploadEntity.getFilePath() + &quot;】，文件不存在。&quot;);
+  77       fail();
+  78       return;
+  79     }
+  80 
+  81     mListener.onPre();
+  82 
+  83     URL url;
+  84     try {
+  85       url = new URL(mTaskEntity.uploadUrl);
+  86       mHttpConn = (HttpURLConnection) url.openConnection();
+  87       mHttpConn.setUseCaches(false);
+  88       mHttpConn.setDoOutput(true);
+  89       mHttpConn.setDoInput(true);
+  90       mHttpConn.setRequestProperty(&quot;Content-Type&quot;,
+  91           mTaskEntity.contentType + &quot;; boundary=&quot; + BOUNDARY);
+  92       mHttpConn.setRequestProperty(&quot;User-Agent&quot;, mTaskEntity.userAgent);
+  93       //mHttpConn.setRequestProperty(&quot;Range&quot;, &quot;bytes=&quot; + 0 + &quot;-&quot; + &quot;100&quot;);
+  94       //内部缓冲区---分段上传防止oom
+  95       mHttpConn.setChunkedStreamingMode(1024);
+  96 
+  97       //添加Http请求头部
+  98       Set&lt;String&gt; keys = mTaskEntity.headers.keySet();
+  99       for (String key : keys) {
+ 100         mHttpConn.setRequestProperty(key, mTaskEntity.headers.get(key));
+ 101       }
+ 102 
+ 103       OutputStream outputStream = mHttpConn.getOutputStream();
+ 104       PrintWriter writer =
+ 105           new PrintWriter(new OutputStreamWriter(outputStream, mTaskEntity.charset), true);
+ 106 
+ 107       //添加文件上传表单字段
+ 108       keys = mTaskEntity.formFields.keySet();
+ 109       for (String key : keys) {
+ 110         addFormField(writer, key, mTaskEntity.formFields.get(key));
+ 111       }
+ 112       mListener.onStart(uploadFile.length());
+ 113       uploadFile(writer, outputStream, mTaskEntity.attachment, uploadFile);
+ 114       Log.d(TAG, finish(writer) + &quot;&quot;);
+ 115     } catch (IOException e) {
+ 116       e.printStackTrace();
+ 117       fail();
+ 118     }
+ 119   }
+ 120 
+ 121   boolean isRunning() {
+ 122     return isRunning;
+ 123   }
+ 124 
+ 125   private void fail() {
+ 126     mListener.onFail();
+ 127   }
+ 128 
+ 129   /**
+ 130    * 添加文件上传表单字段
+ 131    */
+ 132   private void addFormField(PrintWriter writer, String name, String value) {
+ 133     writer.append(PREFIX).append(BOUNDARY).append(LINE_END);
+ 134     writer.append(&quot;Content-Disposition: form-data; name=\&quot;&quot;)
+ 135         .append(name)
+ 136         .append(&quot;\&quot;&quot;)
+ 137         .append(LINE_END);
+ 138     writer.append(&quot;Content-Type: text/plain; charset=&quot;)
+ 139         .append(mTaskEntity.charset)
+ 140         .append(LINE_END);
+ 141     writer.append(LINE_END);
+ 142     writer.append(value).append(LINE_END);
+ 143     writer.flush();
+ 144   }
+ 145 
+ 146   /**
+ 147    * 上传文件
+ 148    *
+ 149    * @param attachment 文件上传attachment
+ 150    * @throws IOException
+ 151    */
+ 152   private void uploadFile(PrintWriter writer, OutputStream outputStream, String attachment,
+ 153       File uploadFile) throws IOException {
+ 154     Log.e(TAG, &quot;uploadFile&quot;);
+ 155     writer.append(PREFIX).append(BOUNDARY).append(LINE_END);
+ 156     writer.append(&quot;Content-Disposition: form-data; name=\&quot;&quot;)
+ 157         .append(attachment)
+ 158         .append(&quot;\&quot;; filename=\&quot;&quot;)
+ 159         .append(mTaskEntity.uploadEntity.getFileName())
+ 160         .append(&quot;\&quot;&quot;)
+ 161         .append(LINE_END);
+ 162     writer.append(&quot;Content-Type: &quot;)
+ 163         .append(URLConnection.guessContentTypeFromName(mTaskEntity.uploadEntity.getFileName()))
+ 164         .append(LINE_END);
+ 165     writer.append(&quot;Content-Transfer-Encoding: binary&quot;).append(LINE_END);
+ 166     writer.append(LINE_END);
+ 167     writer.flush();
+ 168 
+ 169     FileInputStream inputStream = new FileInputStream(uploadFile);
+ 170     byte[] buffer = new byte[4096];
+ 171     int bytesRead;
+ 172     while ((bytesRead = inputStream.read(buffer)) != -1) {
+ 173       mCurrentLocation += bytesRead;
+ 174       outputStream.write(buffer, 0, bytesRead);
+ 175       if (isCancel) {
+ 176         break;
+ 177       }
+ 178       isRunning = true;
+ 179       mListener.onProgress(mCurrentLocation);
+ 180     }
+ 181 
+ 182     outputStream.flush();
+ 183 &lt;&lt;&lt;&lt;&lt;&lt;&lt; GitAnalyzerPlus_ours
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 184     //outputStream.close(); //不能调用，否则服务器端异常</span>
+ 185 ||||||| GitAnalyzerPlus_base
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 186     outputStream.close();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 187     inputStream.close();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 188     writer.append(LINE_END);</span>
+ 189 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 190     //outputStream.close();</span>
+ 191 &gt;&gt;&gt;&gt;&gt;&gt;&gt; GitAnalyzerPlus_theirs
+ 192     inputStream.close();
+ 193     writer.append(LINE_END);
+ 194     writer.flush();
+ 195     isRunning = false;
+ 196     if (isCancel) {
+ 197       mListener.onCancel();
+ 198       return;
+ 199     }
+ 200     mListener.onComplete();
+ 201   }
+ 202 
+ 203   /**
+ 204    * 任务结束操作
+ 205    *
+ 206    * @throws IOException
+ 207    */
+ 208   private String finish(PrintWriter writer) throws IOException {
+ 209     StringBuilder response = new StringBuilder();
+ 210 
+ 211     writer.append(LINE_END).flush();
+ 212     writer.append(PREFIX).append(BOUNDARY).append(PREFIX).append(LINE_END);
+ 213     writer.close();
+ 214 
+ 215     int status = mHttpConn.getResponseCode();
+ 216     if (status == HttpURLConnection.HTTP_OK) {
+ 217       BufferedReader reader = new BufferedReader(new InputStreamReader(mHttpConn.getInputStream()));
+ 218       String line;
+ 219       while ((line = reader.readLine()) != null) {
+ 220         response.append(line);
+ 221       }
+ 222       reader.close();
+ 223       mHttpConn.disconnect();
+ 224     } else {
+ 225       Log.w(TAG, &quot;state_code = &quot; + status);
+ 226     }
+ 227 
+ 228     writer.flush();
+ 229     writer.close();
+ 230 
+ 231     return response.toString();
+ 232   }
+ 233 }</pre></td>
+                            <td><pre>   1 /*
+   2  * Copyright (C) 2016 AriaLyy(https://github.com/AriaLyy/Aria)
+   3  *
+   4  * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+   5  * you may not use this file except in compliance with the License.
+   6  * You may obtain a copy of the License at
+   7  *
+   8  *      http://www.apache.org/licenses/LICENSE-2.0
+   9  *
+  10  * Unless required by applicable law or agreed to in writing, software
+  11  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  12  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  13  * See the License for the specific language governing permissions and
+  14  * limitations under the License.
+  15  */
+  16 package com.arialyy.aria.core.upload;
+  17 
+  18 import android.util.Log;
+  19 import com.arialyy.aria.util.CheckUtil;
+  20 import java.io.BufferedReader;
+  21 import java.io.File;
+  22 import java.io.FileInputStream;
+  23 import java.io.IOException;
+  24 import java.io.InputStreamReader;
+  25 import java.io.OutputStream;
+  26 import java.io.OutputStreamWriter;
+  27 import java.io.PrintWriter;
+  28 import java.net.HttpURLConnection;
+  29 import java.net.URL;
+  30 import java.net.URLConnection;
+  31 import java.util.Set;
+  32 import java.util.UUID;
+  33 
+  34 /**
+  35  * Created by Aria.Lao on 2017/2/9.
+  36  * 上传工具
+  37  */
+  38 public class UploadUtil implements Runnable {
+  39   private static final String TAG = &quot;UploadUtil&quot;;
+  40   private final String BOUNDARY = UUID.randomUUID().toString(); // 边界标识 随机生成
+  41   private final String PREFIX = &quot;--&quot;, LINE_END = &quot;\r\n&quot;;
+  42   private UploadEntity mUploadEntity;
+  43   private UploadTaskEntity mTaskEntity;
+  44   private IUploadListener mListener;
+  45   private HttpURLConnection mHttpConn;
+  46   private long mCurrentLocation = 0;
+  47   private boolean isCancel = false;
+  48   private boolean isRunning = false;
+  49 
+  50   public UploadUtil(UploadTaskEntity taskEntity, IUploadListener listener) {
+  51     mTaskEntity = taskEntity;
+  52     CheckUtil.checkUploadEntity(taskEntity.uploadEntity);
+  53     mUploadEntity = taskEntity.uploadEntity;
+  54     if (listener == null) {
+  55       throw new IllegalArgumentException(&quot;上传监听不能为空&quot;);
+  56     }
+  57     mListener = listener;
+  58   }
+  59 
+  60   public void start() {
+  61     Log.d(TAG, &quot;start&quot;);
+  62     isCancel = false;
+  63     isRunning = false;
+  64     new Thread(this).start();
+  65   }
+  66 
+  67   public void cancel() {
+  68     isCancel = true;
+  69     isRunning = false;
+  70   }
+  71 
+  72   @Override public void run() {
+  73     Log.e(TAG, &quot;run&quot;);
+  74     File uploadFile = new File(mUploadEntity.getFilePath());
+  75     if (!uploadFile.exists()) {
+  76       Log.e(TAG, &quot;【&quot; + mUploadEntity.getFilePath() + &quot;】，文件不存在。&quot;);
+  77       fail();
+  78       return;
+  79     }
+  80 
+  81     mListener.onPre();
+  82 
+  83     URL url;
+  84     try {
+  85       url = new URL(mTaskEntity.uploadUrl);
+  86       mHttpConn = (HttpURLConnection) url.openConnection();
+  87       mHttpConn.setUseCaches(false);
+  88       mHttpConn.setDoOutput(true);
+  89       mHttpConn.setDoInput(true);
+  90       mHttpConn.setRequestProperty(&quot;Content-Type&quot;,
+  91           mTaskEntity.contentType + &quot;; boundary=&quot; + BOUNDARY);
+  92       mHttpConn.setRequestProperty(&quot;User-Agent&quot;, mTaskEntity.userAgent);
+  93       //mHttpConn.setRequestProperty(&quot;Range&quot;, &quot;bytes=&quot; + 0 + &quot;-&quot; + &quot;100&quot;);
+  94       //内部缓冲区---分段上传防止oom
+  95       mHttpConn.setChunkedStreamingMode(1024);
+  96 
+  97       //添加Http请求头部
+  98       Set&lt;String&gt; keys = mTaskEntity.headers.keySet();
+  99       for (String key : keys) {
+ 100         mHttpConn.setRequestProperty(key, mTaskEntity.headers.get(key));
+ 101       }
+ 102 
+ 103       OutputStream outputStream = mHttpConn.getOutputStream();
+ 104       PrintWriter writer =
+ 105           new PrintWriter(new OutputStreamWriter(outputStream, mTaskEntity.charset), true);
+ 106 
+ 107       //添加文件上传表单字段
+ 108       keys = mTaskEntity.formFields.keySet();
+ 109       for (String key : keys) {
+ 110         addFormField(writer, key, mTaskEntity.formFields.get(key));
+ 111       }
+ 112       mListener.onStart(uploadFile.length());
+ 113       uploadFile(writer, outputStream, mTaskEntity.attachment, uploadFile);
+ 114       Log.d(TAG, finish(writer) + &quot;&quot;);
+ 115     } catch (IOException e) {
+ 116       e.printStackTrace();
+ 117       fail();
+ 118     }
+ 119   }
+ 120 
+ 121   boolean isRunning() {
+ 122     return isRunning;
+ 123   }
+ 124 
+ 125   private void fail() {
+ 126     mListener.onFail();
+ 127   }
+ 128 
+ 129   /**
+ 130    * 添加文件上传表单字段
+ 131    */
+ 132   private void addFormField(PrintWriter writer, String name, String value) {
+ 133     writer.append(PREFIX).append(BOUNDARY).append(LINE_END);
+ 134     writer.append(&quot;Content-Disposition: form-data; name=\&quot;&quot;)
+ 135         .append(name)
+ 136         .append(&quot;\&quot;&quot;)
+ 137         .append(LINE_END);
+ 138     writer.append(&quot;Content-Type: text/plain; charset=&quot;)
+ 139         .append(mTaskEntity.charset)
+ 140         .append(LINE_END);
+ 141     writer.append(LINE_END);
+ 142     writer.append(value).append(LINE_END);
+ 143     writer.flush();
+ 144   }
+ 145 
+ 146   /**
+ 147    * 上传文件
+ 148    *
+ 149    * @param attachment 文件上传attachment
+ 150    * @throws IOException
+ 151    */
+ 152   private void uploadFile(PrintWriter writer, OutputStream outputStream, String attachment,
+ 153       File uploadFile) throws IOException {
+ 154     Log.e(TAG, &quot;uploadFile&quot;);
+ 155     writer.append(PREFIX).append(BOUNDARY).append(LINE_END);
+ 156     writer.append(&quot;Content-Disposition: form-data; name=\&quot;&quot;)
+ 157         .append(attachment)
+ 158         .append(&quot;\&quot;; filename=\&quot;&quot;)
+ 159         .append(mTaskEntity.uploadEntity.getFileName())
+ 160         .append(&quot;\&quot;&quot;)
+ 161         .append(LINE_END);
+ 162     writer.append(&quot;Content-Type: &quot;)
+ 163         .append(URLConnection.guessContentTypeFromName(mTaskEntity.uploadEntity.getFileName()))
+ 164         .append(LINE_END);
+ 165     writer.append(&quot;Content-Transfer-Encoding: binary&quot;).append(LINE_END);
+ 166     writer.append(LINE_END);
+ 167     writer.flush();
+ 168 
+ 169     FileInputStream inputStream = new FileInputStream(uploadFile);
+ 170     byte[] buffer = new byte[4096];
+ 171     int bytesRead;
+ 172     while ((bytesRead = inputStream.read(buffer)) != -1) {
+ 173       mCurrentLocation += bytesRead;
+ 174       outputStream.write(buffer, 0, bytesRead);
+ 175       if (isCancel) {
+ 176         break;
+ 177       }
+ 178       isRunning = true;
+ 179       mListener.onProgress(mCurrentLocation);
+ 180     }
+ 181 
+ 182     outputStream.flush();
+ 183 &lt;&lt;&lt;&lt;&lt;&lt;&lt; MINE
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 184     //outputStream.close(); //不能调用，否则服务器端异常</span>
+ 185 ||||||| BASE
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 186     outputStream.close();</span>
+ 187 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 188     //outputStream.close();</span>
+ 189 &gt;&gt;&gt;&gt;&gt;&gt;&gt; YOURS
+ 190     inputStream.close();
+ 191     writer.append(LINE_END);
+ 192     writer.flush();
+ 193     isRunning = false;
+ 194     if (isCancel) {
+ 195       mListener.onCancel();
+ 196       return;
+ 197     }
+ 198     mListener.onComplete();
+ 199   }
+ 200 
+ 201   /**
+ 202    * 任务结束操作
+ 203    *
+ 204    * @throws IOException
+ 205    */
+ 206   private String finish(PrintWriter writer) throws IOException {
+ 207     StringBuilder response = new StringBuilder();
+ 208 
+ 209     writer.append(LINE_END).flush();
+ 210     writer.append(PREFIX).append(BOUNDARY).append(PREFIX).append(LINE_END);
+ 211     writer.close();
+ 212 
+ 213     int status = mHttpConn.getResponseCode();
+ 214     if (status == HttpURLConnection.HTTP_OK) {
+ 215       BufferedReader reader = new BufferedReader(new InputStreamReader(mHttpConn.getInputStream()));
+ 216       String line;
+ 217       while ((line = reader.readLine()) != null) {
+ 218         response.append(line);
+ 219       }
+ 220       reader.close();
+ 221       mHttpConn.disconnect();
+ 222     } else {
+ 223       Log.w(TAG, &quot;state_code = &quot; + status);
+ 224     }
+ 225 
+ 226     writer.flush();
+ 227     writer.close();
+ 228 
+ 229     return response.toString();
+ 230   }
+ 231 }
+ </pre></td>
+                            <td><pre>   1 /*
+   2  * Copyright (C) 2016 AriaLyy(https://github.com/AriaLyy/Aria)
+   3  *
+   4  * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+   5  * you may not use this file except in compliance with the License.
+   6  * You may obtain a copy of the License at
+   7  *
+   8  *      http://www.apache.org/licenses/LICENSE-2.0
+   9  *
+  10  * Unless required by applicable law or agreed to in writing, software
+  11  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  12  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  13  * See the License for the specific language governing permissions and
+  14  * limitations under the License.
+  15  */
+  16 package com.arialyy.aria.core.upload;
+  17 
+  18 import android.util.Log;
+  19 import com.arialyy.aria.util.CheckUtil;
+  20 import java.io.BufferedReader;
+  21 import java.io.File;
+  22 import java.io.FileInputStream;
+  23 import java.io.IOException;
+  24 import java.io.InputStreamReader;
+  25 import java.io.OutputStream;
+  26 import java.io.OutputStreamWriter;
+  27 import java.io.PrintWriter;
+  28 import java.net.HttpURLConnection;
+  29 import java.net.URL;
+  30 import java.net.URLConnection;
+  31 import java.util.Set;
+  32 import java.util.UUID;
+  33 
+  34 
+  35 /**
+  36  * Created by Aria.Lao on 2017/2/9.
+  37  * 上传工具
+  38  */
+  39 public class UploadUtil implements Runnable {
+  40   private static final String TAG = &quot;UploadUtil&quot;;
+  41 
+  42   // 边界标识 随机生成
+  43   private final String BOUNDARY = UUID.randomUUID().toString(); // 边界标识 随机生成
+  44 
+  45   private final String PREFIX = &quot;--&quot;;
+  46 
+  47   private final String LINE_END = &quot;\r\n&quot;;
+  48 
+  49   private UploadEntity mUploadEntity;
+  50 
+  51   private UploadTaskEntity mTaskEntity;
+  52 
+  53   private IUploadListener mListener;
+  54 
+  55   private HttpURLConnection mHttpConn;
+  56 
+  57   private long mCurrentLocation = 0;
+  58 
+  59   private boolean isCancel = false;
+  60 
+  61   private boolean isRunning = false;
+  62 
+  63   public UploadUtil(UploadTaskEntity taskEntity, IUploadListener listener) {
+  64     mTaskEntity = taskEntity;
+  65     CheckUtil.checkUploadEntity(taskEntity.uploadEntity);
+  66     mUploadEntity = taskEntity.uploadEntity;
+  67     if (listener == null) {
+  68       throw new IllegalArgumentException(&quot;上传监听不能为空&quot;);
+  69     }
+  70     mListener = listener;
+  71   }
+  72 
+  73   public void start() {
+  74     Log.d(TAG, &quot;start&quot;);
+  75     isCancel = false;
+  76     isRunning = false;
+  77     new Thread(this).start();
+  78   }
+  79 
+  80   public void cancel() {
+  81     isCancel = true;
+  82     isRunning = false;
+  83   }
+  84 
+  85   @Override
+  86   public void run() {
+  87     Log.e(TAG, &quot;run&quot;);
+  88     File uploadFile = new File(mUploadEntity.getFilePath());
+  89     if (!uploadFile.exists()) {
+  90       Log.e(TAG, (&quot;【&quot; + mUploadEntity.getFilePath()) + &quot;】，文件不存在。&quot;);
+  91       fail();
+  92       return;
+  93     }
+  94     mListener.onPre();
+  95     URL url;
+  96     try {
+  97       url = new URL(mTaskEntity.uploadUrl);
+  98       mHttpConn = ((HttpURLConnection) (url.openConnection()));
+  99       mHttpConn.setUseCaches(false);
+ 100       mHttpConn.setDoOutput(true);
+ 101       mHttpConn.setDoInput(true);
+ 102       mHttpConn.setRequestProperty(&quot;Content-Type&quot;, (mTaskEntity.contentType + &quot;; boundary=&quot;) + BOUNDARY);
+ 103       mHttpConn.setRequestProperty(&quot;User-Agent&quot;, mTaskEntity.userAgent);
+ 104       // mHttpConn.setRequestProperty(&quot;Range&quot;, &quot;bytes=&quot; + 0 + &quot;-&quot; + &quot;100&quot;);
+ 105       // 内部缓冲区---分段上传防止oom
+ 106       mHttpConn.setChunkedStreamingMode(1024);
+ 107       // 添加Http请求头部
+ 108       Set&lt;String&gt; keys = mTaskEntity.headers.keySet();
+ 109       for (String key : keys) {
+ 110         mHttpConn.setRequestProperty(key, mTaskEntity.headers.get(key));
+ 111       }
+ 112       OutputStream outputStream = mHttpConn.getOutputStream();
+<abbr title=" 113       PrintWriter writer = new PrintWriter(new OutputStreamWriter(outputStream, mTaskEntity.charset), true);"> 113       PrintWriter writer = new PrintWriter(new OutputStreamWriter(outputStream, mTaskEntity.charset), tru🔵</abbr>
+ 114       // 添加文件上传表单字段
+ 115       keys = mTaskEntity.formFields.keySet();
+ 116       for (String key : keys) {
+ 117         addFormField(writer, key, mTaskEntity.formFields.get(key));
+ 118       }
+ 119       mListener.onStart(uploadFile.length());
+ 120       uploadFile(writer, outputStream, mTaskEntity.attachment, uploadFile);
+ 121       Log.d(TAG, finish(writer) + &quot;&quot;);
+ 122     } catch (IOException e) {
+ 123       e.printStackTrace();
+ 124       fail();
+ 125     }
+ 126   }
+ 127 
+ 128   boolean isRunning() {
+ 129     return isRunning;
+ 130   }
+ 131 
+ 132   private void fail() {
+ 133     mListener.onFail();
+ 134   }
+ 135 
+ 136   /**
+ 137    * 添加文件上传表单字段
+ 138    */
+ 139   private void addFormField(PrintWriter writer, String name, String value) {
+ 140     writer.append(PREFIX).append(BOUNDARY).append(LINE_END);
+ 141     writer.append(&quot;Content-Disposition: form-data; name=\&quot;&quot;)
+ 142         .append(name)
+ 143         .append(&quot;\&quot;&quot;)
+ 144         .append(LINE_END);
+ 145     writer.append(&quot;Content-Type: text/plain; charset=&quot;)
+ 146         .append(mTaskEntity.charset)
+ 147         .append(LINE_END);
+ 148     writer.append(LINE_END);
+ 149     writer.append(value).append(LINE_END);
+ 150     writer.flush();
+ 151   }
+ 152 
+ 153   /**
+ 154    * 上传文件
+ 155    *
+ 156    * @param attachment 文件上传attachment
+ 157    * @throws IOException
+ 158    */
+<abbr title=" 159   private void uploadFile(PrintWriter writer, OutputStream outputStream, String attachment, File uploadFile) throws IOException {"> 159   private void uploadFile(PrintWriter writer, OutputStream outputStream, String attachment, File uploadFi🔵</abbr>
+ 160     Log.e(TAG, &quot;uploadFile&quot;);
+ 161     writer.append(PREFIX).append(BOUNDARY).append(LINE_END);
+<abbr title=" 162     writer.append(&quot;Content-Disposition: form-data; name=\&quot;&quot;).append(attachment).append(&quot;\&quot;; filename=\&quot;&quot;).append(mTaskEntity.uploadEntity.getFileName()).append(&quot;\&quot;&quot;).append(LINE_END);"> 162     writer.append(&quot;Content-Disposition: form-data; name=\&quot;&quot;).append(attachment).append(&quot;\&quot;; filename=\&quot;&quot;)🔵</abbr>
+<abbr title=" 163     writer.append(&quot;Content-Type: &quot;).append(URLConnection.guessContentTypeFromName(mTaskEntity.uploadEntity.getFileName())).append(LINE_END);"> 163     writer.append(&quot;Content-Type: &quot;).append(URLConnection.guessContentTypeFromName(mTaskEntity.uploadEntit🔵</abbr>
+ 164     writer.append(&quot;Content-Transfer-Encoding: binary&quot;).append(LINE_END);
+ 165     writer.append(LINE_END);
+ 166     writer.flush();
+ 167     FileInputStream inputStream = new FileInputStream(uploadFile);
+ 168     byte[] buffer = new byte[4096];
+ 169     int bytesRead;
+ 170     while ((bytesRead = inputStream.read(buffer)) != (-1)) {
+ 171       mCurrentLocation += bytesRead;
+ 172       outputStream.write(buffer, 0, bytesRead);
+ 173       if (isCancel) {
+ 174         break;
+ 175       }
+ 176       isRunning = true;
+ 177       mListener.onProgress(mCurrentLocation);
+ 178     }
+ 179     outputStream.flush();
+ 180     inputStream.close();
+ 181     writer.append(LINE_END);
+ 182     writer.flush();
+ 183     isRunning = false;
+ 184     if (isCancel) {
+ 185       mListener.onCancel();
+ 186       return;
+ 187     }
+ 188     mListener.onComplete();
+ 189   }
+ 190 
+ 191   /**
+ 192    * 任务结束操作
+ 193    *
+ 194    * @throws IOException
+ 195    */
+ 196   private String finish(PrintWriter writer) throws IOException {
+ 197     StringBuilder response = new StringBuilder();
+ 198 
+ 199     writer.append(LINE_END).flush();
+ 200     writer.append(PREFIX).append(BOUNDARY).append(PREFIX).append(LINE_END);
+ 201     writer.close();
+ 202 
+ 203     int status = mHttpConn.getResponseCode();
+ 204     if (status == HttpURLConnection.HTTP_OK) {
+ 205       BufferedReader reader = new BufferedReader(new InputStreamReader(mHttpConn.getInputStream()));
+ 206       String line;
+ 207       while ((line = reader.readLine()) != null) {
+ 208         response.append(line);
+ 209       }
+ 210       reader.close();
+ 211       mHttpConn.disconnect();
+ 212     } else {
+ 213       Log.w(TAG, &quot;state_code = &quot; + status);
+ 214     }
+ 215 
+ 216     writer.flush();
+ 217     writer.close();
+ 218 
+ 219     return response.toString();
+ 220   }
+ 221 }
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ </pre></td>
+                        </tr>
+                    </table>
+                </div>
+                <div id="bottom">
+                    <table style="margin:auto">
+                        <tr>
+                            <th>ours vs. base</th>
+                            <th>theirs vs. base</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1  /*
+   2   * Copyright (C) 2016 AriaLyy(https://github.com/AriaLyy/Aria)
+   3   *
+   4   * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+   5   * you may not use this file except in compliance with the License.
+   6   * You may obtain a copy of the License at
+   7   *
+   8   *      http://www.apache.org/licenses/LICENSE-2.0
+   9   *
+  10   * Unless required by applicable law or agreed to in writing, software
+  11   * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  12   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  13   * See the License for the specific language governing permissions and
+  14   * limitations under the License.
+  15   */
+  16  package com.arialyy.aria.core.upload;
+  17  
+  18  import android.util.Log;
+  19  import com.arialyy.aria.util.CheckUtil;
+  20  import java.io.BufferedReader;
+  21  import java.io.File;
+  22  import java.io.FileInputStream;
+  23  import java.io.IOException;
+  24  import java.io.InputStreamReader;
+  25  import java.io.OutputStream;
+  26  import java.io.OutputStreamWriter;
+  27  import java.io.PrintWriter;
+  28  import java.net.HttpURLConnection;
+  29  import java.net.URL;
+  30  import java.net.URLConnection;
+  31  import java.util.Set;
+  32  import java.util.UUID;
+  33  
+  34  /**
+  35   * Created by Aria.Lao on 2017/2/9.
+  36   * 上传工具
+  37   */
+  38  public class UploadUtil implements Runnable {
+  39    private static final String TAG = &quot;UploadUtil&quot;;
+  40    private final String BOUNDARY = UUID.randomUUID().toString(); // 边界标识 随机生成
+  41    private final String PREFIX = &quot;--&quot;, LINE_END = &quot;\r\n&quot;;
+  42    private UploadEntity mUploadEntity;
+  43    private UploadTaskEntity mTaskEntity;
+  44    private IUploadListener mListener;
+  45    private HttpURLConnection mHttpConn;
+  46    private long mCurrentLocation = 0;
+  47    private boolean isCancel = false;
+  48    private boolean isRunning = false;
+  49  
+  50    public UploadUtil(UploadTaskEntity taskEntity, IUploadListener listener) {
+  51      mTaskEntity = taskEntity;
+  52      CheckUtil.checkUploadEntity(taskEntity.uploadEntity);
+  53      mUploadEntity = taskEntity.uploadEntity;
+  54      if (listener == null) {
+  55        throw new IllegalArgumentException(&quot;上传监听不能为空&quot;);
+  56      }
+  57      mListener = listener;
+  58    }
+  59  
+  60    public void start() {
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  61 +    Log.d(TAG, &quot;start&quot;);</span>
+  62      isCancel = false;
+  63      isRunning = false;
+  64      new Thread(this).start();
+  65    }
+  66  
+  67    public void cancel() {
+  68      isCancel = true;
+  69      isRunning = false;
+  70    }
+  71  
+  72    @Override public void run() {
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  73 +    Log.e(TAG, &quot;run&quot;);</span>
+  74      File uploadFile = new File(mUploadEntity.getFilePath());
+  75      if (!uploadFile.exists()) {
+  76        Log.e(TAG, &quot;【&quot; + mUploadEntity.getFilePath() + &quot;】，文件不存在。&quot;);
+  77        fail();
+  78        return;
+  79      }
+  80  
+  81      mListener.onPre();
+  82  
+  83      URL url;
+  84      try {
+  85        url = new URL(mTaskEntity.uploadUrl);
+  86        mHttpConn = (HttpURLConnection) url.openConnection();
+  87        mHttpConn.setUseCaches(false);
+  88        mHttpConn.setDoOutput(true);
+  89        mHttpConn.setDoInput(true);
+  90        mHttpConn.setRequestProperty(&quot;Content-Type&quot;,
+  91            mTaskEntity.contentType + &quot;; boundary=&quot; + BOUNDARY);
+  92        mHttpConn.setRequestProperty(&quot;User-Agent&quot;, mTaskEntity.userAgent);
+  93        //mHttpConn.setRequestProperty(&quot;Range&quot;, &quot;bytes=&quot; + 0 + &quot;-&quot; + &quot;100&quot;);
+  94        //内部缓冲区---分段上传防止oom
+  95        mHttpConn.setChunkedStreamingMode(1024);
+  96  
+  97        //添加Http请求头部
+  98        Set&lt;String&gt; keys = mTaskEntity.headers.keySet();
+  99        for (String key : keys) {
+ 100          mHttpConn.setRequestProperty(key, mTaskEntity.headers.get(key));
+ 101        }
+ 102  
+ 103        OutputStream outputStream = mHttpConn.getOutputStream();
+ 104        PrintWriter writer =
+ 105            new PrintWriter(new OutputStreamWriter(outputStream, mTaskEntity.charset), true);
+ 106  
+ 107        //添加文件上传表单字段
+ 108        keys = mTaskEntity.formFields.keySet();
+ 109        for (String key : keys) {
+ 110          addFormField(writer, key, mTaskEntity.formFields.get(key));
+ 111        }
+ 112        mListener.onStart(uploadFile.length());
+ 113        uploadFile(writer, outputStream, mTaskEntity.attachment, uploadFile);
+ 114        Log.d(TAG, finish(writer) + &quot;&quot;);
+ 115      } catch (IOException e) {
+ 116        e.printStackTrace();
+ 117        fail();
+ 118      }
+ 119    }
+ 120  
+ 121    boolean isRunning() {
+ 122      return isRunning;
+ 123    }
+ 124  
+ 125    private void fail() {
+ 126      mListener.onFail();
+ 127    }
+ 128  
+ 129    /**
+ 130     * 添加文件上传表单字段
+ 131     */
+ 132    private void addFormField(PrintWriter writer, String name, String value) {
+ 133      writer.append(PREFIX).append(BOUNDARY).append(LINE_END);
+ 134      writer.append(&quot;Content-Disposition: form-data; name=\&quot;&quot;)
+ 135          .append(name)
+ 136          .append(&quot;\&quot;&quot;)
+ 137          .append(LINE_END);
+ 138      writer.append(&quot;Content-Type: text/plain; charset=&quot;)
+ 139          .append(mTaskEntity.charset)
+ 140          .append(LINE_END);
+ 141      writer.append(LINE_END);
+ 142      writer.append(value).append(LINE_END);
+ 143      writer.flush();
+ 144    }
+ 145  
+ 146    /**
+ 147     * 上传文件
+ 148     *
+ 149     * @param attachment 文件上传attachment
+ 150     * @throws IOException
+ 151     */
+ 152    private void uploadFile(PrintWriter writer, OutputStream outputStream, String attachment,
+ 153        File uploadFile) throws IOException {
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 154 +    Log.e(TAG, &quot;uploadFile&quot;);</span>
+ 155      writer.append(PREFIX).append(BOUNDARY).append(LINE_END);
+ 156      writer.append(&quot;Content-Disposition: form-data; name=\&quot;&quot;)
+ 157          .append(attachment)
+ 158          .append(&quot;\&quot;; filename=\&quot;&quot;)
+ 159          .append(mTaskEntity.uploadEntity.getFileName())
+ 160          .append(&quot;\&quot;&quot;)
+ 161          .append(LINE_END);
+ 162      writer.append(&quot;Content-Type: &quot;)
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 163 -        //.append(URLConnection.guessContentTypeFromName(mTaskEntity.uploadEntity.getFileName()))</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 164 -        .append(mTaskEntity.contentType)</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 165 +        .append(URLConnection.guessContentTypeFromName(mTaskEntity.uploadEntity.getFileName()))</span>
+ 166          .append(LINE_END);
+ 167      writer.append(&quot;Content-Transfer-Encoding: binary&quot;).append(LINE_END);
+ 168      writer.append(LINE_END);
+ 169      writer.flush();
+ 170  
+ 171      FileInputStream inputStream = new FileInputStream(uploadFile);
+ 172      byte[] buffer = new byte[4096];
+ 173      int bytesRead;
+ 174      while ((bytesRead = inputStream.read(buffer)) != -1) {
+ 175        mCurrentLocation += bytesRead;
+ 176        outputStream.write(buffer, 0, bytesRead);
+ 177        if (isCancel) {
+ 178          break;
+ 179        }
+ 180        isRunning = true;
+ 181        mListener.onProgress(mCurrentLocation);
+ 182      }
+ 183  
+ 184      outputStream.flush();
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 185 -    outputStream.close();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 186 +    //outputStream.close(); //不能调用，否则服务器端异常</span>
+ 187      inputStream.close();
+ 188      writer.append(LINE_END);
+ 189      writer.flush();
+ 190      isRunning = false;
+ 191      if (isCancel) {
+ 192        mListener.onCancel();
+ 193        return;
+ 194      }
+ 195      mListener.onComplete();
+ 196    }
+ 197  
+ 198    /**
+ 199     * 任务结束操作
+ 200     *
+ 201     * @throws IOException
+ 202     */
+ 203    private String finish(PrintWriter writer) throws IOException {
+ 204      StringBuilder response = new StringBuilder();
+ 205  
+ 206      writer.append(LINE_END).flush();
+ 207      writer.append(PREFIX).append(BOUNDARY).append(PREFIX).append(LINE_END);
+ 208      writer.close();
+ 209  
+ 210      int status = mHttpConn.getResponseCode();
+ 211      if (status == HttpURLConnection.HTTP_OK) {
+ 212        BufferedReader reader = new BufferedReader(new InputStreamReader(mHttpConn.getInputStream()));
+ 213        String line;
+ 214        while ((line = reader.readLine()) != null) {
+ 215          response.append(line);
+ 216        }
+ 217        reader.close();
+ 218        mHttpConn.disconnect();
+ 219      } else {
+ 220        Log.w(TAG, &quot;state_code = &quot; + status);
+ 221      }
+ 222  
+ 223      writer.flush();
+ 224      writer.close();
+ 225  
+ 226      return response.toString();
+ 227    }
+ 228  }</pre></td>
+                            <td><pre>   1  /*
+   2   * Copyright (C) 2016 AriaLyy(https://github.com/AriaLyy/Aria)
+   3   *
+   4   * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+   5   * you may not use this file except in compliance with the License.
+   6   * You may obtain a copy of the License at
+   7   *
+   8   *      http://www.apache.org/licenses/LICENSE-2.0
+   9   *
+  10   * Unless required by applicable law or agreed to in writing, software
+  11   * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  12   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  13   * See the License for the specific language governing permissions and
+  14   * limitations under the License.
+  15   */
+  16  package com.arialyy.aria.core.upload;
+  17  
+  18  import android.util.Log;
+  19  import com.arialyy.aria.util.CheckUtil;
+  20  import java.io.BufferedReader;
+  21  import java.io.File;
+  22  import java.io.FileInputStream;
+  23  import java.io.IOException;
+  24  import java.io.InputStreamReader;
+  25  import java.io.OutputStream;
+  26  import java.io.OutputStreamWriter;
+  27  import java.io.PrintWriter;
+  28  import java.net.HttpURLConnection;
+  29  import java.net.URL;
+  30  import java.net.URLConnection;
+  31  import java.util.Set;
+  32  import java.util.UUID;
+  33  
+  34  /**
+  35   * Created by Aria.Lao on 2017/2/9.
+  36   * 上传工具
+  37   */
+  38  public class UploadUtil implements Runnable {
+  39    private static final String TAG = &quot;UploadUtil&quot;;
+  40    private final String BOUNDARY = UUID.randomUUID().toString(); // 边界标识 随机生成
+  41    private final String PREFIX = &quot;--&quot;, LINE_END = &quot;\r\n&quot;;
+  42    private UploadEntity mUploadEntity;
+  43    private UploadTaskEntity mTaskEntity;
+  44    private IUploadListener mListener;
+  45    private HttpURLConnection mHttpConn;
+  46    private long mCurrentLocation = 0;
+  47    private boolean isCancel = false;
+  48    private boolean isRunning = false;
+  49  
+  50    public UploadUtil(UploadTaskEntity taskEntity, IUploadListener listener) {
+  51      mTaskEntity = taskEntity;
+  52      CheckUtil.checkUploadEntity(taskEntity.uploadEntity);
+  53      mUploadEntity = taskEntity.uploadEntity;
+  54      if (listener == null) {
+  55        throw new IllegalArgumentException(&quot;上传监听不能为空&quot;);
+  56      }
+  57      mListener = listener;
+  58    }
+  59  
+  60    public void start() {
+
+  61      isCancel = false;
+  62      isRunning = false;
+  63      new Thread(this).start();
+  64    }
+  65  
+  66    public void cancel() {
+  67      isCancel = true;
+  68      isRunning = false;
+  69    }
+  70  
+  71    @Override public void run() {
+
+  72      File uploadFile = new File(mUploadEntity.getFilePath());
+  73      if (!uploadFile.exists()) {
+  74        Log.e(TAG, &quot;【&quot; + mUploadEntity.getFilePath() + &quot;】，文件不存在。&quot;);
+  75        fail();
+  76        return;
+  77      }
+  78  
+  79      mListener.onPre();
+  80  
+  81      URL url;
+  82      try {
+  83        url = new URL(mTaskEntity.uploadUrl);
+  84        mHttpConn = (HttpURLConnection) url.openConnection();
+  85        mHttpConn.setUseCaches(false);
+  86        mHttpConn.setDoOutput(true);
+  87        mHttpConn.setDoInput(true);
+  88        mHttpConn.setRequestProperty(&quot;Content-Type&quot;,
+  89            mTaskEntity.contentType + &quot;; boundary=&quot; + BOUNDARY);
+  90        mHttpConn.setRequestProperty(&quot;User-Agent&quot;, mTaskEntity.userAgent);
+  91        //mHttpConn.setRequestProperty(&quot;Range&quot;, &quot;bytes=&quot; + 0 + &quot;-&quot; + &quot;100&quot;);
+  92        //内部缓冲区---分段上传防止oom
+  93        mHttpConn.setChunkedStreamingMode(1024);
+  94  
+  95        //添加Http请求头部
+  96        Set&lt;String&gt; keys = mTaskEntity.headers.keySet();
+  97        for (String key : keys) {
+  98          mHttpConn.setRequestProperty(key, mTaskEntity.headers.get(key));
+  99        }
+ 100  
+ 101        OutputStream outputStream = mHttpConn.getOutputStream();
+ 102        PrintWriter writer =
+ 103            new PrintWriter(new OutputStreamWriter(outputStream, mTaskEntity.charset), true);
+ 104  
+ 105        //添加文件上传表单字段
+ 106        keys = mTaskEntity.formFields.keySet();
+ 107        for (String key : keys) {
+ 108          addFormField(writer, key, mTaskEntity.formFields.get(key));
+ 109        }
+ 110        mListener.onStart(uploadFile.length());
+ 111        uploadFile(writer, outputStream, mTaskEntity.attachment, uploadFile);
+ 112        Log.d(TAG, finish(writer) + &quot;&quot;);
+ 113      } catch (IOException e) {
+ 114        e.printStackTrace();
+ 115        fail();
+ 116      }
+ 117    }
+ 118  
+ 119    boolean isRunning() {
+ 120      return isRunning;
+ 121    }
+ 122  
+ 123    private void fail() {
+ 124      mListener.onFail();
+ 125    }
+ 126  
+ 127    /**
+ 128     * 添加文件上传表单字段
+ 129     */
+ 130    private void addFormField(PrintWriter writer, String name, String value) {
+ 131      writer.append(PREFIX).append(BOUNDARY).append(LINE_END);
+ 132      writer.append(&quot;Content-Disposition: form-data; name=\&quot;&quot;)
+ 133          .append(name)
+ 134          .append(&quot;\&quot;&quot;)
+ 135          .append(LINE_END);
+ 136      writer.append(&quot;Content-Type: text/plain; charset=&quot;)
+ 137          .append(mTaskEntity.charset)
+ 138          .append(LINE_END);
+ 139      writer.append(LINE_END);
+ 140      writer.append(value).append(LINE_END);
+ 141      writer.flush();
+ 142    }
+ 143  
+ 144    /**
+ 145     * 上传文件
+ 146     *
+ 147     * @param attachment 文件上传attachment
+ 148     * @throws IOException
+ 149     */
+ 150    private void uploadFile(PrintWriter writer, OutputStream outputStream, String attachment,
+ 151        File uploadFile) throws IOException {
+
+ 152      writer.append(PREFIX).append(BOUNDARY).append(LINE_END);
+ 153      writer.append(&quot;Content-Disposition: form-data; name=\&quot;&quot;)
+ 154          .append(attachment)
+ 155          .append(&quot;\&quot;; filename=\&quot;&quot;)
+ 156          .append(mTaskEntity.uploadEntity.getFileName())
+ 157          .append(&quot;\&quot;&quot;)
+ 158          .append(LINE_END);
+ 159      writer.append(&quot;Content-Type: &quot;)
+ 160          //.append(URLConnection.guessContentTypeFromName(mTaskEntity.uploadEntity.getFileName()))
+ 161          .append(mTaskEntity.contentType)
+
+ 162          .append(LINE_END);
+ 163      writer.append(&quot;Content-Transfer-Encoding: binary&quot;).append(LINE_END);
+ 164      writer.append(LINE_END);
+ 165      writer.flush();
+ 166  
+ 167      FileInputStream inputStream = new FileInputStream(uploadFile);
+ 168      byte[] buffer = new byte[4096];
+ 169      int bytesRead;
+ 170      while ((bytesRead = inputStream.read(buffer)) != -1) {
+ 171        mCurrentLocation += bytesRead;
+ 172        outputStream.write(buffer, 0, bytesRead);
+ 173        if (isCancel) {
+ 174          break;
+ 175        }
+ 176        isRunning = true;
+ 177        mListener.onProgress(mCurrentLocation);
+ 178      }
+ 179  
+ 180      outputStream.flush();
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 181 -    outputStream.close();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 182 +    //outputStream.close();</span>
+ 183      inputStream.close();
+ 184      writer.append(LINE_END);
+ 185      writer.flush();
+ 186      isRunning = false;
+ 187      if (isCancel) {
+ 188        mListener.onCancel();
+ 189        return;
+ 190      }
+ 191      mListener.onComplete();
+ 192    }
+ 193  
+ 194    /**
+ 195     * 任务结束操作
+ 196     *
+ 197     * @throws IOException
+ 198     */
+ 199    private String finish(PrintWriter writer) throws IOException {
+ 200      StringBuilder response = new StringBuilder();
+ 201  
+ 202      writer.append(LINE_END).flush();
+ 203      writer.append(PREFIX).append(BOUNDARY).append(PREFIX).append(LINE_END);
+ 204      writer.close();
+ 205  
+ 206      int status = mHttpConn.getResponseCode();
+ 207      if (status == HttpURLConnection.HTTP_OK) {
+ 208        BufferedReader reader = new BufferedReader(new InputStreamReader(mHttpConn.getInputStream()));
+ 209        String line;
+ 210        while ((line = reader.readLine()) != null) {
+ 211          response.append(line);
+ 212        }
+ 213        reader.close();
+ 214        mHttpConn.disconnect();
+ 215      } else {
+ 216        Log.w(TAG, &quot;state_code = &quot; + status);
+ 217      }
+ 218  
+ 219      writer.flush();
+ 220      writer.close();
+ 221  
+ 222      return response.toString();
+ 223    }
+ 224  }</pre></td>
+                        </tr>
+                    </table>
+                </div>
+              </body>
+            </html>
+            

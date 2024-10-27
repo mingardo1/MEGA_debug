@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+    <html lang="en">
+              <head>
+                <meta charset="utf-8">
+                <title>3</title>
+                    <style>
+                        #top {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        #bottom {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        abbr {
+                          /* Here is the delay */
+                          transition-delay:0s;
+                        }
+                    </style>
+              </head>
+              <body>
+                <span style="height: 4vh">
+                    3
+                    <a href="2.html">prev</a>
+                    <a href="4.html">next</a>
+                    <a href="3_chunks.html">chunks</a>
+                    <a href="index.html">index</a>
+                    AriaLyy/Aria_36c226702d18c92fdf8715c82aa7930e42c84999_app/src/main/java/com/arialyy/simple/core/download/FtpDownloadModule.java
+                    <textarea rows=1 onclick='navigator.clipboard.writeText(this.value)'>cd C:\studies\se\mega\git-analyzer-plus\notebooks\debug
+del /Q *
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\AriaLyy\Aria show &quot;36c226702d18c92fdf8715c82aa7930e42c84999:app/src/main/java/com/arialyy/simple/core/download/FtpDownloadModule.java&quot; &gt; committed.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\AriaLyy\Aria show &quot;36c226702d18c92fdf8715c82aa7930e42c84999^1:app/src/main/java/com/arialyy/simple/core/download/FtpDownloadModule.java&quot; &gt; ours.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\AriaLyy\Aria show &quot;36c226702d18c92fdf8715c82aa7930e42c84999^2:app/src/main/java/com/arialyy/simple/core/download/FtpDownloadModule.java&quot; &gt; theirs.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\AriaLyy\Aria show &quot;bfc2cff5b0ab4e860cee1e3232fcdc50ca009f2d:app/src/main/java/com/arialyy/simple/core/download/FtpDownloadModule.java&quot; &gt; base.java
+copy ours.java 1ours.java
+copy ours.java 2ours.java
+copy theirs.java 1theirs.java
+copy theirs.java 2theirs.java
+copy base.java 1base.java
+copy base.java 2base.java
+&quot;C:\Program Files\Java\jdk1.8.0_241\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\jFSTMerge\build\libs\jFSTMerge-all.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\jfstmerge.java --show-base
+&quot;C:\Program Files\Eclipse Adoptium\jdk-17.0.11.9-hotspot\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\spork\target\spork-0.5.0-SNAPSHOT.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\spork.java
+del /Q 1*.java
+del /Q 2*.java
+del /Q jfstmerge.java.merge
+</textarea>
+                    {strict: [[sbj]], subset: [[sbj]]}
+                </span>
+                <div id="top">
+
+                    <table>
+                        <tr>
+                            <th>line based (standard git)</th>
+                            <th>jfstmerge</th>
+                            <th>spork</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1 /*
+   2  * Copyright (C) 2016 AriaLyy(https://github.com/AriaLyy/Aria)
+   3  *
+   4  * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+   5  * you may not use this file except in compliance with the License.
+   6  * You may obtain a copy of the License at
+   7  *
+   8  *      http://www.apache.org/licenses/LICENSE-2.0
+   9  *
+  10  * Unless required by applicable law or agreed to in writing, software
+  11  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  12  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  13  * See the License for the specific language governing permissions and
+  14  * limitations under the License.
+  15  */
+  16 
+  17 package com.arialyy.simple.core.download;
+  18 
+  19 import android.content.Context;
+  20 import android.net.Uri;
+  21 import android.os.Environment;
+  22 import android.text.TextUtils;
+  23 import androidx.lifecycle.LiveData;
+  24 import androidx.lifecycle.MutableLiveData;
+  25 import com.arialyy.aria.core.Aria;
+  26 import com.arialyy.aria.core.download.DownloadEntity;
+  27 import com.arialyy.aria.util.ALog;
+  28 import com.arialyy.frame.base.BaseViewModule;
+  29 import com.arialyy.simple.util.AppUtil;
+  30 import java.io.File;
+  31 
+  32 public class FtpDownloadModule extends BaseViewModule {
+  33   private final String FTP_URL_KEY = &quot;FTP_URL_KEY&quot;;
+  34   private final String FTP_PATH_KEY = &quot;FTP_PATH_KEY&quot;;
+  35 
+  36   private final String ftpDefUrl = &quot;ftp://9.9.9.50:2121/Cyberduck-6.9.4.30164.zip&quot;;
+  37   private final String ftpDefPath =
+  38       Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getPath();
+  39 
+  40   private MutableLiveData&lt;DownloadEntity&gt; liveData = new MutableLiveData&lt;&gt;();
+  41   private DownloadEntity singDownloadInfo;
+  42 
+  43   /**
+  44    * xx
+  45    * 单任务下载的信息
+  46    *
+  47    *
+  48    */
+  49   LiveData&lt;DownloadEntity&gt; getFtpDownloadInfo(Context context) {
+  50     //String url = AppUtil.getConfigValue(context, FTP_URL_KEY, ftpDefUrl);
+  51 &lt;&lt;&lt;&lt;&lt;&lt;&lt; GitAnalyzerPlus_ours
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  52     //String filePath = AppUtil.getConfigValue(context, FTP_PATH_KEY, ftpDefPath);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  53     String url = &quot;ftp://9.9.9.72:2121/Cyberduck-6.9.4.30164.zip&quot;;</span>
+  54 ||||||| GitAnalyzerPlus_base
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  55     //String url = &quot;ftp://9.9.9.72:2121/Cyberduck-6.9.4.30164.zip&quot;;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  56     String url = &quot;ftp://58.210.178.52:21/battery1.0.0.apk&quot;;</span>
+  57 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  58     //String url = &quot;ftp://9.9.9.72:2121/Cyberduck-6.9.4.30164.zip&quot;;</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  59     String filePath = AppUtil.getConfigValue(context, FTP_PATH_KEY, ftpDefPath);</span>
+  60 &gt;&gt;&gt;&gt;&gt;&gt;&gt; GitAnalyzerPlus_theirs
+  61 
+  62     singDownloadInfo = Aria.download(context).getFirstDownloadEntity(url);
+  63     if (singDownloadInfo == null) {
+  64       singDownloadInfo = new DownloadEntity();
+  65       singDownloadInfo.setUrl(url);
+  66       String name = getFileName(ftpDefUrl);
+  67       singDownloadInfo.setFileName(name);
+  68       singDownloadInfo.setFilePath(ftpDefPath + name);
+  69     } else {
+  70       AppUtil.setConfigValue(context, FTP_PATH_KEY, singDownloadInfo.getFilePath());
+  71       AppUtil.setConfigValue(context, FTP_URL_KEY, singDownloadInfo.getUrl());
+  72     }
+  73     liveData.postValue(singDownloadInfo);
+  74 
+  75     return liveData;
+  76   }
+  77 
+  78   /**
+  79    * 更新文件保存路径
+  80    *
+  81    * @param dirPath 文件保存文件夹
+  82    */
+  83   void updateFilePath(Context context, String dirPath) {
+  84     if (TextUtils.isEmpty(dirPath)) {
+  85       ALog.e(TAG, &quot;文件保存路径为空&quot;);
+  86       return;
+  87     }
+  88     AppUtil.setConfigValue(context, FTP_PATH_KEY, dirPath);
+  89     singDownloadInfo.setFilePath(dirPath + singDownloadInfo.getFileName());
+  90     liveData.postValue(singDownloadInfo);
+  91   }
+  92 
+  93   /**
+  94    * 更新url
+  95    */
+  96   void uploadUrl(Context context, String url) {
+  97     if (TextUtils.isEmpty(url)) {
+  98       ALog.e(TAG, &quot;下载地址为空&quot;);
+  99       return;
+ 100     }
+ 101     AppUtil.setConfigValue(context, FTP_URL_KEY, url);
+ 102     File file = new File(singDownloadInfo.getFilePath());
+ 103     String name = getFileName(url);
+ 104     singDownloadInfo.setFilePath(file.getParent() + name);
+ 105     singDownloadInfo.setFileName(name);
+ 106     singDownloadInfo.setUrl(url);
+ 107     liveData.postValue(singDownloadInfo);
+ 108   }
+ 109 
+ 110   /**
+ 111    * 通过url获取文件名
+ 112    *
+ 113    * @param url ftp地址
+ 114    * @return &quot;/aria.text&quot;
+ 115    */
+ 116   private String getFileName(String url) {
+ 117     Uri uri = Uri.parse(url);
+ 118     String path = uri.getPath();
+ 119     int index = path.lastIndexOf(&quot;/&quot;);
+ 120     return path.substring(index);
+ 121   }
+ 122 }
+ 
+ 
+ 
+ 
+ </pre></td>
+                            <td><pre>   1 /*
+   2  * Copyright (C) 2016 AriaLyy(https://github.com/AriaLyy/Aria)
+   3  *
+   4  * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+   5  * you may not use this file except in compliance with the License.
+   6  * You may obtain a copy of the License at
+   7  *
+   8  *      http://www.apache.org/licenses/LICENSE-2.0
+   9  *
+  10  * Unless required by applicable law or agreed to in writing, software
+  11  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  12  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  13  * See the License for the specific language governing permissions and
+  14  * limitations under the License.
+  15  */
+  16 
+  17 package com.arialyy.simple.core.download;
+  18 
+  19 import android.content.Context;
+  20 import android.net.Uri;
+  21 import android.os.Environment;
+  22 import android.text.TextUtils;
+  23 import androidx.lifecycle.LiveData;
+  24 import androidx.lifecycle.MutableLiveData;
+  25 import com.arialyy.aria.core.Aria;
+  26 import com.arialyy.aria.core.download.DownloadEntity;
+  27 import com.arialyy.aria.util.ALog;
+  28 import com.arialyy.frame.base.BaseViewModule;
+  29 import com.arialyy.simple.util.AppUtil;
+  30 import java.io.File;
+  31 
+  32 public class FtpDownloadModule extends BaseViewModule {
+  33   private final String FTP_URL_KEY = &quot;FTP_URL_KEY&quot;;
+  34   private final String FTP_PATH_KEY = &quot;FTP_PATH_KEY&quot;;
+  35 
+  36   private final String ftpDefUrl = &quot;ftp://9.9.9.50:2121/Cyberduck-6.9.4.30164.zip&quot;;
+  37   private final String ftpDefPath =
+  38       Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getPath();
+  39 
+  40   private MutableLiveData&lt;DownloadEntity&gt; liveData = new MutableLiveData&lt;&gt;();
+  41   private DownloadEntity singDownloadInfo;
+  42 
+  43   /**
+  44    * xx
+  45    * 单任务下载的信息
+  46    *
+  47    *
+  48    */
+  49   LiveData&lt;DownloadEntity&gt; getFtpDownloadInfo(Context context) {
+  50     //String url = AppUtil.getConfigValue(context, FTP_URL_KEY, ftpDefUrl);
+  51 &lt;&lt;&lt;&lt;&lt;&lt;&lt; MINE
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  52     //String filePath = AppUtil.getConfigValue(context, FTP_PATH_KEY, ftpDefPath);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  53     String url = &quot;ftp://9.9.9.72:2121/Cyberduck-6.9.4.30164.zip&quot;;</span>
+  54 ||||||| BASE
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  55     //String url = &quot;ftp://9.9.9.72:2121/Cyberduck-6.9.4.30164.zip&quot;;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  56     String url = &quot;ftp://58.210.178.52:21/battery1.0.0.apk&quot;;</span>
+  57 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  58     //String url = &quot;ftp://9.9.9.72:2121/Cyberduck-6.9.4.30164.zip&quot;;</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  59     String filePath = AppUtil.getConfigValue(context, FTP_PATH_KEY, ftpDefPath);</span>
+  60 &gt;&gt;&gt;&gt;&gt;&gt;&gt; YOURS
+  61 
+  62     singDownloadInfo = Aria.download(context).getFirstDownloadEntity(url);
+  63     if (singDownloadInfo == null) {
+  64       singDownloadInfo = new DownloadEntity();
+  65       singDownloadInfo.setUrl(url);
+  66       String name = getFileName(ftpDefUrl);
+  67       singDownloadInfo.setFileName(name);
+  68       singDownloadInfo.setFilePath(ftpDefPath + name);
+  69     } else {
+  70       AppUtil.setConfigValue(context, FTP_PATH_KEY, singDownloadInfo.getFilePath());
+  71       AppUtil.setConfigValue(context, FTP_URL_KEY, singDownloadInfo.getUrl());
+  72     }
+  73     liveData.postValue(singDownloadInfo);
+  74 
+  75     return liveData;
+  76   }
+  77 
+  78   /**
+  79    * 更新文件保存路径
+  80    *
+  81    * @param dirPath 文件保存文件夹
+  82    */
+  83   void updateFilePath(Context context, String dirPath) {
+  84     if (TextUtils.isEmpty(dirPath)) {
+  85       ALog.e(TAG, &quot;文件保存路径为空&quot;);
+  86       return;
+  87     }
+  88     AppUtil.setConfigValue(context, FTP_PATH_KEY, dirPath);
+  89     singDownloadInfo.setFilePath(dirPath + singDownloadInfo.getFileName());
+  90     liveData.postValue(singDownloadInfo);
+  91   }
+  92 
+  93   /**
+  94    * 更新url
+  95    */
+  96   void uploadUrl(Context context, String url) {
+  97     if (TextUtils.isEmpty(url)) {
+  98       ALog.e(TAG, &quot;下载地址为空&quot;);
+  99       return;
+ 100     }
+ 101     AppUtil.setConfigValue(context, FTP_URL_KEY, url);
+ 102     File file = new File(singDownloadInfo.getFilePath());
+ 103     String name = getFileName(url);
+ 104     singDownloadInfo.setFilePath(file.getParent() + name);
+ 105     singDownloadInfo.setFileName(name);
+ 106     singDownloadInfo.setUrl(url);
+ 107     liveData.postValue(singDownloadInfo);
+ 108   }
+ 109 
+ 110   /**
+ 111    * 通过url获取文件名
+ 112    *
+ 113    * @param url ftp地址
+ 114    * @return &quot;/aria.text&quot;
+ 115    */
+ 116   private String getFileName(String url) {
+ 117     Uri uri = Uri.parse(url);
+ 118     String path = uri.getPath();
+ 119     int index = path.lastIndexOf(&quot;/&quot;);
+ 120     return path.substring(index);
+ 121   }
+ 122 }
+ 
+ 
+ 
+ 
+ </pre></td>
+                            <td><pre>   1 /*
+   2  * Copyright (C) 2016 AriaLyy(https://github.com/AriaLyy/Aria)
+   3  *
+   4  * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+   5  * you may not use this file except in compliance with the License.
+   6  * You may obtain a copy of the License at
+   7  *
+   8  *      http://www.apache.org/licenses/LICENSE-2.0
+   9  *
+  10  * Unless required by applicable law or agreed to in writing, software
+  11  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  12  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  13  * See the License for the specific language governing permissions and
+  14  * limitations under the License.
+  15  */
+  16 package com.arialyy.simple.core.download;
+  17 
+  18 import android.content.Context;
+  19 import android.net.Uri;
+  20 import android.os.Environment;
+  21 import android.text.TextUtils;
+  22 import androidx.lifecycle.LiveData;
+  23 import androidx.lifecycle.MutableLiveData;
+  24 import com.arialyy.aria.core.Aria;
+  25 import com.arialyy.aria.core.download.DownloadEntity;
+  26 import com.arialyy.aria.util.ALog;
+  27 import com.arialyy.frame.base.BaseViewModule;
+  28 import com.arialyy.simple.util.AppUtil;
+  29 import java.io.File;
+  30 
+  31 
+  32 public class FtpDownloadModule extends BaseViewModule {
+  33   private final String FTP_URL_KEY = &quot;FTP_URL_KEY&quot;;
+  34 
+  35   private final String FTP_PATH_KEY = &quot;FTP_PATH_KEY&quot;;
+  36 
+  37   private final String ftpDefUrl = &quot;ftp://9.9.9.50:2121/Cyberduck-6.9.4.30164.zip&quot;;
+  38 
+  39   private final String ftpDefPath =
+  40       Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getPath();
+  41 
+  42   private MutableLiveData&lt;DownloadEntity&gt; liveData = new MutableLiveData&lt;&gt;();
+  43 
+  44   private DownloadEntity singDownloadInfo;
+  45 
+  46   /**
+  47    * xx
+  48    * 单任务下载的信息
+  49    *
+  50    *
+  51    */
+  52   LiveData&lt;DownloadEntity&gt; getFtpDownloadInfo(Context context) {
+  53     //String url = AppUtil.getConfigValue(context, FTP_URL_KEY, ftpDefUrl);
+  54 
+  55 &lt;&lt;&lt;&lt;&lt;&lt;&lt; LEFT
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  56     //String filePath = AppUtil.getConfigValue(context, FTP_PATH_KEY, ftpDefPath);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  57     String url = &quot;ftp://9.9.9.72:2121/Cyberduck-6.9.4.30164.zip&quot;;</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  58 </span>
+  59 ||||||| BASE
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"><abbr title="  60 /*d94z9sk0k4hf9j3ijd - note the base isn&#x27;t actually empty, spork simply doesn&#x27;t generate a base - gd930kwohrp23k5b6vdk93d3r*/">  60 /*d94z9sk0k4hf9j3ijd - note the base isn&#x27;t actually empty, spork simply doesn&#x27;t generate a base - gd930kw🔵</abbr></span>
+  61 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  62 </span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  63     //String url = &quot;ftp://9.9.9.72:2121/Cyberduck-6.9.4.30164.zip&quot;;</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  64     String filePath = AppUtil.getConfigValue(context, FTP_PATH_KEY, ftpDefPath);</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  65 </span>
+  66 &gt;&gt;&gt;&gt;&gt;&gt;&gt; RIGHT
+  67 
+  68     singDownloadInfo = Aria.download(context).getFirstDownloadEntity(url);
+  69     if (singDownloadInfo == null) {
+  70       singDownloadInfo = new DownloadEntity();
+  71       singDownloadInfo.setUrl(url);
+  72       String name = getFileName(ftpDefUrl);
+  73       singDownloadInfo.setFileName(name);
+  74       singDownloadInfo.setFilePath(ftpDefPath + name);
+  75     } else {
+  76       AppUtil.setConfigValue(context, FTP_PATH_KEY, singDownloadInfo.getFilePath());
+  77       AppUtil.setConfigValue(context, FTP_URL_KEY, singDownloadInfo.getUrl());
+  78     }
+  79     liveData.postValue(singDownloadInfo);
+  80 
+  81     return liveData;
+  82   }
+  83 
+  84   /**
+  85    * 更新文件保存路径
+  86    *
+  87    * @param dirPath 文件保存文件夹
+  88    */
+  89   void updateFilePath(Context context, String dirPath) {
+  90     if (TextUtils.isEmpty(dirPath)) {
+  91       ALog.e(TAG, &quot;文件保存路径为空&quot;);
+  92       return;
+  93     }
+  94     AppUtil.setConfigValue(context, FTP_PATH_KEY, dirPath);
+  95     singDownloadInfo.setFilePath(dirPath + singDownloadInfo.getFileName());
+  96     liveData.postValue(singDownloadInfo);
+  97   }
+  98 
+  99   /**
+ 100    * 更新url
+ 101    */
+ 102   void uploadUrl(Context context, String url) {
+ 103     if (TextUtils.isEmpty(url)) {
+ 104       ALog.e(TAG, &quot;下载地址为空&quot;);
+ 105       return;
+ 106     }
+ 107     AppUtil.setConfigValue(context, FTP_URL_KEY, url);
+ 108     File file = new File(singDownloadInfo.getFilePath());
+ 109     String name = getFileName(url);
+ 110     singDownloadInfo.setFilePath(file.getParent() + name);
+ 111     singDownloadInfo.setFileName(name);
+ 112     singDownloadInfo.setUrl(url);
+ 113     liveData.postValue(singDownloadInfo);
+ 114   }
+ 115 
+ 116   /**
+ 117    * 通过url获取文件名
+ 118    *
+ 119    * @param url ftp地址
+ 120    * @return &quot;/aria.text&quot;
+ 121    */
+ 122   private String getFileName(String url) {
+ 123     Uri uri = Uri.parse(url);
+ 124     String path = uri.getPath();
+ 125     int index = path.lastIndexOf(&quot;/&quot;);
+ 126     return path.substring(index);
+ 127   }
+ 128 }</pre></td>
+                        </tr>
+                    </table>
+                </div>
+                <div id="bottom">
+                    <table style="margin:auto">
+                        <tr>
+                            <th>ours vs. base</th>
+                            <th>theirs vs. base</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1  /*
+   2   * Copyright (C) 2016 AriaLyy(https://github.com/AriaLyy/Aria)
+   3   *
+   4   * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+   5   * you may not use this file except in compliance with the License.
+   6   * You may obtain a copy of the License at
+   7   *
+   8   *      http://www.apache.org/licenses/LICENSE-2.0
+   9   *
+  10   * Unless required by applicable law or agreed to in writing, software
+  11   * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  12   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  13   * See the License for the specific language governing permissions and
+  14   * limitations under the License.
+  15   */
+  16  
+  17  package com.arialyy.simple.core.download;
+  18  
+  19  import android.content.Context;
+  20  import android.net.Uri;
+  21  import android.os.Environment;
+  22  import android.text.TextUtils;
+  23  import androidx.lifecycle.LiveData;
+  24  import androidx.lifecycle.MutableLiveData;
+  25  import com.arialyy.aria.core.Aria;
+  26  import com.arialyy.aria.core.download.DownloadEntity;
+  27  import com.arialyy.aria.util.ALog;
+  28  import com.arialyy.frame.base.BaseViewModule;
+  29  import com.arialyy.simple.util.AppUtil;
+  30  import java.io.File;
+  31  
+  32  public class FtpDownloadModule extends BaseViewModule {
+  33    private final String FTP_URL_KEY = &quot;FTP_URL_KEY&quot;;
+  34    private final String FTP_PATH_KEY = &quot;FTP_PATH_KEY&quot;;
+  35  
+  36    private final String ftpDefUrl = &quot;ftp://9.9.9.50:2121/Cyberduck-6.9.4.30164.zip&quot;;
+  37    private final String ftpDefPath =
+  38        Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getPath();
+  39  
+  40    private MutableLiveData&lt;DownloadEntity&gt; liveData = new MutableLiveData&lt;&gt;();
+  41    private DownloadEntity singDownloadInfo;
+  42  
+  43    /**
+  44     * xx
+  45     * 单任务下载的信息
+  46     *
+  47     *
+  48     */
+  49    LiveData&lt;DownloadEntity&gt; getFtpDownloadInfo(Context context) {
+  50      //String url = AppUtil.getConfigValue(context, FTP_URL_KEY, ftpDefUrl);
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  51 -    //String url = &quot;ftp://9.9.9.72:2121/Cyberduck-6.9.4.30164.zip&quot;;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  52 -    String url = &quot;ftp://58.210.178.52:21/battery1.0.0.apk&quot;;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  53 -    String filePath = AppUtil.getConfigValue(context, FTP_PATH_KEY, ftpDefPath);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  54 +    //String filePath = AppUtil.getConfigValue(context, FTP_PATH_KEY, ftpDefPath);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  55 +    String url = &quot;ftp://9.9.9.72:2121/Cyberduck-6.9.4.30164.zip&quot;;</span>
+  56  
+  57      singDownloadInfo = Aria.download(context).getFirstDownloadEntity(url);
+  58      if (singDownloadInfo == null) {
+  59        singDownloadInfo = new DownloadEntity();
+  60        singDownloadInfo.setUrl(url);
+  61        String name = getFileName(ftpDefUrl);
+  62        singDownloadInfo.setFileName(name);
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  63 -      singDownloadInfo.setFilePath(filePath + name);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  64 +      singDownloadInfo.setFilePath(ftpDefPath + name);</span>
+  65      } else {
+  66        AppUtil.setConfigValue(context, FTP_PATH_KEY, singDownloadInfo.getFilePath());
+  67        AppUtil.setConfigValue(context, FTP_URL_KEY, singDownloadInfo.getUrl());
+  68      }
+  69      liveData.postValue(singDownloadInfo);
+  70  
+  71      return liveData;
+  72    }
+  73  
+  74    /**
+  75     * 更新文件保存路径
+  76     *
+  77     * @param dirPath 文件保存文件夹
+  78     */
+  79    void updateFilePath(Context context, String dirPath) {
+  80      if (TextUtils.isEmpty(dirPath)) {
+  81        ALog.e(TAG, &quot;文件保存路径为空&quot;);
+  82        return;
+  83      }
+  84      AppUtil.setConfigValue(context, FTP_PATH_KEY, dirPath);
+  85      singDownloadInfo.setFilePath(dirPath + singDownloadInfo.getFileName());
+  86      liveData.postValue(singDownloadInfo);
+  87    }
+  88  
+  89    /**
+  90     * 更新url
+  91     */
+  92    void uploadUrl(Context context, String url) {
+  93      if (TextUtils.isEmpty(url)) {
+  94        ALog.e(TAG, &quot;下载地址为空&quot;);
+  95        return;
+  96      }
+  97      AppUtil.setConfigValue(context, FTP_URL_KEY, url);
+  98      File file = new File(singDownloadInfo.getFilePath());
+  99      String name = getFileName(url);
+ 100      singDownloadInfo.setFilePath(file.getParent() + name);
+ 101      singDownloadInfo.setFileName(name);
+ 102      singDownloadInfo.setUrl(url);
+ 103      liveData.postValue(singDownloadInfo);
+ 104    }
+ 105  
+ 106    /**
+ 107     * 通过url获取文件名
+ 108     *
+ 109     * @param url ftp地址
+ 110     * @return &quot;/aria.text&quot;
+ 111     */
+ 112    private String getFileName(String url) {
+ 113      Uri uri = Uri.parse(url);
+ 114      String path = uri.getPath();
+ 115      int index = path.lastIndexOf(&quot;/&quot;);
+ 116      return path.substring(index);
+ 117    }
+ 118  }</pre></td>
+                            <td><pre>   1  /*
+   2   * Copyright (C) 2016 AriaLyy(https://github.com/AriaLyy/Aria)
+   3   *
+   4   * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+   5   * you may not use this file except in compliance with the License.
+   6   * You may obtain a copy of the License at
+   7   *
+   8   *      http://www.apache.org/licenses/LICENSE-2.0
+   9   *
+  10   * Unless required by applicable law or agreed to in writing, software
+  11   * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  12   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  13   * See the License for the specific language governing permissions and
+  14   * limitations under the License.
+  15   */
+  16  
+  17  package com.arialyy.simple.core.download;
+  18  
+  19  import android.content.Context;
+  20  import android.net.Uri;
+  21  import android.os.Environment;
+  22  import android.text.TextUtils;
+  23  import androidx.lifecycle.LiveData;
+  24  import androidx.lifecycle.MutableLiveData;
+  25  import com.arialyy.aria.core.Aria;
+  26  import com.arialyy.aria.core.download.DownloadEntity;
+  27  import com.arialyy.aria.util.ALog;
+  28  import com.arialyy.frame.base.BaseViewModule;
+  29  import com.arialyy.simple.util.AppUtil;
+  30  import java.io.File;
+  31  
+  32  public class FtpDownloadModule extends BaseViewModule {
+  33    private final String FTP_URL_KEY = &quot;FTP_URL_KEY&quot;;
+  34    private final String FTP_PATH_KEY = &quot;FTP_PATH_KEY&quot;;
+  35  
+  36    private final String ftpDefUrl = &quot;ftp://9.9.9.50:2121/Cyberduck-6.9.4.30164.zip&quot;;
+  37    private final String ftpDefPath =
+  38        Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getPath();
+  39  
+  40    private MutableLiveData&lt;DownloadEntity&gt; liveData = new MutableLiveData&lt;&gt;();
+  41    private DownloadEntity singDownloadInfo;
+  42  
+  43    /**
+  44     * xx
+  45     * 单任务下载的信息
+  46     *
+  47     *
+  48     */
+  49    LiveData&lt;DownloadEntity&gt; getFtpDownloadInfo(Context context) {
+  50      //String url = AppUtil.getConfigValue(context, FTP_URL_KEY, ftpDefUrl);
+  51      //String url = &quot;ftp://9.9.9.72:2121/Cyberduck-6.9.4.30164.zip&quot;;
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  52 -    String url = &quot;ftp://58.210.178.52:21/battery1.0.0.apk&quot;;</span>
+  53      String filePath = AppUtil.getConfigValue(context, FTP_PATH_KEY, ftpDefPath);
+
+
+  54  
+  55      singDownloadInfo = Aria.download(context).getFirstDownloadEntity(url);
+  56      if (singDownloadInfo == null) {
+  57        singDownloadInfo = new DownloadEntity();
+  58        singDownloadInfo.setUrl(url);
+  59        String name = getFileName(ftpDefUrl);
+  60        singDownloadInfo.setFileName(name);
+  61        singDownloadInfo.setFilePath(filePath + name);
+
+  62      } else {
+  63        AppUtil.setConfigValue(context, FTP_PATH_KEY, singDownloadInfo.getFilePath());
+  64        AppUtil.setConfigValue(context, FTP_URL_KEY, singDownloadInfo.getUrl());
+  65      }
+  66      liveData.postValue(singDownloadInfo);
+  67  
+  68      return liveData;
+  69    }
+  70  
+  71    /**
+  72     * 更新文件保存路径
+  73     *
+  74     * @param dirPath 文件保存文件夹
+  75     */
+  76    void updateFilePath(Context context, String dirPath) {
+  77      if (TextUtils.isEmpty(dirPath)) {
+  78        ALog.e(TAG, &quot;文件保存路径为空&quot;);
+  79        return;
+  80      }
+  81      AppUtil.setConfigValue(context, FTP_PATH_KEY, dirPath);
+  82      singDownloadInfo.setFilePath(dirPath + singDownloadInfo.getFileName());
+  83      liveData.postValue(singDownloadInfo);
+  84    }
+  85  
+  86    /**
+  87     * 更新url
+  88     */
+  89    void uploadUrl(Context context, String url) {
+  90      if (TextUtils.isEmpty(url)) {
+  91        ALog.e(TAG, &quot;下载地址为空&quot;);
+  92        return;
+  93      }
+  94      AppUtil.setConfigValue(context, FTP_URL_KEY, url);
+  95      File file = new File(singDownloadInfo.getFilePath());
+  96      String name = getFileName(url);
+  97      singDownloadInfo.setFilePath(file.getParent() + name);
+  98      singDownloadInfo.setFileName(name);
+  99      singDownloadInfo.setUrl(url);
+ 100      liveData.postValue(singDownloadInfo);
+ 101    }
+ 102  
+ 103    /**
+ 104     * 通过url获取文件名
+ 105     *
+ 106     * @param url ftp地址
+ 107     * @return &quot;/aria.text&quot;
+ 108     */
+ 109    private String getFileName(String url) {
+ 110      Uri uri = Uri.parse(url);
+ 111      String path = uri.getPath();
+ 112      int index = path.lastIndexOf(&quot;/&quot;);
+ 113      return path.substring(index);
+ 114    }
+ 115  }</pre></td>
+                        </tr>
+                    </table>
+                </div>
+              </body>
+            </html>
+            

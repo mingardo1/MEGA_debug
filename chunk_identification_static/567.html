@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+    <html lang="en">
+              <head>
+                <meta charset="utf-8">
+                <title>567</title>
+                    <style>
+                        #top {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        #bottom {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        abbr {
+                          /* Here is the delay */
+                          transition-delay:0s;
+                        }
+                    </style>
+              </head>
+              <body>
+                <span style="height: 4vh">
+                    567
+                    <a href="566.html">prev</a>
+                    <a href="568.html">next</a>
+                    <a href="567_chunks.html">chunks</a>
+                    <a href="index.html">index</a>
+                    DTStack/flinkStreamSQL_7302b163e73618ae14d90bd0ad9b64f1caf7c884_core/src/main/java/com/dtstack/flink/sql/exec/FlinkSQLExec.java
+                    <textarea rows=1 onclick='navigator.clipboard.writeText(this.value)'>cd C:\studies\se\mega\git-analyzer-plus\notebooks\debug
+del /Q *
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;7302b163e73618ae14d90bd0ad9b64f1caf7c884:core/src/main/java/com/dtstack/flink/sql/exec/FlinkSQLExec.java&quot; &gt; committed.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;7302b163e73618ae14d90bd0ad9b64f1caf7c884^1:core/src/main/java/com/dtstack/flink/sql/exec/FlinkSQLExec.java&quot; &gt; ours.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;7302b163e73618ae14d90bd0ad9b64f1caf7c884^2:core/src/main/java/com/dtstack/flink/sql/exec/FlinkSQLExec.java&quot; &gt; theirs.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;b259aa5e9ca64e4d07266783ec504a1f5fd6d5ec:core/src/main/java/com/dtstack/flink/sql/exec/FlinkSQLExec.java&quot; &gt; base.java
+copy ours.java 1ours.java
+copy ours.java 2ours.java
+copy theirs.java 1theirs.java
+copy theirs.java 2theirs.java
+copy base.java 1base.java
+copy base.java 2base.java
+&quot;C:\Program Files\Java\jdk1.8.0_241\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\jFSTMerge\build\libs\jFSTMerge-all.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\jfstmerge.java --show-base
+&quot;C:\Program Files\Eclipse Adoptium\jdk-17.0.11.9-hotspot\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\spork\target\spork-0.5.0-SNAPSHOT.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\spork.java
+del /Q 1*.java
+del /Q 2*.java
+del /Q jfstmerge.java.merge
+</textarea>
+                    {strict: [[b]], subset: [[b]]}
+                </span>
+                <div id="top">
+
+                    <table>
+                        <tr>
+                            <th>line based (standard git)</th>
+                            <th>jfstmerge</th>
+                            <th>spork</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1 /*
+   2  * Licensed to the Apache Software Foundation (ASF) under one
+   3  * or more contributor license agreements.  See the NOTICE file
+   4  * distributed with this work for additional information
+   5  * regarding copyright ownership.  The ASF licenses this file
+   6  * to you under the Apache License, Version 2.0 (the
+   7  * &quot;License&quot;); you may not use this file except in compliance
+   8  * with the License.  You may obtain a copy of the License at
+   9  *
+  10  * http://www.apache.org/licenses/LICENSE-2.0
+  11  *
+  12  * Unless required by applicable law or agreed to in writing, software
+  13  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15  * See the License for the specific language governing permissions and
+  16  * limitations under the License.
+  17  */
+  18 
+  19 package com.dtstack.flink.sql.exec;
+  20 
+  21 import org.apache.calcite.sql.SqlIdentifier;
+  22 import org.apache.calcite.sql.SqlInsert;
+  23 import org.apache.flink.sql.parser.dml.RichSqlInsert;
+  24 import org.apache.flink.table.api.Table;
+  25 import org.apache.flink.table.api.ValidationException;
+  26 import org.apache.flink.table.api.internal.TableEnvironmentImpl;
+  27 import org.apache.flink.table.api.internal.TableImpl;
+  28 import org.apache.flink.table.api.java.StreamTableEnvironment;
+  29 import org.apache.flink.table.api.java.internal.StreamTableEnvironmentImpl;
+  30 import org.apache.flink.table.catalog.CatalogManager;
+  31 import org.apache.flink.table.catalog.ObjectIdentifier;
+  32 import org.apache.flink.table.operations.Operation;
+  33 import org.apache.flink.table.operations.QueryOperation;
+  34 import org.apache.flink.table.planner.calcite.FlinkPlannerImpl;
+  35 import org.apache.flink.table.planner.delegation.PlannerBase;
+  36 import org.apache.flink.table.planner.delegation.StreamPlanner;
+  37 import org.apache.flink.table.planner.operations.SqlToOperationConverter;
+  38 import org.apache.flink.table.sinks.TableSink;
+  39 import org.slf4j.Logger;
+  40 import org.slf4j.LoggerFactory;
+  41 import scala.Option;
+  42 import scala.Tuple2;
+  43 
+  44 import java.lang.reflect.Constructor;
+  45 import java.lang.reflect.InvocationTargetException;
+  46 import java.lang.reflect.Method;
+  47 
+  48 
+  49 /**
+  50  * @description: mapping by name when insert into sink table
+  51  * @author: maqi
+  52  * @create: 2019/08/15 11:09
+  53  */
+  54 public class FlinkSQLExec {
+  55     private static final Logger LOG = LoggerFactory.getLogger(FlinkSQLExec.class);
+  56 
+  57     public static void sqlUpdate(StreamTableEnvironment tableEnv, String stmt) throws Exception {
+  58         StreamTableEnvironmentImpl tableEnvImpl = ((StreamTableEnvironmentImpl) tableEnv);
+  59         StreamPlanner streamPlanner = (StreamPlanner) tableEnvImpl.getPlanner();
+  60         FlinkPlannerImpl flinkPlanner = streamPlanner.createFlinkPlanner();
+  61 
+  62 &lt;&lt;&lt;&lt;&lt;&lt;&lt; GitAnalyzerPlus_ours
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  63         RichSqlInsert insert = (RichSqlInsert) flinkPlanner.validate(flinkPlanner.parser().parse(stmt));</span>
+  64 ||||||| GitAnalyzerPlus_base
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  65         TableImpl queryResult = extractQueryTableFromInsertCaluse(tableEnvImpl, flinkPlanner, insert);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  66 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  67         String targetTableName = ((SqlIdentifier) ((SqlInsert) insert).getTargetTable()).names.get(0);</span>
+  68 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  69         RichSqlInsert insert = (RichSqlInsert) flinkPlanner.parse(stmt);</span>
+  70 &gt;&gt;&gt;&gt;&gt;&gt;&gt; GitAnalyzerPlus_theirs
+  71         TableImpl queryResult = extractQueryTableFromInsertCaluse(tableEnvImpl, flinkPlanner, insert);
+  72 
+  73         String targetTableName = ((SqlIdentifier) ((SqlInsert) insert).getTargetTable()).names.get(0);
+  74         TableSink tableSink = getTableSinkByPlanner(streamPlanner, targetTableName);
+  75 
+  76         String[] sinkFieldNames = tableSink.getTableSchema().getFieldNames();
+  77         String[] queryFieldNames = queryResult.getSchema().getFieldNames();
+  78 
+  79         if (sinkFieldNames.length != queryFieldNames.length) {
+  80             throw new ValidationException(
+<abbr title="  81                     &quot;Field name of query result and registered TableSink &quot; + targetTableName + &quot; do not match.\n&quot; +">  81                     &quot;Field name of query result and registered TableSink &quot; + targetTableName + &quot; do not m🔵</abbr>
+  82                             &quot;Query result schema: &quot; + String.join(&quot;,&quot;, queryFieldNames) + &quot;\n&quot; +
+  83                             &quot;TableSink schema: &quot; + String.join(&quot;,&quot;, sinkFieldNames));
+  84         }
+  85 
+  86 
+  87         Table newTable = null;
+  88         try {
+  89             newTable = queryResult.select(String.join(&quot;,&quot;, sinkFieldNames));
+  90         } catch (Exception e) {
+  91             throw new ValidationException(
+<abbr title="  92                     &quot;Field name of query result and registered TableSink &quot; + targetTableName + &quot; do not match.\n&quot; +">  92                     &quot;Field name of query result and registered TableSink &quot; + targetTableName + &quot; do not m🔵</abbr>
+  93                             &quot;Query result schema: &quot; + String.join(&quot;,&quot;, queryFieldNames) + &quot;\n&quot; +
+  94                             &quot;TableSink schema: &quot; + String.join(&quot;,&quot;, sinkFieldNames));
+  95         }
+  96 
+  97         try {
+  98             tableEnv.insertInto(targetTableName, newTable);
+  99         } catch (Exception e) {
+ 100             LOG.warn(&quot;Field name case of query result and registered TableSink do not match. &quot;, e);
+ 101             newTable = queryResult.select(String.join(&quot;,&quot;, ignoreCase(queryFieldNames, sinkFieldNames)));
+ 102             tableEnv.insertInto(targetTableName, newTable);
+ 103         }
+ 104 
+ 105     }
+ 106 
+ 107     private static TableSink getTableSinkByPlanner(StreamPlanner streamPlanner, String targetTableName)
+ 108             throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+<abbr title=" 109         Method getTableSink = PlannerBase.class.getDeclaredMethod(&quot;getTableSink&quot;, ObjectIdentifier.class);"> 109         Method getTableSink = PlannerBase.class.getDeclaredMethod(&quot;getTableSink&quot;, ObjectIdentifier.class)🔵</abbr>
+ 110         getTableSink.setAccessible(true);
+<abbr title=" 111         ObjectIdentifier objectIdentifier = ObjectIdentifier.of(streamPlanner.catalogManager().getCurrentCatalog(), streamPlanner.catalogManager().getCurrentDatabase(), targetTableName);"> 111         ObjectIdentifier objectIdentifier = ObjectIdentifier.of(streamPlanner.catalogManager().getCurrent🔵</abbr>
+ 112         Option tableSinkOption = (Option) getTableSink.invoke(streamPlanner, objectIdentifier);
+ 113         return (TableSink) ((Tuple2) tableSinkOption.get())._2;
+ 114     }
+ 115 
+<abbr title=" 116     private static TableImpl extractQueryTableFromInsertCaluse(StreamTableEnvironmentImpl tableEnvImpl, FlinkPlannerImpl flinkPlanner, RichSqlInsert insert)"> 116     private static TableImpl extractQueryTableFromInsertCaluse(StreamTableEnvironmentImpl tableEnvImpl, F🔵</abbr>
+ 117             throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+ 118         StreamPlanner streamPlanner = (StreamPlanner) tableEnvImpl.getPlanner();
+<abbr title=" 119         Operation queryOperation = SqlToOperationConverter.convert(flinkPlanner, streamPlanner.catalogManager(), insert.getSource()).get();"> 119         Operation queryOperation = SqlToOperationConverter.convert(flinkPlanner, streamPlanner.catalogMan🔵</abbr>
+<abbr title=" 120         Method createTableMethod = TableEnvironmentImpl.class.getDeclaredMethod(&quot;createTable&quot;, QueryOperation.class);"> 120         Method createTableMethod = TableEnvironmentImpl.class.getDeclaredMethod(&quot;createTable&quot;, QueryOpera🔵</abbr>
+ 121         createTableMethod.setAccessible(true);
+ 122         return (TableImpl) createTableMethod.invoke(tableEnvImpl, queryOperation);
+ 123     }
+ 124 
+ 125     private static String[] ignoreCase(String[] queryFieldNames, String[] sinkFieldNames) {
+ 126         String[] newFieldNames = sinkFieldNames;
+ 127         for (int i = 0; i &lt; newFieldNames.length; i++) {
+ 128             for (String queryFieldName : queryFieldNames) {
+ 129                 if (newFieldNames[i].equalsIgnoreCase(queryFieldName)) {
+ 130                     newFieldNames[i] = queryFieldName;
+ 131                     break;
+ 132                 }
+ 133             }
+ 134         }
+ 135         return newFieldNames;
+ 136     }
+ 137 }</pre></td>
+                            <td><pre>   1 /*
+   2  * Licensed to the Apache Software Foundation (ASF) under one
+   3  * or more contributor license agreements.  See the NOTICE file
+   4  * distributed with this work for additional information
+   5  * regarding copyright ownership.  The ASF licenses this file
+   6  * to you under the Apache License, Version 2.0 (the
+   7  * &quot;License&quot;); you may not use this file except in compliance
+   8  * with the License.  You may obtain a copy of the License at
+   9  *
+  10  * http://www.apache.org/licenses/LICENSE-2.0
+  11  *
+  12  * Unless required by applicable law or agreed to in writing, software
+  13  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15  * See the License for the specific language governing permissions and
+  16  * limitations under the License.
+  17  */
+  18 
+  19 package com.dtstack.flink.sql.exec;
+  20 
+  21 import org.apache.calcite.sql.SqlIdentifier;
+  22 import org.apache.calcite.sql.SqlInsert;
+  23 import org.apache.flink.sql.parser.dml.RichSqlInsert;
+  24 import org.apache.flink.table.api.Table;
+  25 import org.apache.flink.table.api.ValidationException;
+  26 import org.apache.flink.table.api.internal.TableEnvironmentImpl;
+  27 import org.apache.flink.table.api.internal.TableImpl;
+  28 import org.apache.flink.table.api.java.StreamTableEnvironment;
+  29 import org.apache.flink.table.api.java.internal.StreamTableEnvironmentImpl;
+  30 import org.apache.flink.table.catalog.CatalogManager;
+  31 import org.apache.flink.table.catalog.ObjectIdentifier;
+  32 import org.apache.flink.table.operations.Operation;
+  33 import org.apache.flink.table.operations.QueryOperation;
+  34 import org.apache.flink.table.planner.calcite.FlinkPlannerImpl;
+  35 import org.apache.flink.table.planner.delegation.PlannerBase;
+  36 import org.apache.flink.table.planner.delegation.StreamPlanner;
+  37 import org.apache.flink.table.planner.operations.SqlToOperationConverter;
+  38 import org.apache.flink.table.sinks.TableSink;
+  39 import org.slf4j.Logger;
+  40 import org.slf4j.LoggerFactory;
+  41 import scala.Option;
+  42 import scala.Tuple2;
+  43 
+  44 import java.lang.reflect.Constructor;
+  45 import java.lang.reflect.InvocationTargetException;
+  46 import java.lang.reflect.Method;
+  47 
+  48 
+  49 /**
+  50  * @description:  mapping by name when insert into sink table
+  51  * @author: maqi
+  52  * @create: 2019/08/15 11:09
+  53  */
+  54 public class FlinkSQLExec {
+  55     private static final Logger LOG = LoggerFactory.getLogger(FlinkSQLExec.class);
+  56 
+  57     public static void sqlUpdate(StreamTableEnvironment tableEnv, String stmt) throws Exception {
+  58         StreamTableEnvironmentImpl tableEnvImpl = ((StreamTableEnvironmentImpl) tableEnv);
+  59         StreamPlanner streamPlanner = (StreamPlanner)tableEnvImpl.getPlanner();
+  60         FlinkPlannerImpl flinkPlanner = streamPlanner.createFlinkPlanner();
+  61 
+  62         RichSqlInsert insert = (RichSqlInsert) flinkPlanner.validate(flinkPlanner.parser().parse(stmt));
+  63         TableImpl queryResult = extractQueryTableFromInsertCaluse(tableEnvImpl, flinkPlanner, insert);
+  64 
+  65         String targetTableName = ((SqlIdentifier) ((SqlInsert) insert).getTargetTable()).names.get(0);
+  66         TableSink tableSink = getTableSinkByPlanner(streamPlanner, targetTableName);
+  67 
+  68         String[] sinkFieldNames = tableSink.getTableSchema().getFieldNames();
+  69         String[] queryFieldNames = queryResult.getSchema().getFieldNames();
+  70 
+  71         if (sinkFieldNames.length != queryFieldNames.length) {
+  72             throw new ValidationException(
+<abbr title="  73                     &quot;Field name of query result and registered TableSink &quot; + targetTableName + &quot; do not match.\n&quot; +">  73                     &quot;Field name of query result and registered TableSink &quot; + targetTableName + &quot; do not m🔵</abbr>
+  74                             &quot;Query result schema: &quot; + String.join(&quot;,&quot;, queryFieldNames) + &quot;\n&quot; +
+  75                             &quot;TableSink schema: &quot; + String.join(&quot;,&quot;, sinkFieldNames));
+  76         }
+  77 
+  78 
+  79         Table newTable = null;
+  80         try {
+  81             newTable = queryResult.select(String.join(&quot;,&quot;, sinkFieldNames));
+  82         } catch (Exception e) {
+  83             throw new ValidationException(
+<abbr title="  84                     &quot;Field name of query result and registered TableSink &quot;+targetTableName +&quot; do not match.\n&quot; +">  84                     &quot;Field name of query result and registered TableSink &quot;+targetTableName +&quot; do not matc🔵</abbr>
+  85                     &quot;Query result schema: &quot; + String.join(&quot;,&quot;, queryFieldNames) + &quot;\n&quot; +
+  86                     &quot;TableSink schema: &quot; + String.join(&quot;,&quot;, sinkFieldNames));
+  87         }
+  88 
+  89         try {
+  90             tableEnv.insertInto(targetTableName, newTable);
+  91         } catch (Exception e) {
+  92             LOG.warn(&quot;Field name case of query result and registered TableSink do not match. &quot;, e);
+  93             newTable = queryResult.select(String.join(&quot;,&quot;, ignoreCase(queryFieldNames, sinkFieldNames)));
+  94             tableEnv.insertInto(targetTableName, newTable);
+  95         }
+  96 
+  97     }
+  98 
+  99     private static TableSink getTableSinkByPlanner(StreamPlanner streamPlanner, String targetTableName)
+ 100             throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+<abbr title=" 101         Method getTableSink = PlannerBase.class.getDeclaredMethod(&quot;getTableSink&quot;, ObjectIdentifier.class);"> 101         Method getTableSink = PlannerBase.class.getDeclaredMethod(&quot;getTableSink&quot;, ObjectIdentifier.class)🔵</abbr>
+ 102         getTableSink.setAccessible(true);
+<abbr title=" 103         ObjectIdentifier objectIdentifier = ObjectIdentifier.of(streamPlanner.catalogManager().getCurrentCatalog(), streamPlanner.catalogManager().getCurrentDatabase(), targetTableName);"> 103         ObjectIdentifier objectIdentifier = ObjectIdentifier.of(streamPlanner.catalogManager().getCurrent🔵</abbr>
+ 104         Option tableSinkOption = (Option) getTableSink.invoke(streamPlanner, objectIdentifier);
+ 105         return (TableSink) ((Tuple2) tableSinkOption.get())._2;
+ 106     }
+ 107 
+<abbr title=" 108     private static TableImpl extractQueryTableFromInsertCaluse(StreamTableEnvironmentImpl tableEnvImpl, FlinkPlannerImpl flinkPlanner, RichSqlInsert insert)"> 108     private static TableImpl extractQueryTableFromInsertCaluse(StreamTableEnvironmentImpl tableEnvImpl, F🔵</abbr>
+ 109             throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+ 110         StreamPlanner streamPlanner = (StreamPlanner) tableEnvImpl.getPlanner();
+<abbr title=" 111         Operation queryOperation = SqlToOperationConverter.convert(flinkPlanner, streamPlanner.catalogManager(), insert.getSource()).get();"> 111         Operation queryOperation = SqlToOperationConverter.convert(flinkPlanner, streamPlanner.catalogMan🔵</abbr>
+<abbr title=" 112         Method createTableMethod = TableEnvironmentImpl.class.getDeclaredMethod(&quot;createTable&quot;, QueryOperation.class);"> 112         Method createTableMethod = TableEnvironmentImpl.class.getDeclaredMethod(&quot;createTable&quot;, QueryOpera🔵</abbr>
+ 113         createTableMethod.setAccessible(true);
+ 114         return (TableImpl) createTableMethod.invoke(tableEnvImpl, queryOperation);
+ 115     }
+ 116 
+ 117     private static String[] ignoreCase(String[] queryFieldNames, String[] sinkFieldNames) {
+ 118         String[] newFieldNames = sinkFieldNames;
+ 119         for (int i = 0; i &lt; newFieldNames.length; i++) {
+ 120             for (String queryFieldName : queryFieldNames) {
+ 121                 if (newFieldNames[i].equalsIgnoreCase(queryFieldName)) {
+ 122                     newFieldNames[i] = queryFieldName;
+ 123                     break;
+ 124                 }
+ 125             }
+ 126         }
+ 127         return newFieldNames;
+ 128     }
+ 129 }
+ 
+ 
+ 
+ 
+ 
+ 
+ </pre></td>
+                            <td><pre>   1 /*
+   2  * Licensed to the Apache Software Foundation (ASF) under one
+   3  * or more contributor license agreements.  See the NOTICE file
+   4  * distributed with this work for additional information
+   5  * regarding copyright ownership.  The ASF licenses this file
+   6  * to you under the Apache License, Version 2.0 (the
+   7  * &quot;License&quot;); you may not use this file except in compliance
+   8  * with the License.  You may obtain a copy of the License at
+   9  *
+  10  * http://www.apache.org/licenses/LICENSE-2.0
+  11  *
+  12  * Unless required by applicable law or agreed to in writing, software
+  13  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15  * See the License for the specific language governing permissions and
+  16  * limitations under the License.
+  17  */
+  18 package com.dtstack.flink.sql.exec;
+  19 
+  20 import java.lang.reflect.Constructor;
+  21 import java.lang.reflect.InvocationTargetException;
+  22 import java.lang.reflect.Method;
+  23 import org.apache.calcite.sql.SqlIdentifier;
+  24 import org.apache.calcite.sql.SqlInsert;
+  25 import org.apache.flink.sql.parser.dml.RichSqlInsert;
+  26 import org.apache.flink.table.api.Table;
+  27 import org.apache.flink.table.api.ValidationException;
+  28 import org.apache.flink.table.api.internal.TableEnvironmentImpl;
+  29 import org.apache.flink.table.api.internal.TableImpl;
+  30 import org.apache.flink.table.api.java.StreamTableEnvironment;
+  31 import org.apache.flink.table.api.java.internal.StreamTableEnvironmentImpl;
+  32 import org.apache.flink.table.catalog.CatalogManager;
+  33 import org.apache.flink.table.catalog.ObjectIdentifier;
+  34 import org.apache.flink.table.operations.Operation;
+  35 import org.apache.flink.table.operations.QueryOperation;
+  36 import org.apache.flink.table.planner.calcite.FlinkPlannerImpl;
+  37 import org.apache.flink.table.planner.delegation.PlannerBase;
+  38 import org.apache.flink.table.planner.delegation.StreamPlanner;
+  39 import org.apache.flink.table.planner.operations.SqlToOperationConverter;
+  40 import org.apache.flink.table.sinks.TableSink;
+  41 import org.slf4j.Logger;
+  42 import org.slf4j.LoggerFactory;
+  43 import scala.Option;
+  44 import scala.Tuple2;
+  45 
+  46 
+  47 /**
+  48  * @description:  mapping by name when insert into sink table
+  49  * @author: maqi
+  50  * @create: 2019/08/15 11:09
+  51  */
+  52 public class FlinkSQLExec {
+  53     private static final Logger LOG = LoggerFactory.getLogger(FlinkSQLExec.class);
+  54 
+  55     public static void sqlUpdate(StreamTableEnvironment tableEnv, String stmt) throws Exception {
+  56         StreamTableEnvironmentImpl tableEnvImpl = ((StreamTableEnvironmentImpl) (tableEnv));
+  57         StreamPlanner streamPlanner = ((StreamPlanner) (tableEnvImpl.getPlanner()));
+  58         FlinkPlannerImpl flinkPlanner = streamPlanner.createFlinkPlanner();
+<abbr title="  59         RichSqlInsert insert = ((RichSqlInsert) (flinkPlanner.validate(flinkPlanner.parser().parse(stmt))));">  59         RichSqlInsert insert = ((RichSqlInsert) (flinkPlanner.validate(flinkPlanner.parser().parse(stmt))🔵</abbr>
+  60         TableImpl queryResult = extractQueryTableFromInsertCaluse(tableEnvImpl, flinkPlanner, insert);
+<abbr title="  61         String targetTableName = ((SqlIdentifier) (((SqlInsert) (insert)).getTargetTable())).names.get(0);">  61         String targetTableName = ((SqlIdentifier) (((SqlInsert) (insert)).getTargetTable())).names.get(0)🔵</abbr>
+  62         TableSink tableSink = getTableSinkByPlanner(streamPlanner, targetTableName);
+  63         String[] sinkFieldNames = tableSink.getTableSchema().getFieldNames();
+  64         String[] queryFieldNames = queryResult.getSchema().getFieldNames();
+  65         if (sinkFieldNames.length != queryFieldNames.length) {
+<abbr title="  66             throw new ValidationException(((((((&quot;Field name of query result and registered TableSink &quot; + targetTableName) + &quot; do not match.\n&quot;) + &quot;Query result schema: &quot;) + String.join(&quot;,&quot;, queryFieldNames)) + &quot;\n&quot;) + &quot;TableSink schema: &quot;) + String.join(&quot;,&quot;, sinkFieldNames));">  66             throw new ValidationException(((((((&quot;Field name of query result and registered TableSink &quot; + 🔵</abbr>
+  67         }
+  68         Table newTable = null;
+  69         try {
+  70             newTable = queryResult.select(String.join(&quot;,&quot;, sinkFieldNames));
+  71         } catch (java.lang.Exception e) {
+<abbr title="  72             throw new ValidationException(((((((&quot;Field name of query result and registered TableSink &quot; + targetTableName) + &quot; do not match.\n&quot;) + &quot;Query result schema: &quot;) + String.join(&quot;,&quot;, queryFieldNames)) + &quot;\n&quot;) + &quot;TableSink schema: &quot;) + String.join(&quot;,&quot;, sinkFieldNames));">  72             throw new ValidationException(((((((&quot;Field name of query result and registered TableSink &quot; + 🔵</abbr>
+  73         }
+  74         try {
+  75             tableEnv.insertInto(targetTableName, newTable);
+  76         } catch (java.lang.Exception e) {
+  77             LOG.warn(&quot;Field name case of query result and registered TableSink do not match. &quot;, e);
+  78             newTable = queryResult.select(String.join(&quot;,&quot;, ignoreCase(queryFieldNames, sinkFieldNames)));
+  79             tableEnv.insertInto(targetTableName, newTable);
+  80         }
+  81     }
+  82 
+<abbr title="  83     private static TableSink getTableSinkByPlanner(StreamPlanner streamPlanner, String targetTableName) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {">  83     private static TableSink getTableSinkByPlanner(StreamPlanner streamPlanner, String targetTableName) t🔵</abbr>
+<abbr title="  84         Method getTableSink = PlannerBase.class.getDeclaredMethod(&quot;getTableSink&quot;, ObjectIdentifier.class);">  84         Method getTableSink = PlannerBase.class.getDeclaredMethod(&quot;getTableSink&quot;, ObjectIdentifier.class)🔵</abbr>
+  85         getTableSink.setAccessible(true);
+<abbr title="  86         ObjectIdentifier objectIdentifier = ObjectIdentifier.of(streamPlanner.catalogManager().getCurrentCatalog(), streamPlanner.catalogManager().getCurrentDatabase(), targetTableName);">  86         ObjectIdentifier objectIdentifier = ObjectIdentifier.of(streamPlanner.catalogManager().getCurrent🔵</abbr>
+  87         Option tableSinkOption = ((Option) (getTableSink.invoke(streamPlanner, objectIdentifier)));
+  88         return ((TableSink) (((Tuple2) (tableSinkOption.get()))._2));
+  89     }
+  90 
+<abbr title="  91     private static TableImpl extractQueryTableFromInsertCaluse(StreamTableEnvironmentImpl tableEnvImpl, FlinkPlannerImpl flinkPlanner, RichSqlInsert insert) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {">  91     private static TableImpl extractQueryTableFromInsertCaluse(StreamTableEnvironmentImpl tableEnvImpl, F🔵</abbr>
+  92         StreamPlanner streamPlanner = ((StreamPlanner) (tableEnvImpl.getPlanner()));
+<abbr title="  93         Operation queryOperation = SqlToOperationConverter.convert(flinkPlanner, streamPlanner.catalogManager(), insert.getSource()).get();">  93         Operation queryOperation = SqlToOperationConverter.convert(flinkPlanner, streamPlanner.catalogMan🔵</abbr>
+<abbr title="  94         Method createTableMethod = TableEnvironmentImpl.class.getDeclaredMethod(&quot;createTable&quot;, QueryOperation.class);">  94         Method createTableMethod = TableEnvironmentImpl.class.getDeclaredMethod(&quot;createTable&quot;, QueryOpera🔵</abbr>
+  95         createTableMethod.setAccessible(true);
+  96         return ((TableImpl) (createTableMethod.invoke(tableEnvImpl, queryOperation)));
+  97     }
+  98 
+  99     private static String[] ignoreCase(String[] queryFieldNames, String[] sinkFieldNames) {
+ 100         String[] newFieldNames = sinkFieldNames;
+ 101         for (int i = 0; i &lt; newFieldNames.length; i++) {
+ 102             for (String queryFieldName : queryFieldNames) {
+ 103                 if (newFieldNames[i].equalsIgnoreCase(queryFieldName)) {
+ 104                     newFieldNames[i] = queryFieldName;
+ 105                     break;
+ 106                 }
+ 107             }
+ 108         }
+ 109         return newFieldNames;
+ 110     }
+ 111 }
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ </pre></td>
+                        </tr>
+                    </table>
+                </div>
+                <div id="bottom">
+                    <table style="margin:auto">
+                        <tr>
+                            <th>ours vs. base</th>
+                            <th>theirs vs. base</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1  /*
+   2   * Licensed to the Apache Software Foundation (ASF) under one
+   3   * or more contributor license agreements.  See the NOTICE file
+   4   * distributed with this work for additional information
+   5   * regarding copyright ownership.  The ASF licenses this file
+   6   * to you under the Apache License, Version 2.0 (the
+   7   * &quot;License&quot;); you may not use this file except in compliance
+   8   * with the License.  You may obtain a copy of the License at
+   9   *
+  10   * http://www.apache.org/licenses/LICENSE-2.0
+  11   *
+  12   * Unless required by applicable law or agreed to in writing, software
+  13   * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15   * See the License for the specific language governing permissions and
+  16   * limitations under the License.
+  17   */
+  18  
+  19  package com.dtstack.flink.sql.exec;
+  20  
+  21  import org.apache.calcite.sql.SqlIdentifier;
+  22  import org.apache.calcite.sql.SqlInsert;
+  23  import org.apache.flink.sql.parser.dml.RichSqlInsert;
+  24  import org.apache.flink.table.api.Table;
+  25  import org.apache.flink.table.api.ValidationException;
+  26  import org.apache.flink.table.api.internal.TableEnvironmentImpl;
+  27  import org.apache.flink.table.api.internal.TableImpl;
+  28  import org.apache.flink.table.api.java.StreamTableEnvironment;
+  29  import org.apache.flink.table.api.java.internal.StreamTableEnvironmentImpl;
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  30 +import org.apache.flink.table.catalog.CatalogManager;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  31 +import org.apache.flink.table.catalog.ObjectIdentifier;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  32 +import org.apache.flink.table.operations.Operation;</span>
+  33  import org.apache.flink.table.operations.QueryOperation;
+  34  import org.apache.flink.table.planner.calcite.FlinkPlannerImpl;
+  35  import org.apache.flink.table.planner.delegation.PlannerBase;
+  36  import org.apache.flink.table.planner.delegation.StreamPlanner;
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  37 -import org.apache.flink.table.planner.operations.PlannerQueryOperation;</span>
+  38  import org.apache.flink.table.planner.operations.SqlToOperationConverter;
+  39  import org.apache.flink.table.sinks.TableSink;
+  40  import org.slf4j.Logger;
+  41  import org.slf4j.LoggerFactory;
+  42  import scala.Option;
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  43 +import scala.Tuple2;</span>
+  44  
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  45 +import java.lang.reflect.Constructor;</span>
+  46  import java.lang.reflect.InvocationTargetException;
+  47  import java.lang.reflect.Method;
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  48 -import java.util.Arrays;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  49 -import java.util.List;</span>
+  50  
+  51  
+  52  /**
+  53   * @description:  mapping by name when insert into sink table
+
+  54   * @author: maqi
+  55   * @create: 2019/08/15 11:09
+  56   */
+  57  public class FlinkSQLExec {
+  58      private static final Logger LOG = LoggerFactory.getLogger(FlinkSQLExec.class);
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  59 +</span>
+  60      public static void sqlUpdate(StreamTableEnvironment tableEnv, String stmt) throws Exception {
+  61          StreamTableEnvironmentImpl tableEnvImpl = ((StreamTableEnvironmentImpl) tableEnv);
+  62          StreamPlanner streamPlanner = (StreamPlanner)tableEnvImpl.getPlanner();
+
+  63          FlinkPlannerImpl flinkPlanner = streamPlanner.createFlinkPlanner();
+  64  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  65 -        RichSqlInsert insert = (RichSqlInsert)flinkPlanner.parse(stmt);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  66 +        RichSqlInsert insert = (RichSqlInsert) flinkPlanner.validate(flinkPlanner.parser().parse(stmt));</span>
+  67          TableImpl queryResult = extractQueryTableFromInsertCaluse(tableEnvImpl, flinkPlanner, insert);
+  68  
+  69          String targetTableName = ((SqlIdentifier) ((SqlInsert) insert).getTargetTable()).names.get(0);
+  70          TableSink tableSink = getTableSinkByPlanner(streamPlanner, targetTableName);
+  71  
+  72          String[] sinkFieldNames = tableSink.getTableSchema().getFieldNames();
+  73          String[] queryFieldNames = queryResult.getSchema().getFieldNames();
+  74  
+  75          if (sinkFieldNames.length != queryFieldNames.length) {
+  76              throw new ValidationException(
+<abbr title="  77                      &quot;Field name of query result and registered TableSink &quot; + targetTableName + &quot; do not match.\n&quot; +">  77                      &quot;Field name of query result and registered TableSink &quot; + targetTableName + &quot; do not match.\n&quot; 🔵</abbr>
+  78                              &quot;Query result schema: &quot; + String.join(&quot;,&quot;, queryFieldNames) + &quot;\n&quot; +
+  79                              &quot;TableSink schema: &quot; + String.join(&quot;,&quot;, sinkFieldNames));
+  80          }
+  81  
+  82  
+  83          Table newTable = null;
+  84          try {
+  85              newTable = queryResult.select(String.join(&quot;,&quot;, sinkFieldNames));
+  86          } catch (Exception e) {
+  87              throw new ValidationException(
+  88                      &quot;Field name of query result and registered TableSink &quot;+targetTableName +&quot; do not match.\n&quot; +
+  89                      &quot;Query result schema: &quot; + String.join(&quot;,&quot;, queryFieldNames) + &quot;\n&quot; +
+  90                      &quot;TableSink schema: &quot; + String.join(&quot;,&quot;, sinkFieldNames));
+
+
+
+  91          }
+  92  
+  93          try {
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  94 -            tableEnv.insertInto(newTable, targetTableName);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  95 +            tableEnv.insertInto(targetTableName, newTable);</span>
+  96          } catch (Exception e) {
+  97              LOG.warn(&quot;Field name case of query result and registered TableSink do not match. &quot;, e);
+  98              newTable = queryResult.select(String.join(&quot;,&quot;, ignoreCase(queryFieldNames, sinkFieldNames)));
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  99 -            tableEnv.insertInto(newTable, targetTableName);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 100 +            tableEnv.insertInto(targetTableName, newTable);</span>
+ 101          }
+ 102  
+ 103      }
+ 104  
+ 105      private static TableSink getTableSinkByPlanner(StreamPlanner streamPlanner, String targetTableName)
+ 106              throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 107 -        Method getTableSink = PlannerBase.class.getDeclaredMethod(&quot;getTableSink&quot;, List.class);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 108 +        Method getTableSink = PlannerBase.class.getDeclaredMethod(&quot;getTableSink&quot;, ObjectIdentifier.class);</span>
+ 109          getTableSink.setAccessible(true);
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 110 -        Option tableSinkOption = (Option) getTableSink.invoke(streamPlanner, Arrays.asList(targetTableName));</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 111 -        return (TableSink) tableSinkOption.get();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"><abbr title=" 112 +        ObjectIdentifier objectIdentifier = ObjectIdentifier.of(streamPlanner.catalogManager().getCurrentCatalog(), streamPlanner.catalogManager().getCurrentDatabase(), targetTableName);"> 112 +        ObjectIdentifier objectIdentifier = ObjectIdentifier.of(streamPlanner.catalogManager().getCurrentCatalog()🔵</abbr></span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 113 +        Option tableSinkOption = (Option) getTableSink.invoke(streamPlanner, objectIdentifier);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 114 +        return (TableSink) ((Tuple2) tableSinkOption.get())._2;</span>
+ 115      }
+ 116  
+<abbr title=" 117      private static TableImpl extractQueryTableFromInsertCaluse(StreamTableEnvironmentImpl tableEnvImpl, FlinkPlannerImpl flinkPlanner, RichSqlInsert insert)"> 117      private static TableImpl extractQueryTableFromInsertCaluse(StreamTableEnvironmentImpl tableEnvImpl, FlinkPlann🔵</abbr>
+ 118              throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 119 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"><abbr title=" 120 -        PlannerQueryOperation queryOperation = (PlannerQueryOperation) SqlToOperationConverter.convert(flinkPlanner,"> 120 -        PlannerQueryOperation queryOperation = (PlannerQueryOperation) SqlToOperationConverter.convert(flinkPlanne🔵</abbr></span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 121 -                insert.getSource());</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 122 +        StreamPlanner streamPlanner = (StreamPlanner) tableEnvImpl.getPlanner();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"><abbr title=" 123 +        Operation queryOperation = SqlToOperationConverter.convert(flinkPlanner, streamPlanner.catalogManager(), insert.getSource()).get();"> 123 +        Operation queryOperation = SqlToOperationConverter.convert(flinkPlanner, streamPlanner.catalogManager(), i🔵</abbr></span>
+<abbr title=" 124          Method createTableMethod = TableEnvironmentImpl.class.getDeclaredMethod(&quot;createTable&quot;, QueryOperation.class);"> 124          Method createTableMethod = TableEnvironmentImpl.class.getDeclaredMethod(&quot;createTable&quot;, QueryOperation.clas🔵</abbr>
+ 125          createTableMethod.setAccessible(true);
+ 126          return (TableImpl) createTableMethod.invoke(tableEnvImpl, queryOperation);
+ 127      }
+ 128  
+ 129      private static String[] ignoreCase(String[] queryFieldNames, String[] sinkFieldNames) {
+ 130          String[] newFieldNames = sinkFieldNames;
+ 131          for (int i = 0; i &lt; newFieldNames.length; i++) {
+ 132              for (String queryFieldName : queryFieldNames) {
+ 133                  if (newFieldNames[i].equalsIgnoreCase(queryFieldName)) {
+ 134                      newFieldNames[i] = queryFieldName;
+ 135                      break;
+ 136                  }
+ 137              }
+ 138          }
+ 139          return newFieldNames;
+ 140      }
+ 141  }</pre></td>
+                            <td><pre>   1  /*
+   2   * Licensed to the Apache Software Foundation (ASF) under one
+   3   * or more contributor license agreements.  See the NOTICE file
+   4   * distributed with this work for additional information
+   5   * regarding copyright ownership.  The ASF licenses this file
+   6   * to you under the Apache License, Version 2.0 (the
+   7   * &quot;License&quot;); you may not use this file except in compliance
+   8   * with the License.  You may obtain a copy of the License at
+   9   *
+  10   * http://www.apache.org/licenses/LICENSE-2.0
+  11   *
+  12   * Unless required by applicable law or agreed to in writing, software
+  13   * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15   * See the License for the specific language governing permissions and
+  16   * limitations under the License.
+  17   */
+  18  
+  19  package com.dtstack.flink.sql.exec;
+  20  
+  21  import org.apache.calcite.sql.SqlIdentifier;
+  22  import org.apache.calcite.sql.SqlInsert;
+  23  import org.apache.flink.sql.parser.dml.RichSqlInsert;
+  24  import org.apache.flink.table.api.Table;
+  25  import org.apache.flink.table.api.ValidationException;
+  26  import org.apache.flink.table.api.internal.TableEnvironmentImpl;
+  27  import org.apache.flink.table.api.internal.TableImpl;
+  28  import org.apache.flink.table.api.java.StreamTableEnvironment;
+  29  import org.apache.flink.table.api.java.internal.StreamTableEnvironmentImpl;
+
+
+
+  30  import org.apache.flink.table.operations.QueryOperation;
+  31  import org.apache.flink.table.planner.calcite.FlinkPlannerImpl;
+  32  import org.apache.flink.table.planner.delegation.PlannerBase;
+  33  import org.apache.flink.table.planner.delegation.StreamPlanner;
+  34  import org.apache.flink.table.planner.operations.PlannerQueryOperation;
+  35  import org.apache.flink.table.planner.operations.SqlToOperationConverter;
+  36  import org.apache.flink.table.sinks.TableSink;
+  37  import org.slf4j.Logger;
+  38  import org.slf4j.LoggerFactory;
+  39  import scala.Option;
+
+  40  
+
+  41  import java.lang.reflect.InvocationTargetException;
+  42  import java.lang.reflect.Method;
+  43  import java.util.Arrays;
+  44  import java.util.List;
+  45  
+  46  
+  47  /**
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  48 - * @description:  mapping by name when insert into sink table</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  49 + * @description: mapping by name when insert into sink table</span>
+  50   * @author: maqi
+  51   * @create: 2019/08/15 11:09
+  52   */
+  53  public class FlinkSQLExec {
+  54      private static final Logger LOG = LoggerFactory.getLogger(FlinkSQLExec.class);
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  55 +</span>
+  56      public static void sqlUpdate(StreamTableEnvironment tableEnv, String stmt) throws Exception {
+  57          StreamTableEnvironmentImpl tableEnvImpl = ((StreamTableEnvironmentImpl) tableEnv);
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  58 -        StreamPlanner streamPlanner = (StreamPlanner)tableEnvImpl.getPlanner();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  59 +        StreamPlanner streamPlanner = (StreamPlanner) tableEnvImpl.getPlanner();</span>
+  60          FlinkPlannerImpl flinkPlanner = streamPlanner.createFlinkPlanner();
+  61  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  62 -        RichSqlInsert insert = (RichSqlInsert)flinkPlanner.parse(stmt);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  63 +        RichSqlInsert insert = (RichSqlInsert) flinkPlanner.parse(stmt);</span>
+  64          TableImpl queryResult = extractQueryTableFromInsertCaluse(tableEnvImpl, flinkPlanner, insert);
+  65  
+  66          String targetTableName = ((SqlIdentifier) ((SqlInsert) insert).getTargetTable()).names.get(0);
+  67          TableSink tableSink = getTableSinkByPlanner(streamPlanner, targetTableName);
+  68  
+  69          String[] sinkFieldNames = tableSink.getTableSchema().getFieldNames();
+  70          String[] queryFieldNames = queryResult.getSchema().getFieldNames();
+  71  
+  72          if (sinkFieldNames.length != queryFieldNames.length) {
+  73              throw new ValidationException(
+<abbr title="  74                      &quot;Field name of query result and registered TableSink &quot; + targetTableName + &quot; do not match.\n&quot; +">  74                      &quot;Field name of query result and registered TableSink &quot; + targetTableName + &quot; do not match.\n&quot; 🔵</abbr>
+  75                              &quot;Query result schema: &quot; + String.join(&quot;,&quot;, queryFieldNames) + &quot;\n&quot; +
+  76                              &quot;TableSink schema: &quot; + String.join(&quot;,&quot;, sinkFieldNames));
+  77          }
+  78  
+  79  
+  80          Table newTable = null;
+  81          try {
+  82              newTable = queryResult.select(String.join(&quot;,&quot;, sinkFieldNames));
+  83          } catch (Exception e) {
+  84              throw new ValidationException(
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  85 -                    &quot;Field name of query result and registered TableSink &quot;+targetTableName +&quot; do not match.\n&quot; +</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  86 -                    &quot;Query result schema: &quot; + String.join(&quot;,&quot;, queryFieldNames) + &quot;\n&quot; +</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  87 -                    &quot;TableSink schema: &quot; + String.join(&quot;,&quot;, sinkFieldNames));</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"><abbr title="  88 +                    &quot;Field name of query result and registered TableSink &quot; + targetTableName + &quot; do not match.\n&quot; +">  88 +                    &quot;Field name of query result and registered TableSink &quot; + targetTableName + &quot; do not match.\n&quot; 🔵</abbr></span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  89 +                            &quot;Query result schema: &quot; + String.join(&quot;,&quot;, queryFieldNames) + &quot;\n&quot; +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  90 +                            &quot;TableSink schema: &quot; + String.join(&quot;,&quot;, sinkFieldNames));</span>
+  91          }
+  92  
+  93          try {
+  94              tableEnv.insertInto(newTable, targetTableName);
+
+  95          } catch (Exception e) {
+  96              LOG.warn(&quot;Field name case of query result and registered TableSink do not match. &quot;, e);
+  97              newTable = queryResult.select(String.join(&quot;,&quot;, ignoreCase(queryFieldNames, sinkFieldNames)));
+  98              tableEnv.insertInto(newTable, targetTableName);
+
+  99          }
+ 100  
+ 101      }
+ 102  
+ 103      private static TableSink getTableSinkByPlanner(StreamPlanner streamPlanner, String targetTableName)
+ 104              throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+ 105          Method getTableSink = PlannerBase.class.getDeclaredMethod(&quot;getTableSink&quot;, List.class);
+
+ 106          getTableSink.setAccessible(true);
+ 107          Option tableSinkOption = (Option) getTableSink.invoke(streamPlanner, Arrays.asList(targetTableName));
+ 108          return (TableSink) tableSinkOption.get();
+
+
+
+ 109      }
+ 110  
+<abbr title=" 111      private static TableImpl extractQueryTableFromInsertCaluse(StreamTableEnvironmentImpl tableEnvImpl, FlinkPlannerImpl flinkPlanner, RichSqlInsert insert)"> 111      private static TableImpl extractQueryTableFromInsertCaluse(StreamTableEnvironmentImpl tableEnvImpl, FlinkPlann🔵</abbr>
+ 112              throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+ 113  
+<abbr title=" 114          PlannerQueryOperation queryOperation = (PlannerQueryOperation) SqlToOperationConverter.convert(flinkPlanner,"> 114          PlannerQueryOperation queryOperation = (PlannerQueryOperation) SqlToOperationConverter.convert(flinkPlanne🔵</abbr>
+ 115                  insert.getSource());
+
+
+<abbr title=" 116          Method createTableMethod = TableEnvironmentImpl.class.getDeclaredMethod(&quot;createTable&quot;, QueryOperation.class);"> 116          Method createTableMethod = TableEnvironmentImpl.class.getDeclaredMethod(&quot;createTable&quot;, QueryOperation.clas🔵</abbr>
+ 117          createTableMethod.setAccessible(true);
+ 118          return (TableImpl) createTableMethod.invoke(tableEnvImpl, queryOperation);
+ 119      }
+ 120  
+ 121      private static String[] ignoreCase(String[] queryFieldNames, String[] sinkFieldNames) {
+ 122          String[] newFieldNames = sinkFieldNames;
+ 123          for (int i = 0; i &lt; newFieldNames.length; i++) {
+ 124              for (String queryFieldName : queryFieldNames) {
+ 125                  if (newFieldNames[i].equalsIgnoreCase(queryFieldName)) {
+ 126                      newFieldNames[i] = queryFieldName;
+ 127                      break;
+ 128                  }
+ 129              }
+ 130          }
+ 131          return newFieldNames;
+ 132      }
+ 133  }</pre></td>
+                        </tr>
+                    </table>
+                </div>
+              </body>
+            </html>
+            

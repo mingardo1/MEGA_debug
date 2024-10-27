@@ -1,0 +1,1537 @@
+<!DOCTYPE html>
+    <html lang="en">
+              <head>
+                <meta charset="utf-8">
+                <title>344</title>
+                    <style>
+                        #top {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        #bottom {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        abbr {
+                          /* Here is the delay */
+                          transition-delay:0s;
+                        }
+                    </style>
+              </head>
+              <body>
+                <span style="height: 4vh">
+                    344
+                    <a href="343.html">prev</a>
+                    <a href="345.html">next</a>
+                    <a href="344_chunks.html">chunks</a>
+                    <a href="index.html">index</a>
+                    DTStack/flinkStreamSQL_cbc70fa886c8cb9647e92d5fa9f8a4c032c94031_impala/impala-sink/src/main/java/com/dtstack/flink/sql/sink/impala/table/ImpalaSinkParser.java
+                    <textarea rows=1 onclick='navigator.clipboard.writeText(this.value)'>cd C:\studies\se\mega\git-analyzer-plus\notebooks\debug
+del /Q *
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;cbc70fa886c8cb9647e92d5fa9f8a4c032c94031:impala/impala-sink/src/main/java/com/dtstack/flink/sql/sink/impala/table/ImpalaSinkParser.java&quot; &gt; committed.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;cbc70fa886c8cb9647e92d5fa9f8a4c032c94031^1:impala/impala-sink/src/main/java/com/dtstack/flink/sql/sink/impala/table/ImpalaSinkParser.java&quot; &gt; ours.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;cbc70fa886c8cb9647e92d5fa9f8a4c032c94031^2:impala/impala-sink/src/main/java/com/dtstack/flink/sql/sink/impala/table/ImpalaSinkParser.java&quot; &gt; theirs.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;64c00d303220e98a602fec341743013447048eea:impala/impala-sink/src/main/java/com/dtstack/flink/sql/sink/impala/table/ImpalaSinkParser.java&quot; &gt; base.java
+copy ours.java 1ours.java
+copy ours.java 2ours.java
+copy theirs.java 1theirs.java
+copy theirs.java 2theirs.java
+copy base.java 1base.java
+copy base.java 2base.java
+&quot;C:\Program Files\Java\jdk1.8.0_241\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\jFSTMerge\build\libs\jFSTMerge-all.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\jfstmerge.java --show-base
+&quot;C:\Program Files\Eclipse Adoptium\jdk-17.0.11.9-hotspot\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\spork\target\spork-0.5.0-SNAPSHOT.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\spork.java
+del /Q 1*.java
+del /Q 2*.java
+del /Q jfstmerge.java.merge
+</textarea>
+                    {strict: [[sbj], [sbj], [sbj], [bs]], subset: [[sbj], [sbj], [sbj], [bs]]}
+                </span>
+                <div id="top">
+
+                    <table>
+                        <tr>
+                            <th>line based (standard git)</th>
+                            <th>jfstmerge</th>
+                            <th>spork</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1 /*
+   2  * Licensed to the Apache Software Foundation (ASF) under one
+   3  * or more contributor license agreements.  See the NOTICE file
+   4  * distributed with this work for additional information
+   5  * regarding copyright ownership.  The ASF licenses this file
+   6  * to you under the Apache License, Version 2.0 (the
+   7  * &quot;License&quot;); you may not use this file except in compliance
+   8  * with the License.  You may obtain a copy of the License at
+   9  *
+  10  *     http://www.apache.org/licenses/LICENSE-2.0
+  11  *
+  12  * Unless required by applicable law or agreed to in writing, software
+  13  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15  * See the License for the specific language governing permissions and
+  16  * limitations under the License.
+  17  */
+  18 
+  19 package com.dtstack.flink.sql.sink.impala.table;
+  20 
+  21 import com.dtstack.flink.sql.table.AbstractTableInfo;
+  22 import com.dtstack.flink.sql.table.AbstractTableParser;
+  23 import com.dtstack.flink.sql.util.MathUtil;
+  24 
+  25 import java.util.Arrays;
+  26 import java.util.List;
+  27 import java.util.Map;
+  28 import java.util.Objects;
+  29 
+  30 /**
+  31  * Date: 2020/10/14
+  32  * Company: www.dtstack.com
+  33  *
+  34  * @author tiezhu
+  35  */
+  36 public class ImpalaSinkParser extends AbstractTableParser {
+  37 
+  38     private static final String PARALLELISM_KEY = &quot;parallelism&quot;;
+  39 
+  40     private static final String AUTH_MECH_KEY = &quot;authMech&quot;;
+  41 
+  42     private static final String KRB5FILEPATH_KEY = &quot;krb5FilePath&quot;;
+  43 
+  44     private static final String PRINCIPAL_KEY = &quot;principal&quot;;
+  45 
+  46     private static final String KEY_TAB_FILE_PATH_KEY = &quot;keyTabFilePath&quot;;
+  47 
+  48     private static final String KRB_REALM_KEY = &quot;krbRealm&quot;;
+  49 
+  50     private static final String KRB_HOST_FQDN_KEY = &quot;krbHostFQDN&quot;;
+  51 
+  52     private static final String KRB_SERVICE_NAME_KEY = &quot;krbServiceName&quot;;
+  53 
+  54     private static final String ENABLE_PARTITION_KEY = &quot;enablePartition&quot;;
+  55 
+  56     private static final String PARTITION_FIELDS_KEY = &quot;partitionFields&quot;;
+  57 
+  58     private static final String URL_KEY = &quot;url&quot;;
+  59 
+  60     private static final String TABLE_NAME_KEY = &quot;tableName&quot;;
+  61 
+  62     private static final String USER_NAME_KEY = &quot;userName&quot;;
+  63 
+  64     private static final String PASSWORD_KEY = &quot;password&quot;;
+  65 
+  66     private static final String BATCH_SIZE_KEY = &quot;batchSize&quot;;
+  67 
+  68     private static final String BATCH_WAIT_INTERVAL_KEY = &quot;batchWaitInterval&quot;;
+  69 
+  70     private static final String BUFFER_SIZE_KEY = &quot;bufferSize&quot;;
+  71 
+  72     private static final String FLUSH_INTERVAL_MS_KEY = &quot;flushIntervalMs&quot;;
+  73 
+  74     private static final String SCHEMA_KEY = &quot;schema&quot;;
+  75 
+  76     private static final String UPDATE_KEY = &quot;updateMode&quot;;
+  77 
+  78     private static final String KUDU_TYPE = &quot;kudu&quot;;
+  79 
+  80     private static final String DEFAULT_STORE_TYPE = &quot;kudu&quot;;
+  81 
+  82     private static final String STORE_TYPE_KEY = &quot;storeType&quot;;
+  83 
+  84     private static final String KRB_DEFAULT_REALM = &quot;HADOOP.COM&quot;;
+  85 
+  86     private static final String CURRENT_TYPE = &quot;impala&quot;;
+  87 
+  88 
+  89     @Override
+<abbr title="  90     public AbstractTableInfo getTableInfo(String tableName, String fieldsInfo, Map&lt;String, Object&gt; props) throws Exception {">  90     public AbstractTableInfo getTableInfo(String tableName, String fieldsInfo, Map&lt;String, Object&gt; props)🔵</abbr>
+  91         ImpalaTableInfo impalaTableInfo = new ImpalaTableInfo();
+  92         impalaTableInfo.setName(tableName);
+  93         parseFieldsInfo(fieldsInfo, impalaTableInfo);
+  94 
+  95         impalaTableInfo.setParallelism(MathUtil.getIntegerVal(props.get(PARALLELISM_KEY.toLowerCase())));
+  96         impalaTableInfo.setUrl(MathUtil.getString(props.get(URL_KEY.toLowerCase())));
+  97         impalaTableInfo.setTableName(MathUtil.getString(props.get(TABLE_NAME_KEY.toLowerCase())));
+  98         impalaTableInfo.setBatchSize(MathUtil.getIntegerVal(props.get(BATCH_SIZE_KEY.toLowerCase())));
+<abbr title="  99         impalaTableInfo.setBatchWaitInterval(MathUtil.getLongVal(props.get(BATCH_WAIT_INTERVAL_KEY.toLowerCase())));">  99         impalaTableInfo.setBatchWaitInterval(MathUtil.getLongVal(props.get(BATCH_WAIT_INTERVAL_KEY.toLowe🔵</abbr>
+ 100         impalaTableInfo.setBufferSize(MathUtil.getString(props.get(BUFFER_SIZE_KEY.toLowerCase())));
+<abbr title=" 101         impalaTableInfo.setFlushIntervalMs(MathUtil.getString(props.get(FLUSH_INTERVAL_MS_KEY.toLowerCase())));"> 101         impalaTableInfo.setFlushIntervalMs(MathUtil.getString(props.get(FLUSH_INTERVAL_MS_KEY.toLowerCase🔵</abbr>
+ 102         impalaTableInfo.setSchema(MathUtil.getString(props.get(SCHEMA_KEY.toLowerCase())));
+ 103         impalaTableInfo.setUpdateMode(MathUtil.getString(props.get(UPDATE_KEY.toLowerCase())));
+ 104 
+ 105         Integer authMech = MathUtil.getIntegerVal(props.get(AUTH_MECH_KEY.toLowerCase()));
+ 106         authMech = authMech == null ? 0 : authMech;
+ 107         impalaTableInfo.setAuthMech(authMech);
+ 108         List&lt;Integer&gt; authMechs = Arrays.asList(0, 1, 2, 3);
+ 109 
+ 110         if (!authMechs.contains(authMech)) {
+<abbr title=" 111             throw new IllegalArgumentException(&quot;The value of authMech is illegal, Please select 0, 1, 2, 3&quot;);"> 111             throw new IllegalArgumentException(&quot;The value of authMech is illegal, Please select 0, 1, 2, 🔵</abbr>
+ 112         } else if (authMech == 1) {
+ 113             impalaTableInfo.setPrincipal(MathUtil.getString(props.get(PRINCIPAL_KEY.toLowerCase())));
+<abbr title=" 114             impalaTableInfo.setKeyTabFilePath(MathUtil.getString(props.get(KEY_TAB_FILE_PATH_KEY.toLowerCase())));"> 114             impalaTableInfo.setKeyTabFilePath(MathUtil.getString(props.get(KEY_TAB_FILE_PATH_KEY.toLowerC🔵</abbr>
+<abbr title=" 115             impalaTableInfo.setKrb5FilePath(MathUtil.getString(props.get(KRB5FILEPATH_KEY.toLowerCase())));"> 115             impalaTableInfo.setKrb5FilePath(MathUtil.getString(props.get(KRB5FILEPATH_KEY.toLowerCase()))🔵</abbr>
+ 116             String krbRealm = MathUtil.getString(props.get(KRB_REALM_KEY.toLowerCase()));
+ 117             krbRealm = krbRealm == null ? KRB_DEFAULT_REALM : krbRealm;
+ 118             impalaTableInfo.setKrbRealm(krbRealm);
+<abbr title=" 119             impalaTableInfo.setKrbHostFQDN(MathUtil.getString(props.get(KRB_HOST_FQDN_KEY.toLowerCase())));"> 119             impalaTableInfo.setKrbHostFQDN(MathUtil.getString(props.get(KRB_HOST_FQDN_KEY.toLowerCase()))🔵</abbr>
+<abbr title=" 120             impalaTableInfo.setKrbServiceName(MathUtil.getString(props.get(KRB_SERVICE_NAME_KEY.toLowerCase())));"> 120             impalaTableInfo.setKrbServiceName(MathUtil.getString(props.get(KRB_SERVICE_NAME_KEY.toLowerCa🔵</abbr>
+ 121         } else if (authMech == 2) {
+ 122             impalaTableInfo.setUserName(MathUtil.getString(props.get(USER_NAME_KEY.toLowerCase())));
+ 123         } else if (authMech == 3) {
+ 124             impalaTableInfo.setUserName(MathUtil.getString(props.get(USER_NAME_KEY.toLowerCase())));
+ 125             impalaTableInfo.setPassword(MathUtil.getString(props.get(PASSWORD_KEY.toLowerCase())));
+ 126         }
+ 127 
+ 128 &lt;&lt;&lt;&lt;&lt;&lt;&lt; GitAnalyzerPlus_ours
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 129         String storeType = MathUtil.getString(props.get(ImpalaTableInfo.STORE_TYPE_KEY.toLowerCase()));</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 130         impalaTableInfo.setStoreType(storeType);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 131 </span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 132         String enablePartitionStr = (String) props.get(ImpalaTableInfo.ENABLEPARITION_KEY.toLowerCase());</span>
+ 133 ||||||| GitAnalyzerPlus_base
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 134         String enablePartitionStr = (String) props.get(ImpalaTableInfo.ENABLEPARITION_KEY.toLowerCase());</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"><abbr title=" 135         boolean enablePartition = MathUtil.getBoolean(enablePartitionStr == null ? &quot;false&quot; : enablePartitionStr);"> 135         boolean enablePartition = MathUtil.getBoolean(enablePartitionStr == null ? &quot;false&quot; : enablePartit🔵</abbr></span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 136         impalaTableInfo.setEnablePartition(enablePartition);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 137         if (enablePartition) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"><abbr title=" 138             String partitionFields = MathUtil.getString(props.get(ImpalaTableInfo.PARTITIONFIELDS_KEY.toLowerCase()));"> 138             String partitionFields = MathUtil.getString(props.get(ImpalaTableInfo.PARTITIONFIELDS_KEY.toL🔵</abbr></span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 139             impalaTableInfo.setPartitionFields(partitionFields);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 140         }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 141 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 142         impalaTableInfo.check();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 143         return impalaTableInfo;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 144     }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 145 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 146     @Override</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 147     public  Class dbTypeConvertToJavaType(String fieldType) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 148         switch (fieldType.toLowerCase()) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 149             case &quot;boolean&quot;:</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 150                 return Boolean.class;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 151             case &quot;char&quot;:</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 152                 return Character.class;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 153             case &quot;double&quot;:</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 154                 return Double.class;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 155             case &quot;float&quot;:</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 156                 return Float.class;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 157             case &quot;tinyint&quot;:</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 158                 return Byte.class;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 159             case &quot;smallint&quot;:</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 160                 return Short.class;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 161             case &quot;int&quot;:</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 162                 return Integer.class;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 163             case &quot;bigint&quot;:</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 164                 return Long.class;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 165             case &quot;decimal&quot;:</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 166                 return BigDecimal.class;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 167             case &quot;string&quot;:</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 168             case &quot;varchar&quot;:</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 169                 return String.class;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 170             case &quot;timestamp&quot;:</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 171                 return Timestamp.class;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 172             default:</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 173                 break;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 174         }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 175 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 176         throw new RuntimeException(&quot;不支持 &quot; + fieldType + &quot; 类型&quot;);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 177     }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 178 }</span>
+ 179 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 180         String storeType = MathUtil.getString(props.get(STORE_TYPE_KEY.toLowerCase()));</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 181         impalaTableInfo.setStoreType(Objects.isNull(storeType) ? DEFAULT_STORE_TYPE : storeType);</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 182 </span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 183         String enablePartitionStr = (String) props.get(ENABLE_PARTITION_KEY.toLowerCase());</span>
+ 184 &gt;&gt;&gt;&gt;&gt;&gt;&gt; GitAnalyzerPlus_theirs
+<abbr title=" 185         boolean enablePartition = MathUtil.getBoolean(enablePartitionStr == null ? &quot;false&quot; : enablePartitionStr);"> 185         boolean enablePartition = MathUtil.getBoolean(enablePartitionStr == null ? &quot;false&quot; : enablePartit🔵</abbr>
+ 186         impalaTableInfo.setEnablePartition(enablePartition);
+ 187 
+ 188 &lt;&lt;&lt;&lt;&lt;&lt;&lt; GitAnalyzerPlus_ours
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 189         if (!storeType.equalsIgnoreCase(ImpalaTableInfo.KUDU_TYPE) &amp;&amp; enablePartition) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"><abbr title=" 190             String partitionFields = MathUtil.getString(props.get(ImpalaTableInfo.PARTITIONFIELDS_KEY.toLowerCase()));"> 190             String partitionFields = MathUtil.getString(props.get(ImpalaTableInfo.PARTITIONFIELDS_KEY.toL🔵</abbr></span>
+ 191 ||||||| GitAnalyzerPlus_base
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 192 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 193         impalaTableInfo.check();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 194         return impalaTableInfo;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 195     }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 196 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 197     @Override</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 198     public  Class dbTypeConvertToJavaType(String fieldType) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 199         switch (fieldType.toLowerCase()) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 200             case &quot;boolean&quot;:</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 201                 return Boolean.class;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 202             case &quot;char&quot;:</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 203                 return Character.class;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 204             case &quot;double&quot;:</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 205                 return Double.class;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 206             case &quot;float&quot;:</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 207                 return Float.class;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 208             case &quot;tinyint&quot;:</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 209                 return Byte.class;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 210             case &quot;smallint&quot;:</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 211                 return Short.class;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 212             case &quot;int&quot;:</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 213                 return Integer.class;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 214             case &quot;bigint&quot;:</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 215                 return Long.class;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 216             case &quot;decimal&quot;:</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 217                 return BigDecimal.class;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 218             case &quot;string&quot;:</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 219             case &quot;varchar&quot;:</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 220                 return String.class;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 221             case &quot;timestamp&quot;:</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 222                 return Timestamp.class;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 223             default:</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 224                 break;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 225         }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 226 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 227         throw new RuntimeException(&quot;不支持 &quot; + fieldType + &quot; 类型&quot;);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 228     }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 229 }</span>
+ 230 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 231         if (!impalaTableInfo.getStoreType().equalsIgnoreCase(KUDU_TYPE) &amp;&amp; enablePartition) {</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 232             String partitionFields = MathUtil.getString(props.get(PARTITION_FIELDS_KEY.toLowerCase()));</span>
+ 233 &gt;&gt;&gt;&gt;&gt;&gt;&gt; GitAnalyzerPlus_theirs
+ 234             impalaTableInfo.setPartitionFields(partitionFields);
+ 235         }
+ 236 
+ 237 &lt;&lt;&lt;&lt;&lt;&lt;&lt; GitAnalyzerPlus_ours
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 238         impalaTableInfo.setType(CURR_TYPE);</span>
+ 239 ||||||| GitAnalyzerPlus_base
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 240     @Override</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 241     public  Class dbTypeConvertToJavaType(String fieldType) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 242         switch (fieldType.toLowerCase()) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 243             case &quot;boolean&quot;:</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 244                 return Boolean.class;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 245             case &quot;char&quot;:</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 246                 return Character.class;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 247             case &quot;double&quot;:</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 248                 return Double.class;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 249             case &quot;float&quot;:</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 250                 return Float.class;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 251             case &quot;tinyint&quot;:</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 252                 return Byte.class;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 253             case &quot;smallint&quot;:</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 254                 return Short.class;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 255             case &quot;int&quot;:</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 256                 return Integer.class;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 257             case &quot;bigint&quot;:</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 258                 return Long.class;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 259             case &quot;decimal&quot;:</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 260                 return BigDecimal.class;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 261             case &quot;string&quot;:</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 262             case &quot;varchar&quot;:</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 263                 return String.class;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 264             case &quot;timestamp&quot;:</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 265                 return Timestamp.class;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 266             default:</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 267                 break;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 268         }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 269 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 270         throw new RuntimeException(&quot;不支持 &quot; + fieldType + &quot; 类型&quot;);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 271     }</span>
+ 272 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 273         impalaTableInfo.setType(CURRENT_TYPE);</span>
+ 274 &gt;&gt;&gt;&gt;&gt;&gt;&gt; GitAnalyzerPlus_theirs
+ 275 
+ 276         impalaTableInfo.check();
+ 277         return impalaTableInfo;
+ 278     }
+ 279 &lt;&lt;&lt;&lt;&lt;&lt;&lt; GitAnalyzerPlus_ours
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 280 </span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 281     @Override</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 282     public Class dbTypeConvertToJavaType(String fieldType) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 283         switch (fieldType.toLowerCase()) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 284             case &quot;boolean&quot;:</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 285                 return Boolean.class;</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 286             case &quot;char&quot;:</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 287                 return Character.class;</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 288             case &quot;double&quot;:</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 289                 return Double.class;</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 290             case &quot;float&quot;:</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 291                 return Float.class;</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 292             case &quot;tinyint&quot;:</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 293                 return Byte.class;</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 294             case &quot;smallint&quot;:</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 295                 return Short.class;</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 296             case &quot;int&quot;:</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 297                 return Integer.class;</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 298             case &quot;bigint&quot;:</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 299                 return Long.class;</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 300             case &quot;decimal&quot;:</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 301                 return BigDecimal.class;</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 302             case &quot;string&quot;:</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 303             case &quot;varchar&quot;:</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 304                 return String.class;</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 305             case &quot;timestamp&quot;:</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 306                 return Timestamp.class;</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 307             default:</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 308                 break;</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 309         }</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 310 </span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 311         throw new RuntimeException(&quot;不支持 &quot; + fieldType + &quot; 类型&quot;);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 312     }</span>
+ 313 ||||||| GitAnalyzerPlus_base
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 314             case &quot;char&quot;:</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 315                 return Character.class;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 316             case &quot;double&quot;:</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 317                 return Double.class;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 318             case &quot;float&quot;:</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 319                 return Float.class;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 320             case &quot;tinyint&quot;:</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 321                 return Byte.class;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 322             case &quot;smallint&quot;:</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 323                 return Short.class;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 324             case &quot;int&quot;:</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 325                 return Integer.class;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 326             case &quot;bigint&quot;:</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 327                 return Long.class;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 328             case &quot;decimal&quot;:</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 329                 return BigDecimal.class;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 330             case &quot;string&quot;:</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 331             case &quot;varchar&quot;:</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 332                 return String.class;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 333             case &quot;timestamp&quot;:</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 334                 return Timestamp.class;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 335             default:</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 336                 break;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 337         }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 338 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 339         throw new RuntimeException(&quot;不支持 &quot; + fieldType + &quot; 类型&quot;);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 340     }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 341 }</span>
+ 342 =======
+ 343 &gt;&gt;&gt;&gt;&gt;&gt;&gt; GitAnalyzerPlus_theirs
+ 344 }</pre></td>
+                            <td><pre>   1 /*
+   2  * Licensed to the Apache Software Foundation (ASF) under one
+   3  * or more contributor license agreements.  See the NOTICE file
+   4  * distributed with this work for additional information
+   5  * regarding copyright ownership.  The ASF licenses this file
+   6  * to you under the Apache License, Version 2.0 (the
+   7  * &quot;License&quot;); you may not use this file except in compliance
+   8  * with the License.  You may obtain a copy of the License at
+   9  *
+  10  *     http://www.apache.org/licenses/LICENSE-2.0
+  11  *
+  12  * Unless required by applicable law or agreed to in writing, software
+  13  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15  * See the License for the specific language governing permissions and
+  16  * limitations under the License.
+  17  */
+  18 
+  19 package com.dtstack.flink.sql.sink.impala.table;
+  20 
+  21 import com.dtstack.flink.sql.table.AbstractTableInfo;
+  22 import com.dtstack.flink.sql.table.AbstractTableParser;
+  23 import com.dtstack.flink.sql.util.MathUtil;
+  24 
+  25 import java.util.Arrays;
+  26 import java.util.List;
+  27 import java.util.Map;
+  28 import java.util.Objects;
+  29 
+  30 /**
+  31  * Date: 2020/10/14
+  32  * Company: www.dtstack.com
+  33  *
+  34  * @author tiezhu
+  35  */
+  36 public class ImpalaSinkParser extends AbstractTableParser {
+  37 
+  38     private static final String PARALLELISM_KEY = &quot;parallelism&quot;;
+  39 
+  40     private static final String AUTH_MECH_KEY = &quot;authMech&quot;;
+  41 
+  42     private static final String KRB5FILEPATH_KEY = &quot;krb5FilePath&quot;;
+  43 
+  44     private static final String PRINCIPAL_KEY = &quot;principal&quot;;
+  45 
+  46     private static final String KEY_TAB_FILE_PATH_KEY = &quot;keyTabFilePath&quot;;
+  47 
+  48     private static final String KRB_REALM_KEY = &quot;krbRealm&quot;;
+  49 
+  50     private static final String KRB_HOST_FQDN_KEY = &quot;krbHostFQDN&quot;;
+  51 
+  52     private static final String KRB_SERVICE_NAME_KEY = &quot;krbServiceName&quot;;
+  53 
+  54     private static final String ENABLE_PARTITION_KEY = &quot;enablePartition&quot;;
+  55 
+  56     private static final String PARTITION_FIELDS_KEY = &quot;partitionFields&quot;;
+  57 
+  58     private static final String URL_KEY = &quot;url&quot;;
+  59 
+  60     private static final String TABLE_NAME_KEY = &quot;tableName&quot;;
+  61 
+  62     private static final String USER_NAME_KEY = &quot;userName&quot;;
+  63 
+  64     private static final String PASSWORD_KEY = &quot;password&quot;;
+  65 
+  66     private static final String BATCH_SIZE_KEY = &quot;batchSize&quot;;
+  67 
+  68     private static final String BATCH_WAIT_INTERVAL_KEY = &quot;batchWaitInterval&quot;;
+  69 
+  70     private static final String BUFFER_SIZE_KEY = &quot;bufferSize&quot;;
+  71 
+  72     private static final String FLUSH_INTERVAL_MS_KEY = &quot;flushIntervalMs&quot;;
+  73 
+  74     private static final String SCHEMA_KEY = &quot;schema&quot;;
+  75 
+  76     private static final String UPDATE_KEY = &quot;updateMode&quot;;
+  77 
+  78     private static final String KUDU_TYPE = &quot;kudu&quot;;
+  79 
+  80     private static final String DEFAULT_STORE_TYPE = &quot;kudu&quot;;
+  81 
+  82     private static final String STORE_TYPE_KEY = &quot;storeType&quot;;
+  83 
+  84     private static final String KRB_DEFAULT_REALM = &quot;HADOOP.COM&quot;;
+  85 
+  86     private static final String CURRENT_TYPE = &quot;impala&quot;;
+  87 
+  88 
+  89     @Override
+<abbr title="  90     public AbstractTableInfo getTableInfo(String tableName, String fieldsInfo, Map&lt;String, Object&gt; props) throws Exception {">  90     public AbstractTableInfo getTableInfo(String tableName, String fieldsInfo, Map&lt;String, Object&gt; props)🔵</abbr>
+  91         ImpalaTableInfo impalaTableInfo = new ImpalaTableInfo();
+  92         impalaTableInfo.setName(tableName);
+  93         parseFieldsInfo(fieldsInfo, impalaTableInfo);
+  94 
+  95         impalaTableInfo.setParallelism(MathUtil.getIntegerVal(props.get(PARALLELISM_KEY.toLowerCase())));
+  96         impalaTableInfo.setUrl(MathUtil.getString(props.get(URL_KEY.toLowerCase())));
+  97         impalaTableInfo.setTableName(MathUtil.getString(props.get(TABLE_NAME_KEY.toLowerCase())));
+  98         impalaTableInfo.setBatchSize(MathUtil.getIntegerVal(props.get(BATCH_SIZE_KEY.toLowerCase())));
+<abbr title="  99         impalaTableInfo.setBatchWaitInterval(MathUtil.getLongVal(props.get(BATCH_WAIT_INTERVAL_KEY.toLowerCase())));">  99         impalaTableInfo.setBatchWaitInterval(MathUtil.getLongVal(props.get(BATCH_WAIT_INTERVAL_KEY.toLowe🔵</abbr>
+ 100         impalaTableInfo.setBufferSize(MathUtil.getString(props.get(BUFFER_SIZE_KEY.toLowerCase())));
+<abbr title=" 101         impalaTableInfo.setFlushIntervalMs(MathUtil.getString(props.get(FLUSH_INTERVAL_MS_KEY.toLowerCase())));"> 101         impalaTableInfo.setFlushIntervalMs(MathUtil.getString(props.get(FLUSH_INTERVAL_MS_KEY.toLowerCase🔵</abbr>
+ 102         impalaTableInfo.setSchema(MathUtil.getString(props.get(SCHEMA_KEY.toLowerCase())));
+ 103         impalaTableInfo.setUpdateMode(MathUtil.getString(props.get(UPDATE_KEY.toLowerCase())));
+ 104 
+ 105         Integer authMech = MathUtil.getIntegerVal(props.get(AUTH_MECH_KEY.toLowerCase()));
+ 106         authMech = authMech == null ? 0 : authMech;
+ 107         impalaTableInfo.setAuthMech(authMech);
+ 108         List&lt;Integer&gt; authMechs = Arrays.asList(0, 1, 2, 3);
+ 109 
+ 110         if (!authMechs.contains(authMech)) {
+<abbr title=" 111             throw new IllegalArgumentException(&quot;The value of authMech is illegal, Please select 0, 1, 2, 3&quot;);"> 111             throw new IllegalArgumentException(&quot;The value of authMech is illegal, Please select 0, 1, 2, 🔵</abbr>
+ 112         } else if (authMech == 1) {
+ 113             impalaTableInfo.setPrincipal(MathUtil.getString(props.get(PRINCIPAL_KEY.toLowerCase())));
+<abbr title=" 114             impalaTableInfo.setKeyTabFilePath(MathUtil.getString(props.get(KEY_TAB_FILE_PATH_KEY.toLowerCase())));"> 114             impalaTableInfo.setKeyTabFilePath(MathUtil.getString(props.get(KEY_TAB_FILE_PATH_KEY.toLowerC🔵</abbr>
+<abbr title=" 115             impalaTableInfo.setKrb5FilePath(MathUtil.getString(props.get(KRB5FILEPATH_KEY.toLowerCase())));"> 115             impalaTableInfo.setKrb5FilePath(MathUtil.getString(props.get(KRB5FILEPATH_KEY.toLowerCase()))🔵</abbr>
+ 116             String krbRealm = MathUtil.getString(props.get(KRB_REALM_KEY.toLowerCase()));
+ 117             krbRealm = krbRealm == null ? KRB_DEFAULT_REALM : krbRealm;
+ 118             impalaTableInfo.setKrbRealm(krbRealm);
+<abbr title=" 119             impalaTableInfo.setKrbHostFQDN(MathUtil.getString(props.get(KRB_HOST_FQDN_KEY.toLowerCase())));"> 119             impalaTableInfo.setKrbHostFQDN(MathUtil.getString(props.get(KRB_HOST_FQDN_KEY.toLowerCase()))🔵</abbr>
+<abbr title=" 120             impalaTableInfo.setKrbServiceName(MathUtil.getString(props.get(KRB_SERVICE_NAME_KEY.toLowerCase())));"> 120             impalaTableInfo.setKrbServiceName(MathUtil.getString(props.get(KRB_SERVICE_NAME_KEY.toLowerCa🔵</abbr>
+ 121         } else if (authMech == 2) {
+ 122             impalaTableInfo.setUserName(MathUtil.getString(props.get(USER_NAME_KEY.toLowerCase())));
+ 123         } else if (authMech == 3) {
+ 124             impalaTableInfo.setUserName(MathUtil.getString(props.get(USER_NAME_KEY.toLowerCase())));
+ 125             impalaTableInfo.setPassword(MathUtil.getString(props.get(PASSWORD_KEY.toLowerCase())));
+ 126         }
+ 127 
+ 128 &lt;&lt;&lt;&lt;&lt;&lt;&lt; MINE
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 129         String storeType = MathUtil.getString(props.get(ImpalaTableInfo.STORE_TYPE_KEY.toLowerCase()));</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 130         impalaTableInfo.setStoreType(storeType);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 131 </span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 132         String enablePartitionStr = (String) props.get(ImpalaTableInfo.ENABLEPARITION_KEY.toLowerCase());</span>
+ 133 ||||||| BASE
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 134         String enablePartitionStr = (String) props.get(ImpalaTableInfo.ENABLEPARITION_KEY.toLowerCase());</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"><abbr title=" 135         boolean enablePartition = MathUtil.getBoolean(enablePartitionStr == null ? &quot;false&quot; : enablePartitionStr);"> 135         boolean enablePartition = MathUtil.getBoolean(enablePartitionStr == null ? &quot;false&quot; : enablePartit🔵</abbr></span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 136         impalaTableInfo.setEnablePartition(enablePartition);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 137         if (enablePartition) {</span>
+ 138 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 139         String storeType = MathUtil.getString(props.get(STORE_TYPE_KEY.toLowerCase()));</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 140         impalaTableInfo.setStoreType(Objects.isNull(storeType) ? DEFAULT_STORE_TYPE : storeType);</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 141 </span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 142         String enablePartitionStr = (String) props.get(ENABLE_PARTITION_KEY.toLowerCase());</span>
+ 143 &gt;&gt;&gt;&gt;&gt;&gt;&gt; YOURS
+<abbr title=" 144         boolean enablePartition = MathUtil.getBoolean(enablePartitionStr == null ? &quot;false&quot; : enablePartitionStr);"> 144         boolean enablePartition = MathUtil.getBoolean(enablePartitionStr == null ? &quot;false&quot; : enablePartit🔵</abbr>
+ 145         impalaTableInfo.setEnablePartition(enablePartition);
+ 146 
+ 147 &lt;&lt;&lt;&lt;&lt;&lt;&lt; MINE
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 148         if (!storeType.equalsIgnoreCase(ImpalaTableInfo.KUDU_TYPE) &amp;&amp; enablePartition) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"><abbr title=" 149             String partitionFields = MathUtil.getString(props.get(ImpalaTableInfo.PARTITIONFIELDS_KEY.toLowerCase()));"> 149             String partitionFields = MathUtil.getString(props.get(ImpalaTableInfo.PARTITIONFIELDS_KEY.toL🔵</abbr></span>
+ 150 ||||||| BASE
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 151 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 152         impalaTableInfo.check();</span>
+ 153 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 154         if (!impalaTableInfo.getStoreType().equalsIgnoreCase(KUDU_TYPE) &amp;&amp; enablePartition) {</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 155             String partitionFields = MathUtil.getString(props.get(PARTITION_FIELDS_KEY.toLowerCase()));</span>
+ 156 &gt;&gt;&gt;&gt;&gt;&gt;&gt; YOURS
+ 157             impalaTableInfo.setPartitionFields(partitionFields);
+ 158         }
+ 159 
+ 160 &lt;&lt;&lt;&lt;&lt;&lt;&lt; MINE
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 161         impalaTableInfo.setType(CURR_TYPE);</span>
+ 162 ||||||| BASE
+ 163 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 164         impalaTableInfo.setType(CURRENT_TYPE);</span>
+ 165 &gt;&gt;&gt;&gt;&gt;&gt;&gt; YOURS
+ 166 
+ 167         impalaTableInfo.check();
+ 168         return impalaTableInfo;
+ 169     }
+ 170 }
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ </pre></td>
+                            <td><pre>   1 /*
+   2  * Licensed to the Apache Software Foundation (ASF) under one
+   3  * or more contributor license agreements.  See the NOTICE file
+   4  * distributed with this work for additional information
+   5  * regarding copyright ownership.  The ASF licenses this file
+   6  * to you under the Apache License, Version 2.0 (the
+   7  * &quot;License&quot;); you may not use this file except in compliance
+   8  * with the License.  You may obtain a copy of the License at
+   9  *
+  10  *     http://www.apache.org/licenses/LICENSE-2.0
+  11  *
+  12  * Unless required by applicable law or agreed to in writing, software
+  13  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15  * See the License for the specific language governing permissions and
+  16  * limitations under the License.
+  17  */
+  18 package com.dtstack.flink.sql.sink.impala.table;
+  19 
+  20 import com.dtstack.flink.sql.table.AbstractTableInfo;
+  21 import com.dtstack.flink.sql.table.AbstractTableParser;
+  22 import com.dtstack.flink.sql.util.MathUtil;
+  23 import java.util.Arrays;
+  24 import java.util.List;
+  25 import java.util.Map;
+  26 import java.util.Objects;
+  27 
+  28 
+  29 /**
+  30  * Date: 2020/10/14
+  31  * Company: www.dtstack.com
+  32  *
+  33  * @author tiezhu
+  34  */
+  35 public class ImpalaSinkParser extends AbstractTableParser {
+  36 
+  37     private static final String PARALLELISM_KEY = &quot;parallelism&quot;;
+  38 
+  39     private static final String AUTH_MECH_KEY = &quot;authMech&quot;;
+  40 
+  41     private static final String KRB5FILEPATH_KEY = &quot;krb5FilePath&quot;;
+  42 
+  43     private static final String PRINCIPAL_KEY = &quot;principal&quot;;
+  44 
+  45     private static final String KEY_TAB_FILE_PATH_KEY = &quot;keyTabFilePath&quot;;
+  46 
+  47     private static final String KRB_REALM_KEY = &quot;krbRealm&quot;;
+  48 
+  49     private static final String KRB_HOST_FQDN_KEY = &quot;krbHostFQDN&quot;;
+  50 
+  51     private static final String KRB_SERVICE_NAME_KEY = &quot;krbServiceName&quot;;
+  52 
+  53     private static final String ENABLE_PARTITION_KEY = &quot;enablePartition&quot;;
+  54 
+  55     private static final String PARTITION_FIELDS_KEY = &quot;partitionFields&quot;;
+  56 
+  57     private static final String URL_KEY = &quot;url&quot;;
+  58 
+  59     private static final String TABLE_NAME_KEY = &quot;tableName&quot;;
+  60 
+  61     private static final String USER_NAME_KEY = &quot;userName&quot;;
+  62 
+  63     private static final String PASSWORD_KEY = &quot;password&quot;;
+  64 
+  65     private static final String BATCH_SIZE_KEY = &quot;batchSize&quot;;
+  66 
+  67     private static final String BATCH_WAIT_INTERVAL_KEY = &quot;batchWaitInterval&quot;;
+  68 
+  69     private static final String BUFFER_SIZE_KEY = &quot;bufferSize&quot;;
+  70 
+  71     private static final String FLUSH_INTERVAL_MS_KEY = &quot;flushIntervalMs&quot;;
+  72 
+  73     private static final String SCHEMA_KEY = &quot;schema&quot;;
+  74 
+  75     private static final String UPDATE_KEY = &quot;updateMode&quot;;
+  76 
+  77     private static final String KUDU_TYPE = &quot;kudu&quot;;
+  78 
+  79     private static final String DEFAULT_STORE_TYPE = &quot;kudu&quot;;
+  80 
+  81     private static final String STORE_TYPE_KEY = &quot;storeType&quot;;
+  82 
+  83     private static final String KRB_DEFAULT_REALM = &quot;HADOOP.COM&quot;;
+  84 
+  85     private static final String CURRENT_TYPE = &quot;impala&quot;;
+  86 
+  87 
+  88     @Override
+<abbr title="  89     public AbstractTableInfo getTableInfo(String tableName, String fieldsInfo, Map&lt;String, Object&gt; props) throws Exception {">  89     public AbstractTableInfo getTableInfo(String tableName, String fieldsInfo, Map&lt;String, Object&gt; props)🔵</abbr>
+  90         ImpalaTableInfo impalaTableInfo = new ImpalaTableInfo();
+  91         impalaTableInfo.setName(tableName);
+  92         parseFieldsInfo(fieldsInfo, impalaTableInfo);
+  93 
+  94         impalaTableInfo.setParallelism(MathUtil.getIntegerVal(props.get(PARALLELISM_KEY.toLowerCase())));
+  95         impalaTableInfo.setUrl(MathUtil.getString(props.get(URL_KEY.toLowerCase())));
+  96         impalaTableInfo.setTableName(MathUtil.getString(props.get(TABLE_NAME_KEY.toLowerCase())));
+  97         impalaTableInfo.setBatchSize(MathUtil.getIntegerVal(props.get(BATCH_SIZE_KEY.toLowerCase())));
+<abbr title="  98         impalaTableInfo.setBatchWaitInterval(MathUtil.getLongVal(props.get(BATCH_WAIT_INTERVAL_KEY.toLowerCase())));">  98         impalaTableInfo.setBatchWaitInterval(MathUtil.getLongVal(props.get(BATCH_WAIT_INTERVAL_KEY.toLowe🔵</abbr>
+  99         impalaTableInfo.setBufferSize(MathUtil.getString(props.get(BUFFER_SIZE_KEY.toLowerCase())));
+<abbr title=" 100         impalaTableInfo.setFlushIntervalMs(MathUtil.getString(props.get(FLUSH_INTERVAL_MS_KEY.toLowerCase())));"> 100         impalaTableInfo.setFlushIntervalMs(MathUtil.getString(props.get(FLUSH_INTERVAL_MS_KEY.toLowerCase🔵</abbr>
+ 101         impalaTableInfo.setSchema(MathUtil.getString(props.get(SCHEMA_KEY.toLowerCase())));
+ 102         impalaTableInfo.setUpdateMode(MathUtil.getString(props.get(UPDATE_KEY.toLowerCase())));
+ 103 
+ 104         Integer authMech = MathUtil.getIntegerVal(props.get(AUTH_MECH_KEY.toLowerCase()));
+ 105         authMech = authMech == null ? 0 : authMech;
+ 106         impalaTableInfo.setAuthMech(authMech);
+ 107         List&lt;Integer&gt; authMechs = Arrays.asList(0, 1, 2, 3);
+ 108 
+ 109         if (!authMechs.contains(authMech)) {
+<abbr title=" 110             throw new IllegalArgumentException(&quot;The value of authMech is illegal, Please select 0, 1, 2, 3&quot;);"> 110             throw new IllegalArgumentException(&quot;The value of authMech is illegal, Please select 0, 1, 2, 🔵</abbr>
+ 111         } else if (authMech == 1) {
+ 112             impalaTableInfo.setPrincipal(MathUtil.getString(props.get(PRINCIPAL_KEY.toLowerCase())));
+<abbr title=" 113             impalaTableInfo.setKeyTabFilePath(MathUtil.getString(props.get(KEY_TAB_FILE_PATH_KEY.toLowerCase())));"> 113             impalaTableInfo.setKeyTabFilePath(MathUtil.getString(props.get(KEY_TAB_FILE_PATH_KEY.toLowerC🔵</abbr>
+<abbr title=" 114             impalaTableInfo.setKrb5FilePath(MathUtil.getString(props.get(KRB5FILEPATH_KEY.toLowerCase())));"> 114             impalaTableInfo.setKrb5FilePath(MathUtil.getString(props.get(KRB5FILEPATH_KEY.toLowerCase()))🔵</abbr>
+ 115             String krbRealm = MathUtil.getString(props.get(KRB_REALM_KEY.toLowerCase()));
+ 116             krbRealm = krbRealm == null ? KRB_DEFAULT_REALM : krbRealm;
+ 117             impalaTableInfo.setKrbRealm(krbRealm);
+<abbr title=" 118             impalaTableInfo.setKrbHostFQDN(MathUtil.getString(props.get(KRB_HOST_FQDN_KEY.toLowerCase())));"> 118             impalaTableInfo.setKrbHostFQDN(MathUtil.getString(props.get(KRB_HOST_FQDN_KEY.toLowerCase()))🔵</abbr>
+<abbr title=" 119             impalaTableInfo.setKrbServiceName(MathUtil.getString(props.get(KRB_SERVICE_NAME_KEY.toLowerCase())));"> 119             impalaTableInfo.setKrbServiceName(MathUtil.getString(props.get(KRB_SERVICE_NAME_KEY.toLowerCa🔵</abbr>
+ 120         } else if (authMech == 2) {
+ 121             impalaTableInfo.setUserName(MathUtil.getString(props.get(USER_NAME_KEY.toLowerCase())));
+ 122         } else if (authMech == 3) {
+ 123             impalaTableInfo.setUserName(MathUtil.getString(props.get(USER_NAME_KEY.toLowerCase())));
+ 124             impalaTableInfo.setPassword(MathUtil.getString(props.get(PASSWORD_KEY.toLowerCase())));
+ 125         }
+ 126 
+ 127 
+ 128 &lt;&lt;&lt;&lt;&lt;&lt;&lt; LEFT
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 129         String storeType = MathUtil.getString(props.get(ImpalaTableInfo.STORE_TYPE_KEY.toLowerCase()));</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 130         impalaTableInfo.setStoreType(storeType);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 131 </span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 132         String enablePartitionStr = (String) props.get(ImpalaTableInfo.ENABLEPARITION_KEY.toLowerCase());</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 133 </span>
+ 134 ||||||| BASE
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"><abbr title=" 135 /*d94z9sk0k4hf9j3ijd - note the base isn&#x27;t actually empty, spork simply doesn&#x27;t generate a base - gd930kwohrp23k5b6vdk93d3r*/"> 135 /*d94z9sk0k4hf9j3ijd - note the base isn&#x27;t actually empty, spork simply doesn&#x27;t generate a base - gd930kw🔵</abbr></span>
+ 136 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 137 </span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 138         String storeType = MathUtil.getString(props.get(STORE_TYPE_KEY.toLowerCase()));</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 139         impalaTableInfo.setStoreType(Objects.isNull(storeType) ? DEFAULT_STORE_TYPE : storeType);</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 140 </span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 141         String enablePartitionStr = (String) props.get(ENABLE_PARTITION_KEY.toLowerCase());</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 142 </span>
+ 143 &gt;&gt;&gt;&gt;&gt;&gt;&gt; RIGHT
+<abbr title=" 144         boolean enablePartition = MathUtil.getBoolean(enablePartitionStr == null ? &quot;false&quot; : enablePartitionStr);"> 144         boolean enablePartition = MathUtil.getBoolean(enablePartitionStr == null ? &quot;false&quot; : enablePartit🔵</abbr>
+ 145         impalaTableInfo.setEnablePartition(enablePartition);
+ 146 
+ 147 
+ 148 &lt;&lt;&lt;&lt;&lt;&lt;&lt; LEFT
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 149         if (!storeType.equalsIgnoreCase(ImpalaTableInfo.KUDU_TYPE) &amp;&amp; enablePartition) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"><abbr title=" 150             String partitionFields = MathUtil.getString(props.get(ImpalaTableInfo.PARTITIONFIELDS_KEY.toLowerCase()));"> 150             String partitionFields = MathUtil.getString(props.get(ImpalaTableInfo.PARTITIONFIELDS_KEY.toL🔵</abbr></span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 151 </span>
+ 152 ||||||| BASE
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"><abbr title=" 153 /*d94z9sk0k4hf9j3ijd - note the base isn&#x27;t actually empty, spork simply doesn&#x27;t generate a base - gd930kwohrp23k5b6vdk93d3r*/"> 153 /*d94z9sk0k4hf9j3ijd - note the base isn&#x27;t actually empty, spork simply doesn&#x27;t generate a base - gd930kw🔵</abbr></span>
+ 154 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 155 </span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 156         if (!impalaTableInfo.getStoreType().equalsIgnoreCase(KUDU_TYPE) &amp;&amp; enablePartition) {</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 157             String partitionFields = MathUtil.getString(props.get(PARTITION_FIELDS_KEY.toLowerCase()));</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 158 </span>
+ 159 &gt;&gt;&gt;&gt;&gt;&gt;&gt; RIGHT
+ 160             impalaTableInfo.setPartitionFields(partitionFields);
+ 161         }
+ 162 
+ 163 
+ 164 &lt;&lt;&lt;&lt;&lt;&lt;&lt; LEFT
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 165         impalaTableInfo.setType(CURR_TYPE);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 166 </span>
+ 167 ||||||| BASE
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"><abbr title=" 168 /*d94z9sk0k4hf9j3ijd - note the base isn&#x27;t actually empty, spork simply doesn&#x27;t generate a base - gd930kwohrp23k5b6vdk93d3r*/"> 168 /*d94z9sk0k4hf9j3ijd - note the base isn&#x27;t actually empty, spork simply doesn&#x27;t generate a base - gd930kw🔵</abbr></span>
+ 169 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 170 </span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 171         impalaTableInfo.setType(CURRENT_TYPE);</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 172 </span>
+ 173 &gt;&gt;&gt;&gt;&gt;&gt;&gt; RIGHT
+ 174 
+ 175         impalaTableInfo.check();
+ 176         return impalaTableInfo;
+ 177     }
+ 178 
+ 179 &lt;&lt;&lt;&lt;&lt;&lt;&lt; LEFT
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 180 </span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 181     @Override</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 182     public Class dbTypeConvertToJavaType(String fieldType) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 183         switch (fieldType.toLowerCase()) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 184             case &quot;boolean&quot;:</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 185                 return Boolean.class;</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 186             case &quot;char&quot;:</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 187                 return Character.class;</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 188             case &quot;double&quot;:</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 189                 return Double.class;</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 190             case &quot;float&quot;:</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 191                 return Float.class;</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 192             case &quot;tinyint&quot;:</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 193                 return Byte.class;</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 194             case &quot;smallint&quot;:</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 195                 return Short.class;</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 196             case &quot;int&quot;:</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 197                 return Integer.class;</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 198             case &quot;bigint&quot;:</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 199                 return Long.class;</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 200             case &quot;decimal&quot;:</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 201                 return BigDecimal.class;</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 202             case &quot;string&quot;:</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 203             case &quot;varchar&quot;:</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 204                 return String.class;</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 205             case &quot;timestamp&quot;:</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 206                 return Timestamp.class;</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 207             default:</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 208                 break;</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 209         }</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 210 </span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 211         throw new RuntimeException(&quot;不支持 &quot; + fieldType + &quot; 类型&quot;);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 212     }</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 213 </span>
+ 214 ||||||| BASE
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"><abbr title=" 215 /*d94z9sk0k4hf9j3ijd - note the base isn&#x27;t actually empty, spork simply doesn&#x27;t generate a base - gd930kwohrp23k5b6vdk93d3r*/"> 215 /*d94z9sk0k4hf9j3ijd - note the base isn&#x27;t actually empty, spork simply doesn&#x27;t generate a base - gd930kw🔵</abbr></span>
+ 216 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 217 </span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 218 </span>
+ 219 &gt;&gt;&gt;&gt;&gt;&gt;&gt; RIGHT
+ 220 }
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ </pre></td>
+                        </tr>
+                    </table>
+                </div>
+                <div id="bottom">
+                    <table style="margin:auto">
+                        <tr>
+                            <th>ours vs. base</th>
+                            <th>theirs vs. base</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1  /*
+   2   * Licensed to the Apache Software Foundation (ASF) under one
+   3   * or more contributor license agreements.  See the NOTICE file
+   4   * distributed with this work for additional information
+   5   * regarding copyright ownership.  The ASF licenses this file
+   6   * to you under the Apache License, Version 2.0 (the
+   7   * &quot;License&quot;); you may not use this file except in compliance
+   8   * with the License.  You may obtain a copy of the License at
+   9   *
+  10   *     http://www.apache.org/licenses/LICENSE-2.0
+  11   *
+  12   * Unless required by applicable law or agreed to in writing, software
+  13   * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15   * See the License for the specific language governing permissions and
+  16   * limitations under the License.
+  17   */
+  18  
+  19  package com.dtstack.flink.sql.sink.impala.table;
+  20  
+  21  import com.dtstack.flink.sql.sink.rdb.table.RdbSinkParser;
+  22  import com.dtstack.flink.sql.table.AbstractTableInfo;
+
+  23  import com.dtstack.flink.sql.util.MathUtil;
+  24  
+  25  import java.math.BigDecimal;
+  26  import java.sql.Timestamp;
+  27  import java.util.Arrays;
+  28  import java.util.List;
+  29  import java.util.Map;
+
+  30  
+  31  /**
+  32   * Reason:
+  33   * Date: 2019/11/11
+
+  34   * Company: www.dtstack.com
+  35   *
+  36   * @author xiuzhu
+
+  37   */
+
+  38  
+  39  public class ImpalaSinkParser extends RdbSinkParser {
+
+  40  
+  41      private static final String CURR_TYPE = &quot;impala&quot;;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  42  
+  43      @Override
+  44      public AbstractTableInfo getTableInfo(String tableName, String fieldsInfo, Map&lt;String, Object&gt; props) {
+
+  45          ImpalaTableInfo impalaTableInfo = new ImpalaTableInfo();
+  46          impalaTableInfo.setName(tableName);
+  47          parseFieldsInfo(fieldsInfo, impalaTableInfo);
+  48  
+<abbr title="  49          impalaTableInfo.setParallelism(MathUtil.getIntegerVal(props.get(ImpalaTableInfo.PARALLELISM_KEY.toLowerCase())));">  49          impalaTableInfo.setParallelism(MathUtil.getIntegerVal(props.get(ImpalaTableInfo.PARALLELISM_KEY.toLowerCas🔵</abbr>
+  50          impalaTableInfo.setUrl(MathUtil.getString(props.get(ImpalaTableInfo.URL_KEY.toLowerCase())));
+  51          impalaTableInfo.setTableName(MathUtil.getString(props.get(ImpalaTableInfo.TABLE_NAME_KEY.toLowerCase())));
+<abbr title="  52          impalaTableInfo.setBatchSize(MathUtil.getIntegerVal(props.get(ImpalaTableInfo.BATCH_SIZE_KEY.toLowerCase())));">  52          impalaTableInfo.setBatchSize(MathUtil.getIntegerVal(props.get(ImpalaTableInfo.BATCH_SIZE_KEY.toLowerCase()🔵</abbr>
+<abbr title="  53          impalaTableInfo.setBatchWaitInterval(MathUtil.getLongVal(props.get(ImpalaTableInfo.BATCH_WAIT_INTERVAL_KEY.toLowerCase())));">  53          impalaTableInfo.setBatchWaitInterval(MathUtil.getLongVal(props.get(ImpalaTableInfo.BATCH_WAIT_INTERVAL_KEY🔵</abbr>
+<abbr title="  54          impalaTableInfo.setBufferSize(MathUtil.getString(props.get(ImpalaTableInfo.BUFFER_SIZE_KEY.toLowerCase())));">  54          impalaTableInfo.setBufferSize(MathUtil.getString(props.get(ImpalaTableInfo.BUFFER_SIZE_KEY.toLowerCase()))🔵</abbr>
+<abbr title="  55          impalaTableInfo.setFlushIntervalMs(MathUtil.getString(props.get(ImpalaTableInfo.FLUSH_INTERVALMS_KEY.toLowerCase())));">  55          impalaTableInfo.setFlushIntervalMs(MathUtil.getString(props.get(ImpalaTableInfo.FLUSH_INTERVALMS_KEY.toLow🔵</abbr>
+  56          impalaTableInfo.setSchema(MathUtil.getString(props.get(ImpalaTableInfo.SCHEMA_KEY.toLowerCase())));
+  57          impalaTableInfo.setUpdateMode(MathUtil.getString(props.get(ImpalaTableInfo.UPDATE_KEY.toLowerCase())));
+
+
+
+
+
+
+
+
+
+  58  
+  59          Integer authMech = MathUtil.getIntegerVal(props.get(ImpalaTableInfo.AUTHMECH_KEY.toLowerCase()));
+
+  60          authMech = authMech == null ? 0 : authMech;
+  61          impalaTableInfo.setAuthMech(authMech);
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  62 -        List authMechs = Arrays.asList(new Integer[]{0, 1, 2, 3});</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  63 +        List&lt;Integer&gt; authMechs = Arrays.asList(0, 1, 2, 3);</span>
+  64  
+  65          if (!authMechs.contains(authMech)) {
+  66              throw new IllegalArgumentException(&quot;The value of authMech is illegal, Please select 0, 1, 2, 3&quot;);
+  67          } else if (authMech == 1) {
+<abbr title="  68              impalaTableInfo.setPrincipal(MathUtil.getString(props.get(ImpalaTableInfo.PRINCIPAL_KEY.toLowerCase())));">  68              impalaTableInfo.setPrincipal(MathUtil.getString(props.get(ImpalaTableInfo.PRINCIPAL_KEY.toLowerCase())🔵</abbr>
+<abbr title="  69              impalaTableInfo.setKeyTabFilePath(MathUtil.getString(props.get(ImpalaTableInfo.KEYTABFILEPATH_KEY.toLowerCase())));">  69              impalaTableInfo.setKeyTabFilePath(MathUtil.getString(props.get(ImpalaTableInfo.KEYTABFILEPATH_KEY.toLo🔵</abbr>
+<abbr title="  70              impalaTableInfo.setKrb5FilePath(MathUtil.getString(props.get(ImpalaTableInfo.KRB5FILEPATH_KEY.toLowerCase())));">  70              impalaTableInfo.setKrb5FilePath(MathUtil.getString(props.get(ImpalaTableInfo.KRB5FILEPATH_KEY.toLowerC🔵</abbr>
+  71              String krbRealm = MathUtil.getString(props.get(ImpalaTableInfo.KRBREALM_KEY.toLowerCase()));
+  72              krbRealm = krbRealm == null ? &quot;HADOOP.COM&quot; : krbRealm;
+
+
+
+
+
+  73              impalaTableInfo.setKrbRealm(krbRealm);
+<abbr title="  74              impalaTableInfo.setKrbHostFQDN(MathUtil.getString(props.get(ImpalaTableInfo.KRBHOSTFQDN_KEY.toLowerCase())));">  74              impalaTableInfo.setKrbHostFQDN(MathUtil.getString(props.get(ImpalaTableInfo.KRBHOSTFQDN_KEY.toLowerCas🔵</abbr>
+<abbr title="  75              impalaTableInfo.setKrbServiceName(MathUtil.getString(props.get(ImpalaTableInfo.KRBSERVICENAME_KEY.toLowerCase())));">  75              impalaTableInfo.setKrbServiceName(MathUtil.getString(props.get(ImpalaTableInfo.KRBSERVICENAME_KEY.toLo🔵</abbr>
+
+
+  76          } else if (authMech == 2) {
+<abbr title="  77              impalaTableInfo.setUserName(MathUtil.getString(props.get(ImpalaTableInfo.USER_NAME_KEY.toLowerCase())));">  77              impalaTableInfo.setUserName(MathUtil.getString(props.get(ImpalaTableInfo.USER_NAME_KEY.toLowerCase()))🔵</abbr>
+
+  78          } else if (authMech == 3) {
+<abbr title="  79              impalaTableInfo.setUserName(MathUtil.getString(props.get(ImpalaTableInfo.USER_NAME_KEY.toLowerCase())));">  79              impalaTableInfo.setUserName(MathUtil.getString(props.get(ImpalaTableInfo.USER_NAME_KEY.toLowerCase()))🔵</abbr>
+<abbr title="  80              impalaTableInfo.setPassword(MathUtil.getString(props.get(ImpalaTableInfo.PASSWORD_KEY.toLowerCase())));">  80              impalaTableInfo.setPassword(MathUtil.getString(props.get(ImpalaTableInfo.PASSWORD_KEY.toLowerCase())))🔵</abbr>
+
+
+  81          }
+  82  
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  83 +        String storeType = MathUtil.getString(props.get(ImpalaTableInfo.STORE_TYPE_KEY.toLowerCase()));</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  84 +        impalaTableInfo.setStoreType(storeType);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  85 +</span>
+  86          String enablePartitionStr = (String) props.get(ImpalaTableInfo.ENABLEPARITION_KEY.toLowerCase());
+
+
+
+
+  87          boolean enablePartition = MathUtil.getBoolean(enablePartitionStr == null ? &quot;false&quot; : enablePartitionStr);
+  88          impalaTableInfo.setEnablePartition(enablePartition);
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  89 -        if (enablePartition) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  90 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  91 +        if (!storeType.equalsIgnoreCase(ImpalaTableInfo.KUDU_TYPE) &amp;&amp; enablePartition) {</span>
+<abbr title="  92              String partitionFields = MathUtil.getString(props.get(ImpalaTableInfo.PARTITIONFIELDS_KEY.toLowerCase()));">  92              String partitionFields = MathUtil.getString(props.get(ImpalaTableInfo.PARTITIONFIELDS_KEY.toLowerCase(🔵</abbr>
+
+
+
+  93              impalaTableInfo.setPartitionFields(partitionFields);
+  94          }
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  95 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  96 +        impalaTableInfo.setType(CURR_TYPE);</span>
+  97  
+  98          impalaTableInfo.check();
+  99          return impalaTableInfo;
+ 100      }
+ 101  
+ 102      @Override
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 103 -    public  Class dbTypeConvertToJavaType(String fieldType) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 104 +    public Class dbTypeConvertToJavaType(String fieldType) {</span>
+ 105          switch (fieldType.toLowerCase()) {
+ 106              case &quot;boolean&quot;:
+ 107                  return Boolean.class;
+ 108              case &quot;char&quot;:
+ 109                  return Character.class;
+ 110              case &quot;double&quot;:
+ 111                  return Double.class;
+ 112              case &quot;float&quot;:
+ 113                  return Float.class;
+ 114              case &quot;tinyint&quot;:
+ 115                  return Byte.class;
+ 116              case &quot;smallint&quot;:
+ 117                  return Short.class;
+ 118              case &quot;int&quot;:
+ 119                  return Integer.class;
+ 120              case &quot;bigint&quot;:
+ 121                  return Long.class;
+ 122              case &quot;decimal&quot;:
+ 123                  return BigDecimal.class;
+ 124              case &quot;string&quot;:
+ 125              case &quot;varchar&quot;:
+ 126                  return String.class;
+ 127              case &quot;timestamp&quot;:
+ 128                  return Timestamp.class;
+ 129              default:
+ 130                  break;
+ 131          }
+ 132  
+ 133          throw new RuntimeException(&quot;不支持 &quot; + fieldType + &quot; 类型&quot;);
+ 134      }
+ 135  }</pre></td>
+                            <td><pre>   1  /*
+   2   * Licensed to the Apache Software Foundation (ASF) under one
+   3   * or more contributor license agreements.  See the NOTICE file
+   4   * distributed with this work for additional information
+   5   * regarding copyright ownership.  The ASF licenses this file
+   6   * to you under the Apache License, Version 2.0 (the
+   7   * &quot;License&quot;); you may not use this file except in compliance
+   8   * with the License.  You may obtain a copy of the License at
+   9   *
+  10   *     http://www.apache.org/licenses/LICENSE-2.0
+  11   *
+  12   * Unless required by applicable law or agreed to in writing, software
+  13   * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15   * See the License for the specific language governing permissions and
+  16   * limitations under the License.
+  17   */
+  18  
+  19  package com.dtstack.flink.sql.sink.impala.table;
+  20  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  21 -import com.dtstack.flink.sql.sink.rdb.table.RdbSinkParser;</span>
+  22  import com.dtstack.flink.sql.table.AbstractTableInfo;
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  23 +import com.dtstack.flink.sql.table.AbstractTableParser;</span>
+  24  import com.dtstack.flink.sql.util.MathUtil;
+  25  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  26 -import java.math.BigDecimal;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  27 -import java.sql.Timestamp;</span>
+  28  import java.util.Arrays;
+  29  import java.util.List;
+  30  import java.util.Map;
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  31 +import java.util.Objects;</span>
+  32  
+  33  /**
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  34 - * Reason:</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  35 - * Date: 2019/11/11</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  36 + * Date: 2020/10/14</span>
+  37   * Company: www.dtstack.com
+  38   *
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  39 - * @author xiuzhu</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  40 + * @author tiezhu</span>
+  41   */
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  42 +public class ImpalaSinkParser extends AbstractTableParser {</span>
+  43  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  44 -public class ImpalaSinkParser extends RdbSinkParser {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  45 +    private static final String PARALLELISM_KEY = &quot;parallelism&quot;;</span>
+  46  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  47 -    private static final String CURR_TYPE = &quot;impala&quot;;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  48 +    private static final String AUTH_MECH_KEY = &quot;authMech&quot;;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  49 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  50 +    private static final String KRB5FILEPATH_KEY = &quot;krb5FilePath&quot;;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  51 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  52 +    private static final String PRINCIPAL_KEY = &quot;principal&quot;;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  53 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  54 +    private static final String KEY_TAB_FILE_PATH_KEY = &quot;keyTabFilePath&quot;;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  55 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  56 +    private static final String KRB_REALM_KEY = &quot;krbRealm&quot;;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  57 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  58 +    private static final String KRB_HOST_FQDN_KEY = &quot;krbHostFQDN&quot;;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  59 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  60 +    private static final String KRB_SERVICE_NAME_KEY = &quot;krbServiceName&quot;;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  61 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  62 +    private static final String ENABLE_PARTITION_KEY = &quot;enablePartition&quot;;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  63 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  64 +    private static final String PARTITION_FIELDS_KEY = &quot;partitionFields&quot;;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  65 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  66 +    private static final String URL_KEY = &quot;url&quot;;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  67 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  68 +    private static final String TABLE_NAME_KEY = &quot;tableName&quot;;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  69 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  70 +    private static final String USER_NAME_KEY = &quot;userName&quot;;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  71 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  72 +    private static final String PASSWORD_KEY = &quot;password&quot;;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  73 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  74 +    private static final String BATCH_SIZE_KEY = &quot;batchSize&quot;;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  75 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  76 +    private static final String BATCH_WAIT_INTERVAL_KEY = &quot;batchWaitInterval&quot;;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  77 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  78 +    private static final String BUFFER_SIZE_KEY = &quot;bufferSize&quot;;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  79 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  80 +    private static final String FLUSH_INTERVAL_MS_KEY = &quot;flushIntervalMs&quot;;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  81 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  82 +    private static final String SCHEMA_KEY = &quot;schema&quot;;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  83 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  84 +    private static final String UPDATE_KEY = &quot;updateMode&quot;;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  85 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  86 +    private static final String KUDU_TYPE = &quot;kudu&quot;;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  87 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  88 +    private static final String DEFAULT_STORE_TYPE = &quot;kudu&quot;;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  89 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  90 +    private static final String STORE_TYPE_KEY = &quot;storeType&quot;;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  91 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  92 +    private static final String KRB_DEFAULT_REALM = &quot;HADOOP.COM&quot;;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  93 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  94 +    private static final String CURRENT_TYPE = &quot;impala&quot;;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  95 +</span>
+  96  
+  97      @Override
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  98 -    public AbstractTableInfo getTableInfo(String tableName, String fieldsInfo, Map&lt;String, Object&gt; props) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"><abbr title="  99 +    public AbstractTableInfo getTableInfo(String tableName, String fieldsInfo, Map&lt;String, Object&gt; props) throws Exception {">  99 +    public AbstractTableInfo getTableInfo(String tableName, String fieldsInfo, Map&lt;String, Object&gt; props) throws E🔵</abbr></span>
+ 100          ImpalaTableInfo impalaTableInfo = new ImpalaTableInfo();
+ 101          impalaTableInfo.setName(tableName);
+ 102          parseFieldsInfo(fieldsInfo, impalaTableInfo);
+ 103  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"><abbr title=" 104 -        impalaTableInfo.setParallelism(MathUtil.getIntegerVal(props.get(ImpalaTableInfo.PARALLELISM_KEY.toLowerCase())));"> 104 -        impalaTableInfo.setParallelism(MathUtil.getIntegerVal(props.get(ImpalaTableInfo.PARALLELISM_KEY.toLowerCas🔵</abbr></span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 105 -        impalaTableInfo.setUrl(MathUtil.getString(props.get(ImpalaTableInfo.URL_KEY.toLowerCase())));</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 106 -        impalaTableInfo.setTableName(MathUtil.getString(props.get(ImpalaTableInfo.TABLE_NAME_KEY.toLowerCase())));</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"><abbr title=" 107 -        impalaTableInfo.setBatchSize(MathUtil.getIntegerVal(props.get(ImpalaTableInfo.BATCH_SIZE_KEY.toLowerCase())));"> 107 -        impalaTableInfo.setBatchSize(MathUtil.getIntegerVal(props.get(ImpalaTableInfo.BATCH_SIZE_KEY.toLowerCase()🔵</abbr></span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"><abbr title=" 108 -        impalaTableInfo.setBatchWaitInterval(MathUtil.getLongVal(props.get(ImpalaTableInfo.BATCH_WAIT_INTERVAL_KEY.toLowerCase())));"> 108 -        impalaTableInfo.setBatchWaitInterval(MathUtil.getLongVal(props.get(ImpalaTableInfo.BATCH_WAIT_INTERVAL_KEY🔵</abbr></span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"><abbr title=" 109 -        impalaTableInfo.setBufferSize(MathUtil.getString(props.get(ImpalaTableInfo.BUFFER_SIZE_KEY.toLowerCase())));"> 109 -        impalaTableInfo.setBufferSize(MathUtil.getString(props.get(ImpalaTableInfo.BUFFER_SIZE_KEY.toLowerCase()))🔵</abbr></span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"><abbr title=" 110 -        impalaTableInfo.setFlushIntervalMs(MathUtil.getString(props.get(ImpalaTableInfo.FLUSH_INTERVALMS_KEY.toLowerCase())));"> 110 -        impalaTableInfo.setFlushIntervalMs(MathUtil.getString(props.get(ImpalaTableInfo.FLUSH_INTERVALMS_KEY.toLow🔵</abbr></span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 111 -        impalaTableInfo.setSchema(MathUtil.getString(props.get(ImpalaTableInfo.SCHEMA_KEY.toLowerCase())));</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 112 -        impalaTableInfo.setUpdateMode(MathUtil.getString(props.get(ImpalaTableInfo.UPDATE_KEY.toLowerCase())));</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 113 +        impalaTableInfo.setParallelism(MathUtil.getIntegerVal(props.get(PARALLELISM_KEY.toLowerCase())));</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 114 +        impalaTableInfo.setUrl(MathUtil.getString(props.get(URL_KEY.toLowerCase())));</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 115 +        impalaTableInfo.setTableName(MathUtil.getString(props.get(TABLE_NAME_KEY.toLowerCase())));</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 116 +        impalaTableInfo.setBatchSize(MathUtil.getIntegerVal(props.get(BATCH_SIZE_KEY.toLowerCase())));</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"><abbr title=" 117 +        impalaTableInfo.setBatchWaitInterval(MathUtil.getLongVal(props.get(BATCH_WAIT_INTERVAL_KEY.toLowerCase())));"> 117 +        impalaTableInfo.setBatchWaitInterval(MathUtil.getLongVal(props.get(BATCH_WAIT_INTERVAL_KEY.toLowerCase()))🔵</abbr></span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 118 +        impalaTableInfo.setBufferSize(MathUtil.getString(props.get(BUFFER_SIZE_KEY.toLowerCase())));</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 119 +        impalaTableInfo.setFlushIntervalMs(MathUtil.getString(props.get(FLUSH_INTERVAL_MS_KEY.toLowerCase())));</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 120 +        impalaTableInfo.setSchema(MathUtil.getString(props.get(SCHEMA_KEY.toLowerCase())));</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 121 +        impalaTableInfo.setUpdateMode(MathUtil.getString(props.get(UPDATE_KEY.toLowerCase())));</span>
+ 122  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 123 -        Integer authMech = MathUtil.getIntegerVal(props.get(ImpalaTableInfo.AUTHMECH_KEY.toLowerCase()));</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 124 +        Integer authMech = MathUtil.getIntegerVal(props.get(AUTH_MECH_KEY.toLowerCase()));</span>
+ 125          authMech = authMech == null ? 0 : authMech;
+ 126          impalaTableInfo.setAuthMech(authMech);
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 127 -        List authMechs = Arrays.asList(new Integer[]{0, 1, 2, 3});</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 128 +        List&lt;Integer&gt; authMechs = Arrays.asList(0, 1, 2, 3);</span>
+ 129  
+ 130          if (!authMechs.contains(authMech)) {
+ 131              throw new IllegalArgumentException(&quot;The value of authMech is illegal, Please select 0, 1, 2, 3&quot;);
+ 132          } else if (authMech == 1) {
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"><abbr title=" 133 -            impalaTableInfo.setPrincipal(MathUtil.getString(props.get(ImpalaTableInfo.PRINCIPAL_KEY.toLowerCase())));"> 133 -            impalaTableInfo.setPrincipal(MathUtil.getString(props.get(ImpalaTableInfo.PRINCIPAL_KEY.toLowerCase())🔵</abbr></span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"><abbr title=" 134 -            impalaTableInfo.setKeyTabFilePath(MathUtil.getString(props.get(ImpalaTableInfo.KEYTABFILEPATH_KEY.toLowerCase())));"> 134 -            impalaTableInfo.setKeyTabFilePath(MathUtil.getString(props.get(ImpalaTableInfo.KEYTABFILEPATH_KEY.toLo🔵</abbr></span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"><abbr title=" 135 -            impalaTableInfo.setKrb5FilePath(MathUtil.getString(props.get(ImpalaTableInfo.KRB5FILEPATH_KEY.toLowerCase())));"> 135 -            impalaTableInfo.setKrb5FilePath(MathUtil.getString(props.get(ImpalaTableInfo.KRB5FILEPATH_KEY.toLowerC🔵</abbr></span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 136 -            String krbRealm = MathUtil.getString(props.get(ImpalaTableInfo.KRBREALM_KEY.toLowerCase()));</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 137 -            krbRealm = krbRealm == null ? &quot;HADOOP.COM&quot; : krbRealm;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 138 +            impalaTableInfo.setPrincipal(MathUtil.getString(props.get(PRINCIPAL_KEY.toLowerCase())));</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 139 +            impalaTableInfo.setKeyTabFilePath(MathUtil.getString(props.get(KEY_TAB_FILE_PATH_KEY.toLowerCase())));</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 140 +            impalaTableInfo.setKrb5FilePath(MathUtil.getString(props.get(KRB5FILEPATH_KEY.toLowerCase())));</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 141 +            String krbRealm = MathUtil.getString(props.get(KRB_REALM_KEY.toLowerCase()));</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 142 +            krbRealm = krbRealm == null ? KRB_DEFAULT_REALM : krbRealm;</span>
+ 143              impalaTableInfo.setKrbRealm(krbRealm);
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"><abbr title=" 144 -            impalaTableInfo.setKrbHostFQDN(MathUtil.getString(props.get(ImpalaTableInfo.KRBHOSTFQDN_KEY.toLowerCase())));"> 144 -            impalaTableInfo.setKrbHostFQDN(MathUtil.getString(props.get(ImpalaTableInfo.KRBHOSTFQDN_KEY.toLowerCas🔵</abbr></span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"><abbr title=" 145 -            impalaTableInfo.setKrbServiceName(MathUtil.getString(props.get(ImpalaTableInfo.KRBSERVICENAME_KEY.toLowerCase())));"> 145 -            impalaTableInfo.setKrbServiceName(MathUtil.getString(props.get(ImpalaTableInfo.KRBSERVICENAME_KEY.toLo🔵</abbr></span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 146 +            impalaTableInfo.setKrbHostFQDN(MathUtil.getString(props.get(KRB_HOST_FQDN_KEY.toLowerCase())));</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 147 +            impalaTableInfo.setKrbServiceName(MathUtil.getString(props.get(KRB_SERVICE_NAME_KEY.toLowerCase())));</span>
+ 148          } else if (authMech == 2) {
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"><abbr title=" 149 -            impalaTableInfo.setUserName(MathUtil.getString(props.get(ImpalaTableInfo.USER_NAME_KEY.toLowerCase())));"> 149 -            impalaTableInfo.setUserName(MathUtil.getString(props.get(ImpalaTableInfo.USER_NAME_KEY.toLowerCase()))🔵</abbr></span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 150 +            impalaTableInfo.setUserName(MathUtil.getString(props.get(USER_NAME_KEY.toLowerCase())));</span>
+ 151          } else if (authMech == 3) {
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"><abbr title=" 152 -            impalaTableInfo.setUserName(MathUtil.getString(props.get(ImpalaTableInfo.USER_NAME_KEY.toLowerCase())));"> 152 -            impalaTableInfo.setUserName(MathUtil.getString(props.get(ImpalaTableInfo.USER_NAME_KEY.toLowerCase()))🔵</abbr></span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"><abbr title=" 153 -            impalaTableInfo.setPassword(MathUtil.getString(props.get(ImpalaTableInfo.PASSWORD_KEY.toLowerCase())));"> 153 -            impalaTableInfo.setPassword(MathUtil.getString(props.get(ImpalaTableInfo.PASSWORD_KEY.toLowerCase())))🔵</abbr></span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 154 +            impalaTableInfo.setUserName(MathUtil.getString(props.get(USER_NAME_KEY.toLowerCase())));</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 155 +            impalaTableInfo.setPassword(MathUtil.getString(props.get(PASSWORD_KEY.toLowerCase())));</span>
+ 156          }
+ 157  
+
+
+
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 158 -        String enablePartitionStr = (String) props.get(ImpalaTableInfo.ENABLEPARITION_KEY.toLowerCase());</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 159 +        String storeType = MathUtil.getString(props.get(STORE_TYPE_KEY.toLowerCase()));</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 160 +        impalaTableInfo.setStoreType(Objects.isNull(storeType) ? DEFAULT_STORE_TYPE : storeType);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 161 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 162 +        String enablePartitionStr = (String) props.get(ENABLE_PARTITION_KEY.toLowerCase());</span>
+ 163          boolean enablePartition = MathUtil.getBoolean(enablePartitionStr == null ? &quot;false&quot; : enablePartitionStr);
+ 164          impalaTableInfo.setEnablePartition(enablePartition);
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 165 -        if (enablePartition) {</span>
+
+
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"><abbr title=" 166 -            String partitionFields = MathUtil.getString(props.get(ImpalaTableInfo.PARTITIONFIELDS_KEY.toLowerCase()));"> 166 -            String partitionFields = MathUtil.getString(props.get(ImpalaTableInfo.PARTITIONFIELDS_KEY.toLowerCase(🔵</abbr></span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 167 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 168 +        if (!impalaTableInfo.getStoreType().equalsIgnoreCase(KUDU_TYPE) &amp;&amp; enablePartition) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 169 +            String partitionFields = MathUtil.getString(props.get(PARTITION_FIELDS_KEY.toLowerCase()));</span>
+ 170              impalaTableInfo.setPartitionFields(partitionFields);
+ 171          }
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 172 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 173 +        impalaTableInfo.setType(CURRENT_TYPE);</span>
+ 174  
+ 175          impalaTableInfo.check();
+ 176          return impalaTableInfo;
+ 177      }
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 178 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 179 -    @Override</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 180 -    public  Class dbTypeConvertToJavaType(String fieldType) {</span>
+
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 181 -        switch (fieldType.toLowerCase()) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 182 -            case &quot;boolean&quot;:</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 183 -                return Boolean.class;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 184 -            case &quot;char&quot;:</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 185 -                return Character.class;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 186 -            case &quot;double&quot;:</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 187 -                return Double.class;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 188 -            case &quot;float&quot;:</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 189 -                return Float.class;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 190 -            case &quot;tinyint&quot;:</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 191 -                return Byte.class;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 192 -            case &quot;smallint&quot;:</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 193 -                return Short.class;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 194 -            case &quot;int&quot;:</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 195 -                return Integer.class;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 196 -            case &quot;bigint&quot;:</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 197 -                return Long.class;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 198 -            case &quot;decimal&quot;:</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 199 -                return BigDecimal.class;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 200 -            case &quot;string&quot;:</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 201 -            case &quot;varchar&quot;:</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 202 -                return String.class;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 203 -            case &quot;timestamp&quot;:</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 204 -                return Timestamp.class;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 205 -            default:</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 206 -                break;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 207 -        }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 208 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 209 -        throw new RuntimeException(&quot;不支持 &quot; + fieldType + &quot; 类型&quot;);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 210 -    }</span>
+ 211  }</pre></td>
+                        </tr>
+                    </table>
+                </div>
+              </body>
+            </html>
+            

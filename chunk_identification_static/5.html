@@ -1,0 +1,1356 @@
+<!DOCTYPE html>
+    <html lang="en">
+              <head>
+                <meta charset="utf-8">
+                <title>5</title>
+                    <style>
+                        #top {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        #bottom {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        abbr {
+                          /* Here is the delay */
+                          transition-delay:0s;
+                        }
+                    </style>
+              </head>
+              <body>
+                <span style="height: 4vh">
+                    5
+                    <a href="4.html">prev</a>
+                    <a href="6.html">next</a>
+                    <a href="5_chunks.html">chunks</a>
+                    <a href="index.html">index</a>
+                    AriaLyy/Aria_102d3ba0f641e26d0a6e82b0506f600ea40244dd_PublicComponent/src/main/java/com/arialyy/aria/core/common/RecordHandler.java
+                    <textarea rows=1 onclick='navigator.clipboard.writeText(this.value)'>cd C:\studies\se\mega\git-analyzer-plus\notebooks\debug
+del /Q *
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\AriaLyy\Aria show &quot;102d3ba0f641e26d0a6e82b0506f600ea40244dd:PublicComponent/src/main/java/com/arialyy/aria/core/common/RecordHandler.java&quot; &gt; committed.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\AriaLyy\Aria show &quot;102d3ba0f641e26d0a6e82b0506f600ea40244dd^1:PublicComponent/src/main/java/com/arialyy/aria/core/common/RecordHandler.java&quot; &gt; ours.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\AriaLyy\Aria show &quot;102d3ba0f641e26d0a6e82b0506f600ea40244dd^2:PublicComponent/src/main/java/com/arialyy/aria/core/common/RecordHandler.java&quot; &gt; theirs.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\AriaLyy\Aria show &quot;0cb5d3e68461842509c569f76610654b8d5e6298:PublicComponent/src/main/java/com/arialyy/aria/core/common/RecordHandler.java&quot; &gt; base.java
+copy ours.java 1ours.java
+copy ours.java 2ours.java
+copy theirs.java 1theirs.java
+copy theirs.java 2theirs.java
+copy base.java 1base.java
+copy base.java 2base.java
+&quot;C:\Program Files\Java\jdk1.8.0_241\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\jFSTMerge\build\libs\jFSTMerge-all.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\jfstmerge.java --show-base
+&quot;C:\Program Files\Eclipse Adoptium\jdk-17.0.11.9-hotspot\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\spork\target\spork-0.5.0-SNAPSHOT.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\spork.java
+del /Q 1*.java
+del /Q 2*.java
+del /Q jfstmerge.java.merge
+</textarea>
+                    {strict: [[b], [bj]], subset: [[b], [bj]]}
+                </span>
+                <div id="top">
+
+                    <table>
+                        <tr>
+                            <th>line based (standard git)</th>
+                            <th>jfstmerge</th>
+                            <th>spork</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1 /*
+   2  * Copyright (C) 2016 AriaLyy(https://github.com/AriaLyy/Aria)
+   3  *
+   4  * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+   5  * you may not use this file except in compliance with the License.
+   6  * You may obtain a copy of the License at
+   7  *
+   8  *      http://www.apache.org/licenses/LICENSE-2.0
+   9  *
+  10  * Unless required by applicable law or agreed to in writing, software
+  11  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  12  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  13  * See the License for the specific language governing permissions and
+  14  * limitations under the License.
+  15  */
+  16 package com.arialyy.aria.core.common;
+  17 
+  18 import com.arialyy.aria.core.TaskRecord;
+  19 import com.arialyy.aria.core.ThreadRecord;
+  20 import com.arialyy.aria.core.download.DownloadEntity;
+  21 import com.arialyy.aria.core.loader.ILoaderVisitor;
+  22 import com.arialyy.aria.core.loader.IRecordHandler;
+  23 import com.arialyy.aria.core.upload.UploadEntity;
+  24 import com.arialyy.aria.core.wrapper.AbsTaskWrapper;
+  25 import com.arialyy.aria.core.wrapper.ITaskWrapper;
+  26 import com.arialyy.aria.core.wrapper.RecordWrapper;
+  27 import com.arialyy.aria.orm.DbEntity;
+  28 import com.arialyy.aria.util.ALog;
+  29 import com.arialyy.aria.util.CommonUtil;
+  30 import com.arialyy.aria.util.DbDataHelper;
+  31 import com.arialyy.aria.util.FileUtil;
+  32 import java.io.File;
+  33 import java.util.HashSet;
+  34 import java.util.List;
+  35 import java.util.Properties;
+  36 import java.util.Set;
+  37 
+  38 /**
+  39  * 处理任务记录，分配线程区间
+  40  */
+  41 public abstract class RecordHandler implements IRecordHandler {
+  42   protected final String TAG = CommonUtil.getClassName(this);
+  43 
+  44   @Deprecated private File mConfigFile;
+  45   private TaskRecord mTaskRecord;
+  46   private AbsTaskWrapper mTaskWrapper;
+  47   private AbsNormalEntity mEntity;
+  48 
+  49   public RecordHandler(AbsTaskWrapper wrapper) {
+  50     mTaskWrapper = wrapper;
+  51     mEntity = (AbsNormalEntity) mTaskWrapper.getEntity();
+  52   }
+  53 
+  54   public AbsTaskWrapper getWrapper() {
+  55     return mTaskWrapper;
+  56   }
+  57 
+  58   public AbsNormalEntity getEntity() {
+  59     return mEntity;
+  60   }
+  61 
+  62   @Override public void onPre() {
+  63 
+  64   }
+  65 
+  66   /**
+  67    * 获取任务记录，如果任务记录存在，检查任务记录
+  68    * 检查记录 对于分块任务： 子分块不存在或被删除，子线程将重新下载
+  69    * 对于普通任务： 预下载文件不存在，则任务任务呗删除
+  70    * 如果任务记录不存在或线程记录不存在，初始化记录
+  71    *
+  72    * @return 任务记录
+  73    */
+  74   @Override
+  75   public TaskRecord getRecord() {
+  76     mConfigFile = new File(CommonUtil.getFileConfigPath(false, mEntity.getFileName()));
+  77     if (mConfigFile.exists()) {
+  78       convertDb();
+  79     } else {
+  80       onPre();
+  81       mTaskRecord = DbDataHelper.getTaskRecord(getFilePath(), mEntity.getTaskType());
+  82       if (mTaskRecord == null) {
+  83 &lt;&lt;&lt;&lt;&lt;&lt;&lt; GitAnalyzerPlus_ours
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  84         if (!new File(getFilePath()).exists()) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  85           FileUtil.createFile(getFilePath());</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  86         }</span>
+  87 ||||||| GitAnalyzerPlus_base
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  88         if (!new File(getFilePath()).exists()){</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  89           FileUtil.createFile(getFilePath());</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  90         }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  91         initRecord(true);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  92       } else {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  93         File file = new File(mTaskRecord.filePath);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  94         if (!file.exists()) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  95           ALog.w(TAG, String.format(&quot;文件【%s】不存在，重新分配线程区间&quot;, mTaskRecord.filePath));</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  96           DbEntity.deleteData(ThreadRecord.class, &quot;taskKey=?&quot;, mTaskRecord.filePath);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  97           mTaskRecord.threadRecords.clear();</span>
+  98 =======
+  99 &gt;&gt;&gt;&gt;&gt;&gt;&gt; GitAnalyzerPlus_theirs
+ 100         initRecord(true);
+ 101 &lt;&lt;&lt;&lt;&lt;&lt;&lt; GitAnalyzerPlus_ours
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 102       } else {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 103         File file = new File(mTaskRecord.filePath);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 104         if (!file.exists()) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 105           ALog.w(TAG, String.format(&quot;文件【%s】不存在，重新分配线程区间&quot;, mTaskRecord.filePath));</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 106           DbEntity.deleteData(ThreadRecord.class, &quot;taskKey=?&quot;, mTaskRecord.filePath);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 107           mTaskRecord.threadRecords.clear();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 108           mTaskRecord.threadNum = initTaskThreadNum();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 109           initRecord(false);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 110         } else if (mTaskRecord.threadRecords == null || mTaskRecord.threadRecords.isEmpty()) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 111           mTaskRecord.threadNum = initTaskThreadNum();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 112           initRecord(false);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 113         }</span>
+ 114 ||||||| GitAnalyzerPlus_base
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 115           FileUtil.createFile(getFilePath());</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 116         }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 117         initRecord(true);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 118       } else {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 119         File file = new File(mTaskRecord.filePath);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 120         if (!file.exists()) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 121           ALog.w(TAG, String.format(&quot;文件【%s】不存在，重新分配线程区间&quot;, mTaskRecord.filePath));</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 122           DbEntity.deleteData(ThreadRecord.class, &quot;taskKey=?&quot;, mTaskRecord.filePath);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 123           mTaskRecord.threadRecords.clear();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 124           mTaskRecord.threadNum = mAdapter.initTaskThreadNum();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 125           initRecord(false);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 126         } else if (mTaskRecord.threadRecords == null || mTaskRecord.threadRecords.isEmpty()) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 127           mTaskRecord.threadNum = mAdapter.initTaskThreadNum();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 128           initRecord(false);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 129         }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 130       }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 131       mAdapter.handlerTaskRecord(mTaskRecord);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 132     }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 133     saveRecord();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 134     return mTaskRecord;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 135   }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 136 </span>
+ 137 =======
+ 138 &gt;&gt;&gt;&gt;&gt;&gt;&gt; GitAnalyzerPlus_theirs
+ 139       }
+ 140       handlerTaskRecord(mTaskRecord);
+ 141     }
+ 142     saveRecord();
+ 143     return mTaskRecord;
+ 144   }
+ 145 
+ 146   /**
+ 147    * convertDb 是兼容性代码 从3.4.1开始，线程配置信息将存储在数据库中。 将配置文件的内容复制到数据库中，并将配置文件删除
+ 148    */
+ 149   private void convertDb() {
+ 150     List&lt;RecordWrapper&gt; records =
+ 151         DbEntity.findRelationData(RecordWrapper.class, &quot;TaskRecord.filePath=?&quot;,
+ 152             getFilePath());
+ 153     if (records == null || records.size() == 0) {
+ 154       Properties pro = FileUtil.loadConfig(mConfigFile);
+ 155       if (pro.isEmpty()) {
+ 156         ALog.d(TAG, &quot;老版本的线程记录为空，任务为新任务&quot;);
+ 157         initRecord(true);
+ 158         return;
+ 159       }
+ 160 
+ 161       Set&lt;Object&gt; keys = pro.keySet();
+ 162       // 老版本记录是5s存一次，但是5s中内，如果线程执行完成，record记录是没有的，只有state记录...
+ 163       // 第一步应该是record 和 state去重取正确的线程数
+ 164       Set&lt;Integer&gt; set = new HashSet&lt;&gt;();
+ 165       for (Object key : keys) {
+ 166         String str = String.valueOf(key);
+ 167         int i = Integer.parseInt(str.substring(str.length() - 1));
+ 168         set.add(i);
+ 169       }
+ 170       int threadNum = set.size();
+ 171       if (threadNum == 0) {
+ 172         ALog.d(TAG, &quot;线程数为空，任务为新任务&quot;);
+ 173         initRecord(true);
+ 174         return;
+ 175       }
+ 176       mTaskWrapper.setNewTask(false);
+ 177       mTaskRecord = createTaskRecord(threadNum);
+ 178       mTaskRecord.isBlock = false;
+ 179       File tempFile = new File(getFilePath());
+ 180       for (int i = 0; i &lt; threadNum; i++) {
+ 181         ThreadRecord tRecord = new ThreadRecord();
+ 182         tRecord.taskKey = mTaskRecord.filePath;
+ 183         Object state = pro.getProperty(tempFile.getName() + STATE + i);
+ 184         Object record = pro.getProperty(tempFile.getName() + RECORD + i);
+ 185         if (state != null &amp;&amp; Integer.parseInt(String.valueOf(state)) == 1) {
+ 186           tRecord.isComplete = true;
+ 187           continue;
+ 188         }
+ 189         if (record != null) {
+ 190           long temp = Long.parseLong(String.valueOf(record));
+ 191           tRecord.startLocation = temp &gt; 0 ? temp : 0;
+ 192         } else {
+ 193           tRecord.startLocation = 0;
+ 194         }
+ 195         mTaskRecord.threadRecords.add(tRecord);
+ 196       }
+ 197       FileUtil.deleteFile(mConfigFile);
+ 198     }
+ 199   }
+ 200 
+ 201   /**
+ 202    * 初始化任务记录，分配线程区间，如果任务记录不存在，则创建新的任务记录
+ 203    *
+ 204    * @param newRecord {@code true} 需要创建新{@link TaskRecord}
+ 205    */
+ 206   private void initRecord(boolean newRecord) {
+ 207     if (newRecord) {
+ 208       mTaskRecord = createTaskRecord(initTaskThreadNum());
+ 209     }
+ 210     mTaskWrapper.setNewTask(true);
+ 211     int requestType = mTaskWrapper.getRequestType();
+ 212     if (requestType == ITaskWrapper.M3U8_LIVE) {
+ 213       return;
+ 214     }
+ 215     long blockSize = mEntity.getFileSize() / mTaskRecord.threadNum;
+ 216     // 处理线程区间记录
+ 217     for (int i = 0; i &lt; mTaskRecord.threadNum; i++) {
+ 218       long startL = i * blockSize, endL = (i + 1) * blockSize;
+ 219       ThreadRecord tr = createThreadRecord(mTaskRecord, i, startL, endL);
+ 220       mTaskRecord.threadRecords.add(tr);
+ 221     }
+ 222   }
+ 223 
+ 224   /**
+ 225    * 保存任务记录
+ 226    */
+ 227   private void saveRecord() {
+ 228     mTaskRecord.threadNum = mTaskRecord.threadRecords.size();
+ 229     mTaskRecord.save();
+ 230     if (mTaskRecord.threadRecords != null &amp;&amp; !mTaskRecord.threadRecords.isEmpty()) {
+ 231       DbEntity.saveAll(mTaskRecord.threadRecords);
+ 232     }
+ 233     ALog.d(TAG, String.format(&quot;保存记录，线程记录数：%s&quot;, mTaskRecord.threadRecords.size()));
+ 234   }
+ 235 
+ 236   /**
+ 237    * 获取任务路径
+ 238    *
+ 239    * @return 任务文件路径
+ 240    */
+ 241   private String getFilePath() {
+ 242     if (mEntity instanceof DownloadEntity) {
+ 243       return ((DownloadEntity) mTaskWrapper.getEntity()).getFilePath();
+ 244     } else {
+ 245       return ((UploadEntity) mTaskWrapper.getEntity()).getFilePath();
+ 246     }
+ 247   }
+ 248 
+ 249   @Override public void accept(ILoaderVisitor visitor) {
+ 250     visitor.addComponent(this);
+ 251   }
+ 252 
+ 253   @Override public boolean checkTaskCompleted() {
+ 254     if (mTaskRecord == null
+ 255         || mTaskRecord.threadRecords == null
+ 256         || mTaskRecord.threadRecords.isEmpty()) {
+ 257       return false;
+ 258     }
+ 259     int completeNum = 0;
+ 260     for (ThreadRecord tr : mTaskRecord.threadRecords) {
+ 261       if (tr.isComplete) {
+ 262         completeNum++;
+ 263       }
+ 264     }
+ 265     return completeNum != 0 &amp;&amp; completeNum == mTaskRecord.threadNum;
+ 266   }
+ 267 }</pre></td>
+                            <td><pre>   1 /*
+   2  * Copyright (C) 2016 AriaLyy(https://github.com/AriaLyy/Aria)
+   3  *
+   4  * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+   5  * you may not use this file except in compliance with the License.
+   6  * You may obtain a copy of the License at
+   7  *
+   8  *      http://www.apache.org/licenses/LICENSE-2.0
+   9  *
+  10  * Unless required by applicable law or agreed to in writing, software
+  11  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  12  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  13  * See the License for the specific language governing permissions and
+  14  * limitations under the License.
+  15  */
+  16 package com.arialyy.aria.core.common;
+  17 
+  18 import com.arialyy.aria.core.TaskRecord;
+  19 import com.arialyy.aria.core.ThreadRecord;
+  20 import com.arialyy.aria.core.download.DownloadEntity;
+  21 import com.arialyy.aria.core.loader.ILoaderVisitor;
+  22 import com.arialyy.aria.core.loader.IRecordHandler;
+  23 import com.arialyy.aria.core.upload.UploadEntity;
+  24 import com.arialyy.aria.core.wrapper.AbsTaskWrapper;
+  25 import com.arialyy.aria.core.wrapper.ITaskWrapper;
+  26 import com.arialyy.aria.core.wrapper.RecordWrapper;
+  27 import com.arialyy.aria.orm.DbEntity;
+  28 import com.arialyy.aria.util.ALog;
+  29 import com.arialyy.aria.util.CommonUtil;
+  30 import com.arialyy.aria.util.DbDataHelper;
+  31 import com.arialyy.aria.util.FileUtil;
+  32 import java.io.File;
+  33 import java.util.HashSet;
+  34 import java.util.List;
+  35 import java.util.Properties;
+  36 import java.util.Set;
+  37 
+  38 /**
+  39  * 处理任务记录，分配线程区间
+  40  */
+  41 public abstract class RecordHandler implements IRecordHandler {
+  42   protected final String TAG = CommonUtil.getClassName(this);
+  43 
+  44   @Deprecated private File mConfigFile;
+  45   private TaskRecord mTaskRecord;
+  46   private AbsTaskWrapper mTaskWrapper;
+  47   private AbsNormalEntity mEntity;
+  48 
+  49   public RecordHandler(AbsTaskWrapper wrapper) {
+  50     mTaskWrapper = wrapper;
+  51     mEntity = (AbsNormalEntity) mTaskWrapper.getEntity();
+  52   }
+  53 
+  54   public AbsTaskWrapper getWrapper() {
+  55     return mTaskWrapper;
+  56   }
+  57 
+  58   public AbsNormalEntity getEntity() {
+  59     return mEntity;
+  60   }
+  61 
+  62   @Override public void onPre() {
+  63 
+  64   }
+  65 
+  66   /**
+  67    * 获取任务记录，如果任务记录存在，检查任务记录
+  68    * 检查记录 对于分块任务： 子分块不存在或被删除，子线程将重新下载
+  69    * 对于普通任务： 预下载文件不存在，则任务任务呗删除
+  70    * 如果任务记录不存在或线程记录不存在，初始化记录
+  71    *
+  72    * @return 任务记录
+  73    */
+  74   @Override
+  75   public TaskRecord getRecord() {
+  76     mConfigFile = new File(CommonUtil.getFileConfigPath(false, mEntity.getFileName()));
+  77     if (mConfigFile.exists()) {
+  78       convertDb();
+  79     } else {
+  80       onPre();
+  81       mTaskRecord = DbDataHelper.getTaskRecord(getFilePath(), mEntity.getTaskType());
+  82       if (mTaskRecord == null) {
+  83         initRecord(true);
+  84 &lt;&lt;&lt;&lt;&lt;&lt;&lt; MINE
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  85       } else {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  86         File file = new File(mTaskRecord.filePath);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  87         if (!file.exists()) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  88           ALog.w(TAG, String.format(&quot;文件【%s】不存在，重新分配线程区间&quot;, mTaskRecord.filePath));</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  89           DbEntity.deleteData(ThreadRecord.class, &quot;taskKey=?&quot;, mTaskRecord.filePath);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  90           mTaskRecord.threadRecords.clear();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  91           mTaskRecord.threadNum = initTaskThreadNum();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  92           initRecord(false);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  93         } else if (mTaskRecord.threadRecords == null || mTaskRecord.threadRecords.isEmpty()) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  94           mTaskRecord.threadNum = initTaskThreadNum();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  95           initRecord(false);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  96         }</span>
+  97 ||||||| BASE
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  98           FileUtil.createFile(getFilePath());</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  99         }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 100         initRecord(true);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 101       } else {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 102         File file = new File(mTaskRecord.filePath);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 103         if (!file.exists()) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 104           ALog.w(TAG, String.format(&quot;文件【%s】不存在，重新分配线程区间&quot;, mTaskRecord.filePath));</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 105           DbEntity.deleteData(ThreadRecord.class, &quot;taskKey=?&quot;, mTaskRecord.filePath);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 106           mTaskRecord.threadRecords.clear();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 107           mTaskRecord.threadNum = mAdapter.initTaskThreadNum();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 108           initRecord(false);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 109         } else if (mTaskRecord.threadRecords == null || mTaskRecord.threadRecords.isEmpty()) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 110           mTaskRecord.threadNum = mAdapter.initTaskThreadNum();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 111           initRecord(false);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 112         }</span>
+ 113 =======
+ 114 &gt;&gt;&gt;&gt;&gt;&gt;&gt; YOURS
+ 115       }
+ 116       handlerTaskRecord(mTaskRecord);
+ 117     }
+ 118     saveRecord();
+ 119     return mTaskRecord;
+ 120   }
+ 121 
+ 122   /**
+ 123    * convertDb 是兼容性代码 从3.4.1开始，线程配置信息将存储在数据库中。 将配置文件的内容复制到数据库中，并将配置文件删除
+ 124    */
+ 125   private void convertDb() {
+ 126     List&lt;RecordWrapper&gt; records =
+ 127         DbEntity.findRelationData(RecordWrapper.class, &quot;TaskRecord.filePath=?&quot;,
+ 128             getFilePath());
+ 129     if (records == null || records.size() == 0) {
+ 130       Properties pro = FileUtil.loadConfig(mConfigFile);
+ 131       if (pro.isEmpty()) {
+ 132         ALog.d(TAG, &quot;老版本的线程记录为空，任务为新任务&quot;);
+ 133         initRecord(true);
+ 134         return;
+ 135       }
+ 136 
+ 137       Set&lt;Object&gt; keys = pro.keySet();
+ 138       // 老版本记录是5s存一次，但是5s中内，如果线程执行完成，record记录是没有的，只有state记录...
+ 139       // 第一步应该是record 和 state去重取正确的线程数
+ 140       Set&lt;Integer&gt; set = new HashSet&lt;&gt;();
+ 141       for (Object key : keys) {
+ 142         String str = String.valueOf(key);
+ 143         int i = Integer.parseInt(str.substring(str.length() - 1));
+ 144         set.add(i);
+ 145       }
+ 146       int threadNum = set.size();
+ 147       if (threadNum == 0) {
+ 148         ALog.d(TAG, &quot;线程数为空，任务为新任务&quot;);
+ 149         initRecord(true);
+ 150         return;
+ 151       }
+ 152       mTaskWrapper.setNewTask(false);
+ 153       mTaskRecord = createTaskRecord(threadNum);
+ 154       mTaskRecord.isBlock = false;
+ 155       File tempFile = new File(getFilePath());
+ 156       for (int i = 0; i &lt; threadNum; i++) {
+ 157         ThreadRecord tRecord = new ThreadRecord();
+ 158         tRecord.taskKey = mTaskRecord.filePath;
+ 159         Object state = pro.getProperty(tempFile.getName() + STATE + i);
+ 160         Object record = pro.getProperty(tempFile.getName() + RECORD + i);
+ 161         if (state != null &amp;&amp; Integer.parseInt(String.valueOf(state)) == 1) {
+ 162           tRecord.isComplete = true;
+ 163           continue;
+ 164         }
+ 165         if (record != null) {
+ 166           long temp = Long.parseLong(String.valueOf(record));
+ 167           tRecord.startLocation = temp &gt; 0 ? temp : 0;
+ 168         } else {
+ 169           tRecord.startLocation = 0;
+ 170         }
+ 171         mTaskRecord.threadRecords.add(tRecord);
+ 172       }
+ 173       FileUtil.deleteFile(mConfigFile);
+ 174     }
+ 175   }
+ 176 
+ 177   /**
+ 178    * 初始化任务记录，分配线程区间，如果任务记录不存在，则创建新的任务记录
+ 179    *
+ 180    * @param newRecord {@code true} 需要创建新{@link TaskRecord}
+ 181    */
+ 182   private void initRecord(boolean newRecord) {
+ 183     if (newRecord) {
+ 184       mTaskRecord = createTaskRecord(initTaskThreadNum());
+ 185     }
+ 186     mTaskWrapper.setNewTask(true);
+ 187     int requestType = mTaskWrapper.getRequestType();
+ 188     if (requestType == ITaskWrapper.M3U8_LIVE) {
+ 189       return;
+ 190     }
+ 191     long blockSize = mEntity.getFileSize() / mTaskRecord.threadNum;
+ 192     // 处理线程区间记录
+ 193     for (int i = 0; i &lt; mTaskRecord.threadNum; i++) {
+ 194       long startL = i * blockSize, endL = (i + 1) * blockSize;
+ 195       ThreadRecord tr = createThreadRecord(mTaskRecord, i, startL, endL);
+ 196       mTaskRecord.threadRecords.add(tr);
+ 197     }
+ 198   }
+ 199 
+ 200   /**
+ 201    * 保存任务记录
+ 202    */
+ 203   private void saveRecord() {
+ 204     mTaskRecord.threadNum = mTaskRecord.threadRecords.size();
+ 205     mTaskRecord.save();
+ 206     if (mTaskRecord.threadRecords != null &amp;&amp; !mTaskRecord.threadRecords.isEmpty()) {
+ 207       DbEntity.saveAll(mTaskRecord.threadRecords);
+ 208     }
+ 209     ALog.d(TAG, String.format(&quot;保存记录，线程记录数：%s&quot;, mTaskRecord.threadRecords.size()));
+ 210   }
+ 211 
+ 212   /**
+ 213    * 获取任务路径
+ 214    *
+ 215    * @return 任务文件路径
+ 216    */
+ 217   private String getFilePath() {
+ 218     if (mEntity instanceof DownloadEntity) {
+ 219       return ((DownloadEntity) mTaskWrapper.getEntity()).getFilePath();
+ 220     } else {
+ 221       return ((UploadEntity) mTaskWrapper.getEntity()).getFilePath();
+ 222     }
+ 223   }
+ 224 
+ 225   @Override public void accept(ILoaderVisitor visitor) {
+ 226     visitor.addComponent(this);
+ 227   }
+ 228 
+ 229   @Override public boolean checkTaskCompleted() {
+ 230     if (mTaskRecord == null
+ 231         || mTaskRecord.threadRecords == null
+ 232         || mTaskRecord.threadRecords.isEmpty()) {
+ 233       return false;
+ 234     }
+ 235     int completeNum = 0;
+ 236     for (ThreadRecord tr : mTaskRecord.threadRecords) {
+ 237       if (tr.isComplete) {
+ 238         completeNum++;
+ 239       }
+ 240     }
+ 241     return completeNum != 0 &amp;&amp; completeNum == mTaskRecord.threadNum;
+ 242   }
+ 243 }
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ </pre></td>
+                            <td><pre>   1 /*
+   2  * Copyright (C) 2016 AriaLyy(https://github.com/AriaLyy/Aria)
+   3  *
+   4  * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+   5  * you may not use this file except in compliance with the License.
+   6  * You may obtain a copy of the License at
+   7  *
+   8  *      http://www.apache.org/licenses/LICENSE-2.0
+   9  *
+  10  * Unless required by applicable law or agreed to in writing, software
+  11  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  12  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  13  * See the License for the specific language governing permissions and
+  14  * limitations under the License.
+  15  */
+  16 package com.arialyy.aria.core.common;
+  17 
+  18 import com.arialyy.aria.core.TaskRecord;
+  19 import com.arialyy.aria.core.ThreadRecord;
+  20 import com.arialyy.aria.core.download.DownloadEntity;
+  21 import com.arialyy.aria.core.loader.ILoaderVisitor;
+  22 import com.arialyy.aria.core.loader.IRecordHandler;
+  23 import com.arialyy.aria.core.upload.UploadEntity;
+  24 import com.arialyy.aria.core.wrapper.AbsTaskWrapper;
+  25 import com.arialyy.aria.core.wrapper.ITaskWrapper;
+  26 import com.arialyy.aria.core.wrapper.RecordWrapper;
+  27 import com.arialyy.aria.orm.DbEntity;
+  28 import com.arialyy.aria.util.ALog;
+  29 import com.arialyy.aria.util.CommonUtil;
+  30 import com.arialyy.aria.util.DbDataHelper;
+  31 import com.arialyy.aria.util.FileUtil;
+  32 import java.io.File;
+  33 import java.util.HashSet;
+  34 import java.util.List;
+  35 import java.util.Properties;
+  36 import java.util.Set;
+  37 
+  38 
+  39 /**
+  40  * 处理任务记录，分配线程区间
+  41  */
+  42 public abstract class RecordHandler implements IRecordHandler {
+  43   protected final String TAG = CommonUtil.getClassName(this);
+  44 
+  45   @Deprecated private File mConfigFile;
+  46 
+  47   private TaskRecord mTaskRecord;
+  48 
+  49   private AbsTaskWrapper mTaskWrapper;
+  50 
+  51   private AbsNormalEntity mEntity;
+  52 
+  53   public RecordHandler(AbsTaskWrapper wrapper) {
+  54     mTaskWrapper = wrapper;
+  55     mEntity = ((AbsNormalEntity) (mTaskWrapper.getEntity()));
+  56   }
+  57 
+  58   public AbsTaskWrapper getWrapper() {
+  59     return mTaskWrapper;
+  60   }
+  61 
+  62   public AbsNormalEntity getEntity() {
+  63     return mEntity;
+  64   }
+  65 
+  66   @Override public void onPre() {
+  67 
+  68   }
+  69 
+  70   /**
+  71    * 获取任务记录，如果任务记录存在，检查任务记录
+  72    * 检查记录 对于分块任务： 子分块不存在或被删除，子线程将重新下载
+  73    * 对于普通任务： 预下载文件不存在，则任务任务呗删除
+  74    * 如果任务记录不存在或线程记录不存在，初始化记录
+  75    *
+  76    * @return 任务记录
+  77    */
+  78   @Override
+  79   public TaskRecord getRecord() {
+  80     mConfigFile = new File(CommonUtil.getFileConfigPath(false, mEntity.getFileName()));
+  81     if (mConfigFile.exists()) {
+  82       convertDb();
+  83     } else {
+  84       onPre();
+  85       mTaskRecord = DbDataHelper.getTaskRecord(getFilePath(), mEntity.getTaskType());
+  86       if (mTaskRecord == null) {
+  87         initRecord(true);
+  88       }
+  89       handlerTaskRecord(mTaskRecord);
+  90     }
+  91     saveRecord();
+  92     return mTaskRecord;
+  93   }
+  94 
+  95   /**
+  96    * convertDb 是兼容性代码 从3.4.1开始，线程配置信息将存储在数据库中。 将配置文件的内容复制到数据库中，并将配置文件删除
+  97    */
+  98   private void convertDb() {
+<abbr title="  99     List&lt;RecordWrapper&gt; records = DbEntity.findRelationData(RecordWrapper.class, &quot;TaskRecord.filePath=?&quot;, getFilePath());">  99     List&lt;RecordWrapper&gt; records = DbEntity.findRelationData(RecordWrapper.class, &quot;TaskRecord.filePath=?&quot;,🔵</abbr>
+ 100     if ((records == null) || (records.size() == 0)) {
+ 101       Properties pro = FileUtil.loadConfig(mConfigFile);
+ 102       if (pro.isEmpty()) {
+ 103         ALog.d(TAG, &quot;老版本的线程记录为空，任务为新任务&quot;);
+ 104         initRecord(true);
+ 105         return;
+ 106       }
+ 107       Set&lt;Object&gt; keys = pro.keySet();
+ 108       // 老版本记录是5s存一次，但是5s中内，如果线程执行完成，record记录是没有的，只有state记录...
+ 109       // 第一步应该是record 和 state去重取正确的线程数
+ 110       Set&lt;Integer&gt; set = new HashSet&lt;&gt;();
+ 111       for (Object key : keys) {
+ 112         String str = String.valueOf(key);
+ 113         int i = Integer.parseInt(str.substring(str.length() - 1));
+ 114         set.add(i);
+ 115       }
+ 116       int threadNum = set.size();
+ 117       if (threadNum == 0) {
+ 118         ALog.d(TAG, &quot;线程数为空，任务为新任务&quot;);
+ 119         initRecord(true);
+ 120         return;
+ 121       }
+ 122       mTaskWrapper.setNewTask(false);
+ 123       mTaskRecord = createTaskRecord(threadNum);
+ 124       mTaskRecord.isBlock = false;
+ 125       File tempFile = new File(getFilePath());
+ 126       for (int i = 0; i &lt; threadNum; i++) {
+ 127         ThreadRecord tRecord = new ThreadRecord();
+ 128         tRecord.taskKey = mTaskRecord.filePath;
+ 129         Object state = pro.getProperty((tempFile.getName() + STATE) + i);
+ 130         Object record = pro.getProperty((tempFile.getName() + RECORD) + i);
+ 131         if ((state != null) &amp;&amp; (Integer.parseInt(String.valueOf(state)) == 1)) {
+ 132           tRecord.isComplete = true;
+ 133           continue;
+ 134         }
+ 135         if (record != null) {
+ 136           long temp = Long.parseLong(String.valueOf(record));
+ 137           tRecord.startLocation = (temp &gt; 0) ? temp : 0;
+ 138         } else {
+ 139           tRecord.startLocation = 0;
+ 140         }
+ 141         mTaskRecord.threadRecords.add(tRecord);
+ 142       }
+ 143       FileUtil.deleteFile(mConfigFile);
+ 144     }
+ 145   }
+ 146 
+ 147   /**
+ 148    * 初始化任务记录，分配线程区间，如果任务记录不存在，则创建新的任务记录
+ 149    *
+ 150    * @param newRecord {@code true} 需要创建新{@link TaskRecord}
+ 151    */
+ 152   private void initRecord(boolean newRecord) {
+ 153     if (newRecord) {
+ 154       mTaskRecord = createTaskRecord(initTaskThreadNum());
+ 155     }
+ 156     mTaskWrapper.setNewTask(true);
+ 157     int requestType = mTaskWrapper.getRequestType();
+ 158     if (requestType == ITaskWrapper.M3U8_LIVE) {
+ 159       return;
+ 160     }
+ 161     long blockSize = mEntity.getFileSize() / mTaskRecord.threadNum;
+ 162     // 处理线程区间记录
+ 163     for (int i = 0; i &lt; mTaskRecord.threadNum; i++) {
+ 164       long startL = i * blockSize;
+ 165       long endL = (i + 1) * blockSize;
+ 166       ThreadRecord tr = createThreadRecord(mTaskRecord, i, startL, endL);
+ 167       mTaskRecord.threadRecords.add(tr);
+ 168     }
+ 169   }
+ 170 
+ 171   /**
+ 172    * 保存任务记录
+ 173    */
+ 174   private void saveRecord() {
+ 175     mTaskRecord.threadNum = mTaskRecord.threadRecords.size();
+ 176     mTaskRecord.save();
+ 177     if (mTaskRecord.threadRecords != null &amp;&amp; !mTaskRecord.threadRecords.isEmpty()) {
+ 178       DbEntity.saveAll(mTaskRecord.threadRecords);
+ 179     }
+ 180     ALog.d(TAG, String.format(&quot;保存记录，线程记录数：%s&quot;, mTaskRecord.threadRecords.size()));
+ 181   }
+ 182 
+ 183   /**
+ 184    * 获取任务路径
+ 185    *
+ 186    * @return 任务文件路径
+ 187    */
+ 188   private String getFilePath() {
+ 189     if (mEntity instanceof DownloadEntity) {
+ 190       return ((DownloadEntity) mTaskWrapper.getEntity()).getFilePath();
+ 191     } else {
+ 192       return ((UploadEntity) mTaskWrapper.getEntity()).getFilePath();
+ 193     }
+ 194   }
+ 195 
+ 196   @Override
+ 197   public void accept(ILoaderVisitor visitor) {
+ 198     visitor.addComponent(this);
+ 199   }
+ 200 
+ 201   @Override public boolean checkTaskCompleted() {
+ 202     if (mTaskRecord == null
+ 203         || mTaskRecord.threadRecords == null
+ 204         || mTaskRecord.threadRecords.isEmpty()) {
+ 205       return false;
+ 206     }
+ 207     int completeNum = 0;
+ 208     for (ThreadRecord tr : mTaskRecord.threadRecords) {
+ 209       if (tr.isComplete) {
+ 210         completeNum++;
+ 211       }
+ 212     }
+ 213     return completeNum != 0 &amp;&amp; completeNum == mTaskRecord.threadNum;
+ 214   }
+ 215 }
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ </pre></td>
+                        </tr>
+                    </table>
+                </div>
+                <div id="bottom">
+                    <table style="margin:auto">
+                        <tr>
+                            <th>ours vs. base</th>
+                            <th>theirs vs. base</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1  /*
+   2   * Copyright (C) 2016 AriaLyy(https://github.com/AriaLyy/Aria)
+   3   *
+   4   * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+   5   * you may not use this file except in compliance with the License.
+   6   * You may obtain a copy of the License at
+   7   *
+   8   *      http://www.apache.org/licenses/LICENSE-2.0
+   9   *
+  10   * Unless required by applicable law or agreed to in writing, software
+  11   * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  12   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  13   * See the License for the specific language governing permissions and
+  14   * limitations under the License.
+  15   */
+  16  package com.arialyy.aria.core.common;
+  17  
+  18  import com.arialyy.aria.core.TaskRecord;
+  19  import com.arialyy.aria.core.ThreadRecord;
+  20  import com.arialyy.aria.core.download.DownloadEntity;
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  21 -import com.arialyy.aria.core.inf.IRecordHandler;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  22 -import com.arialyy.aria.core.inf.IRecordHandlerAdapter;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  23 +import com.arialyy.aria.core.loader.ILoaderVisitor;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  24 +import com.arialyy.aria.core.loader.IRecordHandler;</span>
+  25  import com.arialyy.aria.core.upload.UploadEntity;
+  26  import com.arialyy.aria.core.wrapper.AbsTaskWrapper;
+  27  import com.arialyy.aria.core.wrapper.ITaskWrapper;
+  28  import com.arialyy.aria.core.wrapper.RecordWrapper;
+  29  import com.arialyy.aria.orm.DbEntity;
+  30  import com.arialyy.aria.util.ALog;
+  31  import com.arialyy.aria.util.CommonUtil;
+  32  import com.arialyy.aria.util.DbDataHelper;
+  33  import com.arialyy.aria.util.FileUtil;
+  34  import java.io.File;
+  35  import java.util.HashSet;
+  36  import java.util.List;
+  37  import java.util.Properties;
+  38  import java.util.Set;
+  39  
+  40  /**
+  41   * 处理任务记录，分配线程区间
+  42   */
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  43 -public class RecordHandler implements IRecordHandler {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  44 -  private final String TAG = &quot;RecordHandler&quot;;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  45 +public abstract class RecordHandler implements IRecordHandler {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  46 +  protected final String TAG = CommonUtil.getClassName(this);</span>
+  47  
+  48    @Deprecated private File mConfigFile;
+  49    private TaskRecord mTaskRecord;
+  50    private AbsTaskWrapper mTaskWrapper;
+  51    private AbsNormalEntity mEntity;
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  52 -  private IRecordHandlerAdapter mAdapter;</span>
+  53  
+  54    public RecordHandler(AbsTaskWrapper wrapper) {
+  55      mTaskWrapper = wrapper;
+  56      mEntity = (AbsNormalEntity) mTaskWrapper.getEntity();
+  57    }
+  58  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  59 -  public void setAdapter(IRecordHandlerAdapter mAdapter) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  60 -    this.mAdapter = mAdapter;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  61 +  public AbsTaskWrapper getWrapper() {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  62 +    return mTaskWrapper;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  63 +  }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  64 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  65 +  public AbsNormalEntity getEntity() {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  66 +    return mEntity;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  67 +  }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  68 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  69 +  @Override public void onPre() {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  70 +</span>
+  71    }
+  72  
+  73    /**
+  74     * 获取任务记录，如果任务记录存在，检查任务记录
+  75     * 检查记录 对于分块任务： 子分块不存在或被删除，子线程将重新下载
+  76     * 对于普通任务： 预下载文件不存在，则任务任务呗删除
+  77     * 如果任务记录不存在或线程记录不存在，初始化记录
+  78     *
+  79     * @return 任务记录
+  80     */
+  81    @Override
+  82    public TaskRecord getRecord() {
+  83      mConfigFile = new File(CommonUtil.getFileConfigPath(false, mEntity.getFileName()));
+  84      if (mConfigFile.exists()) {
+  85        convertDb();
+  86      } else {
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  87 -      mAdapter.onPre();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  88 +      onPre();</span>
+  89        mTaskRecord = DbDataHelper.getTaskRecord(getFilePath(), mEntity.getTaskType());
+  90        if (mTaskRecord == null) {
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  91 -        if (!new File(getFilePath()).exists()){</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  92 +        if (!new File(getFilePath()).exists()) {</span>
+  93            FileUtil.createFile(getFilePath());
+  94          }
+  95          initRecord(true);
+  96        } else {
+  97          File file = new File(mTaskRecord.filePath);
+  98          if (!file.exists()) {
+  99            ALog.w(TAG, String.format(&quot;文件【%s】不存在，重新分配线程区间&quot;, mTaskRecord.filePath));
+ 100            DbEntity.deleteData(ThreadRecord.class, &quot;taskKey=?&quot;, mTaskRecord.filePath);
+ 101            mTaskRecord.threadRecords.clear();
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 102 -          mTaskRecord.threadNum = mAdapter.initTaskThreadNum();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 103 +          mTaskRecord.threadNum = initTaskThreadNum();</span>
+ 104            initRecord(false);
+ 105          } else if (mTaskRecord.threadRecords == null || mTaskRecord.threadRecords.isEmpty()) {
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 106 -          mTaskRecord.threadNum = mAdapter.initTaskThreadNum();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 107 +          mTaskRecord.threadNum = initTaskThreadNum();</span>
+ 108            initRecord(false);
+ 109          }
+ 110        }
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 111 -      mAdapter.handlerTaskRecord(mTaskRecord);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 112 +      handlerTaskRecord(mTaskRecord);</span>
+ 113      }
+ 114      saveRecord();
+ 115      return mTaskRecord;
+ 116    }
+ 117  
+ 118    /**
+ 119     * convertDb 是兼容性代码 从3.4.1开始，线程配置信息将存储在数据库中。 将配置文件的内容复制到数据库中，并将配置文件删除
+ 120     */
+ 121    private void convertDb() {
+ 122      List&lt;RecordWrapper&gt; records =
+ 123          DbEntity.findRelationData(RecordWrapper.class, &quot;TaskRecord.filePath=?&quot;,
+ 124              getFilePath());
+ 125      if (records == null || records.size() == 0) {
+ 126        Properties pro = FileUtil.loadConfig(mConfigFile);
+ 127        if (pro.isEmpty()) {
+ 128          ALog.d(TAG, &quot;老版本的线程记录为空，任务为新任务&quot;);
+ 129          initRecord(true);
+ 130          return;
+ 131        }
+ 132  
+ 133        Set&lt;Object&gt; keys = pro.keySet();
+ 134        // 老版本记录是5s存一次，但是5s中内，如果线程执行完成，record记录是没有的，只有state记录...
+ 135        // 第一步应该是record 和 state去重取正确的线程数
+ 136        Set&lt;Integer&gt; set = new HashSet&lt;&gt;();
+ 137        for (Object key : keys) {
+ 138          String str = String.valueOf(key);
+ 139          int i = Integer.parseInt(str.substring(str.length() - 1));
+ 140          set.add(i);
+ 141        }
+ 142        int threadNum = set.size();
+ 143        if (threadNum == 0) {
+ 144          ALog.d(TAG, &quot;线程数为空，任务为新任务&quot;);
+ 145          initRecord(true);
+ 146          return;
+ 147        }
+ 148        mTaskWrapper.setNewTask(false);
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 149 -      mTaskRecord = mAdapter.createTaskRecord(threadNum);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 150 +      mTaskRecord = createTaskRecord(threadNum);</span>
+ 151        mTaskRecord.isBlock = false;
+ 152        File tempFile = new File(getFilePath());
+ 153        for (int i = 0; i &lt; threadNum; i++) {
+ 154          ThreadRecord tRecord = new ThreadRecord();
+ 155          tRecord.taskKey = mTaskRecord.filePath;
+ 156          Object state = pro.getProperty(tempFile.getName() + STATE + i);
+ 157          Object record = pro.getProperty(tempFile.getName() + RECORD + i);
+ 158          if (state != null &amp;&amp; Integer.parseInt(String.valueOf(state)) == 1) {
+ 159            tRecord.isComplete = true;
+ 160            continue;
+ 161          }
+ 162          if (record != null) {
+ 163            long temp = Long.parseLong(String.valueOf(record));
+ 164            tRecord.startLocation = temp &gt; 0 ? temp : 0;
+ 165          } else {
+ 166            tRecord.startLocation = 0;
+ 167          }
+ 168          mTaskRecord.threadRecords.add(tRecord);
+ 169        }
+ 170        FileUtil.deleteFile(mConfigFile);
+ 171      }
+ 172    }
+ 173  
+ 174    /**
+ 175     * 初始化任务记录，分配线程区间，如果任务记录不存在，则创建新的任务记录
+ 176     *
+ 177     * @param newRecord {@code true} 需要创建新{@link TaskRecord}
+ 178     */
+ 179    private void initRecord(boolean newRecord) {
+ 180      if (newRecord) {
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 181 -      mTaskRecord = mAdapter.createTaskRecord(mAdapter.initTaskThreadNum());</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 182 +      mTaskRecord = createTaskRecord(initTaskThreadNum());</span>
+ 183      }
+ 184      mTaskWrapper.setNewTask(true);
+ 185      int requestType = mTaskWrapper.getRequestType();
+ 186      if (requestType == ITaskWrapper.M3U8_LIVE) {
+ 187        return;
+ 188      }
+ 189      long blockSize = mEntity.getFileSize() / mTaskRecord.threadNum;
+ 190      // 处理线程区间记录
+ 191      for (int i = 0; i &lt; mTaskRecord.threadNum; i++) {
+ 192        long startL = i * blockSize, endL = (i + 1) * blockSize;
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 193 -      ThreadRecord tr = mAdapter.createThreadRecord(mTaskRecord, i, startL, endL);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 194 +      ThreadRecord tr = createThreadRecord(mTaskRecord, i, startL, endL);</span>
+ 195        mTaskRecord.threadRecords.add(tr);
+ 196      }
+ 197    }
+ 198  
+ 199    /**
+ 200     * 保存任务记录
+ 201     */
+ 202    private void saveRecord() {
+ 203      mTaskRecord.threadNum = mTaskRecord.threadRecords.size();
+ 204      mTaskRecord.save();
+ 205      if (mTaskRecord.threadRecords != null &amp;&amp; !mTaskRecord.threadRecords.isEmpty()) {
+ 206        DbEntity.saveAll(mTaskRecord.threadRecords);
+ 207      }
+ 208      ALog.d(TAG, String.format(&quot;保存记录，线程记录数：%s&quot;, mTaskRecord.threadRecords.size()));
+ 209    }
+ 210  
+ 211    /**
+ 212     * 获取任务路径
+ 213     *
+ 214     * @return 任务文件路径
+ 215     */
+ 216    private String getFilePath() {
+ 217      if (mEntity instanceof DownloadEntity) {
+ 218        return ((DownloadEntity) mTaskWrapper.getEntity()).getFilePath();
+ 219      } else {
+ 220        return ((UploadEntity) mTaskWrapper.getEntity()).getFilePath();
+ 221      }
+ 222    }
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 223 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 224 +  @Override public void accept(ILoaderVisitor visitor) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 225 +    visitor.addComponent(this);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 226 +  }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 227 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 228 +  @Override public boolean checkTaskCompleted() {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 229 +    if (mTaskRecord == null</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 230 +        || mTaskRecord.threadRecords == null</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 231 +        || mTaskRecord.threadRecords.isEmpty()) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 232 +      return false;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 233 +    }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 234 +    int completeNum = 0;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 235 +    for (ThreadRecord tr : mTaskRecord.threadRecords) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 236 +      if (tr.isComplete) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 237 +        completeNum++;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 238 +      }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 239 +    }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 240 +    return completeNum != 0 &amp;&amp; completeNum == mTaskRecord.threadNum;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 241 +  }</span>
+ 242  }</pre></td>
+                            <td><pre>   1  /*
+   2   * Copyright (C) 2016 AriaLyy(https://github.com/AriaLyy/Aria)
+   3   *
+   4   * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+   5   * you may not use this file except in compliance with the License.
+   6   * You may obtain a copy of the License at
+   7   *
+   8   *      http://www.apache.org/licenses/LICENSE-2.0
+   9   *
+  10   * Unless required by applicable law or agreed to in writing, software
+  11   * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  12   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  13   * See the License for the specific language governing permissions and
+  14   * limitations under the License.
+  15   */
+  16  package com.arialyy.aria.core.common;
+  17  
+  18  import com.arialyy.aria.core.TaskRecord;
+  19  import com.arialyy.aria.core.ThreadRecord;
+  20  import com.arialyy.aria.core.download.DownloadEntity;
+  21  import com.arialyy.aria.core.inf.IRecordHandler;
+  22  import com.arialyy.aria.core.inf.IRecordHandlerAdapter;
+
+
+  23  import com.arialyy.aria.core.upload.UploadEntity;
+  24  import com.arialyy.aria.core.wrapper.AbsTaskWrapper;
+  25  import com.arialyy.aria.core.wrapper.ITaskWrapper;
+  26  import com.arialyy.aria.core.wrapper.RecordWrapper;
+  27  import com.arialyy.aria.orm.DbEntity;
+  28  import com.arialyy.aria.util.ALog;
+  29  import com.arialyy.aria.util.CommonUtil;
+  30  import com.arialyy.aria.util.DbDataHelper;
+  31  import com.arialyy.aria.util.FileUtil;
+  32  import java.io.File;
+  33  import java.util.HashSet;
+  34  import java.util.List;
+  35  import java.util.Properties;
+  36  import java.util.Set;
+  37  
+  38  /**
+  39   * 处理任务记录，分配线程区间
+  40   */
+  41  public class RecordHandler implements IRecordHandler {
+  42    private final String TAG = &quot;RecordHandler&quot;;
+
+
+  43  
+  44    @Deprecated private File mConfigFile;
+  45    private TaskRecord mTaskRecord;
+  46    private AbsTaskWrapper mTaskWrapper;
+  47    private AbsNormalEntity mEntity;
+  48    private IRecordHandlerAdapter mAdapter;
+  49  
+  50    public RecordHandler(AbsTaskWrapper wrapper) {
+  51      mTaskWrapper = wrapper;
+  52      mEntity = (AbsNormalEntity) mTaskWrapper.getEntity();
+  53    }
+  54  
+  55    public void setAdapter(IRecordHandlerAdapter mAdapter) {
+  56      this.mAdapter = mAdapter;
+
+
+
+
+
+
+
+
+
+
+  57    }
+  58  
+  59    /**
+  60     * 获取任务记录，如果任务记录存在，检查任务记录
+  61     * 检查记录 对于分块任务： 子分块不存在或被删除，子线程将重新下载
+  62     * 对于普通任务： 预下载文件不存在，则任务任务呗删除
+  63     * 如果任务记录不存在或线程记录不存在，初始化记录
+  64     *
+  65     * @return 任务记录
+  66     */
+  67    @Override
+  68    public TaskRecord getRecord() {
+  69      mConfigFile = new File(CommonUtil.getFileConfigPath(false, mEntity.getFileName()));
+  70      if (mConfigFile.exists()) {
+  71        convertDb();
+  72      } else {
+  73        mAdapter.onPre();
+
+  74        mTaskRecord = DbDataHelper.getTaskRecord(getFilePath(), mEntity.getTaskType());
+  75        if (mTaskRecord == null) {
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  76 -        if (!new File(getFilePath()).exists()){</span>
+
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  77 -          FileUtil.createFile(getFilePath());</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  78 -        }</span>
+  79          initRecord(true);
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  80 -      } else {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  81 -        File file = new File(mTaskRecord.filePath);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  82 -        if (!file.exists()) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  83 -          ALog.w(TAG, String.format(&quot;文件【%s】不存在，重新分配线程区间&quot;, mTaskRecord.filePath));</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  84 -          DbEntity.deleteData(ThreadRecord.class, &quot;taskKey=?&quot;, mTaskRecord.filePath);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  85 -          mTaskRecord.threadRecords.clear();</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  86 -          mTaskRecord.threadNum = mAdapter.initTaskThreadNum();</span>
+
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  87 -          initRecord(false);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  88 -        } else if (mTaskRecord.threadRecords == null || mTaskRecord.threadRecords.isEmpty()) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  89 -          mTaskRecord.threadNum = mAdapter.initTaskThreadNum();</span>
+
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  90 -          initRecord(false);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  91 -        }</span>
+  92        }
+  93        mAdapter.handlerTaskRecord(mTaskRecord);
+
+  94      }
+  95      saveRecord();
+  96      return mTaskRecord;
+  97    }
+  98  
+  99    /**
+ 100     * convertDb 是兼容性代码 从3.4.1开始，线程配置信息将存储在数据库中。 将配置文件的内容复制到数据库中，并将配置文件删除
+ 101     */
+ 102    private void convertDb() {
+ 103      List&lt;RecordWrapper&gt; records =
+ 104          DbEntity.findRelationData(RecordWrapper.class, &quot;TaskRecord.filePath=?&quot;,
+ 105              getFilePath());
+ 106      if (records == null || records.size() == 0) {
+ 107        Properties pro = FileUtil.loadConfig(mConfigFile);
+ 108        if (pro.isEmpty()) {
+ 109          ALog.d(TAG, &quot;老版本的线程记录为空，任务为新任务&quot;);
+ 110          initRecord(true);
+ 111          return;
+ 112        }
+ 113  
+ 114        Set&lt;Object&gt; keys = pro.keySet();
+ 115        // 老版本记录是5s存一次，但是5s中内，如果线程执行完成，record记录是没有的，只有state记录...
+ 116        // 第一步应该是record 和 state去重取正确的线程数
+ 117        Set&lt;Integer&gt; set = new HashSet&lt;&gt;();
+ 118        for (Object key : keys) {
+ 119          String str = String.valueOf(key);
+ 120          int i = Integer.parseInt(str.substring(str.length() - 1));
+ 121          set.add(i);
+ 122        }
+ 123        int threadNum = set.size();
+ 124        if (threadNum == 0) {
+ 125          ALog.d(TAG, &quot;线程数为空，任务为新任务&quot;);
+ 126          initRecord(true);
+ 127          return;
+ 128        }
+ 129        mTaskWrapper.setNewTask(false);
+ 130        mTaskRecord = mAdapter.createTaskRecord(threadNum);
+
+ 131        mTaskRecord.isBlock = false;
+ 132        File tempFile = new File(getFilePath());
+ 133        for (int i = 0; i &lt; threadNum; i++) {
+ 134          ThreadRecord tRecord = new ThreadRecord();
+ 135          tRecord.taskKey = mTaskRecord.filePath;
+ 136          Object state = pro.getProperty(tempFile.getName() + STATE + i);
+ 137          Object record = pro.getProperty(tempFile.getName() + RECORD + i);
+ 138          if (state != null &amp;&amp; Integer.parseInt(String.valueOf(state)) == 1) {
+ 139            tRecord.isComplete = true;
+ 140            continue;
+ 141          }
+ 142          if (record != null) {
+ 143            long temp = Long.parseLong(String.valueOf(record));
+ 144            tRecord.startLocation = temp &gt; 0 ? temp : 0;
+ 145          } else {
+ 146            tRecord.startLocation = 0;
+ 147          }
+ 148          mTaskRecord.threadRecords.add(tRecord);
+ 149        }
+ 150        FileUtil.deleteFile(mConfigFile);
+ 151      }
+ 152    }
+ 153  
+ 154    /**
+ 155     * 初始化任务记录，分配线程区间，如果任务记录不存在，则创建新的任务记录
+ 156     *
+ 157     * @param newRecord {@code true} 需要创建新{@link TaskRecord}
+ 158     */
+ 159    private void initRecord(boolean newRecord) {
+ 160      if (newRecord) {
+ 161        mTaskRecord = mAdapter.createTaskRecord(mAdapter.initTaskThreadNum());
+
+ 162      }
+ 163      mTaskWrapper.setNewTask(true);
+ 164      int requestType = mTaskWrapper.getRequestType();
+ 165      if (requestType == ITaskWrapper.M3U8_LIVE) {
+ 166        return;
+ 167      }
+ 168      long blockSize = mEntity.getFileSize() / mTaskRecord.threadNum;
+ 169      // 处理线程区间记录
+ 170      for (int i = 0; i &lt; mTaskRecord.threadNum; i++) {
+ 171        long startL = i * blockSize, endL = (i + 1) * blockSize;
+ 172        ThreadRecord tr = mAdapter.createThreadRecord(mTaskRecord, i, startL, endL);
+
+ 173        mTaskRecord.threadRecords.add(tr);
+ 174      }
+ 175    }
+ 176  
+ 177    /**
+ 178     * 保存任务记录
+ 179     */
+ 180    private void saveRecord() {
+ 181      mTaskRecord.threadNum = mTaskRecord.threadRecords.size();
+ 182      mTaskRecord.save();
+ 183      if (mTaskRecord.threadRecords != null &amp;&amp; !mTaskRecord.threadRecords.isEmpty()) {
+ 184        DbEntity.saveAll(mTaskRecord.threadRecords);
+ 185      }
+ 186      ALog.d(TAG, String.format(&quot;保存记录，线程记录数：%s&quot;, mTaskRecord.threadRecords.size()));
+ 187    }
+ 188  
+ 189    /**
+ 190     * 获取任务路径
+ 191     *
+ 192     * @return 任务文件路径
+ 193     */
+ 194    private String getFilePath() {
+ 195      if (mEntity instanceof DownloadEntity) {
+ 196        return ((DownloadEntity) mTaskWrapper.getEntity()).getFilePath();
+ 197      } else {
+ 198        return ((UploadEntity) mTaskWrapper.getEntity()).getFilePath();
+ 199      }
+ 200    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 201  }</pre></td>
+                        </tr>
+                    </table>
+                </div>
+              </body>
+            </html>
+            

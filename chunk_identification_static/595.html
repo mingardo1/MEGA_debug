@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+    <html lang="en">
+              <head>
+                <meta charset="utf-8">
+                <title>595</title>
+                    <style>
+                        #top {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        #bottom {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        abbr {
+                          /* Here is the delay */
+                          transition-delay:0s;
+                        }
+                    </style>
+              </head>
+              <body>
+                <span style="height: 4vh">
+                    595
+                    <a href="594.html">prev</a>
+                    <a href="596.html">next</a>
+                    <a href="595_chunks.html">chunks</a>
+                    <a href="index.html">index</a>
+                    DTStack/flinkStreamSQL_658a6401f4f487101aa34499ee28925ef80ffac3_core/src/main/java/com/dtstack/flink/sql/table/AbsTableParser.java
+                    <textarea rows=1 onclick='navigator.clipboard.writeText(this.value)'>cd C:\studies\se\mega\git-analyzer-plus\notebooks\debug
+del /Q *
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;658a6401f4f487101aa34499ee28925ef80ffac3:core/src/main/java/com/dtstack/flink/sql/table/AbsTableParser.java&quot; &gt; committed.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;658a6401f4f487101aa34499ee28925ef80ffac3^1:core/src/main/java/com/dtstack/flink/sql/table/AbsTableParser.java&quot; &gt; ours.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;658a6401f4f487101aa34499ee28925ef80ffac3^2:core/src/main/java/com/dtstack/flink/sql/table/AbsTableParser.java&quot; &gt; theirs.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;0e612c38ef73e0fe86c07e0b47c41fb3ae2d0f0b:core/src/main/java/com/dtstack/flink/sql/table/AbsTableParser.java&quot; &gt; base.java
+copy ours.java 1ours.java
+copy ours.java 2ours.java
+copy theirs.java 1theirs.java
+copy theirs.java 2theirs.java
+copy base.java 1base.java
+copy base.java 2base.java
+&quot;C:\Program Files\Java\jdk1.8.0_241\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\jFSTMerge\build\libs\jFSTMerge-all.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\jfstmerge.java --show-base
+&quot;C:\Program Files\Eclipse Adoptium\jdk-17.0.11.9-hotspot\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\spork\target\spork-0.5.0-SNAPSHOT.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\spork.java
+del /Q 1*.java
+del /Q 2*.java
+del /Q jfstmerge.java.merge
+</textarea>
+                    {strict: [[b]], subset: [[b]]}
+                </span>
+                <div id="top">
+
+                    <table>
+                        <tr>
+                            <th>line based (standard git)</th>
+                            <th>jfstmerge</th>
+                            <th>spork</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1 /*
+   2  * Licensed to the Apache Software Foundation (ASF) under one
+   3  * or more contributor license agreements.  See the NOTICE file
+   4  * distributed with this work for additional information
+   5  * regarding copyright ownership.  The ASF licenses this file
+   6  * to you under the Apache License, Version 2.0 (the
+   7  * &quot;License&quot;); you may not use this file except in compliance
+   8  * with the License.  You may obtain a copy of the License at
+   9  *
+  10  *     http://www.apache.org/licenses/LICENSE-2.0
+  11  *
+  12  * Unless required by applicable law or agreed to in writing, software
+  13  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15  * See the License for the specific language governing permissions and
+  16  * limitations under the License.
+  17  */
+  18 
+  19 
+  20 
+  21 package com.dtstack.flink.sql.table;
+  22 
+  23 import com.dtstack.flink.sql.util.ClassUtil;
+  24 import com.dtstack.flink.sql.util.DtStringUtil;
+  25 import com.google.common.base.Preconditions;
+  26 import com.google.common.collect.Lists;
+  27 import com.google.common.collect.Maps;
+  28 import org.apache.commons.lang3.StringUtils;
+  29 
+  30 import java.util.List;
+  31 import java.util.Map;
+  32 import java.util.regex.Matcher;
+  33 import java.util.regex.Pattern;
+  34 
+  35 /**
+  36  * Reason:
+  37  * Date: 2018/7/4
+  38  * Company: www.dtstack.com
+  39  * @author xuchao
+  40  */
+  41 
+  42 public abstract class AbsTableParser {
+  43 
+  44     private static final String PRIMARY_KEY = &quot;primaryKey&quot;;
+  45     private static final String NEST_JSON_FIELD_KEY = &quot;nestFieldKey&quot;;
+  46     private static final String CHAR_TYPE_NO_LENGTH = &quot;CHAR&quot;;
+  47 
+  48     private static Pattern primaryKeyPattern = Pattern.compile(&quot;(?i)PRIMARY\\s+KEY\\s*\\((.*)\\)&quot;);
+<abbr title="  49     private static Pattern nestJsonFieldKeyPattern = Pattern.compile(&quot;(?i)((@*\\S+\\.)*\\S+)\\s+(\\w+)\\s+AS\\s+(\\w+)(\\s+NOT\\s+NULL)?$&quot;);">  49     private static Pattern nestJsonFieldKeyPattern = Pattern.compile(&quot;(?i)((@*\\S+\\.)*\\S+)\\s+(\\w+)\\s🔵</abbr>
+  50 &lt;&lt;&lt;&lt;&lt;&lt;&lt; GitAnalyzerPlus_ours
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  51     private static Pattern physicalFieldFunPattern = Pattern.compile(&quot;\\w+\\((\\w+)\\)$&quot;);</span>
+  52 ||||||| GitAnalyzerPlus_base
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  53     private Map&lt;String, Pattern&gt; patternMap = Maps.newHashMap();</span>
+  54 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  55     private static Pattern charTypePattern = Pattern.compile(&quot;(?i)CHAR\\((\\d*)\\)$&quot;);</span>
+  56 &gt;&gt;&gt;&gt;&gt;&gt;&gt; GitAnalyzerPlus_theirs
+  57 
+  58     private Map&lt;String, Pattern&gt; patternMap = Maps.newHashMap();
+  59 
+  60     private Map&lt;String, ITableFieldDealHandler&gt; handlerMap = Maps.newHashMap();
+  61 
+  62     public AbsTableParser() {
+  63         addParserHandler(PRIMARY_KEY, primaryKeyPattern, this::dealPrimaryKey);
+  64         addParserHandler(NEST_JSON_FIELD_KEY, nestJsonFieldKeyPattern, this::dealNestField);
+  65     }
+  66 
+  67     protected boolean fieldNameNeedsUpperCase() {
+  68         return true;
+  69     }
+  70 
+<abbr title="  71     public abstract TableInfo getTableInfo(String tableName, String fieldsInfo, Map&lt;String, Object&gt; props) throws Exception;">  71     public abstract TableInfo getTableInfo(String tableName, String fieldsInfo, Map&lt;String, Object&gt; props🔵</abbr>
+  72 
+  73     public boolean dealKeyPattern(String fieldRow, TableInfo tableInfo){
+  74         for(Map.Entry&lt;String, Pattern&gt; keyPattern : patternMap.entrySet()){
+  75             Pattern pattern = keyPattern.getValue();
+  76             String key = keyPattern.getKey();
+  77             Matcher matcher = pattern.matcher(fieldRow);
+  78             if(matcher.find()){
+  79                 ITableFieldDealHandler handler = handlerMap.get(key);
+  80                 if(handler == null){
+  81                     throw new RuntimeException(&quot;parse field [&quot; + fieldRow + &quot;] error.&quot;);
+  82                 }
+  83 
+  84                 handler.dealPrimaryKey(matcher, tableInfo);
+  85                 return true;
+  86             }
+  87         }
+  88 
+  89         return false;
+  90     }
+  91 
+  92     public void parseFieldsInfo(String fieldsInfo, TableInfo tableInfo){
+  93 
+  94         List&lt;String&gt; fieldRows = DtStringUtil.splitIgnoreQuota(fieldsInfo, &#x27;,&#x27;);
+  95         for(String fieldRow : fieldRows){
+  96             fieldRow = fieldRow.trim();
+  97 
+  98             if(StringUtils.isBlank(fieldRow)){
+<abbr title="  99                 throw new RuntimeException(String.format(&quot;table [%s],exists field empty.&quot;, tableInfo.getName()));">  99                 throw new RuntimeException(String.format(&quot;table [%s],exists field empty.&quot;, tableInfo.getN🔵</abbr>
+ 100             }
+ 101 
+ 102             String[] filedInfoArr = fieldRow.split(&quot;\\s+&quot;);
+ 103             if(filedInfoArr.length &lt; 2 ){
+<abbr title=" 104                 throw new RuntimeException(String.format(&quot;table [%s] field [%s] format error.&quot;, tableInfo.getName(), fieldRow));"> 104                 throw new RuntimeException(String.format(&quot;table [%s] field [%s] format error.&quot;, tableInfo🔵</abbr>
+ 105             }
+ 106 
+ 107             boolean isMatcherKey = dealKeyPattern(fieldRow, tableInfo);
+ 108             if(isMatcherKey){
+ 109                 continue;
+ 110             }
+ 111 
+ 112             //Compatible situation may arise in space in the fieldName
+ 113             String[] filedNameArr = new String[filedInfoArr.length - 1];
+ 114             System.arraycopy(filedInfoArr, 0, filedNameArr, 0, filedInfoArr.length - 1);
+ 115             String fieldName = String.join(&quot; &quot;, filedNameArr);
+ 116             String fieldType = filedInfoArr[filedInfoArr.length - 1 ].trim();
+ 117 
+ 118 
+ 119             Class fieldClass = null;
+ 120             TableInfo.FieldExtraInfo fieldExtraInfo = null;
+ 121 
+ 122             Matcher matcher = charTypePattern.matcher(fieldType);
+ 123             if (matcher.find()) {
+ 124                 fieldClass = dbTypeConvertToJavaType(CHAR_TYPE_NO_LENGTH);
+ 125                 fieldExtraInfo = new TableInfo.FieldExtraInfo();
+ 126                 fieldExtraInfo.setLength(Integer.valueOf(matcher.group(1)));
+ 127             } else {
+ 128                 fieldClass = dbTypeConvertToJavaType(fieldType);
+ 129             }
+ 130 
+ 131             tableInfo.addPhysicalMappings(filedInfoArr[0],filedInfoArr[0]);
+ 132             tableInfo.addField(fieldName);
+ 133             tableInfo.addFieldClass(fieldClass);
+ 134             tableInfo.addFieldType(fieldType);
+ 135             tableInfo.addFieldExtraInfo(fieldExtraInfo);
+ 136         }
+ 137 
+ 138         tableInfo.finish();
+ 139     }
+ 140 
+ 141     public void dealPrimaryKey(Matcher matcher, TableInfo tableInfo){
+ 142         String primaryFields = matcher.group(1).trim();
+ 143         String[] splitArry = primaryFields.split(&quot;,&quot;);
+ 144         List&lt;String&gt; primaryKes = Lists.newArrayList(splitArry);
+ 145         tableInfo.setPrimaryKeys(primaryKes);
+ 146     }
+ 147 
+ 148     /**
+ 149      * add parser for alias field
+ 150      * @param matcher
+ 151      * @param tableInfo
+ 152      */
+ 153     protected void dealNestField(Matcher matcher, TableInfo tableInfo) {
+ 154         String physicalField = matcher.group(1);
+ 155         Preconditions.checkArgument(!physicalFieldFunPattern.matcher(physicalField).find(),
+<abbr title=" 156                 &quot;No need to add data types when using functions, The correct way is : strLen(name) as nameSize, &quot;);"> 156                 &quot;No need to add data types when using functions, The correct way is : strLen(name) as nam🔵</abbr>
+ 157 
+ 158         String fieldType = matcher.group(3);
+ 159         String mappingField = matcher.group(4);
+ 160         Class fieldClass = dbTypeConvertToJavaType(fieldType);
+ 161         boolean notNull = matcher.group(5) != null;
+ 162         TableInfo.FieldExtraInfo fieldExtraInfo = new TableInfo.FieldExtraInfo();
+ 163         fieldExtraInfo.setNotNull(notNull);
+ 164 
+ 165         tableInfo.addPhysicalMappings(mappingField, physicalField);
+ 166         tableInfo.addField(mappingField);
+ 167         tableInfo.addFieldClass(fieldClass);
+ 168         tableInfo.addFieldType(fieldType);
+ 169         tableInfo.addFieldExtraInfo(fieldExtraInfo);
+ 170     }
+ 171 
+ 172     public Class dbTypeConvertToJavaType(String fieldType) {
+ 173         return ClassUtil.stringConvertClass(fieldType);
+ 174     }
+ 175 
+ 176     protected void addParserHandler(String parserName, Pattern pattern, ITableFieldDealHandler handler) {
+ 177         patternMap.put(parserName, pattern);
+ 178         handlerMap.put(parserName, handler);
+ 179     }
+ 180 }</pre></td>
+                            <td><pre>   1 /*
+   2  * Licensed to the Apache Software Foundation (ASF) under one
+   3  * or more contributor license agreements.  See the NOTICE file
+   4  * distributed with this work for additional information
+   5  * regarding copyright ownership.  The ASF licenses this file
+   6  * to you under the Apache License, Version 2.0 (the
+   7  * &quot;License&quot;); you may not use this file except in compliance
+   8  * with the License.  You may obtain a copy of the License at
+   9  *
+  10  *     http://www.apache.org/licenses/LICENSE-2.0
+  11  *
+  12  * Unless required by applicable law or agreed to in writing, software
+  13  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15  * See the License for the specific language governing permissions and
+  16  * limitations under the License.
+  17  */
+  18 
+  19 
+  20 
+  21 package com.dtstack.flink.sql.table;
+  22 
+  23 import com.dtstack.flink.sql.util.ClassUtil;
+  24 import com.dtstack.flink.sql.util.DtStringUtil;
+  25 import com.google.common.base.Preconditions;
+  26 import com.google.common.collect.Lists;
+  27 import com.google.common.collect.Maps;
+  28 import org.apache.commons.lang3.StringUtils;
+  29 
+  30 import java.util.List;
+  31 import java.util.Map;
+  32 import java.util.regex.Matcher;
+  33 import java.util.regex.Pattern;
+  34 
+  35 /**
+  36  * Reason:
+  37  * Date: 2018/7/4
+  38  * Company: www.dtstack.com
+  39  * @author xuchao
+  40  */
+  41 
+  42 public abstract class AbsTableParser {
+  43 
+  44     private static final String PRIMARY_KEY = &quot;primaryKey&quot;;
+  45     private static final String NEST_JSON_FIELD_KEY = &quot;nestFieldKey&quot;;
+  46     private static final String CHAR_TYPE_NO_LENGTH = &quot;CHAR&quot;;
+  47 
+  48     private static Pattern primaryKeyPattern = Pattern.compile(&quot;(?i)PRIMARY\\s+KEY\\s*\\((.*)\\)&quot;);
+<abbr title="  49     private static Pattern nestJsonFieldKeyPattern = Pattern.compile(&quot;(?i)((@*\\S+\\.)*\\S+)\\s+(\\w+)\\s+AS\\s+(\\w+)(\\s+NOT\\s+NULL)?$&quot;);">  49     private static Pattern nestJsonFieldKeyPattern = Pattern.compile(&quot;(?i)((@*\\S+\\.)*\\S+)\\s+(\\w+)\\s🔵</abbr>
+  50     private static Pattern physicalFieldFunPattern = Pattern.compile(&quot;\\w+\\((\\w+)\\)$&quot;);
+  51     private static Pattern charTypePattern = Pattern.compile(&quot;(?i)CHAR\\((\\d*)\\)$&quot;);
+  52 
+  53     private Map&lt;String, Pattern&gt; patternMap = Maps.newHashMap();
+  54 
+  55     private Map&lt;String, ITableFieldDealHandler&gt; handlerMap = Maps.newHashMap();
+  56 
+  57     public AbsTableParser() {
+  58         addParserHandler(PRIMARY_KEY, primaryKeyPattern, this::dealPrimaryKey);
+  59         addParserHandler(NEST_JSON_FIELD_KEY, nestJsonFieldKeyPattern, this::dealNestField);
+  60     }
+  61 
+  62     protected boolean fieldNameNeedsUpperCase() {
+  63         return true;
+  64     }
+  65 
+<abbr title="  66     public abstract TableInfo getTableInfo(String tableName, String fieldsInfo, Map&lt;String, Object&gt; props) throws Exception;">  66     public abstract TableInfo getTableInfo(String tableName, String fieldsInfo, Map&lt;String, Object&gt; props🔵</abbr>
+  67 
+  68     public boolean dealKeyPattern(String fieldRow, TableInfo tableInfo){
+  69         for(Map.Entry&lt;String, Pattern&gt; keyPattern : patternMap.entrySet()){
+  70             Pattern pattern = keyPattern.getValue();
+  71             String key = keyPattern.getKey();
+  72             Matcher matcher = pattern.matcher(fieldRow);
+  73             if(matcher.find()){
+  74                 ITableFieldDealHandler handler = handlerMap.get(key);
+  75                 if(handler == null){
+  76                     throw new RuntimeException(&quot;parse field [&quot; + fieldRow + &quot;] error.&quot;);
+  77                 }
+  78 
+  79                 handler.dealPrimaryKey(matcher, tableInfo);
+  80                 return true;
+  81             }
+  82         }
+  83 
+  84         return false;
+  85     }
+  86 
+  87     public void parseFieldsInfo(String fieldsInfo, TableInfo tableInfo){
+  88 
+  89         List&lt;String&gt; fieldRows = DtStringUtil.splitIgnoreQuota(fieldsInfo, &#x27;,&#x27;);
+  90         for(String fieldRow : fieldRows){
+  91             fieldRow = fieldRow.trim();
+  92 
+  93             if(StringUtils.isBlank(fieldRow)){
+<abbr title="  94                 throw new RuntimeException(String.format(&quot;table [%s],exists field empty.&quot;, tableInfo.getName()));">  94                 throw new RuntimeException(String.format(&quot;table [%s],exists field empty.&quot;, tableInfo.getN🔵</abbr>
+  95             }
+  96 
+  97             String[] filedInfoArr = fieldRow.split(&quot;\\s+&quot;);
+  98             if(filedInfoArr.length &lt; 2 ){
+<abbr title="  99                 throw new RuntimeException(String.format(&quot;table [%s] field [%s] format error.&quot;, tableInfo.getName(), fieldRow));">  99                 throw new RuntimeException(String.format(&quot;table [%s] field [%s] format error.&quot;, tableInfo🔵</abbr>
+ 100             }
+ 101 
+ 102             boolean isMatcherKey = dealKeyPattern(fieldRow, tableInfo);
+ 103             if(isMatcherKey){
+ 104                 continue;
+ 105             }
+ 106 
+ 107             //Compatible situation may arise in space in the fieldName
+ 108             String[] filedNameArr = new String[filedInfoArr.length - 1];
+ 109             System.arraycopy(filedInfoArr, 0, filedNameArr, 0, filedInfoArr.length - 1);
+ 110             String fieldName = String.join(&quot; &quot;, filedNameArr);
+ 111             String fieldType = filedInfoArr[filedInfoArr.length - 1 ].trim();
+ 112 
+ 113 
+ 114             Class fieldClass = null;
+ 115             TableInfo.FieldExtraInfo fieldExtraInfo = null;
+ 116 
+ 117             Matcher matcher = charTypePattern.matcher(fieldType);
+ 118             if (matcher.find()) {
+ 119                 fieldClass = dbTypeConvertToJavaType(CHAR_TYPE_NO_LENGTH);
+ 120                 fieldExtraInfo = new TableInfo.FieldExtraInfo();
+ 121                 fieldExtraInfo.setLength(Integer.valueOf(matcher.group(1)));
+ 122             } else {
+ 123                 fieldClass = dbTypeConvertToJavaType(fieldType);
+ 124             }
+ 125 
+ 126             tableInfo.addPhysicalMappings(filedInfoArr[0],filedInfoArr[0]);
+ 127             tableInfo.addField(fieldName);
+ 128             tableInfo.addFieldClass(fieldClass);
+ 129             tableInfo.addFieldType(fieldType);
+ 130             tableInfo.addFieldExtraInfo(fieldExtraInfo);
+ 131         }
+ 132 
+ 133         tableInfo.finish();
+ 134     }
+ 135 
+ 136     public void dealPrimaryKey(Matcher matcher, TableInfo tableInfo){
+ 137         String primaryFields = matcher.group(1).trim();
+ 138         String[] splitArry = primaryFields.split(&quot;,&quot;);
+ 139         List&lt;String&gt; primaryKes = Lists.newArrayList(splitArry);
+ 140         tableInfo.setPrimaryKeys(primaryKes);
+ 141     }
+ 142 
+ 143     /**
+ 144      * add parser for alias field
+ 145      * @param matcher
+ 146      * @param tableInfo
+ 147      */
+ 148     protected void dealNestField(Matcher matcher, TableInfo tableInfo) {
+ 149         String physicalField = matcher.group(1);
+ 150         Preconditions.checkArgument(!physicalFieldFunPattern.matcher(physicalField).find(),
+<abbr title=" 151                 &quot;No need to add data types when using functions, The correct way is : strLen(name) as nameSize, &quot;);"> 151                 &quot;No need to add data types when using functions, The correct way is : strLen(name) as nam🔵</abbr>
+ 152 
+ 153         String fieldType = matcher.group(3);
+ 154         String mappingField = matcher.group(4);
+ 155         Class fieldClass= dbTypeConvertToJavaType(fieldType);
+ 156         boolean notNull = matcher.group(5) != null;
+ 157         TableInfo.FieldExtraInfo fieldExtraInfo = new TableInfo.FieldExtraInfo();
+ 158         fieldExtraInfo.setNotNull(notNull);
+ 159 
+ 160         tableInfo.addPhysicalMappings(mappingField, physicalField);
+ 161         tableInfo.addField(mappingField);
+ 162         tableInfo.addFieldClass(fieldClass);
+ 163         tableInfo.addFieldType(fieldType);
+ 164         tableInfo.addFieldExtraInfo(fieldExtraInfo);
+ 165     }
+ 166 
+ 167     public Class dbTypeConvertToJavaType(String fieldType) {
+ 168         return ClassUtil.stringConvertClass(fieldType);
+ 169     }
+ 170 
+ 171     protected void addParserHandler(String parserName, Pattern pattern, ITableFieldDealHandler handler) {
+ 172         patternMap.put(parserName, pattern);
+ 173         handlerMap.put(parserName, handler);
+ 174     }
+ 175 }
+ 
+ 
+ 
+ </pre></td>
+                            <td><pre>   1 /*
+   2  * Licensed to the Apache Software Foundation (ASF) under one
+   3  * or more contributor license agreements.  See the NOTICE file
+   4  * distributed with this work for additional information
+   5  * regarding copyright ownership.  The ASF licenses this file
+   6  * to you under the Apache License, Version 2.0 (the
+   7  * &quot;License&quot;); you may not use this file except in compliance
+   8  * with the License.  You may obtain a copy of the License at
+   9  *
+  10  *     http://www.apache.org/licenses/LICENSE-2.0
+  11  *
+  12  * Unless required by applicable law or agreed to in writing, software
+  13  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15  * See the License for the specific language governing permissions and
+  16  * limitations under the License.
+  17  */
+  18 package com.dtstack.flink.sql.table;
+  19 
+  20 import com.dtstack.flink.sql.util.ClassUtil;
+  21 import com.dtstack.flink.sql.util.DtStringUtil;
+  22 import com.google.common.base.Preconditions;
+  23 import com.google.common.collect.Lists;
+  24 import com.google.common.collect.Maps;
+  25 import java.util.List;
+  26 import java.util.Map;
+  27 import java.util.regex.Matcher;
+  28 import java.util.regex.Pattern;
+  29 import org.apache.commons.lang3.StringUtils;
+  30 
+  31 
+  32 /**
+  33  * Reason:
+  34  * Date: 2018/7/4
+  35  * Company: www.dtstack.com
+  36  * @author xuchao
+  37  */
+  38 public abstract class AbsTableParser {
+  39     private static final String PRIMARY_KEY = &quot;primaryKey&quot;;
+  40 
+  41     private static final String NEST_JSON_FIELD_KEY = &quot;nestFieldKey&quot;;
+  42 
+  43     private static final String CHAR_TYPE_NO_LENGTH = &quot;CHAR&quot;;
+  44 
+  45     private static Pattern primaryKeyPattern = Pattern.compile(&quot;(?i)PRIMARY\\s+KEY\\s*\\((.*)\\)&quot;);
+  46 
+<abbr title="  47     private static Pattern nestJsonFieldKeyPattern = Pattern.compile(&quot;(?i)((@*\\S+\\.)*\\S+)\\s+(\\w+)\\s+AS\\s+(\\w+)(\\s+NOT\\s+NULL)?$&quot;);">  47     private static Pattern nestJsonFieldKeyPattern = Pattern.compile(&quot;(?i)((@*\\S+\\.)*\\S+)\\s+(\\w+)\\s🔵</abbr>
+  48 
+  49     private static Pattern physicalFieldFunPattern = Pattern.compile(&quot;\\w+\\((\\w+)\\)$&quot;);
+  50 
+  51     private static Pattern charTypePattern = Pattern.compile(&quot;(?i)CHAR\\((\\d*)\\)$&quot;);
+  52 
+  53     private Map&lt;String, Pattern&gt; patternMap = Maps.newHashMap();
+  54 
+  55     private Map&lt;String, ITableFieldDealHandler&gt; handlerMap = Maps.newHashMap();
+  56 
+  57     public AbsTableParser() {
+  58         addParserHandler(PRIMARY_KEY, primaryKeyPattern, this::dealPrimaryKey);
+  59         addParserHandler(NEST_JSON_FIELD_KEY, nestJsonFieldKeyPattern, this::dealNestField);
+  60     }
+  61 
+  62     protected boolean fieldNameNeedsUpperCase() {
+  63         return true;
+  64     }
+  65 
+<abbr title="  66     public abstract TableInfo getTableInfo(String tableName, String fieldsInfo, Map&lt;String, Object&gt; props) throws Exception;">  66     public abstract TableInfo getTableInfo(String tableName, String fieldsInfo, Map&lt;String, Object&gt; props🔵</abbr>
+  67 
+  68     public boolean dealKeyPattern(String fieldRow, TableInfo tableInfo){
+  69         for(Map.Entry&lt;String, Pattern&gt; keyPattern : patternMap.entrySet()){
+  70             Pattern pattern = keyPattern.getValue();
+  71             String key = keyPattern.getKey();
+  72             Matcher matcher = pattern.matcher(fieldRow);
+  73             if(matcher.find()){
+  74                 ITableFieldDealHandler handler = handlerMap.get(key);
+  75                 if(handler == null){
+  76                     throw new RuntimeException(&quot;parse field [&quot; + fieldRow + &quot;] error.&quot;);
+  77                 }
+  78 
+  79                 handler.dealPrimaryKey(matcher, tableInfo);
+  80                 return true;
+  81             }
+  82         }
+  83 
+  84         return false;
+  85     }
+  86 
+  87     public void parseFieldsInfo(String fieldsInfo, TableInfo tableInfo) {
+  88         List&lt;String&gt; fieldRows = DtStringUtil.splitIgnoreQuota(fieldsInfo, &#x27;,&#x27;);
+  89         for (String fieldRow : fieldRows) {
+  90             fieldRow = fieldRow.trim();
+  91             if (StringUtils.isBlank(fieldRow)) {
+<abbr title="  92                 throw new RuntimeException(String.format(&quot;table [%s],exists field empty.&quot;, tableInfo.getName()));">  92                 throw new RuntimeException(String.format(&quot;table [%s],exists field empty.&quot;, tableInfo.getN🔵</abbr>
+  93             }
+  94             String[] filedInfoArr = fieldRow.split(&quot;\\s+&quot;);
+  95             if (filedInfoArr.length &lt; 2) {
+<abbr title="  96                 throw new RuntimeException(String.format(&quot;table [%s] field [%s] format error.&quot;, tableInfo.getName(), fieldRow));">  96                 throw new RuntimeException(String.format(&quot;table [%s] field [%s] format error.&quot;, tableInfo🔵</abbr>
+  97             }
+  98             boolean isMatcherKey = dealKeyPattern(fieldRow, tableInfo);
+  99             if (isMatcherKey) {
+ 100                 continue;
+ 101             }
+ 102             // Compatible situation may arise in space in the fieldName
+ 103             String[] filedNameArr = new String[filedInfoArr.length - 1];
+ 104             System.arraycopy(filedInfoArr, 0, filedNameArr, 0, filedInfoArr.length - 1);
+ 105             String fieldName = String.join(&quot; &quot;, filedNameArr);
+ 106             String fieldType = filedInfoArr[filedInfoArr.length - 1].trim();
+ 107             Class fieldClass = null;
+ 108             TableInfo.FieldExtraInfo fieldExtraInfo = null;
+ 109             Matcher matcher = charTypePattern.matcher(fieldType);
+ 110             if (matcher.find()) {
+ 111                 fieldClass = dbTypeConvertToJavaType(CHAR_TYPE_NO_LENGTH);
+ 112                 fieldExtraInfo = new TableInfo.FieldExtraInfo();
+ 113                 fieldExtraInfo.setLength(Integer.valueOf(matcher.group(1)));
+ 114             } else {
+ 115                 fieldClass = dbTypeConvertToJavaType(fieldType);
+ 116             }
+ 117             tableInfo.addPhysicalMappings(filedInfoArr[0], filedInfoArr[0]);
+ 118             tableInfo.addField(fieldName);
+ 119             tableInfo.addFieldClass(fieldClass);
+ 120             tableInfo.addFieldType(fieldType);
+ 121             tableInfo.addFieldExtraInfo(fieldExtraInfo);
+ 122         }
+ 123         tableInfo.finish();
+ 124     }
+ 125 
+ 126     public void dealPrimaryKey(Matcher matcher, TableInfo tableInfo){
+ 127         String primaryFields = matcher.group(1).trim();
+ 128         String[] splitArry = primaryFields.split(&quot;,&quot;);
+ 129         List&lt;String&gt; primaryKes = Lists.newArrayList(splitArry);
+ 130         tableInfo.setPrimaryKeys(primaryKes);
+ 131     }
+ 132 
+ 133     /**
+ 134      * add parser for alias field
+ 135      * @param matcher
+ 136      * @param tableInfo
+ 137      */
+ 138     protected void dealNestField(Matcher matcher, TableInfo tableInfo) {
+ 139         String physicalField = matcher.group(1);
+<abbr title=" 140         Preconditions.checkArgument(!physicalFieldFunPattern.matcher(physicalField).find(), &quot;No need to add data types when using functions, The correct way is : strLen(name) as nameSize, &quot;);"> 140         Preconditions.checkArgument(!physicalFieldFunPattern.matcher(physicalField).find(), &quot;No need to a🔵</abbr>
+ 141         String fieldType = matcher.group(3);
+ 142         String mappingField = matcher.group(4);
+ 143         Class fieldClass = dbTypeConvertToJavaType(fieldType);
+ 144         boolean notNull = matcher.group(5) != null;
+ 145         TableInfo.FieldExtraInfo fieldExtraInfo = new TableInfo.FieldExtraInfo();
+ 146         fieldExtraInfo.setNotNull(notNull);
+ 147         tableInfo.addPhysicalMappings(mappingField, physicalField);
+ 148         tableInfo.addField(mappingField);
+ 149         tableInfo.addFieldClass(fieldClass);
+ 150         tableInfo.addFieldType(fieldType);
+ 151         tableInfo.addFieldExtraInfo(fieldExtraInfo);
+ 152     }
+ 153 
+ 154     public Class dbTypeConvertToJavaType(String fieldType) {
+ 155         return ClassUtil.stringConvertClass(fieldType);
+ 156     }
+ 157 
+ 158     protected void addParserHandler(String parserName, Pattern pattern, ITableFieldDealHandler handler) {
+ 159         patternMap.put(parserName, pattern);
+ 160         handlerMap.put(parserName, handler);
+ 161     }
+ 162 }
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ </pre></td>
+                        </tr>
+                    </table>
+                </div>
+                <div id="bottom">
+                    <table style="margin:auto">
+                        <tr>
+                            <th>ours vs. base</th>
+                            <th>theirs vs. base</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1  /*
+   2   * Licensed to the Apache Software Foundation (ASF) under one
+   3   * or more contributor license agreements.  See the NOTICE file
+   4   * distributed with this work for additional information
+   5   * regarding copyright ownership.  The ASF licenses this file
+   6   * to you under the Apache License, Version 2.0 (the
+   7   * &quot;License&quot;); you may not use this file except in compliance
+   8   * with the License.  You may obtain a copy of the License at
+   9   *
+  10   *     http://www.apache.org/licenses/LICENSE-2.0
+  11   *
+  12   * Unless required by applicable law or agreed to in writing, software
+  13   * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15   * See the License for the specific language governing permissions and
+  16   * limitations under the License.
+  17   */
+  18  
+  19  
+  20  
+  21  package com.dtstack.flink.sql.table;
+  22  
+  23  import com.dtstack.flink.sql.util.ClassUtil;
+  24  import com.dtstack.flink.sql.util.DtStringUtil;
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  25 +import com.google.common.base.Preconditions;</span>
+  26  import com.google.common.collect.Lists;
+  27  import com.google.common.collect.Maps;
+  28  import org.apache.commons.lang3.StringUtils;
+  29  
+  30  import java.util.List;
+  31  import java.util.Map;
+  32  import java.util.regex.Matcher;
+  33  import java.util.regex.Pattern;
+  34  
+  35  /**
+  36   * Reason:
+  37   * Date: 2018/7/4
+  38   * Company: www.dtstack.com
+  39   * @author xuchao
+  40   */
+  41  
+  42  public abstract class AbsTableParser {
+  43  
+  44      private static final String PRIMARY_KEY = &quot;primaryKey&quot;;
+  45      private static final String NEST_JSON_FIELD_KEY = &quot;nestFieldKey&quot;;
+
+  46  
+  47      private static Pattern primaryKeyPattern = Pattern.compile(&quot;(?i)PRIMARY\\s+KEY\\s*\\((.*)\\)&quot;);
+<abbr title="  48      private static Pattern nestJsonFieldKeyPattern = Pattern.compile(&quot;(?i)((@*\\S+\\.)*\\S+)\\s+(\\w+)\\s+AS\\s+(\\w+)(\\s+NOT\\s+NULL)?$&quot;);">  48      private static Pattern nestJsonFieldKeyPattern = Pattern.compile(&quot;(?i)((@*\\S+\\.)*\\S+)\\s+(\\w+)\\s+AS\\s+(\🔵</abbr>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  49 +    private static Pattern physicalFieldFunPattern = Pattern.compile(&quot;\\w+\\((\\w+)\\)$&quot;);</span>
+  50  
+  51      private Map&lt;String, Pattern&gt; patternMap = Maps.newHashMap();
+  52  
+  53      private Map&lt;String, ITableFieldDealHandler&gt; handlerMap = Maps.newHashMap();
+  54  
+  55      public AbsTableParser() {
+  56          addParserHandler(PRIMARY_KEY, primaryKeyPattern, this::dealPrimaryKey);
+  57          addParserHandler(NEST_JSON_FIELD_KEY, nestJsonFieldKeyPattern, this::dealNestField);
+  58      }
+  59  
+  60      protected boolean fieldNameNeedsUpperCase() {
+  61          return true;
+  62      }
+  63  
+<abbr title="  64      public abstract TableInfo getTableInfo(String tableName, String fieldsInfo, Map&lt;String, Object&gt; props) throws Exception;">  64      public abstract TableInfo getTableInfo(String tableName, String fieldsInfo, Map&lt;String, Object&gt; props) throws 🔵</abbr>
+  65  
+  66      public boolean dealKeyPattern(String fieldRow, TableInfo tableInfo){
+  67          for(Map.Entry&lt;String, Pattern&gt; keyPattern : patternMap.entrySet()){
+  68              Pattern pattern = keyPattern.getValue();
+  69              String key = keyPattern.getKey();
+  70              Matcher matcher = pattern.matcher(fieldRow);
+  71              if(matcher.find()){
+  72                  ITableFieldDealHandler handler = handlerMap.get(key);
+  73                  if(handler == null){
+  74                      throw new RuntimeException(&quot;parse field [&quot; + fieldRow + &quot;] error.&quot;);
+  75                  }
+  76  
+  77                  handler.dealPrimaryKey(matcher, tableInfo);
+  78                  return true;
+  79              }
+  80          }
+  81  
+  82          return false;
+  83      }
+  84  
+  85      public void parseFieldsInfo(String fieldsInfo, TableInfo tableInfo){
+  86  
+  87          List&lt;String&gt; fieldRows = DtStringUtil.splitIgnoreQuota(fieldsInfo, &#x27;,&#x27;);
+  88          for(String fieldRow : fieldRows){
+  89              fieldRow = fieldRow.trim();
+  90  
+  91              if(StringUtils.isBlank(fieldRow)){
+  92                  throw new RuntimeException(String.format(&quot;table [%s],exists field empty.&quot;, tableInfo.getName()));
+  93              }
+  94  
+  95              String[] filedInfoArr = fieldRow.split(&quot;\\s+&quot;);
+  96              if(filedInfoArr.length &lt; 2 ){
+<abbr title="  97                  throw new RuntimeException(String.format(&quot;table [%s] field [%s] format error.&quot;, tableInfo.getName(), fieldRow));">  97                  throw new RuntimeException(String.format(&quot;table [%s] field [%s] format error.&quot;, tableInfo.getName(🔵</abbr>
+  98              }
+  99  
+ 100              boolean isMatcherKey = dealKeyPattern(fieldRow, tableInfo);
+ 101              if(isMatcherKey){
+ 102                  continue;
+ 103              }
+ 104  
+ 105              //Compatible situation may arise in space in the fieldName
+ 106              String[] filedNameArr = new String[filedInfoArr.length - 1];
+ 107              System.arraycopy(filedInfoArr, 0, filedNameArr, 0, filedInfoArr.length - 1);
+ 108              String fieldName = String.join(&quot; &quot;, filedNameArr);
+ 109              String fieldType = filedInfoArr[filedInfoArr.length - 1 ].trim();
+ 110              Class fieldClass = dbTypeConvertToJavaType(fieldType);
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 111  
+ 112              tableInfo.addPhysicalMappings(filedInfoArr[0],filedInfoArr[0]);
+ 113              tableInfo.addField(fieldName);
+ 114              tableInfo.addFieldClass(fieldClass);
+ 115              tableInfo.addFieldType(fieldType);
+ 116              tableInfo.addFieldExtraInfo(null);
+
+ 117          }
+ 118  
+ 119          tableInfo.finish();
+ 120      }
+ 121  
+ 122      public void dealPrimaryKey(Matcher matcher, TableInfo tableInfo){
+ 123          String primaryFields = matcher.group(1).trim();
+ 124          String[] splitArry = primaryFields.split(&quot;,&quot;);
+ 125          List&lt;String&gt; primaryKes = Lists.newArrayList(splitArry);
+ 126          tableInfo.setPrimaryKeys(primaryKes);
+ 127      }
+ 128  
+ 129      /**
+ 130       * add parser for alias field
+ 131       * @param matcher
+ 132       * @param tableInfo
+ 133       */
+ 134      protected void dealNestField(Matcher matcher, TableInfo tableInfo) {
+ 135          String physicalField = matcher.group(1);
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 136 +        Preconditions.checkArgument(!physicalFieldFunPattern.matcher(physicalField).find(),</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"><abbr title=" 137 +                &quot;No need to add data types when using functions, The correct way is : strLen(name) as nameSize, &quot;);"> 137 +                &quot;No need to add data types when using functions, The correct way is : strLen(name) as nameSize, &quot;)🔵</abbr></span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 138 +</span>
+ 139          String fieldType = matcher.group(3);
+ 140          String mappingField = matcher.group(4);
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 141 -        Class fieldClass= dbTypeConvertToJavaType(fieldType);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 142 +        Class fieldClass = dbTypeConvertToJavaType(fieldType);</span>
+ 143          boolean notNull = matcher.group(5) != null;
+ 144          TableInfo.FieldExtraInfo fieldExtraInfo = new TableInfo.FieldExtraInfo();
+ 145          fieldExtraInfo.setNotNull(notNull);
+ 146  
+ 147          tableInfo.addPhysicalMappings(mappingField, physicalField);
+ 148          tableInfo.addField(mappingField);
+ 149          tableInfo.addFieldClass(fieldClass);
+ 150          tableInfo.addFieldType(fieldType);
+ 151          tableInfo.addFieldExtraInfo(fieldExtraInfo);
+ 152      }
+ 153  
+ 154      public Class dbTypeConvertToJavaType(String fieldType) {
+ 155          return ClassUtil.stringConvertClass(fieldType);
+ 156      }
+ 157  
+ 158      protected void addParserHandler(String parserName, Pattern pattern, ITableFieldDealHandler handler) {
+ 159          patternMap.put(parserName, pattern);
+ 160          handlerMap.put(parserName, handler);
+ 161      }
+ 162  }</pre></td>
+                            <td><pre>   1  /*
+   2   * Licensed to the Apache Software Foundation (ASF) under one
+   3   * or more contributor license agreements.  See the NOTICE file
+   4   * distributed with this work for additional information
+   5   * regarding copyright ownership.  The ASF licenses this file
+   6   * to you under the Apache License, Version 2.0 (the
+   7   * &quot;License&quot;); you may not use this file except in compliance
+   8   * with the License.  You may obtain a copy of the License at
+   9   *
+  10   *     http://www.apache.org/licenses/LICENSE-2.0
+  11   *
+  12   * Unless required by applicable law or agreed to in writing, software
+  13   * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15   * See the License for the specific language governing permissions and
+  16   * limitations under the License.
+  17   */
+  18  
+  19  
+  20  
+  21  package com.dtstack.flink.sql.table;
+  22  
+  23  import com.dtstack.flink.sql.util.ClassUtil;
+  24  import com.dtstack.flink.sql.util.DtStringUtil;
+
+  25  import com.google.common.collect.Lists;
+  26  import com.google.common.collect.Maps;
+  27  import org.apache.commons.lang3.StringUtils;
+  28  
+  29  import java.util.List;
+  30  import java.util.Map;
+  31  import java.util.regex.Matcher;
+  32  import java.util.regex.Pattern;
+  33  
+  34  /**
+  35   * Reason:
+  36   * Date: 2018/7/4
+  37   * Company: www.dtstack.com
+  38   * @author xuchao
+  39   */
+  40  
+  41  public abstract class AbsTableParser {
+  42  
+  43      private static final String PRIMARY_KEY = &quot;primaryKey&quot;;
+  44      private static final String NEST_JSON_FIELD_KEY = &quot;nestFieldKey&quot;;
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  45 +    private static final String CHAR_TYPE_NO_LENGTH = &quot;CHAR&quot;;</span>
+  46  
+  47      private static Pattern primaryKeyPattern = Pattern.compile(&quot;(?i)PRIMARY\\s+KEY\\s*\\((.*)\\)&quot;);
+<abbr title="  48      private static Pattern nestJsonFieldKeyPattern = Pattern.compile(&quot;(?i)((@*\\S+\\.)*\\S+)\\s+(\\w+)\\s+AS\\s+(\\w+)(\\s+NOT\\s+NULL)?$&quot;);">  48      private static Pattern nestJsonFieldKeyPattern = Pattern.compile(&quot;(?i)((@*\\S+\\.)*\\S+)\\s+(\\w+)\\s+AS\\s+(\🔵</abbr>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  49 +    private static Pattern charTypePattern = Pattern.compile(&quot;(?i)CHAR\\((\\d*)\\)$&quot;);</span>
+  50  
+  51      private Map&lt;String, Pattern&gt; patternMap = Maps.newHashMap();
+  52  
+  53      private Map&lt;String, ITableFieldDealHandler&gt; handlerMap = Maps.newHashMap();
+  54  
+  55      public AbsTableParser() {
+  56          addParserHandler(PRIMARY_KEY, primaryKeyPattern, this::dealPrimaryKey);
+  57          addParserHandler(NEST_JSON_FIELD_KEY, nestJsonFieldKeyPattern, this::dealNestField);
+  58      }
+  59  
+  60      protected boolean fieldNameNeedsUpperCase() {
+  61          return true;
+  62      }
+  63  
+<abbr title="  64      public abstract TableInfo getTableInfo(String tableName, String fieldsInfo, Map&lt;String, Object&gt; props) throws Exception;">  64      public abstract TableInfo getTableInfo(String tableName, String fieldsInfo, Map&lt;String, Object&gt; props) throws 🔵</abbr>
+  65  
+  66      public boolean dealKeyPattern(String fieldRow, TableInfo tableInfo){
+  67          for(Map.Entry&lt;String, Pattern&gt; keyPattern : patternMap.entrySet()){
+  68              Pattern pattern = keyPattern.getValue();
+  69              String key = keyPattern.getKey();
+  70              Matcher matcher = pattern.matcher(fieldRow);
+  71              if(matcher.find()){
+  72                  ITableFieldDealHandler handler = handlerMap.get(key);
+  73                  if(handler == null){
+  74                      throw new RuntimeException(&quot;parse field [&quot; + fieldRow + &quot;] error.&quot;);
+  75                  }
+  76  
+  77                  handler.dealPrimaryKey(matcher, tableInfo);
+  78                  return true;
+  79              }
+  80          }
+  81  
+  82          return false;
+  83      }
+  84  
+  85      public void parseFieldsInfo(String fieldsInfo, TableInfo tableInfo){
+  86  
+  87          List&lt;String&gt; fieldRows = DtStringUtil.splitIgnoreQuota(fieldsInfo, &#x27;,&#x27;);
+  88          for(String fieldRow : fieldRows){
+  89              fieldRow = fieldRow.trim();
+  90  
+  91              if(StringUtils.isBlank(fieldRow)){
+  92                  throw new RuntimeException(String.format(&quot;table [%s],exists field empty.&quot;, tableInfo.getName()));
+  93              }
+  94  
+  95              String[] filedInfoArr = fieldRow.split(&quot;\\s+&quot;);
+  96              if(filedInfoArr.length &lt; 2 ){
+<abbr title="  97                  throw new RuntimeException(String.format(&quot;table [%s] field [%s] format error.&quot;, tableInfo.getName(), fieldRow));">  97                  throw new RuntimeException(String.format(&quot;table [%s] field [%s] format error.&quot;, tableInfo.getName(🔵</abbr>
+  98              }
+  99  
+ 100              boolean isMatcherKey = dealKeyPattern(fieldRow, tableInfo);
+ 101              if(isMatcherKey){
+ 102                  continue;
+ 103              }
+ 104  
+ 105              //Compatible situation may arise in space in the fieldName
+ 106              String[] filedNameArr = new String[filedInfoArr.length - 1];
+ 107              System.arraycopy(filedInfoArr, 0, filedNameArr, 0, filedInfoArr.length - 1);
+ 108              String fieldName = String.join(&quot; &quot;, filedNameArr);
+ 109              String fieldType = filedInfoArr[filedInfoArr.length - 1 ].trim();
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 110 -            Class fieldClass = dbTypeConvertToJavaType(fieldType);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 111 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 112 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 113 +            Class fieldClass = null;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 114 +            TableInfo.FieldExtraInfo fieldExtraInfo = null;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 115 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 116 +            Matcher matcher = charTypePattern.matcher(fieldType);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 117 +            if (matcher.find()) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 118 +                fieldClass = dbTypeConvertToJavaType(CHAR_TYPE_NO_LENGTH);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 119 +                fieldExtraInfo = new TableInfo.FieldExtraInfo();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 120 +                fieldExtraInfo.setLength(Integer.valueOf(matcher.group(1)));</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 121 +            } else {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 122 +                fieldClass = dbTypeConvertToJavaType(fieldType);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 123 +            }</span>
+ 124  
+ 125              tableInfo.addPhysicalMappings(filedInfoArr[0],filedInfoArr[0]);
+ 126              tableInfo.addField(fieldName);
+ 127              tableInfo.addFieldClass(fieldClass);
+ 128              tableInfo.addFieldType(fieldType);
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 129 -            tableInfo.addFieldExtraInfo(null);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 130 +            tableInfo.addFieldExtraInfo(fieldExtraInfo);</span>
+ 131          }
+ 132  
+ 133          tableInfo.finish();
+ 134      }
+ 135  
+ 136      public void dealPrimaryKey(Matcher matcher, TableInfo tableInfo){
+ 137          String primaryFields = matcher.group(1).trim();
+ 138          String[] splitArry = primaryFields.split(&quot;,&quot;);
+ 139          List&lt;String&gt; primaryKes = Lists.newArrayList(splitArry);
+ 140          tableInfo.setPrimaryKeys(primaryKes);
+ 141      }
+ 142  
+ 143      /**
+ 144       * add parser for alias field
+ 145       * @param matcher
+ 146       * @param tableInfo
+ 147       */
+ 148      protected void dealNestField(Matcher matcher, TableInfo tableInfo) {
+ 149          String physicalField = matcher.group(1);
+
+
+
+ 150          String fieldType = matcher.group(3);
+ 151          String mappingField = matcher.group(4);
+ 152          Class fieldClass= dbTypeConvertToJavaType(fieldType);
+
+ 153          boolean notNull = matcher.group(5) != null;
+ 154          TableInfo.FieldExtraInfo fieldExtraInfo = new TableInfo.FieldExtraInfo();
+ 155          fieldExtraInfo.setNotNull(notNull);
+ 156  
+ 157          tableInfo.addPhysicalMappings(mappingField, physicalField);
+ 158          tableInfo.addField(mappingField);
+ 159          tableInfo.addFieldClass(fieldClass);
+ 160          tableInfo.addFieldType(fieldType);
+ 161          tableInfo.addFieldExtraInfo(fieldExtraInfo);
+ 162      }
+ 163  
+ 164      public Class dbTypeConvertToJavaType(String fieldType) {
+ 165          return ClassUtil.stringConvertClass(fieldType);
+ 166      }
+ 167  
+ 168      protected void addParserHandler(String parserName, Pattern pattern, ITableFieldDealHandler handler) {
+ 169          patternMap.put(parserName, pattern);
+ 170          handlerMap.put(parserName, handler);
+ 171      }
+ 172  }</pre></td>
+                        </tr>
+                    </table>
+                </div>
+              </body>
+            </html>
+            

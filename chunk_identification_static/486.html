@@ -1,0 +1,1235 @@
+<!DOCTYPE html>
+    <html lang="en">
+              <head>
+                <meta charset="utf-8">
+                <title>486</title>
+                    <style>
+                        #top {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        #bottom {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        abbr {
+                          /* Here is the delay */
+                          transition-delay:0s;
+                        }
+                    </style>
+              </head>
+              <body>
+                <span style="height: 4vh">
+                    486
+                    <a href="485.html">prev</a>
+                    <a href="487.html">next</a>
+                    <a href="486_chunks.html">chunks</a>
+                    <a href="index.html">index</a>
+                    DTStack/flinkStreamSQL_cb68efb9e51ba697e771581059b9c11c3fe66ccb_core/src/main/java/com/dtstack/flink/sql/parser/InsertSqlParser.java
+                    <textarea rows=1 onclick='navigator.clipboard.writeText(this.value)'>cd C:\studies\se\mega\git-analyzer-plus\notebooks\debug
+del /Q *
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;cb68efb9e51ba697e771581059b9c11c3fe66ccb:core/src/main/java/com/dtstack/flink/sql/parser/InsertSqlParser.java&quot; &gt; committed.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;cb68efb9e51ba697e771581059b9c11c3fe66ccb^1:core/src/main/java/com/dtstack/flink/sql/parser/InsertSqlParser.java&quot; &gt; ours.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;cb68efb9e51ba697e771581059b9c11c3fe66ccb^2:core/src/main/java/com/dtstack/flink/sql/parser/InsertSqlParser.java&quot; &gt; theirs.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;828062ef514a8028632086b1c19ef248140da519:core/src/main/java/com/dtstack/flink/sql/parser/InsertSqlParser.java&quot; &gt; base.java
+copy ours.java 1ours.java
+copy ours.java 2ours.java
+copy theirs.java 1theirs.java
+copy theirs.java 2theirs.java
+copy base.java 1base.java
+copy base.java 2base.java
+&quot;C:\Program Files\Java\jdk1.8.0_241\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\jFSTMerge\build\libs\jFSTMerge-all.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\jfstmerge.java --show-base
+&quot;C:\Program Files\Eclipse Adoptium\jdk-17.0.11.9-hotspot\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\spork\target\spork-0.5.0-SNAPSHOT.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\spork.java
+del /Q 1*.java
+del /Q 2*.java
+del /Q jfstmerge.java.merge
+</textarea>
+                    {strict: [[b]], subset: [[b]]}
+                </span>
+                <div id="top">
+
+                    <table>
+                        <tr>
+                            <th>line based (standard git)</th>
+                            <th>jfstmerge</th>
+                            <th>spork</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1 /*
+   2  * Licensed to the Apache Software Foundation (ASF) under one
+   3  * or more contributor license agreements.  See the NOTICE file
+   4  * distributed with this work for additional information
+   5  * regarding copyright ownership.  The ASF licenses this file
+   6  * to you under the Apache License, Version 2.0 (the
+   7  * &quot;License&quot;); you may not use this file except in compliance
+   8  * with the License.  You may obtain a copy of the License at
+   9  *
+  10  *     http://www.apache.org/licenses/LICENSE-2.0
+  11  *
+  12  * Unless required by applicable law or agreed to in writing, software
+  13  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15  * See the License for the specific language governing permissions and
+  16  * limitations under the License.
+  17  */
+  18 
+  19 
+  20 package com.dtstack.flink.sql.parser;
+  21 
+  22 import org.apache.calcite.sql.SqlInsert;
+  23 import org.apache.calcite.sql.SqlJoin;
+  24 import org.apache.calcite.sql.SqlKind;
+  25 import org.apache.calcite.sql.SqlNode;
+  26 import org.apache.calcite.sql.SqlSelect;
+  27 import org.apache.calcite.sql.SqlNodeList;
+  28 import org.apache.calcite.sql.SqlBasicCall;
+  29 import org.apache.calcite.sql.SqlMatchRecognize;
+  30 import org.apache.calcite.sql.SqlOrderBy;
+  31 import org.apache.calcite.sql.SqlIdentifier;
+  32 import org.apache.calcite.sql.SqlAsOperator;
+  33 import org.apache.calcite.sql.parser.SqlParserPos;
+  34 import org.apache.commons.lang3.StringUtils;
+  35 import com.google.common.collect.Lists;
+  36 import org.apache.flink.table.planner.calcite.FlinkPlannerImpl;
+  37 
+  38 import java.util.List;
+  39 
+  40 import static org.apache.calcite.sql.SqlKind.IDENTIFIER;
+  41 
+  42 /**
+  43  * 解析flink sql
+  44  * sql 只支持 insert 开头的
+  45  * Date: 2018/6/22
+  46  * Company: www.dtstack.com
+  47  * @author xuchao
+  48  */
+  49 
+  50 public class InsertSqlParser implements IParser {
+  51 
+  52 &lt;&lt;&lt;&lt;&lt;&lt;&lt; GitAnalyzerPlus_ours
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  53     private FlinkPlanner flinkPlanner = new FlinkPlanner();</span>
+  54 ||||||| GitAnalyzerPlus_base
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  55     @Override</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  56     public boolean verify(String sql) {</span>
+  57 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  58     // 用来标识当前解析节点的上一层节点是否为 insert 节点</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  59     private static Boolean parentIsInsert = false;</span>
+  60 &gt;&gt;&gt;&gt;&gt;&gt;&gt; GitAnalyzerPlus_theirs
+  61 
+  62     @Override
+  63     public boolean verify(String sql) {
+  64         return StringUtils.isNotBlank(sql) &amp;&amp; sql.trim().toLowerCase().startsWith(&quot;insert&quot;);
+  65     }
+  66 
+  67     public static InsertSqlParser newInstance(){
+  68         InsertSqlParser parser = new InsertSqlParser();
+  69         return parser;
+  70     }
+  71 
+  72     @Override
+  73     public void parseSql(String sql, SqlTree sqlTree) throws Exception {
+  74 
+  75 
+  76         SqlNode sqlNode = flinkPlanner.getParser().parse(sql);
+  77 
+  78         SqlParseResult sqlParseResult = new SqlParseResult();
+  79         parseNode(sqlNode, sqlParseResult);
+  80         sqlParseResult.setExecSql(sqlNode.toString());
+  81         sqlTree.addExecSql(sqlParseResult);
+  82     }
+  83 
+  84     private static void parseNode(SqlNode sqlNode, SqlParseResult sqlParseResult){
+  85         SqlKind sqlKind = sqlNode.getKind();
+  86         switch (sqlKind){
+  87             case INSERT:
+  88                 SqlNode sqlTarget = ((SqlInsert)sqlNode).getTargetTable();
+  89                 SqlNode sqlSource = ((SqlInsert)sqlNode).getSource();
+  90                 sqlParseResult.addTargetTable(sqlTarget.toString());
+  91                 parentIsInsert = true;
+  92                 parseNode(sqlSource, sqlParseResult);
+  93                 break;
+  94             case SELECT:
+  95                 SqlSelect sqlSelect = (SqlSelect) sqlNode;
+  96                 if (parentIsInsert) {
+  97                     rebuildSelectNode(sqlSelect.getSelectList(), sqlSelect);
+  98                 }
+  99                 SqlNode sqlFrom = ((SqlSelect) sqlNode).getFrom();
+ 100                 if (sqlFrom.getKind() == IDENTIFIER) {
+ 101                     sqlParseResult.addSourceTable(sqlFrom.toString());
+ 102                 } else {
+ 103                     parentIsInsert = false;
+ 104                     parseNode(sqlFrom, sqlParseResult);
+ 105                 }
+ 106                 break;
+ 107             case JOIN:
+ 108                 SqlNode leftNode = ((SqlJoin)sqlNode).getLeft();
+ 109                 SqlNode rightNode = ((SqlJoin)sqlNode).getRight();
+ 110 
+ 111                 if(leftNode.getKind() == IDENTIFIER){
+ 112                     sqlParseResult.addSourceTable(leftNode.toString());
+ 113                 }else{
+ 114                     parseNode(leftNode, sqlParseResult);
+ 115                 }
+ 116 
+ 117                 if(rightNode.getKind() == IDENTIFIER){
+ 118                     sqlParseResult.addSourceTable(rightNode.toString());
+ 119                 }else{
+ 120                     parseNode(rightNode, sqlParseResult);
+ 121                 }
+ 122                 break;
+ 123             case AS:
+ 124                 //不解析column,所以 as 相关的都是表
+ 125                 SqlNode identifierNode = ((SqlBasicCall)sqlNode).getOperands()[0];
+ 126                 if(identifierNode.getKind() != IDENTIFIER){
+ 127                     parseNode(identifierNode, sqlParseResult);
+ 128                 }else {
+ 129                     sqlParseResult.addSourceTable(identifierNode.toString());
+ 130                 }
+ 131                 break;
+ 132             case MATCH_RECOGNIZE:
+ 133                 SqlMatchRecognize node = (SqlMatchRecognize) sqlNode;
+ 134                 sqlParseResult.addSourceTable(node.getTableRef().toString());
+ 135                 break;
+ 136             case UNION:
+ 137                 SqlNode unionLeft = ((SqlBasicCall)sqlNode).getOperands()[0];
+ 138                 SqlNode unionRight = ((SqlBasicCall)sqlNode).getOperands()[1];
+ 139                 if(unionLeft.getKind() == IDENTIFIER){
+ 140                     sqlParseResult.addSourceTable(unionLeft.toString());
+ 141                 }else{
+ 142                     parseNode(unionLeft, sqlParseResult);
+ 143                 }
+ 144                 if(unionRight.getKind() == IDENTIFIER){
+ 145                     sqlParseResult.addSourceTable(unionRight.toString());
+ 146                 }else{
+ 147                     parseNode(unionRight, sqlParseResult);
+ 148                 }
+ 149                 break;
+ 150             case ORDER_BY:
+ 151                 SqlOrderBy sqlOrderBy  = (SqlOrderBy) sqlNode;
+ 152                 parseNode(sqlOrderBy.query, sqlParseResult);
+ 153                 break;
+ 154             default:
+ 155                 //do nothing
+ 156                 break;
+ 157         }
+ 158     }
+ 159 
+ 160     /**
+ 161      * 将第一层 select 中的 sqlNode 转化为 AsNode，解决字段名冲突问题
+ 162      * 仅对 table.xx 这种类型的字段进行替换
+ 163      * @param selectList select Node 的 select 字段
+ 164      * @param sqlSelect 第一层解析出来的 selectNode
+ 165      */
+ 166     private static void rebuildSelectNode(SqlNodeList selectList, SqlSelect sqlSelect) {
+ 167         SqlNodeList sqlNodes = new SqlNodeList(selectList.getParserPosition());
+ 168 
+ 169         for (int index = 0; index &lt; selectList.size(); index++) {
+ 170             if (selectList.get(index).getKind().equals(SqlKind.AS)
+ 171                     || ((SqlIdentifier) selectList.get(index)).names.size() == 1) {
+ 172                 sqlNodes.add(selectList.get(index));
+ 173                 continue;
+ 174             }
+ 175             sqlNodes.add(transformToAsNode(selectList.get(index)));
+ 176         }
+ 177         sqlSelect.setSelectList(sqlNodes);
+ 178     }
+ 179 
+ 180     /**
+ 181      * 将 sqlNode 转化为 AsNode
+ 182      * @param sqlNode 需要转化的 sqlNode
+ 183      * @return 重新构造的 AsNode
+ 184      */
+ 185     public static SqlBasicCall transformToAsNode(SqlNode sqlNode) {
+ 186         String asName = &quot;&quot;;
+ 187         SqlParserPos pos = new SqlParserPos(sqlNode.getParserPosition().getLineNum(),
+ 188                                             sqlNode.getParserPosition().getEndColumnNum());
+ 189         if (sqlNode.getKind().equals(SqlKind.IDENTIFIER)) {
+ 190             asName = ((SqlIdentifier) sqlNode).names.get(1);
+ 191         }
+ 192         SqlNode[] operands = new SqlNode[2];
+ 193         operands[0] = sqlNode;
+ 194         operands[1] = new SqlIdentifier(asName, null, pos);
+ 195         return new SqlBasicCall(new SqlAsOperator(), operands, pos);
+ 196     }
+ 197 
+ 198     public static class SqlParseResult {
+ 199 
+ 200         private List&lt;String&gt; sourceTableList = Lists.newArrayList();
+ 201 
+ 202         private List&lt;String&gt; targetTableList = Lists.newArrayList();
+ 203 
+ 204         private String execSql;
+ 205 
+ 206         public void addSourceTable(String sourceTable){
+ 207             sourceTableList.add(sourceTable);
+ 208         }
+ 209 
+ 210         public void addTargetTable(String targetTable){
+ 211             targetTableList.add(targetTable);
+ 212         }
+ 213 
+ 214         public List&lt;String&gt; getSourceTableList() {
+ 215             return sourceTableList;
+ 216         }
+ 217 
+ 218         public List&lt;String&gt; getTargetTableList() {
+ 219             return targetTableList;
+ 220         }
+ 221 
+ 222         public String getExecSql() {
+ 223             return execSql;
+ 224         }
+ 225 
+ 226         public void setExecSql(String execSql) {
+ 227             this.execSql = execSql;
+ 228         }
+ 229     }
+ 230 }</pre></td>
+                            <td><pre>   1 /*
+   2  * Licensed to the Apache Software Foundation (ASF) under one
+   3  * or more contributor license agreements.  See the NOTICE file
+   4  * distributed with this work for additional information
+   5  * regarding copyright ownership.  The ASF licenses this file
+   6  * to you under the Apache License, Version 2.0 (the
+   7  * &quot;License&quot;); you may not use this file except in compliance
+   8  * with the License.  You may obtain a copy of the License at
+   9  *
+  10  *     http://www.apache.org/licenses/LICENSE-2.0
+  11  *
+  12  * Unless required by applicable law or agreed to in writing, software
+  13  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15  * See the License for the specific language governing permissions and
+  16  * limitations under the License.
+  17  */
+  18 
+  19 
+  20 
+  21 package com.dtstack.flink.sql.parser;
+  22 
+  23 import org.apache.calcite.sql.SqlInsert;
+  24 import org.apache.calcite.sql.SqlJoin;
+  25 import org.apache.calcite.sql.SqlKind;
+  26 import org.apache.calcite.sql.SqlNode;
+  27 import org.apache.calcite.sql.SqlSelect;
+  28 import org.apache.calcite.sql.SqlNodeList;
+  29 import org.apache.calcite.sql.SqlBasicCall;
+  30 import org.apache.calcite.sql.SqlMatchRecognize;
+  31 import org.apache.calcite.sql.SqlOrderBy;
+  32 import org.apache.calcite.sql.SqlIdentifier;
+  33 import org.apache.calcite.sql.SqlAsOperator;
+  34 import org.apache.calcite.sql.parser.SqlParserPos;
+  35 import org.apache.commons.lang3.StringUtils;
+  36 import com.google.common.collect.Lists;
+  37 import org.apache.flink.table.planner.calcite.FlinkPlannerImpl;
+  38 
+  39 import java.util.List;
+  40 
+  41 import static org.apache.calcite.sql.SqlKind.IDENTIFIER;
+  42 
+  43 /**
+  44  * 解析flink sql
+  45  * sql 只支持 insert 开头的
+  46  * Date: 2018/6/22
+  47  * Company: www.dtstack.com
+  48  * @author xuchao
+  49  */
+  50 
+  51 public class InsertSqlParser implements IParser {
+  52 
+  53     private FlinkPlanner flinkPlanner = new FlinkPlanner();
+  54 
+  55     // 用来标识当前解析节点的上一层节点是否为 insert 节点
+  56     private static Boolean parentIsInsert = false;
+  57 
+  58     @Override
+  59     public boolean verify(String sql) {
+  60         return StringUtils.isNotBlank(sql) &amp;&amp; sql.trim().toLowerCase().startsWith(&quot;insert&quot;);
+  61     }
+  62 
+  63     public static InsertSqlParser newInstance(){
+  64         InsertSqlParser parser = new InsertSqlParser();
+  65         return parser;
+  66     }
+  67 
+  68     @Override
+  69     public void parseSql(String sql, SqlTree sqlTree) throws Exception {
+  70 
+  71 
+  72         SqlNode sqlNode = flinkPlanner.getParser().parse(sql);
+  73 
+  74         SqlParseResult sqlParseResult = new SqlParseResult();
+  75         parseNode(sqlNode, sqlParseResult);
+  76         sqlParseResult.setExecSql(sqlNode.toString());
+  77         sqlTree.addExecSql(sqlParseResult);
+  78     }
+  79 
+  80     private static void parseNode(SqlNode sqlNode, SqlParseResult sqlParseResult){
+  81         SqlKind sqlKind = sqlNode.getKind();
+  82         switch (sqlKind){
+  83             case INSERT:
+  84                 SqlNode sqlTarget = ((SqlInsert)sqlNode).getTargetTable();
+  85                 SqlNode sqlSource = ((SqlInsert)sqlNode).getSource();
+  86                 sqlParseResult.addTargetTable(sqlTarget.toString());
+  87                 parentIsInsert = true;
+  88                 parseNode(sqlSource, sqlParseResult);
+  89                 break;
+  90             case SELECT:
+  91                 SqlSelect sqlSelect = (SqlSelect) sqlNode;
+  92                 if (parentIsInsert) {
+  93                     rebuildSelectNode(sqlSelect.getSelectList(), sqlSelect);
+  94                 }
+  95                 SqlNode sqlFrom = ((SqlSelect)sqlNode).getFrom();
+  96                 if(sqlFrom.getKind() == IDENTIFIER){
+  97                     sqlParseResult.addSourceTable(sqlFrom.toString());
+  98                 }else{
+  99                     parentIsInsert = false;
+ 100                     parseNode(sqlFrom, sqlParseResult);
+ 101                 }
+ 102                 break;
+ 103             case JOIN:
+ 104                 SqlNode leftNode = ((SqlJoin)sqlNode).getLeft();
+ 105                 SqlNode rightNode = ((SqlJoin)sqlNode).getRight();
+ 106 
+ 107                 if(leftNode.getKind() == IDENTIFIER){
+ 108                     sqlParseResult.addSourceTable(leftNode.toString());
+ 109                 }else{
+ 110                     parseNode(leftNode, sqlParseResult);
+ 111                 }
+ 112 
+ 113                 if(rightNode.getKind() == IDENTIFIER){
+ 114                     sqlParseResult.addSourceTable(rightNode.toString());
+ 115                 }else{
+ 116                     parseNode(rightNode, sqlParseResult);
+ 117                 }
+ 118                 break;
+ 119             case AS:
+ 120                 //不解析column,所以 as 相关的都是表
+ 121                 SqlNode identifierNode = ((SqlBasicCall)sqlNode).getOperands()[0];
+ 122                 if(identifierNode.getKind() != IDENTIFIER){
+ 123                     parseNode(identifierNode, sqlParseResult);
+ 124                 }else {
+ 125                     sqlParseResult.addSourceTable(identifierNode.toString());
+ 126                 }
+ 127                 break;
+ 128             case MATCH_RECOGNIZE:
+ 129                 SqlMatchRecognize node = (SqlMatchRecognize) sqlNode;
+ 130                 sqlParseResult.addSourceTable(node.getTableRef().toString());
+ 131                 break;
+ 132             case UNION:
+ 133                 SqlNode unionLeft = ((SqlBasicCall)sqlNode).getOperands()[0];
+ 134                 SqlNode unionRight = ((SqlBasicCall)sqlNode).getOperands()[1];
+ 135                 if(unionLeft.getKind() == IDENTIFIER){
+ 136                     sqlParseResult.addSourceTable(unionLeft.toString());
+ 137                 }else{
+ 138                     parseNode(unionLeft, sqlParseResult);
+ 139                 }
+ 140                 if(unionRight.getKind() == IDENTIFIER){
+ 141                     sqlParseResult.addSourceTable(unionRight.toString());
+ 142                 }else{
+ 143                     parseNode(unionRight, sqlParseResult);
+ 144                 }
+ 145                 break;
+ 146             case ORDER_BY:
+ 147                 SqlOrderBy sqlOrderBy  = (SqlOrderBy) sqlNode;
+ 148                 parseNode(sqlOrderBy.query, sqlParseResult);
+ 149                 break;
+ 150             default:
+ 151                 //do nothing
+ 152                 break;
+ 153         }
+ 154     }
+ 155 
+ 156     /**
+ 157      * 将第一层 select 中的 sqlNode 转化为 AsNode，解决字段名冲突问题
+ 158      * 仅对 table.xx 这种类型的字段进行替换
+ 159      * @param selectList select Node 的 select 字段
+ 160      * @param sqlSelect 第一层解析出来的 selectNode
+ 161      */
+ 162     private static void rebuildSelectNode(SqlNodeList selectList, SqlSelect sqlSelect) {
+ 163         SqlNodeList sqlNodes = new SqlNodeList(selectList.getParserPosition());
+ 164 
+ 165         for (int index = 0; index &lt; selectList.size(); index++) {
+ 166             if (selectList.get(index).getKind().equals(SqlKind.AS)
+ 167                     || ((SqlIdentifier) selectList.get(index)).names.size() == 1) {
+ 168                 sqlNodes.add(selectList.get(index));
+ 169                 continue;
+ 170             }
+ 171             sqlNodes.add(transformToAsNode(selectList.get(index)));
+ 172         }
+ 173         sqlSelect.setSelectList(sqlNodes);
+ 174     }
+ 175 
+ 176     /**
+ 177      * 将 sqlNode 转化为 AsNode
+ 178      * @param sqlNode 需要转化的 sqlNode
+ 179      * @return 重新构造的 AsNode
+ 180      */
+ 181     public static SqlBasicCall transformToAsNode(SqlNode sqlNode) {
+ 182         String asName = &quot;&quot;;
+ 183         SqlParserPos pos = new SqlParserPos(sqlNode.getParserPosition().getLineNum(),
+ 184                                             sqlNode.getParserPosition().getEndColumnNum());
+ 185         if (sqlNode.getKind().equals(SqlKind.IDENTIFIER)) {
+ 186             asName = ((SqlIdentifier) sqlNode).names.get(1);
+ 187         }
+ 188         SqlNode[] operands = new SqlNode[2];
+ 189         operands[0] = sqlNode;
+ 190         operands[1] = new SqlIdentifier(asName, null, pos);
+ 191         return new SqlBasicCall(new SqlAsOperator(), operands, pos);
+ 192     }
+ 193 
+ 194     public static class SqlParseResult {
+ 195 
+ 196         private List&lt;String&gt; sourceTableList = Lists.newArrayList();
+ 197 
+ 198         private List&lt;String&gt; targetTableList = Lists.newArrayList();
+ 199 
+ 200         private String execSql;
+ 201 
+ 202         public void addSourceTable(String sourceTable){
+ 203             sourceTableList.add(sourceTable);
+ 204         }
+ 205 
+ 206         public void addTargetTable(String targetTable){
+ 207             targetTableList.add(targetTable);
+ 208         }
+ 209 
+ 210         public List&lt;String&gt; getSourceTableList() {
+ 211             return sourceTableList;
+ 212         }
+ 213 
+ 214         public List&lt;String&gt; getTargetTableList() {
+ 215             return targetTableList;
+ 216         }
+ 217 
+ 218         public String getExecSql() {
+ 219             return execSql;
+ 220         }
+ 221 
+ 222         public void setExecSql(String execSql) {
+ 223             this.execSql = execSql;
+ 224         }
+ 225     }
+ 226 }
+ 
+ 
+ </pre></td>
+                            <td><pre>   1 /*
+   2  * Licensed to the Apache Software Foundation (ASF) under one
+   3  * or more contributor license agreements.  See the NOTICE file
+   4  * distributed with this work for additional information
+   5  * regarding copyright ownership.  The ASF licenses this file
+   6  * to you under the Apache License, Version 2.0 (the
+   7  * &quot;License&quot;); you may not use this file except in compliance
+   8  * with the License.  You may obtain a copy of the License at
+   9  *
+  10  *     http://www.apache.org/licenses/LICENSE-2.0
+  11  *
+  12  * Unless required by applicable law or agreed to in writing, software
+  13  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15  * See the License for the specific language governing permissions and
+  16  * limitations under the License.
+  17  */
+  18 package com.dtstack.flink.sql.parser;
+  19 
+  20 import com.google.common.collect.Lists;
+  21 import java.util.List;
+  22 import org.apache.calcite.sql.SqlAsOperator;
+  23 import org.apache.calcite.sql.SqlBasicCall;
+  24 import org.apache.calcite.sql.SqlIdentifier;
+  25 import org.apache.calcite.sql.SqlInsert;
+  26 import org.apache.calcite.sql.SqlJoin;
+  27 import org.apache.calcite.sql.SqlKind;
+  28 import org.apache.calcite.sql.SqlMatchRecognize;
+  29 import org.apache.calcite.sql.SqlNode;
+  30 import org.apache.calcite.sql.SqlNodeList;
+  31 import org.apache.calcite.sql.SqlOrderBy;
+  32 import org.apache.calcite.sql.SqlSelect;
+  33 import org.apache.calcite.sql.parser.SqlParserPos;
+  34 import org.apache.commons.lang3.StringUtils;
+  35 import org.apache.flink.table.planner.calcite.FlinkPlannerImpl;
+  36 import static org.apache.calcite.sql.SqlKind.IDENTIFIER;
+  37 
+  38 
+  39 /**
+  40  * 解析flink sql
+  41  * sql 只支持 insert 开头的
+  42  * Date: 2018/6/22
+  43  * Company: www.dtstack.com
+  44  * @author xuchao
+  45  */
+  46 public class InsertSqlParser implements IParser {
+  47     private FlinkPlanner flinkPlanner = new FlinkPlanner();
+  48 
+  49     // 用来标识当前解析节点的上一层节点是否为 insert 节点
+  50     // 用来标识当前解析节点的上一层节点是否为 insert 节点
+  51     private static Boolean parentIsInsert = false;
+  52 
+  53     @Override
+  54     public boolean verify(String sql) {
+  55         return StringUtils.isNotBlank(sql) &amp;&amp; sql.trim().toLowerCase().startsWith(&quot;insert&quot;);
+  56     }
+  57 
+  58     public static InsertSqlParser newInstance(){
+  59         InsertSqlParser parser = new InsertSqlParser();
+  60         return parser;
+  61     }
+  62 
+  63     @Override
+  64     public void parseSql(String sql, SqlTree sqlTree) throws Exception {
+  65         SqlNode sqlNode = flinkPlanner.getParser().parse(sql);
+  66         SqlParseResult sqlParseResult = new SqlParseResult();
+  67         parseNode(sqlNode, sqlParseResult);
+  68         sqlParseResult.setExecSql(sqlNode.toString());
+  69         sqlTree.addExecSql(sqlParseResult);
+  70     }
+  71 
+  72     private static void parseNode(SqlNode sqlNode, SqlParseResult sqlParseResult) {
+  73         SqlKind sqlKind = sqlNode.getKind();
+  74         switch (sqlKind) {
+  75             case INSERT :
+  76                 SqlNode sqlTarget = ((SqlInsert) (sqlNode)).getTargetTable();
+  77                 SqlNode sqlSource = ((SqlInsert) (sqlNode)).getSource();
+  78                 sqlParseResult.addTargetTable(sqlTarget.toString());
+  79                 parentIsInsert = true;
+  80                 parseNode(sqlSource, sqlParseResult);
+  81                 break;
+  82             case SELECT :
+  83                 SqlSelect sqlSelect = ((SqlSelect) (sqlNode));
+  84                 if (parentIsInsert) {
+  85                     rebuildSelectNode(sqlSelect.getSelectList(), sqlSelect);
+  86                 }
+  87                 SqlNode sqlFrom = ((SqlSelect) (sqlNode)).getFrom();
+  88                 if (sqlFrom.getKind() == IDENTIFIER) {
+  89                     sqlParseResult.addSourceTable(sqlFrom.toString());
+  90                 } else {
+  91                     parentIsInsert = false;
+  92                     parseNode(sqlFrom, sqlParseResult);
+  93                 }
+  94                 break;
+  95             case JOIN :
+  96                 SqlNode leftNode = ((SqlJoin) (sqlNode)).getLeft();
+  97                 SqlNode rightNode = ((SqlJoin) (sqlNode)).getRight();
+  98                 if (leftNode.getKind() == IDENTIFIER) {
+  99                     sqlParseResult.addSourceTable(leftNode.toString());
+ 100                 } else {
+ 101                     parseNode(leftNode, sqlParseResult);
+ 102                 }
+ 103                 if (rightNode.getKind() == IDENTIFIER) {
+ 104                     sqlParseResult.addSourceTable(rightNode.toString());
+ 105                 } else {
+ 106                     parseNode(rightNode, sqlParseResult);
+ 107                 }
+ 108                 break;
+ 109             case AS :
+ 110                 // 不解析column,所以 as 相关的都是表
+ 111                 SqlNode identifierNode = ((SqlBasicCall) (sqlNode)).getOperands()[0];
+ 112                 if (identifierNode.getKind() != IDENTIFIER) {
+ 113                     parseNode(identifierNode, sqlParseResult);
+ 114                 } else {
+ 115                     sqlParseResult.addSourceTable(identifierNode.toString());
+ 116                 }
+ 117                 break;
+ 118             case MATCH_RECOGNIZE :
+ 119                 SqlMatchRecognize node = ((SqlMatchRecognize) (sqlNode));
+ 120                 sqlParseResult.addSourceTable(node.getTableRef().toString());
+ 121                 break;
+ 122             case UNION :
+ 123                 SqlNode unionLeft = ((SqlBasicCall) (sqlNode)).getOperands()[0];
+ 124                 SqlNode unionRight = ((SqlBasicCall) (sqlNode)).getOperands()[1];
+ 125                 if (unionLeft.getKind() == IDENTIFIER) {
+ 126                     sqlParseResult.addSourceTable(unionLeft.toString());
+ 127                 } else {
+ 128                     parseNode(unionLeft, sqlParseResult);
+ 129                 }
+ 130                 if (unionRight.getKind() == IDENTIFIER) {
+ 131                     sqlParseResult.addSourceTable(unionRight.toString());
+ 132                 } else {
+ 133                     parseNode(unionRight, sqlParseResult);
+ 134                 }
+ 135                 break;
+ 136             case ORDER_BY :
+ 137                 SqlOrderBy sqlOrderBy = ((SqlOrderBy) (sqlNode));
+ 138                 parseNode(sqlOrderBy.query, sqlParseResult);
+ 139                 break;
+ 140             default :
+ 141                 // do nothing
+ 142                 break;
+ 143         }
+ 144     }
+ 145 
+ 146     /**
+ 147      * 将第一层 select 中的 sqlNode 转化为 AsNode，解决字段名冲突问题
+ 148      * 仅对 table.xx 这种类型的字段进行替换
+ 149      * @param selectList select Node 的 select 字段
+ 150      * @param sqlSelect 第一层解析出来的 selectNode
+ 151      */
+ 152     private static void rebuildSelectNode(SqlNodeList selectList, SqlSelect sqlSelect) {
+ 153         SqlNodeList sqlNodes = new SqlNodeList(selectList.getParserPosition());
+ 154 
+ 155         for (int index = 0; index &lt; selectList.size(); index++) {
+ 156             if (selectList.get(index).getKind().equals(SqlKind.AS)
+ 157                     || ((SqlIdentifier) selectList.get(index)).names.size() == 1) {
+ 158                 sqlNodes.add(selectList.get(index));
+ 159                 continue;
+ 160             }
+ 161             sqlNodes.add(transformToAsNode(selectList.get(index)));
+ 162         }
+ 163         sqlSelect.setSelectList(sqlNodes);
+ 164     }
+ 165 
+ 166     /**
+ 167      * 将 sqlNode 转化为 AsNode
+ 168      * @param sqlNode 需要转化的 sqlNode
+ 169      * @return 重新构造的 AsNode
+ 170      */
+ 171     public static SqlBasicCall transformToAsNode(SqlNode sqlNode) {
+ 172         String asName = &quot;&quot;;
+ 173         SqlParserPos pos = new SqlParserPos(sqlNode.getParserPosition().getLineNum(),
+ 174                                             sqlNode.getParserPosition().getEndColumnNum());
+ 175         if (sqlNode.getKind().equals(SqlKind.IDENTIFIER)) {
+ 176             asName = ((SqlIdentifier) sqlNode).names.get(1);
+ 177         }
+ 178         SqlNode[] operands = new SqlNode[2];
+ 179         operands[0] = sqlNode;
+ 180         operands[1] = new SqlIdentifier(asName, null, pos);
+ 181         return new SqlBasicCall(new SqlAsOperator(), operands, pos);
+ 182     }
+ 183 
+ 184     public static class SqlParseResult {
+ 185         private List&lt;String&gt; sourceTableList = Lists.newArrayList();
+ 186 
+ 187         private List&lt;String&gt; targetTableList = Lists.newArrayList();
+ 188 
+ 189         private String execSql;
+ 190 
+ 191         public void addSourceTable(String sourceTable) {
+ 192             sourceTableList.add(sourceTable);
+ 193         }
+ 194 
+ 195         public void addTargetTable(String targetTable) {
+ 196             targetTableList.add(targetTable);
+ 197         }
+ 198 
+ 199         public List&lt;String&gt; getSourceTableList() {
+ 200             return sourceTableList;
+ 201         }
+ 202 
+ 203         public List&lt;String&gt; getTargetTableList() {
+ 204             return targetTableList;
+ 205         }
+ 206 
+ 207         public String getExecSql() {
+ 208             return execSql;
+ 209         }
+ 210 
+ 211         public void setExecSql(String execSql) {
+ 212             this.execSql = execSql;
+ 213         }
+ 214     }
+ 215 }
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ </pre></td>
+                        </tr>
+                    </table>
+                </div>
+                <div id="bottom">
+                    <table style="margin:auto">
+                        <tr>
+                            <th>ours vs. base</th>
+                            <th>theirs vs. base</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1  /*
+   2   * Licensed to the Apache Software Foundation (ASF) under one
+   3   * or more contributor license agreements.  See the NOTICE file
+   4   * distributed with this work for additional information
+   5   * regarding copyright ownership.  The ASF licenses this file
+   6   * to you under the Apache License, Version 2.0 (the
+   7   * &quot;License&quot;); you may not use this file except in compliance
+   8   * with the License.  You may obtain a copy of the License at
+   9   *
+  10   *     http://www.apache.org/licenses/LICENSE-2.0
+  11   *
+  12   * Unless required by applicable law or agreed to in writing, software
+  13   * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15   * See the License for the specific language governing permissions and
+  16   * limitations under the License.
+  17   */
+  18  
+  19  
+  20  
+  21  package com.dtstack.flink.sql.parser;
+  22  
+  23  import org.apache.calcite.config.Lex;
+  24  import org.apache.calcite.sql.SqlBasicCall;
+  25  import org.apache.calcite.sql.SqlInsert;
+  26  import org.apache.calcite.sql.SqlJoin;
+  27  import org.apache.calcite.sql.SqlKind;
+
+
+
+
+  28  import org.apache.calcite.sql.SqlMatchRecognize;
+  29  import org.apache.calcite.sql.SqlNode;
+  30  import org.apache.calcite.sql.SqlOrderBy;
+  31  import org.apache.calcite.sql.SqlSelect;
+  32  import org.apache.calcite.sql.parser.SqlParseException;
+  33  import org.apache.calcite.sql.parser.SqlParser;
+
+
+
+  34  import org.apache.commons.lang3.StringUtils;
+  35  import com.google.common.collect.Lists;
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  36 -import org.apache.flink.table.calcite.FlinkPlannerImpl;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  37 +import org.apache.flink.table.planner.calcite.FlinkPlannerImpl;</span>
+  38  
+  39  import java.util.List;
+  40  
+  41  import static org.apache.calcite.sql.SqlKind.IDENTIFIER;
+  42  
+  43  /**
+  44   * 解析flink sql
+  45   * sql 只支持 insert 开头的
+  46   * Date: 2018/6/22
+  47   * Company: www.dtstack.com
+  48   * @author xuchao
+  49   */
+  50  
+  51  public class InsertSqlParser implements IParser {
+  52  
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  53 +    private FlinkPlanner flinkPlanner = new FlinkPlanner();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  54 +</span>
+
+  55      @Override
+  56      public boolean verify(String sql) {
+  57          return StringUtils.isNotBlank(sql) &amp;&amp; sql.trim().toLowerCase().startsWith(&quot;insert&quot;);
+  58      }
+  59  
+  60      public static InsertSqlParser newInstance(){
+  61          InsertSqlParser parser = new InsertSqlParser();
+  62          return parser;
+  63      }
+  64  
+  65      @Override
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  66 -    public void parseSql(String sql, SqlTree sqlTree) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  67 +    public void parseSql(String sql, SqlTree sqlTree) throws Exception {</span>
+  68  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  69 -        FlinkPlannerImpl flinkPlanner = FlinkPlanner.getFlinkPlanner();</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  70 -        SqlNode sqlNode = flinkPlanner.parse(sql);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  71 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  72 +        SqlNode sqlNode = flinkPlanner.getParser().parse(sql);</span>
+  73  
+  74          SqlParseResult sqlParseResult = new SqlParseResult();
+  75          parseNode(sqlNode, sqlParseResult);
+  76          sqlParseResult.setExecSql(sqlNode.toString());
+  77          sqlTree.addExecSql(sqlParseResult);
+  78      }
+  79  
+  80      private static void parseNode(SqlNode sqlNode, SqlParseResult sqlParseResult){
+  81          SqlKind sqlKind = sqlNode.getKind();
+  82          switch (sqlKind){
+  83              case INSERT:
+  84                  SqlNode sqlTarget = ((SqlInsert)sqlNode).getTargetTable();
+  85                  SqlNode sqlSource = ((SqlInsert)sqlNode).getSource();
+  86                  sqlParseResult.addTargetTable(sqlTarget.toString());
+
+  87                  parseNode(sqlSource, sqlParseResult);
+  88                  break;
+  89              case SELECT:
+  90                  SqlNode sqlFrom = ((SqlSelect)sqlNode).getFrom();
+  91                  if(sqlFrom.getKind() == IDENTIFIER){
+
+
+
+
+
+
+  92                      sqlParseResult.addSourceTable(sqlFrom.toString());
+  93                  }else{
+
+
+  94                      parseNode(sqlFrom, sqlParseResult);
+  95                  }
+  96                  break;
+  97              case JOIN:
+  98                  SqlNode leftNode = ((SqlJoin)sqlNode).getLeft();
+  99                  SqlNode rightNode = ((SqlJoin)sqlNode).getRight();
+ 100  
+ 101                  if(leftNode.getKind() == IDENTIFIER){
+ 102                      sqlParseResult.addSourceTable(leftNode.toString());
+ 103                  }else{
+ 104                      parseNode(leftNode, sqlParseResult);
+ 105                  }
+ 106  
+ 107                  if(rightNode.getKind() == IDENTIFIER){
+ 108                      sqlParseResult.addSourceTable(rightNode.toString());
+ 109                  }else{
+ 110                      parseNode(rightNode, sqlParseResult);
+ 111                  }
+ 112                  break;
+ 113              case AS:
+ 114                  //不解析column,所以 as 相关的都是表
+ 115                  SqlNode identifierNode = ((SqlBasicCall)sqlNode).getOperands()[0];
+ 116                  if(identifierNode.getKind() != IDENTIFIER){
+ 117                      parseNode(identifierNode, sqlParseResult);
+ 118                  }else {
+ 119                      sqlParseResult.addSourceTable(identifierNode.toString());
+ 120                  }
+ 121                  break;
+ 122              case MATCH_RECOGNIZE:
+ 123                  SqlMatchRecognize node = (SqlMatchRecognize) sqlNode;
+ 124                  sqlParseResult.addSourceTable(node.getTableRef().toString());
+ 125                  break;
+ 126              case UNION:
+ 127                  SqlNode unionLeft = ((SqlBasicCall)sqlNode).getOperands()[0];
+ 128                  SqlNode unionRight = ((SqlBasicCall)sqlNode).getOperands()[1];
+ 129                  if(unionLeft.getKind() == IDENTIFIER){
+ 130                      sqlParseResult.addSourceTable(unionLeft.toString());
+ 131                  }else{
+ 132                      parseNode(unionLeft, sqlParseResult);
+ 133                  }
+ 134                  if(unionRight.getKind() == IDENTIFIER){
+ 135                      sqlParseResult.addSourceTable(unionRight.toString());
+ 136                  }else{
+ 137                      parseNode(unionRight, sqlParseResult);
+ 138                  }
+ 139                  break;
+ 140              case ORDER_BY:
+ 141                  SqlOrderBy sqlOrderBy  = (SqlOrderBy) sqlNode;
+ 142                  parseNode(sqlOrderBy.query, sqlParseResult);
+ 143                  break;
+ 144              default:
+ 145                  //do nothing
+ 146                  break;
+ 147          }
+ 148      }
+ 149  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 150      public static class SqlParseResult {
+ 151  
+ 152          private List&lt;String&gt; sourceTableList = Lists.newArrayList();
+ 153  
+ 154          private List&lt;String&gt; targetTableList = Lists.newArrayList();
+ 155  
+ 156          private String execSql;
+ 157  
+ 158          public void addSourceTable(String sourceTable){
+ 159              sourceTableList.add(sourceTable);
+ 160          }
+ 161  
+ 162          public void addTargetTable(String targetTable){
+ 163              targetTableList.add(targetTable);
+ 164          }
+ 165  
+ 166          public List&lt;String&gt; getSourceTableList() {
+ 167              return sourceTableList;
+ 168          }
+ 169  
+ 170          public List&lt;String&gt; getTargetTableList() {
+ 171              return targetTableList;
+ 172          }
+ 173  
+ 174          public String getExecSql() {
+ 175              return execSql;
+ 176          }
+ 177  
+ 178          public void setExecSql(String execSql) {
+ 179              this.execSql = execSql;
+ 180          }
+ 181      }
+ 182  }</pre></td>
+                            <td><pre>   1  /*
+   2   * Licensed to the Apache Software Foundation (ASF) under one
+   3   * or more contributor license agreements.  See the NOTICE file
+   4   * distributed with this work for additional information
+   5   * regarding copyright ownership.  The ASF licenses this file
+   6   * to you under the Apache License, Version 2.0 (the
+   7   * &quot;License&quot;); you may not use this file except in compliance
+   8   * with the License.  You may obtain a copy of the License at
+   9   *
+  10   *     http://www.apache.org/licenses/LICENSE-2.0
+  11   *
+  12   * Unless required by applicable law or agreed to in writing, software
+  13   * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15   * See the License for the specific language governing permissions and
+  16   * limitations under the License.
+  17   */
+  18  
+  19  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  20 -</span>
+  21  package com.dtstack.flink.sql.parser;
+  22  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  23 -import org.apache.calcite.config.Lex;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  24 -import org.apache.calcite.sql.SqlBasicCall;</span>
+  25  import org.apache.calcite.sql.SqlInsert;
+  26  import org.apache.calcite.sql.SqlJoin;
+  27  import org.apache.calcite.sql.SqlKind;
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  28 +import org.apache.calcite.sql.SqlNode;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  29 +import org.apache.calcite.sql.SqlSelect;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  30 +import org.apache.calcite.sql.SqlNodeList;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  31 +import org.apache.calcite.sql.SqlBasicCall;</span>
+  32  import org.apache.calcite.sql.SqlMatchRecognize;
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  33 -import org.apache.calcite.sql.SqlNode;</span>
+  34  import org.apache.calcite.sql.SqlOrderBy;
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  35 -import org.apache.calcite.sql.SqlSelect;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  36 -import org.apache.calcite.sql.parser.SqlParseException;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  37 -import org.apache.calcite.sql.parser.SqlParser;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  38 +import org.apache.calcite.sql.SqlIdentifier;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  39 +import org.apache.calcite.sql.SqlAsOperator;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  40 +import org.apache.calcite.sql.parser.SqlParserPos;</span>
+  41  import org.apache.commons.lang3.StringUtils;
+  42  import com.google.common.collect.Lists;
+  43  import org.apache.flink.table.calcite.FlinkPlannerImpl;
+
+  44  
+  45  import java.util.List;
+  46  
+  47  import static org.apache.calcite.sql.SqlKind.IDENTIFIER;
+  48  
+  49  /**
+  50   * 解析flink sql
+  51   * sql 只支持 insert 开头的
+  52   * Date: 2018/6/22
+  53   * Company: www.dtstack.com
+  54   * @author xuchao
+  55   */
+  56  
+  57  public class InsertSqlParser implements IParser {
+  58  
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  59 +    // 用来标识当前解析节点的上一层节点是否为 insert 节点</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  60 +    private static Boolean parentIsInsert = false;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  61 +</span>
+  62      @Override
+  63      public boolean verify(String sql) {
+  64          return StringUtils.isNotBlank(sql) &amp;&amp; sql.trim().toLowerCase().startsWith(&quot;insert&quot;);
+  65      }
+  66  
+  67      public static InsertSqlParser newInstance(){
+  68          InsertSqlParser parser = new InsertSqlParser();
+  69          return parser;
+  70      }
+  71  
+  72      @Override
+  73      public void parseSql(String sql, SqlTree sqlTree) {
+
+  74  
+  75          FlinkPlannerImpl flinkPlanner = FlinkPlanner.getFlinkPlanner();
+  76          SqlNode sqlNode = flinkPlanner.parse(sql);
+
+
+  77  
+  78          SqlParseResult sqlParseResult = new SqlParseResult();
+  79          parseNode(sqlNode, sqlParseResult);
+  80          sqlParseResult.setExecSql(sqlNode.toString());
+  81          sqlTree.addExecSql(sqlParseResult);
+  82      }
+  83  
+  84      private static void parseNode(SqlNode sqlNode, SqlParseResult sqlParseResult){
+  85          SqlKind sqlKind = sqlNode.getKind();
+  86          switch (sqlKind){
+  87              case INSERT:
+  88                  SqlNode sqlTarget = ((SqlInsert)sqlNode).getTargetTable();
+  89                  SqlNode sqlSource = ((SqlInsert)sqlNode).getSource();
+  90                  sqlParseResult.addTargetTable(sqlTarget.toString());
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  91 +                parentIsInsert = true;</span>
+  92                  parseNode(sqlSource, sqlParseResult);
+  93                  break;
+  94              case SELECT:
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  95 -                SqlNode sqlFrom = ((SqlSelect)sqlNode).getFrom();</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  96 -                if(sqlFrom.getKind() == IDENTIFIER){</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  97 +                SqlSelect sqlSelect = (SqlSelect) sqlNode;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  98 +                if (parentIsInsert) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  99 +                    rebuildSelectNode(sqlSelect.getSelectList(), sqlSelect);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 100 +                }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 101 +                SqlNode sqlFrom = ((SqlSelect) sqlNode).getFrom();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 102 +                if (sqlFrom.getKind() == IDENTIFIER) {</span>
+ 103                      sqlParseResult.addSourceTable(sqlFrom.toString());
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 104 -                }else{</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 105 +                } else {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 106 +                    parentIsInsert = false;</span>
+ 107                      parseNode(sqlFrom, sqlParseResult);
+ 108                  }
+ 109                  break;
+ 110              case JOIN:
+ 111                  SqlNode leftNode = ((SqlJoin)sqlNode).getLeft();
+ 112                  SqlNode rightNode = ((SqlJoin)sqlNode).getRight();
+ 113  
+ 114                  if(leftNode.getKind() == IDENTIFIER){
+ 115                      sqlParseResult.addSourceTable(leftNode.toString());
+ 116                  }else{
+ 117                      parseNode(leftNode, sqlParseResult);
+ 118                  }
+ 119  
+ 120                  if(rightNode.getKind() == IDENTIFIER){
+ 121                      sqlParseResult.addSourceTable(rightNode.toString());
+ 122                  }else{
+ 123                      parseNode(rightNode, sqlParseResult);
+ 124                  }
+ 125                  break;
+ 126              case AS:
+ 127                  //不解析column,所以 as 相关的都是表
+ 128                  SqlNode identifierNode = ((SqlBasicCall)sqlNode).getOperands()[0];
+ 129                  if(identifierNode.getKind() != IDENTIFIER){
+ 130                      parseNode(identifierNode, sqlParseResult);
+ 131                  }else {
+ 132                      sqlParseResult.addSourceTable(identifierNode.toString());
+ 133                  }
+ 134                  break;
+ 135              case MATCH_RECOGNIZE:
+ 136                  SqlMatchRecognize node = (SqlMatchRecognize) sqlNode;
+ 137                  sqlParseResult.addSourceTable(node.getTableRef().toString());
+ 138                  break;
+ 139              case UNION:
+ 140                  SqlNode unionLeft = ((SqlBasicCall)sqlNode).getOperands()[0];
+ 141                  SqlNode unionRight = ((SqlBasicCall)sqlNode).getOperands()[1];
+ 142                  if(unionLeft.getKind() == IDENTIFIER){
+ 143                      sqlParseResult.addSourceTable(unionLeft.toString());
+ 144                  }else{
+ 145                      parseNode(unionLeft, sqlParseResult);
+ 146                  }
+ 147                  if(unionRight.getKind() == IDENTIFIER){
+ 148                      sqlParseResult.addSourceTable(unionRight.toString());
+ 149                  }else{
+ 150                      parseNode(unionRight, sqlParseResult);
+ 151                  }
+ 152                  break;
+ 153              case ORDER_BY:
+ 154                  SqlOrderBy sqlOrderBy  = (SqlOrderBy) sqlNode;
+ 155                  parseNode(sqlOrderBy.query, sqlParseResult);
+ 156                  break;
+ 157              default:
+ 158                  //do nothing
+ 159                  break;
+ 160          }
+ 161      }
+ 162  
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 163 +    /**</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 164 +     * 将第一层 select 中的 sqlNode 转化为 AsNode，解决字段名冲突问题</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 165 +     * 仅对 table.xx 这种类型的字段进行替换</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 166 +     * @param selectList select Node 的 select 字段</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 167 +     * @param sqlSelect 第一层解析出来的 selectNode</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 168 +     */</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 169 +    private static void rebuildSelectNode(SqlNodeList selectList, SqlSelect sqlSelect) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 170 +        SqlNodeList sqlNodes = new SqlNodeList(selectList.getParserPosition());</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 171 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 172 +        for (int index = 0; index &lt; selectList.size(); index++) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 173 +            if (selectList.get(index).getKind().equals(SqlKind.AS)</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 174 +                    || ((SqlIdentifier) selectList.get(index)).names.size() == 1) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 175 +                sqlNodes.add(selectList.get(index));</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 176 +                continue;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 177 +            }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 178 +            sqlNodes.add(transformToAsNode(selectList.get(index)));</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 179 +        }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 180 +        sqlSelect.setSelectList(sqlNodes);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 181 +    }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 182 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 183 +    /**</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 184 +     * 将 sqlNode 转化为 AsNode</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 185 +     * @param sqlNode 需要转化的 sqlNode</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 186 +     * @return 重新构造的 AsNode</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 187 +     */</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 188 +    public static SqlBasicCall transformToAsNode(SqlNode sqlNode) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 189 +        String asName = &quot;&quot;;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 190 +        SqlParserPos pos = new SqlParserPos(sqlNode.getParserPosition().getLineNum(),</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 191 +                                            sqlNode.getParserPosition().getEndColumnNum());</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 192 +        if (sqlNode.getKind().equals(SqlKind.IDENTIFIER)) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 193 +            asName = ((SqlIdentifier) sqlNode).names.get(1);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 194 +        }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 195 +        SqlNode[] operands = new SqlNode[2];</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 196 +        operands[0] = sqlNode;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 197 +        operands[1] = new SqlIdentifier(asName, null, pos);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 198 +        return new SqlBasicCall(new SqlAsOperator(), operands, pos);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 199 +    }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 200 +</span>
+ 201      public static class SqlParseResult {
+ 202  
+ 203          private List&lt;String&gt; sourceTableList = Lists.newArrayList();
+ 204  
+ 205          private List&lt;String&gt; targetTableList = Lists.newArrayList();
+ 206  
+ 207          private String execSql;
+ 208  
+ 209          public void addSourceTable(String sourceTable){
+ 210              sourceTableList.add(sourceTable);
+ 211          }
+ 212  
+ 213          public void addTargetTable(String targetTable){
+ 214              targetTableList.add(targetTable);
+ 215          }
+ 216  
+ 217          public List&lt;String&gt; getSourceTableList() {
+ 218              return sourceTableList;
+ 219          }
+ 220  
+ 221          public List&lt;String&gt; getTargetTableList() {
+ 222              return targetTableList;
+ 223          }
+ 224  
+ 225          public String getExecSql() {
+ 226              return execSql;
+ 227          }
+ 228  
+ 229          public void setExecSql(String execSql) {
+ 230              this.execSql = execSql;
+ 231          }
+ 232      }
+ 233  }</pre></td>
+                        </tr>
+                    </table>
+                </div>
+              </body>
+            </html>
+            

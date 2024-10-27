@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+    <html lang="en">
+              <head>
+                <meta charset="utf-8">
+                <title>287</title>
+                    <style>
+                        #top {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        #bottom {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        abbr {
+                          /* Here is the delay */
+                          transition-delay:0s;
+                        }
+                    </style>
+              </head>
+              <body>
+                <span style="height: 4vh">
+                    287
+                    <a href="286.html">prev</a>
+                    <a href="288.html">next</a>
+                    <a href="287_chunks.html">chunks</a>
+                    <a href="index.html">index</a>
+                    DTStack/flinkStreamSQL_e4d71f0f01d38c2c517d2a3f0baa58064275b074_launcher/src/main/java/com/dtstack/flink/sql/launcher/LauncherMain.java
+                    <textarea rows=1 onclick='navigator.clipboard.writeText(this.value)'>cd C:\studies\se\mega\git-analyzer-plus\notebooks\debug
+del /Q *
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;e4d71f0f01d38c2c517d2a3f0baa58064275b074:launcher/src/main/java/com/dtstack/flink/sql/launcher/LauncherMain.java&quot; &gt; committed.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;e4d71f0f01d38c2c517d2a3f0baa58064275b074^1:launcher/src/main/java/com/dtstack/flink/sql/launcher/LauncherMain.java&quot; &gt; ours.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;e4d71f0f01d38c2c517d2a3f0baa58064275b074^2:launcher/src/main/java/com/dtstack/flink/sql/launcher/LauncherMain.java&quot; &gt; theirs.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;d688310b55de386cfbe6e91b124481ac43c2bd37:launcher/src/main/java/com/dtstack/flink/sql/launcher/LauncherMain.java&quot; &gt; base.java
+copy ours.java 1ours.java
+copy ours.java 2ours.java
+copy theirs.java 1theirs.java
+copy theirs.java 2theirs.java
+copy base.java 1base.java
+copy base.java 2base.java
+&quot;C:\Program Files\Java\jdk1.8.0_241\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\jFSTMerge\build\libs\jFSTMerge-all.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\jfstmerge.java --show-base
+&quot;C:\Program Files\Eclipse Adoptium\jdk-17.0.11.9-hotspot\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\spork\target\spork-0.5.0-SNAPSHOT.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\spork.java
+del /Q 1*.java
+del /Q 2*.java
+del /Q jfstmerge.java.merge
+</textarea>
+                    {strict: [[b]], subset: [[b]]}
+                </span>
+                <div id="top">
+
+                    <table>
+                        <tr>
+                            <th>line based (standard git)</th>
+                            <th>jfstmerge</th>
+                            <th>spork</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1 /*
+   2  * Licensed to the Apache Software Foundation (ASF) under one
+   3  * or more contributor license agreements.  See the NOTICE file
+   4  * distributed with this work for additional information
+   5  * regarding copyright ownership.  The ASF licenses this file
+   6  * to you under the Apache License, Version 2.0 (the
+   7  * &quot;License&quot;); you may not use this file except in compliance
+   8  * with the License.  You may obtain a copy of the License at
+   9  *
+  10  *     http://www.apache.org/licenses/LICENSE-2.0
+  11  *
+  12  * Unless required by applicable law or agreed to in writing, software
+  13  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15  * See the License for the specific language governing permissions and
+  16  * limitations under the License.
+  17  */
+  18 
+  19 
+  20 package com.dtstack.flink.sql.launcher;
+  21 
+  22 import com.alibaba.fastjson.JSON;
+  23 import com.alibaba.fastjson.TypeReference;
+  24 import com.dtstack.flink.sql.Main;
+  25 import com.dtstack.flink.sql.dirtyManager.manager.DirtyDataManager;
+  26 import com.dtstack.flink.sql.enums.ClusterMode;
+  27 import com.dtstack.flink.sql.launcher.entity.JobParamsInfo;
+  28 import com.dtstack.flink.sql.launcher.executor.StandaloneExecutor;
+  29 import com.dtstack.flink.sql.launcher.executor.YarnJobClusterExecutor;
+  30 import com.dtstack.flink.sql.launcher.executor.YarnSessionClusterExecutor;
+  31 import com.dtstack.flink.sql.option.OptionParser;
+  32 import com.dtstack.flink.sql.option.Options;
+  33 import com.dtstack.flink.sql.util.PluginUtil;
+  34 import org.apache.commons.io.Charsets;
+  35 import org.slf4j.Logger;
+  36 import org.slf4j.LoggerFactory;
+  37 
+  38 import java.io.BufferedReader;
+  39 import java.io.FileInputStream;
+  40 import java.io.IOException;
+  41 import java.io.InputStreamReader;
+  42 import java.net.URLDecoder;
+  43 import java.nio.charset.StandardCharsets;
+  44 import java.util.LinkedList;
+  45 import java.util.List;
+  46 import java.util.Map;
+  47 import java.util.Objects;
+  48 import java.util.Properties;
+  49 
+  50 /**
+  51  * Date: 2017/2/20
+  52  * Company: www.dtstack.com
+  53  * @author xuchao
+  54  */
+  55 
+  56 public class LauncherMain {
+  57 
+  58 &lt;&lt;&lt;&lt;&lt;&lt;&lt; GitAnalyzerPlus_ours
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  59     private static final Logger LOG = LoggerFactory.getLogger(LauncherMain.class);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  60 </span>
+  61 ||||||| GitAnalyzerPlus_base
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  62     public static JobParamsInfo parseArgs(String[] args) throws Exception {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  63         if (args.length == 1 &amp;&amp; args[0].endsWith(&quot;.json&quot;)) {</span>
+  64 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  65 </span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  66     @SuppressWarnings(&quot;unchecked&quot;)</span>
+  67 &gt;&gt;&gt;&gt;&gt;&gt;&gt; GitAnalyzerPlus_theirs
+  68     public static JobParamsInfo parseArgs(String[] args) throws Exception {
+  69         if (args.length == 1 &amp;&amp; args[0].endsWith(&quot;.json&quot;)) {
+  70             args = parseJson(args);
+  71         }
+  72         OptionParser optionParser = new OptionParser(args);
+  73         Options launcherOptions = optionParser.getOptions();
+  74         List&lt;String&gt; programExeArgList = optionParser.getProgramExeArgList();
+  75         String[] execArgs = programExeArgList.toArray(new String[0]);
+  76 
+  77         String name = launcherOptions.getName();
+  78         String mode = launcherOptions.getMode();
+  79         String localPluginRoot = launcherOptions.getLocalSqlPluginPath();
+  80         String flinkConfDir = launcherOptions.getFlinkconf();
+  81         String flinkJarPath = launcherOptions.getFlinkJarPath();
+  82         String yarnConfDir = launcherOptions.getYarnconf();
+  83         String udfJar = launcherOptions.getAddjar();
+  84         String queue = launcherOptions.getQueue();
+  85         String pluginLoadMode = launcherOptions.getPluginLoadMode();
+  86         String addShipfile = launcherOptions.getAddShipfile();
+  87         String dirtyStr = launcherOptions.getDirtyProperties();
+  88 
+<abbr title="  89         String yarnSessionConf = URLDecoder.decode(launcherOptions.getYarnSessionConf(), Charsets.UTF_8.toString());">  89         String yarnSessionConf = URLDecoder.decode(launcherOptions.getYarnSessionConf(), Charsets.UTF_8.t🔵</abbr>
+<abbr title="  90         Properties yarnSessionConfProperties = PluginUtil.jsonStrToObject(yarnSessionConf, Properties.class);">  90         Properties yarnSessionConfProperties = PluginUtil.jsonStrToObject(yarnSessionConf, Properties.cla🔵</abbr>
+  91 
+  92         String confProp = URLDecoder.decode(launcherOptions.getConfProp(), Charsets.UTF_8.toString());
+  93         Properties confProperties = PluginUtil.jsonStrToObject(confProp, Properties.class);
+  94         Map&lt;String, Object&gt; dirtyProperties = PluginUtil.jsonStrToObject(Objects.isNull(dirtyStr) ?
+  95                DirtyDataManager.buildDefaultDirty() : dirtyStr, Map.class);
+  96 
+  97         return JobParamsInfo.builder()
+  98                 .setExecArgs(execArgs)
+  99                 .setName(name)
+ 100                 .setMode(mode)
+ 101                 .setUdfJar(udfJar)
+ 102                 .setLocalPluginRoot(localPluginRoot)
+ 103                 .setFlinkConfDir(flinkConfDir)
+ 104                 .setYarnConfDir(yarnConfDir)
+ 105                 .setConfProperties(confProperties)
+ 106                 .setYarnSessionConfProperties(yarnSessionConfProperties)
+ 107                 .setFlinkJarPath(flinkJarPath)
+ 108                 .setPluginLoadMode(pluginLoadMode)
+ 109                 .setQueue(queue)
+ 110                 .setDirtyProperties(dirtyProperties)
+ 111                 .setAddShipfile(addShipfile)
+ 112                 .build();
+ 113     }
+ 114 
+ 115 
+ 116     private static String[] parseJson(String[] args) {
+ 117         StringBuilder lastStr = new StringBuilder();
+ 118         try {
+ 119             try (FileInputStream fileInputStream = new FileInputStream(args[0])) {
+ 120                 try (InputStreamReader inputStreamReader =
+ 121                              new InputStreamReader(fileInputStream, StandardCharsets.UTF_8)) {
+ 122                     try (BufferedReader reader = new BufferedReader(inputStreamReader)) {
+ 123                         String tempString;
+ 124                         while ((tempString = reader.readLine()) != null) {
+ 125                             lastStr.append(tempString);
+ 126                         }
+ 127                     }
+ 128                 }
+ 129             }
+ 130         } catch (IOException e) {
+ 131             LOG.error(&quot;&quot;, e);
+ 132         }
+ 133 
+<abbr title=" 134         Map&lt;String, Object&gt; map = JSON.parseObject(lastStr.toString(), new TypeReference&lt;Map&lt;String, Object&gt;&gt;() {});"> 134         Map&lt;String, Object&gt; map = JSON.parseObject(lastStr.toString(), new TypeReference&lt;Map&lt;String, Obje🔵</abbr>
+ 135         List&lt;String&gt; list = new LinkedList&lt;&gt;();
+ 136 
+ 137         for (Map.Entry&lt;String, Object&gt; entry : map.entrySet()) {
+ 138             list.add(&quot;-&quot; + entry.getKey());
+ 139             list.add(entry.getValue().toString());
+ 140         }
+ 141         return list.toArray(new String[0]);
+ 142     }
+ 143 
+ 144     public static void main(String[] args) throws Exception {
+ 145         JobParamsInfo jobParamsInfo = parseArgs(args);
+ 146         ClusterMode execMode = ClusterMode.valueOf(jobParamsInfo.getMode());
+ 147 
+ 148         switch (execMode) {
+ 149             case local:
+ 150                 Main.main(jobParamsInfo.getExecArgs());
+ 151                 break;
+ 152             case yarn:
+ 153                 new YarnSessionClusterExecutor(jobParamsInfo).exec();
+ 154                 break;
+ 155             case yarnPer:
+ 156                 new YarnJobClusterExecutor(jobParamsInfo).exec();
+ 157                 break;
+ 158             case standalone:
+ 159                 new StandaloneExecutor(jobParamsInfo).exec();
+ 160                 break;
+ 161             default:
+ 162                 throw new RuntimeException(&quot;Unsupported operating mode, please use local,yarn,yarnPer&quot;);
+ 163         }
+ 164     }
+ 165 }</pre></td>
+                            <td><pre>   1 /*
+   2  * Licensed to the Apache Software Foundation (ASF) under one
+   3  * or more contributor license agreements.  See the NOTICE file
+   4  * distributed with this work for additional information
+   5  * regarding copyright ownership.  The ASF licenses this file
+   6  * to you under the Apache License, Version 2.0 (the
+   7  * &quot;License&quot;); you may not use this file except in compliance
+   8  * with the License.  You may obtain a copy of the License at
+   9  *
+  10  *     http://www.apache.org/licenses/LICENSE-2.0
+  11  *
+  12  * Unless required by applicable law or agreed to in writing, software
+  13  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15  * See the License for the specific language governing permissions and
+  16  * limitations under the License.
+  17  */
+  18 
+  19 
+  20 package com.dtstack.flink.sql.launcher;
+  21 
+  22 import com.alibaba.fastjson.JSON;
+  23 import com.alibaba.fastjson.TypeReference;
+  24 import com.dtstack.flink.sql.Main;
+  25 import com.dtstack.flink.sql.dirtyManager.manager.DirtyDataManager;
+  26 import com.dtstack.flink.sql.enums.ClusterMode;
+  27 import com.dtstack.flink.sql.launcher.entity.JobParamsInfo;
+  28 import com.dtstack.flink.sql.launcher.executor.StandaloneExecutor;
+  29 import com.dtstack.flink.sql.launcher.executor.YarnJobClusterExecutor;
+  30 import com.dtstack.flink.sql.launcher.executor.YarnSessionClusterExecutor;
+  31 import com.dtstack.flink.sql.option.OptionParser;
+  32 import com.dtstack.flink.sql.option.Options;
+  33 import com.dtstack.flink.sql.util.PluginUtil;
+  34 import org.apache.commons.io.Charsets;
+  35 import org.slf4j.Logger;
+  36 import org.slf4j.LoggerFactory;
+  37 
+  38 import java.io.BufferedReader;
+  39 import java.io.FileInputStream;
+  40 import java.io.IOException;
+  41 import java.io.InputStreamReader;
+  42 import java.net.URLDecoder;
+  43 import java.nio.charset.StandardCharsets;
+  44 import java.util.LinkedList;
+  45 import java.util.List;
+  46 import java.util.Map;
+  47 import java.util.Objects;
+  48 import java.util.Properties;
+  49 
+  50 /**
+  51  * Date: 2017/2/20
+  52  * Company: www.dtstack.com
+  53  * @author xuchao
+  54  */
+  55 
+  56 public class LauncherMain {
+  57 
+  58     private static final Logger LOG = LoggerFactory.getLogger(LauncherMain.class);
+  59 
+  60     @SuppressWarnings(&quot;unchecked&quot;)
+  61 public static JobParamsInfo parseArgs(String[] args) throws Exception {
+  62         if (args.length == 1 &amp;&amp; args[0].endsWith(&quot;.json&quot;)) {
+  63             args = parseJson(args);
+  64         }
+  65         OptionParser optionParser = new OptionParser(args);
+  66         Options launcherOptions = optionParser.getOptions();
+  67         List&lt;String&gt; programExeArgList = optionParser.getProgramExeArgList();
+  68         String[] execArgs = programExeArgList.toArray(new String[0]);
+  69 
+  70         String name = launcherOptions.getName();
+  71         String mode = launcherOptions.getMode();
+  72         String localPluginRoot = launcherOptions.getLocalSqlPluginPath();
+  73         String flinkConfDir = launcherOptions.getFlinkconf();
+  74         String flinkJarPath = launcherOptions.getFlinkJarPath();
+  75         String yarnConfDir = launcherOptions.getYarnconf();
+  76         String udfJar = launcherOptions.getAddjar();
+  77         String queue = launcherOptions.getQueue();
+  78         String pluginLoadMode = launcherOptions.getPluginLoadMode();
+  79         String addShipfile = launcherOptions.getAddShipfile();
+  80         String dirtyStr = launcherOptions.getDirtyProperties();
+  81 
+<abbr title="  82         String yarnSessionConf = URLDecoder.decode(launcherOptions.getYarnSessionConf(), Charsets.UTF_8.toString());">  82         String yarnSessionConf = URLDecoder.decode(launcherOptions.getYarnSessionConf(), Charsets.UTF_8.t🔵</abbr>
+<abbr title="  83         Properties yarnSessionConfProperties = PluginUtil.jsonStrToObject(yarnSessionConf, Properties.class);">  83         Properties yarnSessionConfProperties = PluginUtil.jsonStrToObject(yarnSessionConf, Properties.cla🔵</abbr>
+  84 
+  85         String confProp = URLDecoder.decode(launcherOptions.getConfProp(), Charsets.UTF_8.toString());
+  86         Properties confProperties = PluginUtil.jsonStrToObject(confProp, Properties.class);
+  87         Map&lt;String, Object&gt; dirtyProperties = PluginUtil.jsonStrToObject(Objects.isNull(dirtyStr) ?
+  88                DirtyDataManager.buildDefaultDirty() : dirtyStr, Map.class);
+  89 
+  90         return JobParamsInfo.builder()
+  91                 .setExecArgs(execArgs)
+  92                 .setName(name)
+  93                 .setMode(mode)
+  94                 .setUdfJar(udfJar)
+  95                 .setLocalPluginRoot(localPluginRoot)
+  96                 .setFlinkConfDir(flinkConfDir)
+  97                 .setYarnConfDir(yarnConfDir)
+  98                 .setConfProperties(confProperties)
+  99                 .setYarnSessionConfProperties(yarnSessionConfProperties)
+ 100                 .setFlinkJarPath(flinkJarPath)
+ 101                 .setPluginLoadMode(pluginLoadMode)
+ 102                 .setQueue(queue)
+ 103                 .setDirtyProperties(dirtyProperties)
+ 104                 .setAddShipfile(addShipfile)
+ 105                 .build();
+ 106     }
+ 107 
+ 108 
+ 109     private static String[] parseJson(String[] args) {
+ 110         StringBuilder lastStr = new StringBuilder();
+ 111         try {
+ 112             try (FileInputStream fileInputStream = new FileInputStream(args[0])) {
+ 113                 try (InputStreamReader inputStreamReader =
+ 114                              new InputStreamReader(fileInputStream, StandardCharsets.UTF_8)) {
+ 115                     try (BufferedReader reader = new BufferedReader(inputStreamReader)) {
+ 116             String tempString;
+ 117             while ((tempString = reader.readLine()) != null) {
+ 118                 lastStr.append(tempString);
+ 119             }
+ 120                     }
+ 121                 }
+ 122             }
+ 123         } catch (IOException e) {
+ 124             LOG.error(&quot;&quot;, e);
+ 125                 }
+ 126 
+<abbr title=" 127         Map&lt;String, Object&gt; map = JSON.parseObject(lastStr.toString(), new TypeReference&lt;Map&lt;String, Object&gt;&gt;() {});"> 127         Map&lt;String, Object&gt; map = JSON.parseObject(lastStr.toString(), new TypeReference&lt;Map&lt;String, Obje🔵</abbr>
+ 128         List&lt;String&gt; list = new LinkedList&lt;&gt;();
+ 129 
+ 130         for (Map.Entry&lt;String, Object&gt; entry : map.entrySet()) {
+ 131             list.add(&quot;-&quot; + entry.getKey());
+ 132             list.add(entry.getValue().toString());
+ 133         }
+ 134         return list.toArray(new String[0]);
+ 135     }
+ 136 
+ 137     public static void main(String[] args) throws Exception {
+ 138         JobParamsInfo jobParamsInfo = parseArgs(args);
+ 139         ClusterMode execMode = ClusterMode.valueOf(jobParamsInfo.getMode());
+ 140 
+ 141         switch (execMode) {
+ 142             case local:
+ 143                 Main.main(jobParamsInfo.getExecArgs());
+ 144                 break;
+ 145             case yarn:
+ 146                 new YarnSessionClusterExecutor(jobParamsInfo).exec();
+ 147                 break;
+ 148             case yarnPer:
+ 149                 new YarnJobClusterExecutor(jobParamsInfo).exec();
+ 150                 break;
+ 151             case standalone:
+ 152                 new StandaloneExecutor(jobParamsInfo).exec();
+ 153                 break;
+ 154             default:
+ 155                 throw new RuntimeException(&quot;Unsupported operating mode, please use local,yarn,yarnPer&quot;);
+ 156         }
+ 157     }
+ 158 }
+ 
+ 
+ 
+ 
+ 
+ </pre></td>
+                            <td><pre>   1 /*
+   2  * Licensed to the Apache Software Foundation (ASF) under one
+   3  * or more contributor license agreements.  See the NOTICE file
+   4  * distributed with this work for additional information
+   5  * regarding copyright ownership.  The ASF licenses this file
+   6  * to you under the Apache License, Version 2.0 (the
+   7  * &quot;License&quot;); you may not use this file except in compliance
+   8  * with the License.  You may obtain a copy of the License at
+   9  *
+  10  *     http://www.apache.org/licenses/LICENSE-2.0
+  11  *
+  12  * Unless required by applicable law or agreed to in writing, software
+  13  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15  * See the License for the specific language governing permissions and
+  16  * limitations under the License.
+  17  */
+  18 package com.dtstack.flink.sql.launcher;
+  19 
+  20 import com.alibaba.fastjson.JSON;
+  21 import com.alibaba.fastjson.TypeReference;
+  22 import com.dtstack.flink.sql.Main;
+  23 import com.dtstack.flink.sql.dirtyManager.manager.DirtyDataManager;
+  24 import com.dtstack.flink.sql.enums.ClusterMode;
+  25 import com.dtstack.flink.sql.launcher.entity.JobParamsInfo;
+  26 import com.dtstack.flink.sql.launcher.executor.StandaloneExecutor;
+  27 import com.dtstack.flink.sql.launcher.executor.YarnJobClusterExecutor;
+  28 import com.dtstack.flink.sql.launcher.executor.YarnSessionClusterExecutor;
+  29 import com.dtstack.flink.sql.option.OptionParser;
+  30 import com.dtstack.flink.sql.option.Options;
+  31 import com.dtstack.flink.sql.util.PluginUtil;
+  32 import java.io.BufferedReader;
+  33 import java.io.FileInputStream;
+  34 import java.io.IOException;
+  35 import java.io.InputStreamReader;
+  36 import java.net.URLDecoder;
+  37 import java.nio.charset.StandardCharsets;
+  38 import java.util.LinkedList;
+  39 import java.util.List;
+  40 import java.util.Map;
+  41 import java.util.Objects;
+  42 import java.util.Properties;
+  43 import org.apache.commons.io.Charsets;
+  44 import org.slf4j.Logger;
+  45 import org.slf4j.LoggerFactory;
+  46 
+  47 
+  48 /**
+  49  * Date: 2017/2/20
+  50  * Company: www.dtstack.com
+  51  * @author xuchao
+  52  */
+  53 public class LauncherMain {
+  54     private static final Logger LOG = LoggerFactory.getLogger(LauncherMain.class);
+  55 
+  56     @SuppressWarnings(&quot;unchecked&quot;)
+  57     public static JobParamsInfo parseArgs(String[] args) throws Exception {
+  58         if ((args.length == 1) &amp;&amp; args[0].endsWith(&quot;.json&quot;)) {
+  59             args = parseJson(args);
+  60         }
+  61         OptionParser optionParser = new OptionParser(args);
+  62         Options launcherOptions = optionParser.getOptions();
+  63         List&lt;String&gt; programExeArgList = optionParser.getProgramExeArgList();
+  64         String[] execArgs = programExeArgList.toArray(new String[0]);
+  65         String name = launcherOptions.getName();
+  66         String mode = launcherOptions.getMode();
+  67         String localPluginRoot = launcherOptions.getLocalSqlPluginPath();
+  68         String flinkConfDir = launcherOptions.getFlinkconf();
+  69         String flinkJarPath = launcherOptions.getFlinkJarPath();
+  70         String yarnConfDir = launcherOptions.getYarnconf();
+  71         String udfJar = launcherOptions.getAddjar();
+  72         String queue = launcherOptions.getQueue();
+  73         String pluginLoadMode = launcherOptions.getPluginLoadMode();
+  74         String addShipfile = launcherOptions.getAddShipfile();
+  75         String dirtyStr = launcherOptions.getDirtyProperties();
+<abbr title="  76         String yarnSessionConf = URLDecoder.decode(launcherOptions.getYarnSessionConf(), Charsets.UTF_8.toString());">  76         String yarnSessionConf = URLDecoder.decode(launcherOptions.getYarnSessionConf(), Charsets.UTF_8.t🔵</abbr>
+<abbr title="  77         Properties yarnSessionConfProperties = PluginUtil.jsonStrToObject(yarnSessionConf, Properties.class);">  77         Properties yarnSessionConfProperties = PluginUtil.jsonStrToObject(yarnSessionConf, Properties.cla🔵</abbr>
+  78         String confProp = URLDecoder.decode(launcherOptions.getConfProp(), Charsets.UTF_8.toString());
+  79         Properties confProperties = PluginUtil.jsonStrToObject(confProp, Properties.class);
+<abbr title="  80         Map&lt;String, Object&gt; dirtyProperties = PluginUtil.jsonStrToObject(Objects.isNull(dirtyStr) ? DirtyDataManager.buildDefaultDirty() : dirtyStr, Map.class);">  80         Map&lt;String, Object&gt; dirtyProperties = PluginUtil.jsonStrToObject(Objects.isNull(dirtyStr) ? Dirty🔵</abbr>
+<abbr title="  81         return JobParamsInfo.builder().setExecArgs(execArgs).setName(name).setMode(mode).setUdfJar(udfJar).setLocalPluginRoot(localPluginRoot).setFlinkConfDir(flinkConfDir).setYarnConfDir(yarnConfDir).setConfProperties(confProperties).setYarnSessionConfProperties(yarnSessionConfProperties).setFlinkJarPath(flinkJarPath).setPluginLoadMode(pluginLoadMode).setQueue(queue).setDirtyProperties(dirtyProperties).setAddShipfile(addShipfile).build();">  81         return JobParamsInfo.builder().setExecArgs(execArgs).setName(name).setMode(mode).setUdfJar(udfJar🔵</abbr>
+  82     }
+  83 
+  84     private static String[] parseJson(String[] args) {
+  85         StringBuilder lastStr = new StringBuilder();
+  86         try {
+  87             try (final FileInputStream fileInputStream = new FileInputStream(args[0])) {
+<abbr title="  88                 try (final InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream, StandardCharsets.UTF_8)) {">  88                 try (final InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream, S🔵</abbr>
+  89                     try (final BufferedReader reader = new BufferedReader(inputStreamReader)) {
+  90                         String tempString;
+  91                         while ((tempString = reader.readLine()) != null) {
+  92                             lastStr.append(tempString);
+  93                         }
+  94                     }
+  95                 }
+  96             }
+  97         } catch (IOException e) {
+  98             LOG.error(&quot;&quot;, e);
+  99         }
+<abbr title=" 100         Map&lt;String, Object&gt; map = JSON.parseObject(lastStr.toString(), new TypeReference&lt;Map&lt;String, Object&gt;&gt;() {});"> 100         Map&lt;String, Object&gt; map = JSON.parseObject(lastStr.toString(), new TypeReference&lt;Map&lt;String, Obje🔵</abbr>
+ 101         List&lt;String&gt; list = new LinkedList&lt;&gt;();
+ 102         for (Map.Entry&lt;String, Object&gt; entry : map.entrySet()) {
+ 103             list.add(&quot;-&quot; + entry.getKey());
+ 104             list.add(entry.getValue().toString());
+ 105         }
+ 106         return list.toArray(new String[0]);
+ 107     }
+ 108 
+ 109     public static void main(String[] args) throws Exception {
+ 110         JobParamsInfo jobParamsInfo = parseArgs(args);
+ 111         ClusterMode execMode = ClusterMode.valueOf(jobParamsInfo.getMode());
+ 112 
+ 113         switch (execMode) {
+ 114             case local:
+ 115                 Main.main(jobParamsInfo.getExecArgs());
+ 116                 break;
+ 117             case yarn:
+ 118                 new YarnSessionClusterExecutor(jobParamsInfo).exec();
+ 119                 break;
+ 120             case yarnPer:
+ 121                 new YarnJobClusterExecutor(jobParamsInfo).exec();
+ 122                 break;
+ 123             case standalone:
+ 124                 new StandaloneExecutor(jobParamsInfo).exec();
+ 125                 break;
+ 126             default:
+ 127                 throw new RuntimeException(&quot;Unsupported operating mode, please use local,yarn,yarnPer&quot;);
+ 128         }
+ 129     }
+ 130 }
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ </pre></td>
+                        </tr>
+                    </table>
+                </div>
+                <div id="bottom">
+                    <table style="margin:auto">
+                        <tr>
+                            <th>ours vs. base</th>
+                            <th>theirs vs. base</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1  /*
+   2   * Licensed to the Apache Software Foundation (ASF) under one
+   3   * or more contributor license agreements.  See the NOTICE file
+   4   * distributed with this work for additional information
+   5   * regarding copyright ownership.  The ASF licenses this file
+   6   * to you under the Apache License, Version 2.0 (the
+   7   * &quot;License&quot;); you may not use this file except in compliance
+   8   * with the License.  You may obtain a copy of the License at
+   9   *
+  10   *     http://www.apache.org/licenses/LICENSE-2.0
+  11   *
+  12   * Unless required by applicable law or agreed to in writing, software
+  13   * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15   * See the License for the specific language governing permissions and
+  16   * limitations under the License.
+  17   */
+  18  
+  19  
+  20  package com.dtstack.flink.sql.launcher;
+  21  
+
+
+
+
+
+  22  import com.dtstack.flink.sql.launcher.entity.JobParamsInfo;
+  23  import com.dtstack.flink.sql.launcher.executor.StandaloneExecutor;
+  24  import com.dtstack.flink.sql.launcher.executor.YarnJobClusterExecutor;
+  25  import com.dtstack.flink.sql.launcher.executor.YarnSessionClusterExecutor;
+  26  import com.alibaba.fastjson.JSON;
+  27  import com.alibaba.fastjson.TypeReference;
+  28  import com.dtstack.flink.sql.enums.ClusterMode;
+  29  import com.dtstack.flink.sql.Main;
+  30  import com.dtstack.flink.sql.option.OptionParser;
+  31  import com.dtstack.flink.sql.option.Options;
+  32  import com.dtstack.flink.sql.util.PluginUtil;
+  33  import org.apache.commons.io.Charsets;
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  34 +import org.slf4j.Logger;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  35 +import org.slf4j.LoggerFactory;</span>
+  36  
+  37  import java.io.BufferedReader;
+  38  import java.io.FileInputStream;
+  39  import java.io.IOException;
+  40  import java.io.InputStreamReader;
+  41  import java.net.URLDecoder;
+  42  import java.nio.charset.StandardCharsets;
+  43  import java.util.LinkedList;
+  44  import java.util.List;
+  45  import java.util.Map;
+
+  46  import java.util.Properties;
+  47  
+  48  /**
+  49   * Date: 2017/2/20
+  50   * Company: www.dtstack.com
+  51   * @author xuchao
+  52   */
+  53  
+  54  public class LauncherMain {
+  55  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  56 -</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  57 +    private static final Logger LOG = LoggerFactory.getLogger(LauncherMain.class);</span>
+  58  
+
+  59      public static JobParamsInfo parseArgs(String[] args) throws Exception {
+  60          if (args.length == 1 &amp;&amp; args[0].endsWith(&quot;.json&quot;)) {
+  61              args = parseJson(args);
+  62          }
+  63          OptionParser optionParser = new OptionParser(args);
+  64          Options launcherOptions = optionParser.getOptions();
+  65          List&lt;String&gt; programExeArgList = optionParser.getProgramExeArgList();
+  66          String[] execArgs = programExeArgList.toArray(new String[0]);
+  67  
+  68          String name = launcherOptions.getName();
+  69          String mode = launcherOptions.getMode();
+  70          String localPluginRoot = launcherOptions.getLocalSqlPluginPath();
+  71          String flinkConfDir = launcherOptions.getFlinkconf();
+  72          String flinkJarPath = launcherOptions.getFlinkJarPath();
+  73          String yarnConfDir = launcherOptions.getYarnconf();
+  74          String udfJar = launcherOptions.getAddjar();
+  75          String queue = launcherOptions.getQueue();
+  76          String pluginLoadMode = launcherOptions.getPluginLoadMode();
+  77          String addShipfile = launcherOptions.getAddShipfile();
+
+  78  
+<abbr title="  79          String yarnSessionConf = URLDecoder.decode(launcherOptions.getYarnSessionConf(), Charsets.UTF_8.toString());">  79          String yarnSessionConf = URLDecoder.decode(launcherOptions.getYarnSessionConf(), Charsets.UTF_8.toString()🔵</abbr>
+  80          Properties yarnSessionConfProperties = PluginUtil.jsonStrToObject(yarnSessionConf, Properties.class);
+  81  
+  82          String confProp = URLDecoder.decode(launcherOptions.getConfProp(), Charsets.UTF_8.toString());
+  83          Properties confProperties = PluginUtil.jsonStrToObject(confProp, Properties.class);
+
+
+  84  
+  85          return JobParamsInfo.builder()
+  86                  .setExecArgs(execArgs)
+  87                  .setName(name)
+  88                  .setMode(mode)
+  89                  .setUdfJar(udfJar)
+  90                  .setLocalPluginRoot(localPluginRoot)
+  91                  .setFlinkConfDir(flinkConfDir)
+  92                  .setYarnConfDir(yarnConfDir)
+  93                  .setConfProperties(confProperties)
+  94                  .setYarnSessionConfProperties(yarnSessionConfProperties)
+  95                  .setFlinkJarPath(flinkJarPath)
+  96                  .setPluginLoadMode(pluginLoadMode)
+  97                  .setQueue(queue)
+
+  98                  .setAddShipfile(addShipfile)
+  99                  .build();
+ 100      }
+
+ 101  
+ 102      private static String[] parseJson(String[] args) {
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 103 -        BufferedReader reader = null;</span>
+ 104          StringBuilder lastStr = new StringBuilder();
+ 105          try {
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 106 -            FileInputStream fileInputStream = new FileInputStream(args[0]);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 107 -            InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream, StandardCharsets.UTF_8);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 108 -            reader = new BufferedReader(inputStreamReader);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 109 -            String tempString;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 110 -            while ((tempString = reader.readLine()) != null) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 111 -                lastStr.append(tempString);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 112 -            }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 113 -            reader.close();</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 114 -        } catch (IOException e) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 115 -            e.printStackTrace();</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 116 -        } finally {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 117 -            if (reader != null) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 118 -                try {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 119 -                    reader.close();</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 120 -                } catch (IOException e) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 121 -                    e.printStackTrace();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 122 +            try (FileInputStream fileInputStream = new FileInputStream(args[0])) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 123 +                try (InputStreamReader inputStreamReader =</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 124 +                             new InputStreamReader(fileInputStream, StandardCharsets.UTF_8)) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 125 +                    try (BufferedReader reader = new BufferedReader(inputStreamReader)) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 126 +                        String tempString;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 127 +                        while ((tempString = reader.readLine()) != null) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 128 +                            lastStr.append(tempString);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 129 +                        }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 130 +                    }</span>
+ 131                  }
+ 132              }
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 133 +        } catch (IOException e) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 134 +            LOG.error(&quot;&quot;, e);</span>
+ 135          }
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 136 -        Map&lt;String, Object&gt; map = JSON.parseObject(lastStr.toString(), new TypeReference&lt;Map&lt;String, Object&gt;&gt;() {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 137 -        });</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 138 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"><abbr title=" 139 +        Map&lt;String, Object&gt; map = JSON.parseObject(lastStr.toString(), new TypeReference&lt;Map&lt;String, Object&gt;&gt;() {});"> 139 +        Map&lt;String, Object&gt; map = JSON.parseObject(lastStr.toString(), new TypeReference&lt;Map&lt;String, Object&gt;&gt;() {}🔵</abbr></span>
+ 140          List&lt;String&gt; list = new LinkedList&lt;&gt;();
+ 141  
+ 142          for (Map.Entry&lt;String, Object&gt; entry : map.entrySet()) {
+ 143              list.add(&quot;-&quot; + entry.getKey());
+ 144              list.add(entry.getValue().toString());
+ 145          }
+ 146          return list.toArray(new String[0]);
+ 147      }
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 148 -</span>
+ 149  
+ 150      public static void main(String[] args) throws Exception {
+ 151          JobParamsInfo jobParamsInfo = parseArgs(args);
+ 152          ClusterMode execMode = ClusterMode.valueOf(jobParamsInfo.getMode());
+ 153  
+ 154          switch (execMode) {
+ 155              case local:
+ 156                  Main.main(jobParamsInfo.getExecArgs());
+ 157                  break;
+ 158              case yarn:
+ 159                  new YarnSessionClusterExecutor(jobParamsInfo).exec();
+ 160                  break;
+ 161              case yarnPer:
+ 162                  new YarnJobClusterExecutor(jobParamsInfo).exec();
+ 163                  break;
+ 164              case standalone:
+ 165                  new StandaloneExecutor(jobParamsInfo).exec();
+ 166                  break;
+ 167              default:
+ 168                  throw new RuntimeException(&quot;Unsupported operating mode, please use local,yarn,yarnPer&quot;);
+ 169          }
+ 170      }
+ 171  }</pre></td>
+                            <td><pre>   1  /*
+   2   * Licensed to the Apache Software Foundation (ASF) under one
+   3   * or more contributor license agreements.  See the NOTICE file
+   4   * distributed with this work for additional information
+   5   * regarding copyright ownership.  The ASF licenses this file
+   6   * to you under the Apache License, Version 2.0 (the
+   7   * &quot;License&quot;); you may not use this file except in compliance
+   8   * with the License.  You may obtain a copy of the License at
+   9   *
+  10   *     http://www.apache.org/licenses/LICENSE-2.0
+  11   *
+  12   * Unless required by applicable law or agreed to in writing, software
+  13   * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15   * See the License for the specific language governing permissions and
+  16   * limitations under the License.
+  17   */
+  18  
+  19  
+  20  package com.dtstack.flink.sql.launcher;
+  21  
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  22 +import com.alibaba.fastjson.JSON;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  23 +import com.alibaba.fastjson.TypeReference;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  24 +import com.dtstack.flink.sql.Main;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  25 +import com.dtstack.flink.sql.dirtyManager.manager.DirtyDataManager;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  26 +import com.dtstack.flink.sql.enums.ClusterMode;</span>
+  27  import com.dtstack.flink.sql.launcher.entity.JobParamsInfo;
+  28  import com.dtstack.flink.sql.launcher.executor.StandaloneExecutor;
+  29  import com.dtstack.flink.sql.launcher.executor.YarnJobClusterExecutor;
+  30  import com.dtstack.flink.sql.launcher.executor.YarnSessionClusterExecutor;
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  31 -import com.alibaba.fastjson.JSON;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  32 -import com.alibaba.fastjson.TypeReference;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  33 -import com.dtstack.flink.sql.enums.ClusterMode;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  34 -import com.dtstack.flink.sql.Main;</span>
+  35  import com.dtstack.flink.sql.option.OptionParser;
+  36  import com.dtstack.flink.sql.option.Options;
+  37  import com.dtstack.flink.sql.util.PluginUtil;
+  38  import org.apache.commons.io.Charsets;
+
+
+  39  
+  40  import java.io.BufferedReader;
+  41  import java.io.FileInputStream;
+  42  import java.io.IOException;
+  43  import java.io.InputStreamReader;
+  44  import java.net.URLDecoder;
+  45  import java.nio.charset.StandardCharsets;
+  46  import java.util.LinkedList;
+  47  import java.util.List;
+  48  import java.util.Map;
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  49 +import java.util.Objects;</span>
+  50  import java.util.Properties;
+  51  
+  52  /**
+  53   * Date: 2017/2/20
+  54   * Company: www.dtstack.com
+  55   * @author xuchao
+  56   */
+  57  
+  58  public class LauncherMain {
+  59  
+  60  
+
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  61 -</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  62 +    @SuppressWarnings(&quot;unchecked&quot;)</span>
+  63      public static JobParamsInfo parseArgs(String[] args) throws Exception {
+  64          if (args.length == 1 &amp;&amp; args[0].endsWith(&quot;.json&quot;)) {
+  65              args = parseJson(args);
+  66          }
+  67          OptionParser optionParser = new OptionParser(args);
+  68          Options launcherOptions = optionParser.getOptions();
+  69          List&lt;String&gt; programExeArgList = optionParser.getProgramExeArgList();
+  70          String[] execArgs = programExeArgList.toArray(new String[0]);
+  71  
+  72          String name = launcherOptions.getName();
+  73          String mode = launcherOptions.getMode();
+  74          String localPluginRoot = launcherOptions.getLocalSqlPluginPath();
+  75          String flinkConfDir = launcherOptions.getFlinkconf();
+  76          String flinkJarPath = launcherOptions.getFlinkJarPath();
+  77          String yarnConfDir = launcherOptions.getYarnconf();
+  78          String udfJar = launcherOptions.getAddjar();
+  79          String queue = launcherOptions.getQueue();
+  80          String pluginLoadMode = launcherOptions.getPluginLoadMode();
+  81          String addShipfile = launcherOptions.getAddShipfile();
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  82 +        String dirtyStr = launcherOptions.getDirtyProperties();</span>
+  83  
+<abbr title="  84          String yarnSessionConf = URLDecoder.decode(launcherOptions.getYarnSessionConf(), Charsets.UTF_8.toString());">  84          String yarnSessionConf = URLDecoder.decode(launcherOptions.getYarnSessionConf(), Charsets.UTF_8.toString()🔵</abbr>
+  85          Properties yarnSessionConfProperties = PluginUtil.jsonStrToObject(yarnSessionConf, Properties.class);
+  86  
+  87          String confProp = URLDecoder.decode(launcherOptions.getConfProp(), Charsets.UTF_8.toString());
+  88          Properties confProperties = PluginUtil.jsonStrToObject(confProp, Properties.class);
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  89 +        Map&lt;String, Object&gt; dirtyProperties = PluginUtil.jsonStrToObject(Objects.isNull(dirtyStr) ?</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  90 +               DirtyDataManager.buildDefaultDirty() : dirtyStr, Map.class);</span>
+  91  
+  92          return JobParamsInfo.builder()
+  93                  .setExecArgs(execArgs)
+  94                  .setName(name)
+  95                  .setMode(mode)
+  96                  .setUdfJar(udfJar)
+  97                  .setLocalPluginRoot(localPluginRoot)
+  98                  .setFlinkConfDir(flinkConfDir)
+  99                  .setYarnConfDir(yarnConfDir)
+ 100                  .setConfProperties(confProperties)
+ 101                  .setYarnSessionConfProperties(yarnSessionConfProperties)
+ 102                  .setFlinkJarPath(flinkJarPath)
+ 103                  .setPluginLoadMode(pluginLoadMode)
+ 104                  .setQueue(queue)
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 105 +                .setDirtyProperties(dirtyProperties)</span>
+ 106                  .setAddShipfile(addShipfile)
+ 107                  .build();
+ 108      }
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 109 +</span>
+ 110  
+ 111      private static String[] parseJson(String[] args) {
+ 112          BufferedReader reader = null;
+ 113          StringBuilder lastStr = new StringBuilder();
+ 114          try {
+ 115              FileInputStream fileInputStream = new FileInputStream(args[0]);
+ 116              InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream, StandardCharsets.UTF_8);
+ 117              reader = new BufferedReader(inputStreamReader);
+ 118              String tempString;
+ 119              while ((tempString = reader.readLine()) != null) {
+ 120                  lastStr.append(tempString);
+ 121              }
+ 122              reader.close();
+ 123          } catch (IOException e) {
+ 124              e.printStackTrace();
+ 125          } finally {
+ 126              if (reader != null) {
+ 127                  try {
+ 128                      reader.close();
+ 129                  } catch (IOException e) {
+ 130                      e.printStackTrace();
+
+
+
+
+
+
+
+
+
+ 131                  }
+ 132              }
+
+
+ 133          }
+ 134          Map&lt;String, Object&gt; map = JSON.parseObject(lastStr.toString(), new TypeReference&lt;Map&lt;String, Object&gt;&gt;() {
+ 135          });
+
+
+ 136          List&lt;String&gt; list = new LinkedList&lt;&gt;();
+ 137  
+ 138          for (Map.Entry&lt;String, Object&gt; entry : map.entrySet()) {
+ 139              list.add(&quot;-&quot; + entry.getKey());
+ 140              list.add(entry.getValue().toString());
+ 141          }
+ 142          return list.toArray(new String[0]);
+ 143      }
+ 144  
+ 145  
+ 146      public static void main(String[] args) throws Exception {
+ 147          JobParamsInfo jobParamsInfo = parseArgs(args);
+ 148          ClusterMode execMode = ClusterMode.valueOf(jobParamsInfo.getMode());
+ 149  
+ 150          switch (execMode) {
+ 151              case local:
+ 152                  Main.main(jobParamsInfo.getExecArgs());
+ 153                  break;
+ 154              case yarn:
+ 155                  new YarnSessionClusterExecutor(jobParamsInfo).exec();
+ 156                  break;
+ 157              case yarnPer:
+ 158                  new YarnJobClusterExecutor(jobParamsInfo).exec();
+ 159                  break;
+ 160              case standalone:
+ 161                  new StandaloneExecutor(jobParamsInfo).exec();
+ 162                  break;
+ 163              default:
+ 164                  throw new RuntimeException(&quot;Unsupported operating mode, please use local,yarn,yarnPer&quot;);
+ 165          }
+ 166      }
+ 167  }</pre></td>
+                        </tr>
+                    </table>
+                </div>
+              </body>
+            </html>
+            

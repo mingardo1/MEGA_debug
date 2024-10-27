@@ -1,0 +1,1842 @@
+<!DOCTYPE html>
+    <html lang="en">
+              <head>
+                <meta charset="utf-8">
+                <title>103</title>
+                    <style>
+                        #top {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        #bottom {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        abbr {
+                          /* Here is the delay */
+                          transition-delay:0s;
+                        }
+                    </style>
+              </head>
+              <body>
+                <span style="height: 4vh">
+                    103
+                    <a href="102.html">prev</a>
+                    <a href="104.html">next</a>
+                    <a href="103_chunks.html">chunks</a>
+                    <a href="index.html">index</a>
+                    Automattic/simplenote-android_37826f373652ce82466012d4d60a2e81bd4d0feb_Simplenote/src/main/java/com/automattic/simplenote/NoteMarkdownFragment.java
+                    <textarea rows=1 onclick='navigator.clipboard.writeText(this.value)'>cd C:\studies\se\mega\git-analyzer-plus\notebooks\debug
+del /Q *
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\Automattic\simplenote-android show &quot;37826f373652ce82466012d4d60a2e81bd4d0feb:Simplenote/src/main/java/com/automattic/simplenote/NoteMarkdownFragment.java&quot; &gt; committed.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\Automattic\simplenote-android show &quot;37826f373652ce82466012d4d60a2e81bd4d0feb^1:Simplenote/src/main/java/com/automattic/simplenote/NoteMarkdownFragment.java&quot; &gt; ours.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\Automattic\simplenote-android show &quot;37826f373652ce82466012d4d60a2e81bd4d0feb^2:Simplenote/src/main/java/com/automattic/simplenote/NoteMarkdownFragment.java&quot; &gt; theirs.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\Automattic\simplenote-android show &quot;33d6f073222f84b537dac4c128bca96cbd16118f:Simplenote/src/main/java/com/automattic/simplenote/NoteMarkdownFragment.java&quot; &gt; base.java
+copy ours.java 1ours.java
+copy ours.java 2ours.java
+copy theirs.java 1theirs.java
+copy theirs.java 2theirs.java
+copy base.java 1base.java
+copy base.java 2base.java
+&quot;C:\Program Files\Java\jdk1.8.0_241\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\jFSTMerge\build\libs\jFSTMerge-all.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\jfstmerge.java --show-base
+&quot;C:\Program Files\Eclipse Adoptium\jdk-17.0.11.9-hotspot\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\spork\target\spork-0.5.0-SNAPSHOT.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\spork.java
+del /Q 1*.java
+del /Q 2*.java
+del /Q jfstmerge.java.merge
+</textarea>
+                    {strict: [[b], [j]], subset: [[bj]]}
+                </span>
+                <div id="top">
+
+                    <table>
+                        <tr>
+                            <th>line based (standard git)</th>
+                            <th>jfstmerge</th>
+                            <th>spork</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1 package com.automattic.simplenote;
+   2 
+   3 import android.os.AsyncTask;
+   4 import android.os.Bundle;
+   5 import android.view.LayoutInflater;
+   6 import android.view.Menu;
+   7 import android.view.MenuInflater;
+   8 import android.view.MenuItem;
+   9 import android.view.View;
+  10 import android.view.ViewGroup;
+  11 import android.webkit.WebResourceRequest;
+  12 import android.webkit.WebView;
+  13 import android.webkit.WebViewClient;
+  14 
+  15 import androidx.annotation.NonNull;
+  16 import androidx.core.view.MenuCompat;
+  17 import androidx.fragment.app.Fragment;
+  18 import androidx.fragment.app.FragmentActivity;
+  19 
+  20 import com.automattic.simplenote.models.Note;
+  21 import com.automattic.simplenote.utils.AppLog;
+  22 import com.automattic.simplenote.utils.AppLog.Type;
+  23 import com.automattic.simplenote.utils.BrowserUtils;
+  24 import com.automattic.simplenote.utils.ContextUtils;
+  25 import com.automattic.simplenote.utils.DrawableUtils;
+  26 import com.automattic.simplenote.utils.NetworkUtils;
+  27 import com.automattic.simplenote.utils.NoteUtils;
+  28 import com.automattic.simplenote.utils.SimplenoteLinkify;
+  29 import com.automattic.simplenote.utils.ThemeUtils;
+  30 import com.commonsware.cwac.anddown.AndDown;
+  31 import com.google.android.material.snackbar.Snackbar;
+  32 import com.simperium.client.Bucket;
+  33 import com.simperium.client.BucketObjectMissingException;
+  34 
+  35 import java.lang.ref.SoftReference;
+  36 
+  37 import static com.automattic.simplenote.utils.SimplenoteLinkify.SIMPLENOTE_LINK_PREFIX;
+  38 
+  39 public class NoteMarkdownFragment extends Fragment implements Bucket.Listener&lt;Note&gt; {
+  40     public static final String ARG_ITEM_ID = &quot;item_id&quot;;
+  41 
+  42     private Bucket&lt;Note&gt; mNotesBucket;
+  43     private Note mNote;
+  44     private String mCss;
+  45     private WebView mMarkdown;
+  46     private boolean mIsLoadingNote;
+  47 
+  48     @Override
+  49     public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
+  50         inflater.inflate(R.menu.note_markdown, menu);
+  51         MenuCompat.setGroupDividerEnabled(menu, true);
+  52 
+  53         DrawableUtils.tintMenuWithAttribute(
+  54             requireContext(),
+  55             menu,
+  56             R.attr.toolbarIconColor
+  57         );
+  58 
+  59         for (int i = 0; i &lt; menu.size(); i++) {
+  60             MenuItem item = menu.getItem(i);
+  61             DrawableUtils.setMenuItemAlpha(item, 0.3);  // 0.3 is 30% opacity.
+  62         }
+  63 
+  64         if (mNote != null) {
+  65             MenuItem viewPublishedNoteItem = menu.findItem(R.id.menu_info);
+  66             viewPublishedNoteItem.setVisible(true);
+  67             MenuItem trashItem = menu.findItem(R.id.menu_trash);
+  68 
+  69             if (mNote.isDeleted()) {
+  70                 trashItem.setTitle(R.string.restore);
+  71             } else {
+  72                 trashItem.setTitle(R.string.trash);
+  73             }
+  74 
+  75             DrawableUtils.tintMenuItemWithAttribute(getActivity(), trashItem, R.attr.toolbarIconColor);
+  76         }
+  77 
+  78         super.onCreateOptionsMenu(menu, inflater);
+  79     }
+  80 
+  81     @Override
+<abbr title="  82     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {">  82     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceS🔵</abbr>
+  83         AppLog.add(Type.SCREEN, &quot;Created (NoteMarkdownFragment)&quot;);
+  84         mNotesBucket = ((Simplenote) requireActivity().getApplication()).getNotesBucket();
+  85 
+  86         // Load note if we were passed an ID.
+  87         Bundle arguments = getArguments();
+  88 
+  89         if (arguments != null &amp;&amp; arguments.containsKey(ARG_ITEM_ID)) {
+  90             String key = arguments.getString(ARG_ITEM_ID);
+  91             new LoadNoteTask(this).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, key);
+  92         }
+  93 
+  94         setHasOptionsMenu(true);
+  95         View layout;
+  96 
+  97         if (BrowserUtils.isWebViewInstalled(requireContext())) {
+  98             layout = inflater.inflate(R.layout.fragment_note_markdown, container, false);
+  99             mMarkdown = layout.findViewById(R.id.markdown);
+ 100             mMarkdown.setWebViewClient(
+ 101                 new WebViewClient() {
+ 102                     @Override
+ 103                     public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request){
+ 104                         String url = request.getUrl().toString();
+ 105 
+ 106                         if (url.startsWith(SimplenoteLinkify.SIMPLENOTE_LINK_PREFIX)){
+<abbr title=" 107                             SimplenoteLinkify.openNote(requireActivity(), url.replace(SIMPLENOTE_LINK_PREFIX, &quot;&quot;));"> 107                             SimplenoteLinkify.openNote(requireActivity(), url.replace(SIMPLENOTE_LINK_PRE🔵</abbr>
+ 108                         } else {
+ 109                             BrowserUtils.launchBrowserOrShowError(requireContext(), url);
+ 110                         }
+ 111 
+ 112                         return true;
+ 113                     }
+ 114                 }
+ 115 &lt;&lt;&lt;&lt;&lt;&lt;&lt; GitAnalyzerPlus_ours
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 116             }</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 117         );</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 118         mCss = ContextUtils.readCssFile(requireContext(), ThemeUtils.getCssFromStyle(requireContext()));</span>
+ 119 ||||||| GitAnalyzerPlus_base
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 120             }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 121         );</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 122         mCss = ThemeUtils.isLightTheme(requireContext())</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 123             ? ContextUtils.readCssFile(requireContext(), &quot;light.css&quot;)</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 124             : ContextUtils.readCssFile(requireContext(), &quot;dark.css&quot;);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 125         return layout;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 126     }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 127 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 128     @Override</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 129     public boolean onOptionsItemSelected(@NonNull MenuItem item) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 130         switch (item.getItemId()) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 131             case android.R.id.home:</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 132                 if (!isAdded()) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 133                     return false;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 134                 }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 135 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 136                 requireActivity().finish();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 137                 return true;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 138             case R.id.menu_trash:</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 139                 if (!isAdded()) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 140                     return false;</span>
+ 141 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 142             );</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 143             mCss = ThemeUtils.isLightTheme(requireContext())</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 144                 ? ContextUtils.readCssFile(requireContext(), &quot;light.css&quot;)</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 145                 : ContextUtils.readCssFile(requireContext(), &quot;dark.css&quot;);</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 146         } else {</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 147             layout = inflater.inflate(R.layout.fragment_note_error, container, false);</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 148             layout.findViewById(R.id.error).setVisibility(View.VISIBLE);</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 149             layout.findViewById(R.id.button).setOnClickListener(</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 150                 new View.OnClickListener() {</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 151                     @Override</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 152                     public void onClick(View v) {</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"><abbr title=" 153                         BrowserUtils.launchBrowserOrShowError(requireContext(), BrowserUtils.URL_WEB_VIEW);"> 153                         BrowserUtils.launchBrowserOrShowError(requireContext(), BrowserUtils.URL_WEB_VIEW🔵</abbr></span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 154                     }</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 155                 }</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 156             );</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 157         }</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 158 </span>
+ 159 &gt;&gt;&gt;&gt;&gt;&gt;&gt; GitAnalyzerPlus_theirs
+ 160         return layout;
+ 161     }
+ 162 
+ 163     @Override
+ 164     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+ 165         switch (item.getItemId()) {
+ 166             case android.R.id.home:
+ 167                 if (!isAdded()) {
+ 168                     return false;
+ 169                 }
+ 170 
+ 171                 requireActivity().finish();
+ 172                 return true;
+ 173             case R.id.menu_trash:
+ 174                 if (!isAdded()) {
+ 175                     return false;
+ 176                 }
+ 177 
+ 178                 deleteNote();
+ 179                 return true;
+ 180             case R.id.menu_copy_internal:
+ 181                 if (!isAdded()) {
+ 182                     return false;
+ 183                 }
+ 184 
+<abbr title=" 185                 if (BrowserUtils.copyToClipboard(requireContext(), SimplenoteLinkify.getNoteLinkWithTitle(mNote.getTitle(), mNote.getSimperiumKey()))) {"> 185                 if (BrowserUtils.copyToClipboard(requireContext(), SimplenoteLinkify.getNoteLinkWithTitle🔵</abbr>
+ 186                     Snackbar.make(mMarkdown, R.string.link_copied, Snackbar.LENGTH_SHORT).show();
+ 187                 } else {
+ 188                     Snackbar.make(mMarkdown, R.string.link_copied_failure, Snackbar.LENGTH_SHORT).show();
+ 189                 }
+ 190 
+ 191                 return true;
+ 192             default:
+ 193                 return super.onOptionsItemSelected(item);
+ 194         }
+ 195     }
+ 196 
+ 197     private void deleteNote() {
+ 198         NoteUtils.deleteNote(mNote, getActivity());
+ 199         requireActivity().finish();
+ 200     }
+ 201 
+ 202     @Override
+ 203     public void onPrepareOptionsMenu(@NonNull Menu menu) {
+ 204         // Disable trash action until note is loaded.
+ 205         menu.findItem(R.id.menu_trash).setEnabled(!mIsLoadingNote);
+ 206 
+ 207         MenuItem pinItem = menu.findItem(R.id.menu_pin);
+ 208         MenuItem publishItem = menu.findItem(R.id.menu_publish);
+ 209         MenuItem copyLinkItem = menu.findItem(R.id.menu_copy);
+ 210         MenuItem markdownItem = menu.findItem(R.id.menu_markdown);
+ 211         MenuItem copyLinkInternalItem = menu.findItem(R.id.menu_copy_internal);
+ 212 
+ 213         if (mNote != null) {
+ 214             pinItem.setChecked(mNote.isPinned());
+ 215             publishItem.setChecked(mNote.isPublished());
+ 216             markdownItem.setChecked(mNote.isMarkdownEnabled());
+ 217         }
+ 218 
+ 219         pinItem.setEnabled(false);
+ 220         publishItem.setEnabled(false);
+ 221         copyLinkItem.setEnabled(false);
+ 222         markdownItem.setEnabled(false);
+ 223         copyLinkInternalItem.setEnabled(true);
+ 224 
+ 225         super.onPrepareOptionsMenu(menu);
+ 226     }
+ 227 
+ 228     @Override
+ 229     public void onDestroy() {
+ 230         super.onDestroy();
+ 231         mNotesBucket.removeListener(this);
+ 232         AppLog.add(Type.SYNC, &quot;Removed note bucket listener (NoteMarkdownFragment)&quot;);
+ 233         AppLog.add(Type.SCREEN, &quot;Destroyed (NoteMarkdownFragment)&quot;);
+ 234     }
+ 235 
+ 236     @Override
+ 237     public void onResume() {
+ 238         super.onResume();
+ 239         checkWebView();
+ 240         mNotesBucket.addListener(this);
+ 241         AppLog.add(Type.SYNC, &quot;Added note bucket listener (NoteMarkdownFragment)&quot;);
+ 242         AppLog.add(Type.NETWORK, NetworkUtils.getNetworkInfo(requireContext()));
+ 243         AppLog.add(Type.SCREEN, &quot;Resumed (NoteMarkdownFragment)&quot;);
+ 244     }
+ 245 
+ 246     @Override
+ 247     public void onBeforeUpdateObject(Bucket&lt;Note&gt; bucket, Note note) {
+ 248     }
+ 249 
+ 250     @Override
+ 251     public void onDeleteObject(Bucket&lt;Note&gt; bucket, Note note) {
+ 252     }
+ 253 
+ 254     @Override
+ 255     public void onNetworkChange(Bucket&lt;Note&gt; bucket, Bucket.ChangeType type, String key) {
+ 256     }
+ 257 
+ 258     @Override
+ 259     public void onSaveObject(Bucket&lt;Note&gt; bucket, Note note) {
+ 260         if (note.equals(mNote)) {
+ 261             mNote = note;
+ 262             requireActivity().invalidateOptionsMenu();
+ 263         }
+ 264 
+ 265         AppLog.add(
+ 266             Type.SYNC,
+ 267             &quot;Saved note callback in NoteMarkdownFragment (ID: &quot; + note.getSimperiumKey() +
+ 268                 &quot; / Title: &quot; + note.getTitle() +
+ 269                 &quot; / Characters: &quot; + NoteUtils.getCharactersCount(note.getContent()) +
+ 270                 &quot; / Words: &quot; + NoteUtils.getWordCount(note.getContent()) + &quot;)&quot;
+ 271         );
+ 272     }
+ 273 
+ 274     private void checkWebView() {
+ 275         // When a WebView is installed and mMarkdown is null, a WebView was not installed when the
+ 276         // fragment was created.  So, open the note again to show the markdown preview.
+ 277         if (BrowserUtils.isWebViewInstalled(requireContext()) &amp;&amp; mMarkdown == null) {
+ 278             SimplenoteLinkify.openNote(requireActivity(), mNote.getSimperiumKey());
+ 279         }
+ 280     }
+ 281 
+ 282     public void updateMarkdown(String text) {
+ 283         if (mMarkdown != null) {
+<abbr title=" 284             mMarkdown.loadDataWithBaseURL(null, getMarkdownFormattedContent(mCss, text), &quot;text/html&quot;, &quot;utf-8&quot;, null);"> 284             mMarkdown.loadDataWithBaseURL(null, getMarkdownFormattedContent(mCss, text), &quot;text/html&quot;, &quot;ut🔵</abbr>
+ 285         }
+ 286     }
+ 287 
+ 288     public static String getMarkdownFormattedContent(String cssContent, String sourceContent) {
+ 289         String header = &quot;&lt;html&gt;&lt;head&gt;&quot; +
+ 290                 &quot;&lt;link href=\&quot;https://fonts.googleapis.com/css?family=Noto+Serif\&quot; rel=\&quot;stylesheet\&quot;&gt;&quot; +
+ 291                 cssContent + &quot;&lt;/head&gt;&lt;body&gt;&quot;;
+ 292 
+ 293         String parsedMarkdown = new AndDown().markdownToHtml(
+ 294                 sourceContent,
+ 295                 AndDown.HOEDOWN_EXT_STRIKETHROUGH | AndDown.HOEDOWN_EXT_FENCED_CODE |
+ 296                         AndDown.HOEDOWN_EXT_QUOTE | AndDown.HOEDOWN_EXT_TABLES,
+ 297                 AndDown.HOEDOWN_HTML_ESCAPE
+ 298         );
+ 299 
+ 300         // Set auto alignment for lists, tables, and quotes based on language of start.
+ 301         parsedMarkdown = parsedMarkdown
+ 302                 .replaceAll(&quot;&lt;ol&gt;&quot;, &quot;&lt;ol dir=\&quot;auto\&quot;&gt;&quot;)
+ 303                 .replaceAll(&quot;&lt;ul&gt;&quot;, &quot;&lt;ul dir=\&quot;auto\&quot;&gt;&quot;)
+ 304                 .replaceAll(&quot;&lt;table&gt;&quot;, &quot;&lt;table dir=\&quot;auto\&quot;&gt;&quot;)
+ 305                 .replaceAll(&quot;&lt;blockquote&gt;&quot;, &quot;&lt;blockquote dir=\&quot;auto\&quot;&gt;&quot;);
+ 306 
+ 307         return header + &quot;&lt;div class=\&quot;note-detail-markdown\&quot;&gt;&quot; + parsedMarkdown +
+ 308                 &quot;&lt;/div&gt;&lt;/body&gt;&lt;/html&gt;&quot;;
+ 309     }
+ 310 
+ 311     private static class LoadNoteTask extends AsyncTask&lt;String, Void, Void&gt; {
+ 312         private SoftReference&lt;NoteMarkdownFragment&gt; mNoteMarkdownFragmentReference;
+ 313 
+ 314         private LoadNoteTask(NoteMarkdownFragment context) {
+ 315             mNoteMarkdownFragmentReference = new SoftReference&lt;&gt;(context);
+ 316         }
+ 317 
+ 318         @Override
+ 319         protected void onPreExecute() {
+ 320             NoteMarkdownFragment fragment = mNoteMarkdownFragmentReference.get();
+ 321             fragment.mIsLoadingNote = true;
+ 322         }
+ 323 
+ 324         @Override
+ 325         protected Void doInBackground(String... args) {
+ 326             NoteMarkdownFragment fragment = mNoteMarkdownFragmentReference.get();
+ 327             FragmentActivity activity = fragment.getActivity();
+ 328 
+ 329             if (activity == null) {
+ 330                 return null;
+ 331             }
+ 332 
+ 333             String noteID = args[0];
+ 334             Simplenote application = (Simplenote) activity.getApplication();
+ 335             Bucket&lt;Note&gt; notesBucket = application.getNotesBucket();
+ 336 
+ 337             try {
+ 338                 fragment.mNote = notesBucket.get(noteID);
+ 339             } catch (BucketObjectMissingException exception) {
+ 340                 // TODO: Handle a missing note
+ 341             }
+ 342 
+ 343             return null;
+ 344         }
+ 345 
+ 346         @Override
+ 347         protected void onPostExecute(Void nada) {
+ 348             NoteMarkdownFragment fragment = mNoteMarkdownFragmentReference.get();
+ 349             fragment.mIsLoadingNote = false;
+ 350             fragment.requireActivity().invalidateOptionsMenu();
+ 351         }
+ 352     }
+ 353 }</pre></td>
+                            <td><pre>   1 package com.automattic.simplenote;
+   2 
+   3 import android.os.AsyncTask;
+   4 import android.os.Bundle;
+   5 import android.view.LayoutInflater;
+   6 import android.view.Menu;
+   7 import android.view.MenuInflater;
+   8 import android.view.MenuItem;
+   9 import android.view.View;
+  10 import android.view.ViewGroup;
+  11 import android.webkit.WebResourceRequest;
+  12 import android.webkit.WebView;
+  13 import android.webkit.WebViewClient;
+  14 
+  15 import androidx.annotation.NonNull;
+  16 import androidx.core.view.MenuCompat;
+  17 import androidx.fragment.app.Fragment;
+  18 import androidx.fragment.app.FragmentActivity;
+  19 
+  20 import com.automattic.simplenote.models.Note;
+  21 import com.automattic.simplenote.utils.AppLog;
+  22 import com.automattic.simplenote.utils.AppLog.Type;
+  23 import com.automattic.simplenote.utils.BrowserUtils;
+  24 import com.automattic.simplenote.utils.ContextUtils;
+  25 import com.automattic.simplenote.utils.DrawableUtils;
+  26 import com.automattic.simplenote.utils.NetworkUtils;
+  27 import com.automattic.simplenote.utils.NoteUtils;
+  28 import com.automattic.simplenote.utils.SimplenoteLinkify;
+  29 import com.automattic.simplenote.utils.ThemeUtils;
+  30 import com.commonsware.cwac.anddown.AndDown;
+  31 import com.google.android.material.snackbar.Snackbar;
+  32 import com.simperium.client.Bucket;
+  33 import com.simperium.client.BucketObjectMissingException;
+  34 
+  35 import java.lang.ref.SoftReference;
+  36 
+  37 import static com.automattic.simplenote.utils.SimplenoteLinkify.SIMPLENOTE_LINK_PREFIX;
+  38 
+  39 public class NoteMarkdownFragment extends Fragment implements Bucket.Listener&lt;Note&gt; {
+  40     public static final String ARG_ITEM_ID = &quot;item_id&quot;;
+  41 
+  42     private Bucket&lt;Note&gt; mNotesBucket;
+  43     private Note mNote;
+  44     private String mCss;
+  45     private WebView mMarkdown;
+  46     private boolean mIsLoadingNote;
+  47 
+  48     @Override
+  49     public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
+  50         inflater.inflate(R.menu.note_markdown, menu);
+  51         MenuCompat.setGroupDividerEnabled(menu, true);
+  52 
+  53         DrawableUtils.tintMenuWithAttribute(
+  54             requireContext(),
+  55             menu,
+  56             R.attr.toolbarIconColor
+  57         );
+  58 
+  59         for (int i = 0; i &lt; menu.size(); i++) {
+  60             MenuItem item = menu.getItem(i);
+  61             DrawableUtils.setMenuItemAlpha(item, 0.3);  // 0.3 is 30% opacity.
+  62         }
+  63 
+  64         if (mNote != null) {
+  65             MenuItem viewPublishedNoteItem = menu.findItem(R.id.menu_info);
+  66             viewPublishedNoteItem.setVisible(true);
+  67             MenuItem trashItem = menu.findItem(R.id.menu_trash);
+  68 
+  69             if (mNote.isDeleted()) {
+  70                 trashItem.setTitle(R.string.restore);
+  71             } else {
+  72                 trashItem.setTitle(R.string.trash);
+  73             }
+  74 
+  75             DrawableUtils.tintMenuItemWithAttribute(getActivity(), trashItem, R.attr.toolbarIconColor);
+  76         }
+  77 
+  78         super.onCreateOptionsMenu(menu, inflater);
+  79     }
+  80 
+  81     @Override
+<abbr title="  82     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {">  82     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceS🔵</abbr>
+  83         AppLog.add(Type.SCREEN, &quot;Created (NoteMarkdownFragment)&quot;);
+  84         mNotesBucket = ((Simplenote) requireActivity().getApplication()).getNotesBucket();
+  85 
+  86         // Load note if we were passed an ID.
+  87         Bundle arguments = getArguments();
+  88 
+  89         if (arguments != null &amp;&amp; arguments.containsKey(ARG_ITEM_ID)) {
+  90             String key = arguments.getString(ARG_ITEM_ID);
+  91             new LoadNoteTask(this).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, key);
+  92         }
+  93 
+  94         setHasOptionsMenu(true);
+  95         View layout;
+  96 
+  97         if (BrowserUtils.isWebViewInstalled(requireContext())) {
+  98             layout = inflater.inflate(R.layout.fragment_note_markdown, container, false);
+  99         mMarkdown = layout.findViewById(R.id.markdown);
+ 100         mMarkdown.setWebViewClient(
+ 101             new WebViewClient() {
+ 102                 @Override
+ 103                 public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request){
+ 104                     String url = request.getUrl().toString();
+ 105 
+ 106                     if (url.startsWith(SimplenoteLinkify.SIMPLENOTE_LINK_PREFIX)){
+<abbr title=" 107                         SimplenoteLinkify.openNote(requireActivity(), url.replace(SIMPLENOTE_LINK_PREFIX, &quot;&quot;));"> 107                         SimplenoteLinkify.openNote(requireActivity(), url.replace(SIMPLENOTE_LINK_PREFIX,🔵</abbr>
+ 108                     } else {
+ 109                         BrowserUtils.launchBrowserOrShowError(requireContext(), url);
+ 110                     }
+ 111 
+ 112                     return true;
+ 113                 }
+ 114             }
+ 115         );
+ 116 &lt;&lt;&lt;&lt;&lt;&lt;&lt; MINE
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 117         mCss = ContextUtils.readCssFile(requireContext(), ThemeUtils.getCssFromStyle(requireContext()));</span>
+ 118 ||||||| BASE
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 119         mCss = ThemeUtils.isLightTheme(requireContext())</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 120             ? ContextUtils.readCssFile(requireContext(), &quot;light.css&quot;)</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 121             : ContextUtils.readCssFile(requireContext(), &quot;dark.css&quot;);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 122         return layout;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 123     }</span>
+ 124 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 125             mCss = ThemeUtils.isLightTheme(requireContext())</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 126                 ? ContextUtils.readCssFile(requireContext(), &quot;light.css&quot;)</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 127                 : ContextUtils.readCssFile(requireContext(), &quot;dark.css&quot;);</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 128         } else {</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 129             layout = inflater.inflate(R.layout.fragment_note_error, container, false);</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 130             layout.findViewById(R.id.error).setVisibility(View.VISIBLE);</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 131             layout.findViewById(R.id.button).setOnClickListener(</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 132                 new View.OnClickListener() {</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 133                     @Override</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 134                     public void onClick(View v) {</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"><abbr title=" 135                         BrowserUtils.launchBrowserOrShowError(requireContext(), BrowserUtils.URL_WEB_VIEW);"> 135                         BrowserUtils.launchBrowserOrShowError(requireContext(), BrowserUtils.URL_WEB_VIEW🔵</abbr></span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 136                     }</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 137                 }</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 138             );</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 139         }</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 140 </span>
+ 141 &gt;&gt;&gt;&gt;&gt;&gt;&gt; YOURS
+ 142         return layout;
+ 143     }
+ 144 
+ 145     @Override
+ 146     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+ 147         switch (item.getItemId()) {
+ 148             case android.R.id.home:
+ 149                 if (!isAdded()) {
+ 150                     return false;
+ 151                 }
+ 152 
+ 153                 requireActivity().finish();
+ 154                 return true;
+ 155             case R.id.menu_trash:
+ 156                 if (!isAdded()) {
+ 157                     return false;
+ 158                 }
+ 159 
+ 160                 deleteNote();
+ 161                 return true;
+ 162             case R.id.menu_copy_internal:
+ 163                 if (!isAdded()) {
+ 164                     return false;
+ 165                 }
+ 166 
+<abbr title=" 167                 if (BrowserUtils.copyToClipboard(requireContext(), SimplenoteLinkify.getNoteLinkWithTitle(mNote.getTitle(), mNote.getSimperiumKey()))) {"> 167                 if (BrowserUtils.copyToClipboard(requireContext(), SimplenoteLinkify.getNoteLinkWithTitle🔵</abbr>
+ 168                     Snackbar.make(mMarkdown, R.string.link_copied, Snackbar.LENGTH_SHORT).show();
+ 169                 } else {
+ 170                     Snackbar.make(mMarkdown, R.string.link_copied_failure, Snackbar.LENGTH_SHORT).show();
+ 171                 }
+ 172 
+ 173                 return true;
+ 174             default:
+ 175                 return super.onOptionsItemSelected(item);
+ 176         }
+ 177     }
+ 178 
+ 179     private void deleteNote() {
+ 180         NoteUtils.deleteNote(mNote, getActivity());
+ 181         requireActivity().finish();
+ 182     }
+ 183 
+ 184     @Override
+ 185     public void onPrepareOptionsMenu(@NonNull Menu menu) {
+ 186         // Disable trash action until note is loaded.
+ 187         menu.findItem(R.id.menu_trash).setEnabled(!mIsLoadingNote);
+ 188 
+ 189         MenuItem pinItem = menu.findItem(R.id.menu_pin);
+ 190         MenuItem publishItem = menu.findItem(R.id.menu_publish);
+ 191         MenuItem copyLinkItem = menu.findItem(R.id.menu_copy);
+ 192         MenuItem markdownItem = menu.findItem(R.id.menu_markdown);
+ 193         MenuItem copyLinkInternalItem = menu.findItem(R.id.menu_copy_internal);
+ 194 
+ 195         if (mNote != null) {
+ 196             pinItem.setChecked(mNote.isPinned());
+ 197             publishItem.setChecked(mNote.isPublished());
+ 198             markdownItem.setChecked(mNote.isMarkdownEnabled());
+ 199         }
+ 200 
+ 201         pinItem.setEnabled(false);
+ 202         publishItem.setEnabled(false);
+ 203         copyLinkItem.setEnabled(false);
+ 204         markdownItem.setEnabled(false);
+ 205         copyLinkInternalItem.setEnabled(true);
+ 206 
+ 207         super.onPrepareOptionsMenu(menu);
+ 208     }
+ 209 
+ 210     @Override
+ 211     public void onDestroy() {
+ 212         super.onDestroy();
+ 213         mNotesBucket.removeListener(this);
+ 214         AppLog.add(Type.SYNC, &quot;Removed note bucket listener (NoteMarkdownFragment)&quot;);
+ 215         AppLog.add(Type.SCREEN, &quot;Destroyed (NoteMarkdownFragment)&quot;);
+ 216     }
+ 217 
+ 218     @Override
+ 219     public void onResume() {
+ 220         super.onResume();
+ 221         checkWebView();
+ 222         mNotesBucket.addListener(this);
+ 223         AppLog.add(Type.SYNC, &quot;Added note bucket listener (NoteMarkdownFragment)&quot;);
+ 224         AppLog.add(Type.NETWORK, NetworkUtils.getNetworkInfo(requireContext()));
+ 225         AppLog.add(Type.SCREEN, &quot;Resumed (NoteMarkdownFragment)&quot;);
+ 226     }
+ 227 
+ 228     @Override
+ 229     public void onBeforeUpdateObject(Bucket&lt;Note&gt; bucket, Note note) {
+ 230     }
+ 231 
+ 232     @Override
+ 233     public void onDeleteObject(Bucket&lt;Note&gt; bucket, Note note) {
+ 234     }
+ 235 
+ 236     @Override
+ 237     public void onNetworkChange(Bucket&lt;Note&gt; bucket, Bucket.ChangeType type, String key) {
+ 238     }
+ 239 
+ 240     @Override
+ 241     public void onSaveObject(Bucket&lt;Note&gt; bucket, Note note) {
+ 242         if (note.equals(mNote)) {
+ 243             mNote = note;
+ 244             requireActivity().invalidateOptionsMenu();
+ 245         }
+ 246 
+ 247         AppLog.add(
+ 248             Type.SYNC,
+ 249             &quot;Saved note callback in NoteMarkdownFragment (ID: &quot; + note.getSimperiumKey() +
+ 250                 &quot; / Title: &quot; + note.getTitle() +
+ 251                 &quot; / Characters: &quot; + NoteUtils.getCharactersCount(note.getContent()) +
+ 252                 &quot; / Words: &quot; + NoteUtils.getWordCount(note.getContent()) + &quot;)&quot;
+ 253         );
+ 254     }
+ 255 
+ 256     private void checkWebView() {
+ 257         // When a WebView is installed and mMarkdown is null, a WebView was not installed when the
+ 258         // fragment was created.  So, open the note again to show the markdown preview.
+ 259         if (BrowserUtils.isWebViewInstalled(requireContext()) &amp;&amp; mMarkdown == null) {
+ 260             SimplenoteLinkify.openNote(requireActivity(), mNote.getSimperiumKey());
+ 261         }
+ 262     }
+ 263 
+ 264     public void updateMarkdown(String text) {
+ 265         if (mMarkdown != null) {
+<abbr title=" 266         mMarkdown.loadDataWithBaseURL(null, getMarkdownFormattedContent(mCss, text), &quot;text/html&quot;, &quot;utf-8&quot;, null);"> 266         mMarkdown.loadDataWithBaseURL(null, getMarkdownFormattedContent(mCss, text), &quot;text/html&quot;, &quot;utf-8&quot;🔵</abbr>
+ 267     }
+ 268     }
+ 269 
+ 270     public static String getMarkdownFormattedContent(String cssContent, String sourceContent) {
+ 271         String header = &quot;&lt;html&gt;&lt;head&gt;&quot; +
+ 272                 &quot;&lt;link href=\&quot;https://fonts.googleapis.com/css?family=Noto+Serif\&quot; rel=\&quot;stylesheet\&quot;&gt;&quot; +
+ 273                 cssContent + &quot;&lt;/head&gt;&lt;body&gt;&quot;;
+ 274 
+ 275         String parsedMarkdown = new AndDown().markdownToHtml(
+ 276                 sourceContent,
+ 277                 AndDown.HOEDOWN_EXT_STRIKETHROUGH | AndDown.HOEDOWN_EXT_FENCED_CODE |
+ 278                         AndDown.HOEDOWN_EXT_QUOTE | AndDown.HOEDOWN_EXT_TABLES,
+ 279                 AndDown.HOEDOWN_HTML_ESCAPE
+ 280         );
+ 281 
+ 282         // Set auto alignment for lists, tables, and quotes based on language of start.
+ 283         parsedMarkdown = parsedMarkdown
+ 284                 .replaceAll(&quot;&lt;ol&gt;&quot;, &quot;&lt;ol dir=\&quot;auto\&quot;&gt;&quot;)
+ 285                 .replaceAll(&quot;&lt;ul&gt;&quot;, &quot;&lt;ul dir=\&quot;auto\&quot;&gt;&quot;)
+ 286                 .replaceAll(&quot;&lt;table&gt;&quot;, &quot;&lt;table dir=\&quot;auto\&quot;&gt;&quot;)
+ 287                 .replaceAll(&quot;&lt;blockquote&gt;&quot;, &quot;&lt;blockquote dir=\&quot;auto\&quot;&gt;&quot;);
+ 288 
+ 289         return header + &quot;&lt;div class=\&quot;note-detail-markdown\&quot;&gt;&quot; + parsedMarkdown +
+ 290                 &quot;&lt;/div&gt;&lt;/body&gt;&lt;/html&gt;&quot;;
+ 291     }
+ 292 
+ 293     private static class LoadNoteTask extends AsyncTask&lt;String, Void, Void&gt; {
+ 294         private SoftReference&lt;NoteMarkdownFragment&gt; mNoteMarkdownFragmentReference;
+ 295 
+ 296         private LoadNoteTask(NoteMarkdownFragment context) {
+ 297             mNoteMarkdownFragmentReference = new SoftReference&lt;&gt;(context);
+ 298         }
+ 299 
+ 300         @Override
+ 301         protected void onPreExecute() {
+ 302             NoteMarkdownFragment fragment = mNoteMarkdownFragmentReference.get();
+ 303             fragment.mIsLoadingNote = true;
+ 304         }
+ 305 
+ 306         @Override
+ 307         protected Void doInBackground(String... args) {
+ 308             NoteMarkdownFragment fragment = mNoteMarkdownFragmentReference.get();
+ 309             FragmentActivity activity = fragment.getActivity();
+ 310 
+ 311             if (activity == null) {
+ 312                 return null;
+ 313             }
+ 314 
+ 315             String noteID = args[0];
+ 316             Simplenote application = (Simplenote) activity.getApplication();
+ 317             Bucket&lt;Note&gt; notesBucket = application.getNotesBucket();
+ 318 
+ 319             try {
+ 320                 fragment.mNote = notesBucket.get(noteID);
+ 321             } catch (BucketObjectMissingException exception) {
+ 322                 // TODO: Handle a missing note
+ 323             }
+ 324 
+ 325             return null;
+ 326         }
+ 327 
+ 328         @Override
+ 329         protected void onPostExecute(Void nada) {
+ 330             NoteMarkdownFragment fragment = mNoteMarkdownFragmentReference.get();
+ 331             fragment.mIsLoadingNote = false;
+ 332             fragment.requireActivity().invalidateOptionsMenu();
+ 333         }
+ 334     }
+ 335 }
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ </pre></td>
+                            <td><pre>   1 package com.automattic.simplenote;
+   2 
+   3 import android.os.AsyncTask;
+   4 import android.os.Bundle;
+   5 import android.view.LayoutInflater;
+   6 import android.view.Menu;
+   7 import android.view.MenuInflater;
+   8 import android.view.MenuItem;
+   9 import android.view.View;
+  10 import android.view.ViewGroup;
+  11 import android.webkit.WebResourceRequest;
+  12 import android.webkit.WebView;
+  13 import android.webkit.WebViewClient;
+  14 import androidx.annotation.NonNull;
+  15 import androidx.core.view.MenuCompat;
+  16 import androidx.fragment.app.Fragment;
+  17 import androidx.fragment.app.FragmentActivity;
+  18 import com.automattic.simplenote.models.Note;
+  19 import com.automattic.simplenote.utils.AppLog.Type;
+  20 import com.automattic.simplenote.utils.AppLog;
+  21 import com.automattic.simplenote.utils.BrowserUtils;
+  22 import com.automattic.simplenote.utils.ContextUtils;
+  23 import com.automattic.simplenote.utils.DrawableUtils;
+  24 import com.automattic.simplenote.utils.NetworkUtils;
+  25 import com.automattic.simplenote.utils.NoteUtils;
+  26 import com.automattic.simplenote.utils.SimplenoteLinkify;
+  27 import com.automattic.simplenote.utils.ThemeUtils;
+  28 import com.commonsware.cwac.anddown.AndDown;
+  29 import com.google.android.material.snackbar.Snackbar;
+  30 import com.simperium.client.Bucket;
+  31 import com.simperium.client.BucketObjectMissingException;
+  32 import java.lang.ref.SoftReference;
+  33 import static com.automattic.simplenote.utils.SimplenoteLinkify.SIMPLENOTE_LINK_PREFIX;
+  34 
+  35 
+  36 public class NoteMarkdownFragment extends Fragment implements Bucket.Listener&lt;Note&gt; {
+  37     public static final String ARG_ITEM_ID = &quot;item_id&quot;;
+  38 
+  39     private Bucket&lt;Note&gt; mNotesBucket;
+  40 
+  41     private Note mNote;
+  42 
+  43     private String mCss;
+  44 
+  45     private WebView mMarkdown;
+  46 
+  47     private boolean mIsLoadingNote;
+  48 
+  49     @Override
+  50     public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
+  51         inflater.inflate(R.menu.note_markdown, menu);
+  52         MenuCompat.setGroupDividerEnabled(menu, true);
+  53 
+  54         DrawableUtils.tintMenuWithAttribute(
+  55             requireContext(),
+  56             menu,
+  57             R.attr.toolbarIconColor
+  58         );
+  59 
+  60         for (int i = 0; i &lt; menu.size(); i++) {
+  61             MenuItem item = menu.getItem(i);
+  62             DrawableUtils.setMenuItemAlpha(item, 0.3);  // 0.3 is 30% opacity.
+  63         }
+  64 
+  65         if (mNote != null) {
+  66             MenuItem viewPublishedNoteItem = menu.findItem(R.id.menu_info);
+  67             viewPublishedNoteItem.setVisible(true);
+  68             MenuItem trashItem = menu.findItem(R.id.menu_trash);
+  69 
+  70             if (mNote.isDeleted()) {
+  71                 trashItem.setTitle(R.string.restore);
+  72             } else {
+  73                 trashItem.setTitle(R.string.trash);
+  74             }
+  75 
+  76             DrawableUtils.tintMenuItemWithAttribute(getActivity(), trashItem, R.attr.toolbarIconColor);
+  77         }
+  78 
+  79         super.onCreateOptionsMenu(menu, inflater);
+  80     }
+  81 
+  82     @Override
+  83     public View onCreateView(@NonNull
+  84     LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+  85         AppLog.add(Type.SCREEN, &quot;Created (NoteMarkdownFragment)&quot;);
+  86         mNotesBucket = ((Simplenote) (requireActivity().getApplication())).getNotesBucket();
+  87         // Load note if we were passed an ID.
+  88         Bundle arguments = getArguments();
+  89         if ((arguments != null) &amp;&amp; arguments.containsKey(ARG_ITEM_ID)) {
+  90             String key = arguments.getString(ARG_ITEM_ID);
+  91             new LoadNoteTask(this).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, key);
+  92         }
+  93         setHasOptionsMenu(true);
+  94         View layout;
+  95         if (BrowserUtils.isWebViewInstalled(requireContext())) {
+  96             layout = inflater.inflate(R.layout.fragment_note_markdown, container, false);
+  97             mMarkdown = layout.findViewById(R.id.markdown);
+  98             mMarkdown.setWebViewClient(new WebViewClient() {
+  99                 @Override
+ 100                 public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+ 101                     String url = request.getUrl().toString();
+ 102                     if (url.startsWith(SimplenoteLinkify.SIMPLENOTE_LINK_PREFIX)) {
+<abbr title=" 103                         SimplenoteLinkify.openNote(requireActivity(), url.replace(SIMPLENOTE_LINK_PREFIX, &quot;&quot;));"> 103                         SimplenoteLinkify.openNote(requireActivity(), url.replace(SIMPLENOTE_LINK_PREFIX,🔵</abbr>
+ 104                     } else {
+ 105                         BrowserUtils.launchBrowserOrShowError(requireContext(), url);
+ 106                     }
+ 107                     return true;
+ 108                 }
+ 109             });
+<abbr title=" 110             mCss = ContextUtils.readCssFile(requireContext(), ThemeUtils.getCssFromStyle(requireContext()));"> 110             mCss = ContextUtils.readCssFile(requireContext(), ThemeUtils.getCssFromStyle(requireContext()🔵</abbr>
+ 111         } else {
+ 112             layout = inflater.inflate(R.layout.fragment_note_error, container, false);
+ 113             layout.findViewById(R.id.error).setVisibility(View.VISIBLE);
+ 114             layout.findViewById(R.id.button).setOnClickListener(new View.OnClickListener() {
+ 115                 @Override
+ 116                 public void onClick(View v) {
+ 117                     BrowserUtils.launchBrowserOrShowError(requireContext(), BrowserUtils.URL_WEB_VIEW);
+ 118                 }
+ 119             });
+ 120         }
+ 121         return layout;
+ 122     }
+ 123 
+ 124     @Override
+ 125     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+ 126         switch (item.getItemId()) {
+ 127             case android.R.id.home:
+ 128                 if (!isAdded()) {
+ 129                     return false;
+ 130                 }
+ 131 
+ 132                 requireActivity().finish();
+ 133                 return true;
+ 134             case R.id.menu_trash:
+ 135                 if (!isAdded()) {
+ 136                     return false;
+ 137                 }
+ 138 
+ 139                 deleteNote();
+ 140                 return true;
+ 141             case R.id.menu_copy_internal:
+ 142                 if (!isAdded()) {
+ 143                     return false;
+ 144                 }
+ 145 
+<abbr title=" 146                 if (BrowserUtils.copyToClipboard(requireContext(), SimplenoteLinkify.getNoteLinkWithTitle(mNote.getTitle(), mNote.getSimperiumKey()))) {"> 146                 if (BrowserUtils.copyToClipboard(requireContext(), SimplenoteLinkify.getNoteLinkWithTitle🔵</abbr>
+ 147                     Snackbar.make(mMarkdown, R.string.link_copied, Snackbar.LENGTH_SHORT).show();
+ 148                 } else {
+ 149                     Snackbar.make(mMarkdown, R.string.link_copied_failure, Snackbar.LENGTH_SHORT).show();
+ 150                 }
+ 151 
+ 152                 return true;
+ 153             default:
+ 154                 return super.onOptionsItemSelected(item);
+ 155         }
+ 156     }
+ 157 
+ 158     private void deleteNote() {
+ 159         NoteUtils.deleteNote(mNote, getActivity());
+ 160         requireActivity().finish();
+ 161     }
+ 162 
+ 163     @Override
+ 164     public void onPrepareOptionsMenu(@NonNull
+ 165     Menu menu) {
+ 166         // Disable trash action until note is loaded.
+ 167         menu.findItem(R.id.menu_trash).setEnabled(!mIsLoadingNote);
+ 168         MenuItem pinItem = menu.findItem(R.id.menu_pin);
+ 169         MenuItem publishItem = menu.findItem(R.id.menu_publish);
+ 170         MenuItem copyLinkItem = menu.findItem(R.id.menu_copy);
+ 171         MenuItem markdownItem = menu.findItem(R.id.menu_markdown);
+ 172         MenuItem copyLinkInternalItem = menu.findItem(R.id.menu_copy_internal);
+ 173         if (mNote != null) {
+ 174             pinItem.setChecked(mNote.isPinned());
+ 175             publishItem.setChecked(mNote.isPublished());
+ 176             markdownItem.setChecked(mNote.isMarkdownEnabled());
+ 177         }
+ 178         pinItem.setEnabled(false);
+ 179         publishItem.setEnabled(false);
+ 180         copyLinkItem.setEnabled(false);
+ 181         markdownItem.setEnabled(false);
+ 182         copyLinkInternalItem.setEnabled(true);
+ 183         super.onPrepareOptionsMenu(menu);
+ 184     }
+ 185 
+ 186     @Override
+ 187     public void onDestroy() {
+ 188         super.onDestroy();
+ 189         mNotesBucket.removeListener(this);
+ 190         AppLog.add(Type.SYNC, &quot;Removed note bucket listener (NoteMarkdownFragment)&quot;);
+ 191         AppLog.add(Type.SCREEN, &quot;Destroyed (NoteMarkdownFragment)&quot;);
+ 192     }
+ 193 
+ 194     @Override
+ 195     public void onResume() {
+ 196         super.onResume();
+ 197         checkWebView();
+ 198         mNotesBucket.addListener(this);
+ 199         AppLog.add(Type.SYNC, &quot;Added note bucket listener (NoteMarkdownFragment)&quot;);
+ 200         AppLog.add(Type.NETWORK, NetworkUtils.getNetworkInfo(requireContext()));
+ 201         AppLog.add(Type.SCREEN, &quot;Resumed (NoteMarkdownFragment)&quot;);
+ 202     }
+ 203 
+ 204     @Override
+ 205     public void onBeforeUpdateObject(Bucket&lt;Note&gt; bucket, Note note) {
+ 206     }
+ 207 
+ 208     @Override
+ 209     public void onDeleteObject(Bucket&lt;Note&gt; bucket, Note note) {
+ 210     }
+ 211 
+ 212     @Override
+ 213     public void onNetworkChange(Bucket&lt;Note&gt; bucket, Bucket.ChangeType type, String key) {
+ 214     }
+ 215 
+ 216     @Override
+ 217     public void onSaveObject(Bucket&lt;Note&gt; bucket, Note note) {
+ 218         if (note.equals(mNote)) {
+ 219             mNote = note;
+ 220             requireActivity().invalidateOptionsMenu();
+ 221         }
+ 222 
+ 223         AppLog.add(
+ 224             Type.SYNC,
+ 225             &quot;Saved note callback in NoteMarkdownFragment (ID: &quot; + note.getSimperiumKey() +
+ 226                 &quot; / Title: &quot; + note.getTitle() +
+ 227                 &quot; / Characters: &quot; + NoteUtils.getCharactersCount(note.getContent()) +
+ 228                 &quot; / Words: &quot; + NoteUtils.getWordCount(note.getContent()) + &quot;)&quot;
+ 229         );
+ 230     }
+ 231 
+ 232     private void checkWebView() {
+ 233         // When a WebView is installed and mMarkdown is null, a WebView was not installed when the
+ 234         // fragment was created.  So, open the note again to show the markdown preview.
+ 235         if (BrowserUtils.isWebViewInstalled(requireContext()) &amp;&amp; mMarkdown == null) {
+ 236             SimplenoteLinkify.openNote(requireActivity(), mNote.getSimperiumKey());
+ 237         }
+ 238     }
+ 239 
+ 240     public void updateMarkdown(String text) {
+ 241         if (mMarkdown != null) {
+<abbr title=" 242             mMarkdown.loadDataWithBaseURL(null, getMarkdownFormattedContent(mCss, text), &quot;text/html&quot;, &quot;utf-8&quot;, null);"> 242             mMarkdown.loadDataWithBaseURL(null, getMarkdownFormattedContent(mCss, text), &quot;text/html&quot;, &quot;ut🔵</abbr>
+ 243         }
+ 244     }
+ 245 
+ 246     public static String getMarkdownFormattedContent(String cssContent, String sourceContent) {
+ 247         String header = &quot;&lt;html&gt;&lt;head&gt;&quot; +
+ 248                 &quot;&lt;link href=\&quot;https://fonts.googleapis.com/css?family=Noto+Serif\&quot; rel=\&quot;stylesheet\&quot;&gt;&quot; +
+ 249                 cssContent + &quot;&lt;/head&gt;&lt;body&gt;&quot;;
+ 250 
+ 251         String parsedMarkdown = new AndDown().markdownToHtml(
+ 252                 sourceContent,
+ 253                 AndDown.HOEDOWN_EXT_STRIKETHROUGH | AndDown.HOEDOWN_EXT_FENCED_CODE |
+ 254                         AndDown.HOEDOWN_EXT_QUOTE | AndDown.HOEDOWN_EXT_TABLES,
+ 255                 AndDown.HOEDOWN_HTML_ESCAPE
+ 256         );
+ 257 
+ 258         // Set auto alignment for lists, tables, and quotes based on language of start.
+ 259         parsedMarkdown = parsedMarkdown
+ 260                 .replaceAll(&quot;&lt;ol&gt;&quot;, &quot;&lt;ol dir=\&quot;auto\&quot;&gt;&quot;)
+ 261                 .replaceAll(&quot;&lt;ul&gt;&quot;, &quot;&lt;ul dir=\&quot;auto\&quot;&gt;&quot;)
+ 262                 .replaceAll(&quot;&lt;table&gt;&quot;, &quot;&lt;table dir=\&quot;auto\&quot;&gt;&quot;)
+ 263                 .replaceAll(&quot;&lt;blockquote&gt;&quot;, &quot;&lt;blockquote dir=\&quot;auto\&quot;&gt;&quot;);
+ 264 
+ 265         return header + &quot;&lt;div class=\&quot;note-detail-markdown\&quot;&gt;&quot; + parsedMarkdown +
+ 266                 &quot;&lt;/div&gt;&lt;/body&gt;&lt;/html&gt;&quot;;
+ 267     }
+ 268 
+ 269     private static class LoadNoteTask extends AsyncTask&lt;String, Void, Void&gt; {
+ 270         private SoftReference&lt;NoteMarkdownFragment&gt; mNoteMarkdownFragmentReference;
+ 271 
+ 272         private LoadNoteTask(NoteMarkdownFragment context) {
+ 273             mNoteMarkdownFragmentReference = new SoftReference&lt;&gt;(context);
+ 274         }
+ 275 
+ 276         @Override
+ 277         protected void onPreExecute() {
+ 278             NoteMarkdownFragment fragment = mNoteMarkdownFragmentReference.get();
+ 279             fragment.mIsLoadingNote = true;
+ 280         }
+ 281 
+ 282         @Override
+ 283         protected Void doInBackground(String... args) {
+ 284             NoteMarkdownFragment fragment = mNoteMarkdownFragmentReference.get();
+ 285             FragmentActivity activity = fragment.getActivity();
+ 286             if (activity == null) {
+ 287                 return null;
+ 288             }
+ 289             String noteID = args[0];
+ 290             Simplenote application = ((Simplenote) (activity.getApplication()));
+ 291             Bucket&lt;Note&gt; notesBucket = application.getNotesBucket();
+ 292             try {
+ 293                 fragment.mNote = notesBucket.get(noteID);
+ 294             } catch (BucketObjectMissingException exception) {
+ 295                 // TODO: Handle a missing note
+ 296             }
+ 297             return null;
+ 298         }
+ 299 
+ 300         @Override
+ 301         protected void onPostExecute(Void nada) {
+ 302             NoteMarkdownFragment fragment = mNoteMarkdownFragmentReference.get();
+ 303             fragment.mIsLoadingNote = false;
+ 304             fragment.requireActivity().invalidateOptionsMenu();
+ 305         }
+ 306     }
+ 307 }
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ </pre></td>
+                        </tr>
+                    </table>
+                </div>
+                <div id="bottom">
+                    <table style="margin:auto">
+                        <tr>
+                            <th>ours vs. base</th>
+                            <th>theirs vs. base</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1  package com.automattic.simplenote;
+   2  
+   3  import android.os.AsyncTask;
+   4  import android.os.Bundle;
+   5  import android.view.LayoutInflater;
+   6  import android.view.Menu;
+   7  import android.view.MenuInflater;
+   8  import android.view.MenuItem;
+   9  import android.view.View;
+  10  import android.view.ViewGroup;
+  11  import android.webkit.WebResourceRequest;
+  12  import android.webkit.WebView;
+  13  import android.webkit.WebViewClient;
+  14  
+  15  import androidx.annotation.NonNull;
+  16  import androidx.core.view.MenuCompat;
+  17  import androidx.fragment.app.Fragment;
+  18  import androidx.fragment.app.FragmentActivity;
+  19  
+  20  import com.automattic.simplenote.models.Note;
+  21  import com.automattic.simplenote.utils.AppLog;
+  22  import com.automattic.simplenote.utils.AppLog.Type;
+  23  import com.automattic.simplenote.utils.BrowserUtils;
+  24  import com.automattic.simplenote.utils.ContextUtils;
+  25  import com.automattic.simplenote.utils.DrawableUtils;
+  26  import com.automattic.simplenote.utils.NetworkUtils;
+  27  import com.automattic.simplenote.utils.NoteUtils;
+  28  import com.automattic.simplenote.utils.SimplenoteLinkify;
+  29  import com.automattic.simplenote.utils.ThemeUtils;
+  30  import com.commonsware.cwac.anddown.AndDown;
+  31  import com.google.android.material.snackbar.Snackbar;
+  32  import com.simperium.client.Bucket;
+  33  import com.simperium.client.BucketObjectMissingException;
+  34  
+  35  import java.lang.ref.SoftReference;
+  36  
+  37  import static com.automattic.simplenote.utils.SimplenoteLinkify.SIMPLENOTE_LINK_PREFIX;
+  38  
+  39  public class NoteMarkdownFragment extends Fragment implements Bucket.Listener&lt;Note&gt; {
+  40      public static final String ARG_ITEM_ID = &quot;item_id&quot;;
+  41  
+  42      private Bucket&lt;Note&gt; mNotesBucket;
+  43      private Note mNote;
+  44      private String mCss;
+  45      private WebView mMarkdown;
+  46      private boolean mIsLoadingNote;
+  47  
+  48      @Override
+  49      public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
+  50          inflater.inflate(R.menu.note_markdown, menu);
+  51          MenuCompat.setGroupDividerEnabled(menu, true);
+  52  
+  53          DrawableUtils.tintMenuWithAttribute(
+  54              requireContext(),
+  55              menu,
+  56              R.attr.toolbarIconColor
+  57          );
+  58  
+  59          for (int i = 0; i &lt; menu.size(); i++) {
+  60              MenuItem item = menu.getItem(i);
+  61              DrawableUtils.setMenuItemAlpha(item, 0.3);  // 0.3 is 30% opacity.
+  62          }
+  63  
+  64          if (mNote != null) {
+  65              MenuItem viewPublishedNoteItem = menu.findItem(R.id.menu_info);
+  66              viewPublishedNoteItem.setVisible(true);
+  67              MenuItem trashItem = menu.findItem(R.id.menu_trash);
+  68  
+  69              if (mNote.isDeleted()) {
+  70                  trashItem.setTitle(R.string.restore);
+  71              } else {
+  72                  trashItem.setTitle(R.string.trash);
+  73              }
+  74  
+  75              DrawableUtils.tintMenuItemWithAttribute(getActivity(), trashItem, R.attr.toolbarIconColor);
+  76          }
+  77  
+  78          super.onCreateOptionsMenu(menu, inflater);
+  79      }
+  80  
+  81      @Override
+  82      public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+  83          AppLog.add(Type.SCREEN, &quot;Created (NoteMarkdownFragment)&quot;);
+  84          mNotesBucket = ((Simplenote) requireActivity().getApplication()).getNotesBucket();
+  85  
+  86          // Load note if we were passed an ID.
+  87          Bundle arguments = getArguments();
+  88  
+  89          if (arguments != null &amp;&amp; arguments.containsKey(ARG_ITEM_ID)) {
+  90              String key = arguments.getString(ARG_ITEM_ID);
+  91              new LoadNoteTask(this).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, key);
+  92          }
+  93  
+  94          setHasOptionsMenu(true);
+  95          View layout = inflater.inflate(R.layout.fragment_note_markdown, container, false);
+  96          mMarkdown = layout.findViewById(R.id.markdown);
+  97          mMarkdown.setWebViewClient(
+  98              new WebViewClient() {
+  99                  @Override
+ 100                  public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request){
+ 101                      String url = request.getUrl().toString();
+ 102  
+ 103                      if (url.startsWith(SimplenoteLinkify.SIMPLENOTE_LINK_PREFIX)){
+ 104                          SimplenoteLinkify.openNote(requireActivity(), url.replace(SIMPLENOTE_LINK_PREFIX, &quot;&quot;));
+ 105                      } else {
+ 106                          BrowserUtils.launchBrowserOrShowError(requireContext(), url);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 107                      }
+ 108  
+ 109                      return true;
+ 110                  }
+ 111              }
+ 112          );
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 113 -        mCss = ThemeUtils.isLightTheme(requireContext())</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 114 -            ? ContextUtils.readCssFile(requireContext(), &quot;light.css&quot;)</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 115 -            : ContextUtils.readCssFile(requireContext(), &quot;dark.css&quot;);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 116 +        mCss = ContextUtils.readCssFile(requireContext(), ThemeUtils.getCssFromStyle(requireContext()));</span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 117          return layout;
+ 118      }
+ 119  
+ 120      @Override
+ 121      public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+ 122          switch (item.getItemId()) {
+ 123              case android.R.id.home:
+ 124                  if (!isAdded()) {
+ 125                      return false;
+ 126                  }
+ 127  
+ 128                  requireActivity().finish();
+ 129                  return true;
+ 130              case R.id.menu_trash:
+ 131                  if (!isAdded()) {
+ 132                      return false;
+ 133                  }
+ 134  
+ 135                  deleteNote();
+ 136                  return true;
+ 137              case R.id.menu_copy_internal:
+ 138                  if (!isAdded()) {
+ 139                      return false;
+ 140                  }
+ 141  
+<abbr title=" 142                  if (BrowserUtils.copyToClipboard(requireContext(), SimplenoteLinkify.getNoteLinkWithTitle(mNote.getTitle(), mNote.getSimperiumKey()))) {"> 142                  if (BrowserUtils.copyToClipboard(requireContext(), SimplenoteLinkify.getNoteLinkWithTitle(mNote.ge🔵</abbr>
+ 143                      Snackbar.make(mMarkdown, R.string.link_copied, Snackbar.LENGTH_SHORT).show();
+ 144                  } else {
+ 145                      Snackbar.make(mMarkdown, R.string.link_copied_failure, Snackbar.LENGTH_SHORT).show();
+ 146                  }
+ 147  
+ 148                  return true;
+ 149              default:
+ 150                  return super.onOptionsItemSelected(item);
+ 151          }
+ 152      }
+ 153  
+ 154      private void deleteNote() {
+ 155          NoteUtils.deleteNote(mNote, getActivity());
+ 156          requireActivity().finish();
+ 157      }
+ 158  
+ 159      @Override
+ 160      public void onPrepareOptionsMenu(@NonNull Menu menu) {
+ 161          // Disable share and delete actions until note is loaded.
+ 162          if (mIsLoadingNote) {
+ 163              menu.findItem(R.id.menu_trash).setEnabled(false);
+ 164          } else {
+ 165              menu.findItem(R.id.menu_trash).setEnabled(true);
+ 166          }
+
+
+ 167  
+ 168          MenuItem pinItem = menu.findItem(R.id.menu_pin);
+ 169          MenuItem publishItem = menu.findItem(R.id.menu_publish);
+ 170          MenuItem copyLinkItem = menu.findItem(R.id.menu_copy);
+ 171          MenuItem markdownItem = menu.findItem(R.id.menu_markdown);
+ 172          MenuItem copyLinkInternalItem = menu.findItem(R.id.menu_copy_internal);
+ 173  
+ 174          if (mNote != null) {
+ 175              pinItem.setChecked(mNote.isPinned());
+ 176              publishItem.setChecked(mNote.isPublished());
+ 177              markdownItem.setChecked(mNote.isMarkdownEnabled());
+ 178          }
+ 179  
+ 180          pinItem.setEnabled(false);
+ 181          publishItem.setEnabled(false);
+ 182          copyLinkItem.setEnabled(false);
+ 183          markdownItem.setEnabled(false);
+ 184          copyLinkInternalItem.setEnabled(true);
+ 185  
+ 186          super.onPrepareOptionsMenu(menu);
+ 187      }
+ 188  
+ 189      @Override
+ 190      public void onDestroy() {
+ 191          super.onDestroy();
+ 192          mNotesBucket.removeListener(this);
+ 193          mNotesBucket.stop();
+ 194          AppLog.add(Type.SYNC, &quot;Stopped note bucket (NoteMarkdownFragment)&quot;);
+
+ 195          AppLog.add(Type.SCREEN, &quot;Destroyed (NoteMarkdownFragment)&quot;);
+ 196      }
+ 197  
+ 198      @Override
+ 199      public void onResume() {
+ 200          super.onResume();
+ 201          mNotesBucket.start();
+ 202          AppLog.add(Type.SYNC, &quot;Started note bucket (NoteMarkdownFragment)&quot;);
+
+ 203          mNotesBucket.addListener(this);
+
+ 204          AppLog.add(Type.NETWORK, NetworkUtils.getNetworkInfo(requireContext()));
+ 205          AppLog.add(Type.SCREEN, &quot;Resumed (NoteMarkdownFragment)&quot;);
+ 206      }
+ 207  
+ 208      @Override
+ 209      public void onBeforeUpdateObject(Bucket&lt;Note&gt; bucket, Note note) {
+ 210      }
+ 211  
+ 212      @Override
+ 213      public void onDeleteObject(Bucket&lt;Note&gt; bucket, Note note) {
+ 214      }
+ 215  
+ 216      @Override
+ 217      public void onNetworkChange(Bucket&lt;Note&gt; bucket, Bucket.ChangeType type, String key) {
+ 218      }
+ 219  
+ 220      @Override
+ 221      public void onSaveObject(Bucket&lt;Note&gt; bucket, Note note) {
+ 222          if (note.equals(mNote)) {
+ 223              mNote = note;
+ 224              requireActivity().invalidateOptionsMenu();
+ 225          }
+ 226  
+ 227          AppLog.add(
+ 228              Type.SYNC,
+ 229              &quot;Saved note callback in NoteMarkdownFragment (ID: &quot; + note.getSimperiumKey() +
+ 230                  &quot; / Title: &quot; + note.getTitle() +
+ 231                  &quot; / Characters: &quot; + NoteUtils.getCharactersCount(note.getContent()) +
+ 232                  &quot; / Words: &quot; + NoteUtils.getWordCount(note.getContent()) + &quot;)&quot;
+ 233          );
+ 234      }
+ 235  
+
+
+
+
+
+
+
+
+ 236      public void updateMarkdown(String text) {
+ 237          mMarkdown.loadDataWithBaseURL(null, getMarkdownFormattedContent(mCss, text), &quot;text/html&quot;, &quot;utf-8&quot;, null);
+
+
+
+ 238      }
+ 239  
+ 240      public static String getMarkdownFormattedContent(String cssContent, String sourceContent) {
+ 241          String header = &quot;&lt;html&gt;&lt;head&gt;&quot; +
+ 242                  &quot;&lt;link href=\&quot;https://fonts.googleapis.com/css?family=Noto+Serif\&quot; rel=\&quot;stylesheet\&quot;&gt;&quot; +
+ 243                  cssContent + &quot;&lt;/head&gt;&lt;body&gt;&quot;;
+ 244  
+ 245          String parsedMarkdown = new AndDown().markdownToHtml(
+ 246                  sourceContent,
+ 247                  AndDown.HOEDOWN_EXT_STRIKETHROUGH | AndDown.HOEDOWN_EXT_FENCED_CODE |
+ 248                          AndDown.HOEDOWN_EXT_QUOTE | AndDown.HOEDOWN_EXT_TABLES,
+ 249                  AndDown.HOEDOWN_HTML_ESCAPE
+ 250          );
+ 251  
+ 252          // Set auto alignment for lists, tables, and quotes based on language of start.
+ 253          parsedMarkdown = parsedMarkdown
+ 254                  .replaceAll(&quot;&lt;ol&gt;&quot;, &quot;&lt;ol dir=\&quot;auto\&quot;&gt;&quot;)
+ 255                  .replaceAll(&quot;&lt;ul&gt;&quot;, &quot;&lt;ul dir=\&quot;auto\&quot;&gt;&quot;)
+ 256                  .replaceAll(&quot;&lt;table&gt;&quot;, &quot;&lt;table dir=\&quot;auto\&quot;&gt;&quot;)
+ 257                  .replaceAll(&quot;&lt;blockquote&gt;&quot;, &quot;&lt;blockquote dir=\&quot;auto\&quot;&gt;&quot;);
+ 258  
+ 259          return header + &quot;&lt;div class=\&quot;note-detail-markdown\&quot;&gt;&quot; + parsedMarkdown +
+ 260                  &quot;&lt;/div&gt;&lt;/body&gt;&lt;/html&gt;&quot;;
+ 261      }
+ 262  
+ 263      private static class LoadNoteTask extends AsyncTask&lt;String, Void, Void&gt; {
+ 264          private SoftReference&lt;NoteMarkdownFragment&gt; mNoteMarkdownFragmentReference;
+ 265  
+ 266          private LoadNoteTask(NoteMarkdownFragment context) {
+ 267              mNoteMarkdownFragmentReference = new SoftReference&lt;&gt;(context);
+ 268          }
+ 269  
+ 270          @Override
+ 271          protected void onPreExecute() {
+ 272              NoteMarkdownFragment fragment = mNoteMarkdownFragmentReference.get();
+ 273              fragment.mIsLoadingNote = true;
+ 274          }
+ 275  
+ 276          @Override
+ 277          protected Void doInBackground(String... args) {
+ 278              NoteMarkdownFragment fragment = mNoteMarkdownFragmentReference.get();
+ 279              FragmentActivity activity = fragment.getActivity();
+ 280  
+ 281              if (activity == null) {
+ 282                  return null;
+ 283              }
+ 284  
+ 285              String noteID = args[0];
+ 286              Simplenote application = (Simplenote) activity.getApplication();
+ 287              Bucket&lt;Note&gt; notesBucket = application.getNotesBucket();
+ 288  
+ 289              try {
+ 290                  fragment.mNote = notesBucket.get(noteID);
+ 291              } catch (BucketObjectMissingException exception) {
+ 292                  // TODO: Handle a missing note
+ 293              }
+ 294  
+ 295              return null;
+ 296          }
+ 297  
+ 298          @Override
+ 299          protected void onPostExecute(Void nada) {
+ 300              NoteMarkdownFragment fragment = mNoteMarkdownFragmentReference.get();
+ 301              fragment.mIsLoadingNote = false;
+ 302              fragment.requireActivity().invalidateOptionsMenu();
+ 303          }
+ 304      }
+ 305  }</pre></td>
+                            <td><pre>   1  package com.automattic.simplenote;
+   2  
+   3  import android.os.AsyncTask;
+   4  import android.os.Bundle;
+   5  import android.view.LayoutInflater;
+   6  import android.view.Menu;
+   7  import android.view.MenuInflater;
+   8  import android.view.MenuItem;
+   9  import android.view.View;
+  10  import android.view.ViewGroup;
+  11  import android.webkit.WebResourceRequest;
+  12  import android.webkit.WebView;
+  13  import android.webkit.WebViewClient;
+  14  
+  15  import androidx.annotation.NonNull;
+  16  import androidx.core.view.MenuCompat;
+  17  import androidx.fragment.app.Fragment;
+  18  import androidx.fragment.app.FragmentActivity;
+  19  
+  20  import com.automattic.simplenote.models.Note;
+  21  import com.automattic.simplenote.utils.AppLog;
+  22  import com.automattic.simplenote.utils.AppLog.Type;
+  23  import com.automattic.simplenote.utils.BrowserUtils;
+  24  import com.automattic.simplenote.utils.ContextUtils;
+  25  import com.automattic.simplenote.utils.DrawableUtils;
+  26  import com.automattic.simplenote.utils.NetworkUtils;
+  27  import com.automattic.simplenote.utils.NoteUtils;
+  28  import com.automattic.simplenote.utils.SimplenoteLinkify;
+  29  import com.automattic.simplenote.utils.ThemeUtils;
+  30  import com.commonsware.cwac.anddown.AndDown;
+  31  import com.google.android.material.snackbar.Snackbar;
+  32  import com.simperium.client.Bucket;
+  33  import com.simperium.client.BucketObjectMissingException;
+  34  
+  35  import java.lang.ref.SoftReference;
+  36  
+  37  import static com.automattic.simplenote.utils.SimplenoteLinkify.SIMPLENOTE_LINK_PREFIX;
+  38  
+  39  public class NoteMarkdownFragment extends Fragment implements Bucket.Listener&lt;Note&gt; {
+  40      public static final String ARG_ITEM_ID = &quot;item_id&quot;;
+  41  
+  42      private Bucket&lt;Note&gt; mNotesBucket;
+  43      private Note mNote;
+  44      private String mCss;
+  45      private WebView mMarkdown;
+  46      private boolean mIsLoadingNote;
+  47  
+  48      @Override
+  49      public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
+  50          inflater.inflate(R.menu.note_markdown, menu);
+  51          MenuCompat.setGroupDividerEnabled(menu, true);
+  52  
+  53          DrawableUtils.tintMenuWithAttribute(
+  54              requireContext(),
+  55              menu,
+  56              R.attr.toolbarIconColor
+  57          );
+  58  
+  59          for (int i = 0; i &lt; menu.size(); i++) {
+  60              MenuItem item = menu.getItem(i);
+  61              DrawableUtils.setMenuItemAlpha(item, 0.3);  // 0.3 is 30% opacity.
+  62          }
+  63  
+  64          if (mNote != null) {
+  65              MenuItem viewPublishedNoteItem = menu.findItem(R.id.menu_info);
+  66              viewPublishedNoteItem.setVisible(true);
+  67              MenuItem trashItem = menu.findItem(R.id.menu_trash);
+  68  
+  69              if (mNote.isDeleted()) {
+  70                  trashItem.setTitle(R.string.restore);
+  71              } else {
+  72                  trashItem.setTitle(R.string.trash);
+  73              }
+  74  
+  75              DrawableUtils.tintMenuItemWithAttribute(getActivity(), trashItem, R.attr.toolbarIconColor);
+  76          }
+  77  
+  78          super.onCreateOptionsMenu(menu, inflater);
+  79      }
+  80  
+  81      @Override
+  82      public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+  83          AppLog.add(Type.SCREEN, &quot;Created (NoteMarkdownFragment)&quot;);
+  84          mNotesBucket = ((Simplenote) requireActivity().getApplication()).getNotesBucket();
+  85  
+  86          // Load note if we were passed an ID.
+  87          Bundle arguments = getArguments();
+  88  
+  89          if (arguments != null &amp;&amp; arguments.containsKey(ARG_ITEM_ID)) {
+  90              String key = arguments.getString(ARG_ITEM_ID);
+  91              new LoadNoteTask(this).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, key);
+  92          }
+  93  
+  94          setHasOptionsMenu(true);
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  95 -        View layout = inflater.inflate(R.layout.fragment_note_markdown, container, false);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  96 -        mMarkdown = layout.findViewById(R.id.markdown);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  97 -        mMarkdown.setWebViewClient(</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  98 -            new WebViewClient() {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  99 -                @Override</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 100 -                public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request){</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 101 -                    String url = request.getUrl().toString();</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 102 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 103 -                    if (url.startsWith(SimplenoteLinkify.SIMPLENOTE_LINK_PREFIX)){</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 104 -                        SimplenoteLinkify.openNote(requireActivity(), url.replace(SIMPLENOTE_LINK_PREFIX, &quot;&quot;));</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 105 -                    } else {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 106 -                        BrowserUtils.launchBrowserOrShowError(requireContext(), url);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 107 +        View layout;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 108 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 109 +        if (BrowserUtils.isWebViewInstalled(requireContext())) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 110 +            layout = inflater.inflate(R.layout.fragment_note_markdown, container, false);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 111 +            mMarkdown = layout.findViewById(R.id.markdown);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 112 +            mMarkdown.setWebViewClient(</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 113 +                new WebViewClient() {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 114 +                    @Override</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 115 +                    public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request){</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 116 +                        String url = request.getUrl().toString();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 117 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 118 +                        if (url.startsWith(SimplenoteLinkify.SIMPLENOTE_LINK_PREFIX)){</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"><abbr title=" 119 +                            SimplenoteLinkify.openNote(requireActivity(), url.replace(SIMPLENOTE_LINK_PREFIX, &quot;&quot;));"> 119 +                            SimplenoteLinkify.openNote(requireActivity(), url.replace(SIMPLENOTE_LINK_PREFIX, &quot;&quot;))🔵</abbr></span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 120 +                        } else {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 121 +                            BrowserUtils.launchBrowserOrShowError(requireContext(), url);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 122 +                        }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 123 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 124 +                        return true;</span>
+ 125                      }
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 126 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 127 -                    return true;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 128 -                }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 129 -            }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 130 -        );</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 131 -        mCss = ThemeUtils.isLightTheme(requireContext())</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 132 -            ? ContextUtils.readCssFile(requireContext(), &quot;light.css&quot;)</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 133 -            : ContextUtils.readCssFile(requireContext(), &quot;dark.css&quot;);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 134 +                }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 135 +            );</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 136 +            mCss = ThemeUtils.isLightTheme(requireContext())</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 137 +                ? ContextUtils.readCssFile(requireContext(), &quot;light.css&quot;)</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 138 +                : ContextUtils.readCssFile(requireContext(), &quot;dark.css&quot;);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 139 +        } else {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 140 +            layout = inflater.inflate(R.layout.fragment_note_error, container, false);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 141 +            layout.findViewById(R.id.error).setVisibility(View.VISIBLE);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 142 +            layout.findViewById(R.id.button).setOnClickListener(</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 143 +                new View.OnClickListener() {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 144 +                    @Override</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 145 +                    public void onClick(View v) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 146 +                        BrowserUtils.launchBrowserOrShowError(requireContext(), BrowserUtils.URL_WEB_VIEW);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 147 +                    }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 148 +                }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 149 +            );</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 150 +        }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 151 +</span>
+ 152          return layout;
+ 153      }
+ 154  
+ 155      @Override
+ 156      public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+ 157          switch (item.getItemId()) {
+ 158              case android.R.id.home:
+ 159                  if (!isAdded()) {
+ 160                      return false;
+ 161                  }
+ 162  
+ 163                  requireActivity().finish();
+ 164                  return true;
+ 165              case R.id.menu_trash:
+ 166                  if (!isAdded()) {
+ 167                      return false;
+ 168                  }
+ 169  
+ 170                  deleteNote();
+ 171                  return true;
+ 172              case R.id.menu_copy_internal:
+ 173                  if (!isAdded()) {
+ 174                      return false;
+ 175                  }
+ 176  
+<abbr title=" 177                  if (BrowserUtils.copyToClipboard(requireContext(), SimplenoteLinkify.getNoteLinkWithTitle(mNote.getTitle(), mNote.getSimperiumKey()))) {"> 177                  if (BrowserUtils.copyToClipboard(requireContext(), SimplenoteLinkify.getNoteLinkWithTitle(mNote.ge🔵</abbr>
+ 178                      Snackbar.make(mMarkdown, R.string.link_copied, Snackbar.LENGTH_SHORT).show();
+ 179                  } else {
+ 180                      Snackbar.make(mMarkdown, R.string.link_copied_failure, Snackbar.LENGTH_SHORT).show();
+ 181                  }
+ 182  
+ 183                  return true;
+ 184              default:
+ 185                  return super.onOptionsItemSelected(item);
+ 186          }
+ 187      }
+ 188  
+ 189      private void deleteNote() {
+ 190          NoteUtils.deleteNote(mNote, getActivity());
+ 191          requireActivity().finish();
+ 192      }
+ 193  
+ 194      @Override
+ 195      public void onPrepareOptionsMenu(@NonNull Menu menu) {
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 196 -        // Disable share and delete actions until note is loaded.</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 197 -        if (mIsLoadingNote) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 198 -            menu.findItem(R.id.menu_trash).setEnabled(false);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 199 -        } else {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 200 -            menu.findItem(R.id.menu_trash).setEnabled(true);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 201 -        }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 202 +        // Disable trash action until note is loaded.</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 203 +        menu.findItem(R.id.menu_trash).setEnabled(!mIsLoadingNote);</span>
+ 204  
+ 205          MenuItem pinItem = menu.findItem(R.id.menu_pin);
+ 206          MenuItem publishItem = menu.findItem(R.id.menu_publish);
+ 207          MenuItem copyLinkItem = menu.findItem(R.id.menu_copy);
+ 208          MenuItem markdownItem = menu.findItem(R.id.menu_markdown);
+ 209          MenuItem copyLinkInternalItem = menu.findItem(R.id.menu_copy_internal);
+ 210  
+ 211          if (mNote != null) {
+ 212              pinItem.setChecked(mNote.isPinned());
+ 213              publishItem.setChecked(mNote.isPublished());
+ 214              markdownItem.setChecked(mNote.isMarkdownEnabled());
+ 215          }
+ 216  
+ 217          pinItem.setEnabled(false);
+ 218          publishItem.setEnabled(false);
+ 219          copyLinkItem.setEnabled(false);
+ 220          markdownItem.setEnabled(false);
+ 221          copyLinkInternalItem.setEnabled(true);
+ 222  
+ 223          super.onPrepareOptionsMenu(menu);
+ 224      }
+ 225  
+ 226      @Override
+ 227      public void onDestroy() {
+ 228          super.onDestroy();
+ 229          mNotesBucket.removeListener(this);
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 230 -        mNotesBucket.stop();</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 231 -        AppLog.add(Type.SYNC, &quot;Stopped note bucket (NoteMarkdownFragment)&quot;);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 232 +        AppLog.add(Type.SYNC, &quot;Removed note bucket listener (NoteMarkdownFragment)&quot;);</span>
+ 233          AppLog.add(Type.SCREEN, &quot;Destroyed (NoteMarkdownFragment)&quot;);
+ 234      }
+ 235  
+ 236      @Override
+ 237      public void onResume() {
+ 238          super.onResume();
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 239 -        mNotesBucket.start();</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 240 -        AppLog.add(Type.SYNC, &quot;Started note bucket (NoteMarkdownFragment)&quot;);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 241 +        checkWebView();</span>
+ 242          mNotesBucket.addListener(this);
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 243 +        AppLog.add(Type.SYNC, &quot;Added note bucket listener (NoteMarkdownFragment)&quot;);</span>
+ 244          AppLog.add(Type.NETWORK, NetworkUtils.getNetworkInfo(requireContext()));
+ 245          AppLog.add(Type.SCREEN, &quot;Resumed (NoteMarkdownFragment)&quot;);
+ 246      }
+ 247  
+ 248      @Override
+ 249      public void onBeforeUpdateObject(Bucket&lt;Note&gt; bucket, Note note) {
+ 250      }
+ 251  
+ 252      @Override
+ 253      public void onDeleteObject(Bucket&lt;Note&gt; bucket, Note note) {
+ 254      }
+ 255  
+ 256      @Override
+ 257      public void onNetworkChange(Bucket&lt;Note&gt; bucket, Bucket.ChangeType type, String key) {
+ 258      }
+ 259  
+ 260      @Override
+ 261      public void onSaveObject(Bucket&lt;Note&gt; bucket, Note note) {
+ 262          if (note.equals(mNote)) {
+ 263              mNote = note;
+ 264              requireActivity().invalidateOptionsMenu();
+ 265          }
+ 266  
+ 267          AppLog.add(
+ 268              Type.SYNC,
+ 269              &quot;Saved note callback in NoteMarkdownFragment (ID: &quot; + note.getSimperiumKey() +
+ 270                  &quot; / Title: &quot; + note.getTitle() +
+ 271                  &quot; / Characters: &quot; + NoteUtils.getCharactersCount(note.getContent()) +
+ 272                  &quot; / Words: &quot; + NoteUtils.getWordCount(note.getContent()) + &quot;)&quot;
+ 273          );
+ 274      }
+ 275  
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 276 +    private void checkWebView() {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 277 +        // When a WebView is installed and mMarkdown is null, a WebView was not installed when the</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 278 +        // fragment was created.  So, open the note again to show the markdown preview.</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 279 +        if (BrowserUtils.isWebViewInstalled(requireContext()) &amp;&amp; mMarkdown == null) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 280 +            SimplenoteLinkify.openNote(requireActivity(), mNote.getSimperiumKey());</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 281 +        }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 282 +    }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 283 +</span>
+ 284      public void updateMarkdown(String text) {
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 285 -        mMarkdown.loadDataWithBaseURL(null, getMarkdownFormattedContent(mCss, text), &quot;text/html&quot;, &quot;utf-8&quot;, null);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 286 +        if (mMarkdown != null) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"><abbr title=" 287 +            mMarkdown.loadDataWithBaseURL(null, getMarkdownFormattedContent(mCss, text), &quot;text/html&quot;, &quot;utf-8&quot;, null);"> 287 +            mMarkdown.loadDataWithBaseURL(null, getMarkdownFormattedContent(mCss, text), &quot;text/html&quot;, &quot;utf-8&quot;, nul🔵</abbr></span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 288 +        }</span>
+ 289      }
+ 290  
+ 291      public static String getMarkdownFormattedContent(String cssContent, String sourceContent) {
+ 292          String header = &quot;&lt;html&gt;&lt;head&gt;&quot; +
+ 293                  &quot;&lt;link href=\&quot;https://fonts.googleapis.com/css?family=Noto+Serif\&quot; rel=\&quot;stylesheet\&quot;&gt;&quot; +
+ 294                  cssContent + &quot;&lt;/head&gt;&lt;body&gt;&quot;;
+ 295  
+ 296          String parsedMarkdown = new AndDown().markdownToHtml(
+ 297                  sourceContent,
+ 298                  AndDown.HOEDOWN_EXT_STRIKETHROUGH | AndDown.HOEDOWN_EXT_FENCED_CODE |
+ 299                          AndDown.HOEDOWN_EXT_QUOTE | AndDown.HOEDOWN_EXT_TABLES,
+ 300                  AndDown.HOEDOWN_HTML_ESCAPE
+ 301          );
+ 302  
+ 303          // Set auto alignment for lists, tables, and quotes based on language of start.
+ 304          parsedMarkdown = parsedMarkdown
+ 305                  .replaceAll(&quot;&lt;ol&gt;&quot;, &quot;&lt;ol dir=\&quot;auto\&quot;&gt;&quot;)
+ 306                  .replaceAll(&quot;&lt;ul&gt;&quot;, &quot;&lt;ul dir=\&quot;auto\&quot;&gt;&quot;)
+ 307                  .replaceAll(&quot;&lt;table&gt;&quot;, &quot;&lt;table dir=\&quot;auto\&quot;&gt;&quot;)
+ 308                  .replaceAll(&quot;&lt;blockquote&gt;&quot;, &quot;&lt;blockquote dir=\&quot;auto\&quot;&gt;&quot;);
+ 309  
+ 310          return header + &quot;&lt;div class=\&quot;note-detail-markdown\&quot;&gt;&quot; + parsedMarkdown +
+ 311                  &quot;&lt;/div&gt;&lt;/body&gt;&lt;/html&gt;&quot;;
+ 312      }
+ 313  
+ 314      private static class LoadNoteTask extends AsyncTask&lt;String, Void, Void&gt; {
+ 315          private SoftReference&lt;NoteMarkdownFragment&gt; mNoteMarkdownFragmentReference;
+ 316  
+ 317          private LoadNoteTask(NoteMarkdownFragment context) {
+ 318              mNoteMarkdownFragmentReference = new SoftReference&lt;&gt;(context);
+ 319          }
+ 320  
+ 321          @Override
+ 322          protected void onPreExecute() {
+ 323              NoteMarkdownFragment fragment = mNoteMarkdownFragmentReference.get();
+ 324              fragment.mIsLoadingNote = true;
+ 325          }
+ 326  
+ 327          @Override
+ 328          protected Void doInBackground(String... args) {
+ 329              NoteMarkdownFragment fragment = mNoteMarkdownFragmentReference.get();
+ 330              FragmentActivity activity = fragment.getActivity();
+ 331  
+ 332              if (activity == null) {
+ 333                  return null;
+ 334              }
+ 335  
+ 336              String noteID = args[0];
+ 337              Simplenote application = (Simplenote) activity.getApplication();
+ 338              Bucket&lt;Note&gt; notesBucket = application.getNotesBucket();
+ 339  
+ 340              try {
+ 341                  fragment.mNote = notesBucket.get(noteID);
+ 342              } catch (BucketObjectMissingException exception) {
+ 343                  // TODO: Handle a missing note
+ 344              }
+ 345  
+ 346              return null;
+ 347          }
+ 348  
+ 349          @Override
+ 350          protected void onPostExecute(Void nada) {
+ 351              NoteMarkdownFragment fragment = mNoteMarkdownFragmentReference.get();
+ 352              fragment.mIsLoadingNote = false;
+ 353              fragment.requireActivity().invalidateOptionsMenu();
+ 354          }
+ 355      }
+ 356  }</pre></td>
+                        </tr>
+                    </table>
+                </div>
+              </body>
+            </html>
+            

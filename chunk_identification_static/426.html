@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+    <html lang="en">
+              <head>
+                <meta charset="utf-8">
+                <title>426</title>
+                    <style>
+                        #top {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        #bottom {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        abbr {
+                          /* Here is the delay */
+                          transition-delay:0s;
+                        }
+                    </style>
+              </head>
+              <body>
+                <span style="height: 4vh">
+                    426
+                    <a href="425.html">prev</a>
+                    <a href="427.html">next</a>
+                    <a href="426_chunks.html">chunks</a>
+                    <a href="index.html">index</a>
+                    DTStack/flinkStreamSQL_480cc75b1cb442e73c527d4143197bb30c9b53c5_kafka/kafka-sink/src/main/java/com/dtstack/flink/sql/sink/kafka/KafkaSink.java
+                    <textarea rows=1 onclick='navigator.clipboard.writeText(this.value)'>cd C:\studies\se\mega\git-analyzer-plus\notebooks\debug
+del /Q *
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;480cc75b1cb442e73c527d4143197bb30c9b53c5:kafka/kafka-sink/src/main/java/com/dtstack/flink/sql/sink/kafka/KafkaSink.java&quot; &gt; committed.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;480cc75b1cb442e73c527d4143197bb30c9b53c5^1:kafka/kafka-sink/src/main/java/com/dtstack/flink/sql/sink/kafka/KafkaSink.java&quot; &gt; ours.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;480cc75b1cb442e73c527d4143197bb30c9b53c5^2:kafka/kafka-sink/src/main/java/com/dtstack/flink/sql/sink/kafka/KafkaSink.java&quot; &gt; theirs.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;cf3543519ddfe6db5473b2b15766ed32bc95d5cf:kafka/kafka-sink/src/main/java/com/dtstack/flink/sql/sink/kafka/KafkaSink.java&quot; &gt; base.java
+copy ours.java 1ours.java
+copy ours.java 2ours.java
+copy theirs.java 1theirs.java
+copy theirs.java 2theirs.java
+copy base.java 1base.java
+copy base.java 2base.java
+&quot;C:\Program Files\Java\jdk1.8.0_241\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\jFSTMerge\build\libs\jFSTMerge-all.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\jfstmerge.java --show-base
+&quot;C:\Program Files\Eclipse Adoptium\jdk-17.0.11.9-hotspot\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\spork\target\spork-0.5.0-SNAPSHOT.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\spork.java
+del /Q 1*.java
+del /Q 2*.java
+del /Q jfstmerge.java.merge
+</textarea>
+                    {strict: [[bj], [b], [j]], subset: [[bj], [b], [j]]}
+                </span>
+                <div id="top">
+
+                    <table>
+                        <tr>
+                            <th>line based (standard git)</th>
+                            <th>jfstmerge</th>
+                            <th>spork</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1 /*
+   2  * Licensed to the Apache Software Foundation (ASF) under one
+   3  * or more contributor license agreements.  See the NOTICE file
+   4  * distributed with this work for additional information
+   5  * regarding copyright ownership.  The ASF licenses this file
+   6  * to you under the Apache License, Version 2.0 (the
+   7  * &quot;License&quot;); you may not use this file except in compliance
+   8  * with the License.  You may obtain a copy of the License at
+   9  *
+  10  *     http://www.apache.org/licenses/LICENSE-2.0
+  11  *
+  12  * Unless required by applicable law or agreed to in writing, software
+  13  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15  * See the License for the specific language governing permissions and
+  16  * limitations under the License.
+  17  */
+  18 
+  19 package com.dtstack.flink.sql.sink.kafka;
+  20 
+  21 import com.dtstack.flink.sql.sink.IStreamSinkGener;
+  22 import com.dtstack.flink.sql.sink.kafka.table.KafkaSinkTableInfo;
+  23 import com.dtstack.flink.sql.table.AbstractTargetTableInfo;
+  24 import org.apache.commons.lang3.StringUtils;
+  25 import org.apache.flink.api.common.typeinfo.TypeInformation;
+  26 import org.apache.flink.api.java.tuple.Tuple2;
+  27 import org.apache.flink.api.java.typeutils.RowTypeInfo;
+  28 import org.apache.flink.api.java.typeutils.TupleTypeInfo;
+  29 import org.apache.flink.streaming.api.datastream.DataStream;
+  30 import org.apache.flink.streaming.api.datastream.DataStreamSink;
+  31 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
+  32 import org.apache.flink.streaming.connectors.kafka.partitioner.FlinkKafkaPartitioner;
+  33 import org.apache.flink.table.api.TableSchema;
+  34 import org.apache.flink.table.runtime.types.CRow;
+  35 import org.apache.flink.table.runtime.types.CRowTypeInfo;
+  36 import org.apache.flink.table.sinks.RetractStreamTableSink;
+  37 import org.apache.flink.table.sinks.TableSink;
+  38 import org.apache.flink.types.Row;
+  39 
+  40 import java.util.Optional;
+  41 import java.util.Properties;
+  42 
+  43 /**
+  44  * @author: chuixue
+  45  * @create: 2019-11-05 11:45
+  46  * @description:
+  47  **/
+  48 public class KafkaSink implements RetractStreamTableSink&lt;Row&gt;, IStreamSinkGener&lt;KafkaSink&gt; {
+  49     private static final String SINK_OPERATOR_NAME_TPL = &quot;${topic}_${table}&quot;;
+  50 
+  51     protected String[] fieldNames;
+  52 
+  53     protected TypeInformation&lt;?&gt;[] fieldTypes;
+  54 
+  55     protected String topic;
+  56 
+  57     protected int parallelism;
+  58 
+  59     protected Properties properties;
+  60 
+  61     protected FlinkKafkaProducer&lt;CRow&gt; flinkKafkaProducer;
+  62     protected CRowTypeInfo typeInformation;
+  63 
+  64 
+  65     /** The schema of the table. */
+  66     private TableSchema schema;
+  67 
+  68     /** Partitioner to select Kafka partition for each item. */
+  69     protected Optional&lt;FlinkKafkaPartitioner&lt;CRow&gt;&gt; partitioner;
+  70 
+  71     private String[] partitionKeys;
+  72 
+  73     protected String sinkOperatorName;
+  74 
+  75 
+  76     @Override
+  77     public KafkaSink genStreamSink(AbstractTargetTableInfo targetTableInfo) {
+  78         KafkaSinkTableInfo kafkaSinkTableInfo = (KafkaSinkTableInfo) targetTableInfo;
+  79         this.topic = kafkaSinkTableInfo.getTopic();
+  80 
+  81         properties = new Properties();
+  82         properties.setProperty(&quot;bootstrap.servers&quot;, kafkaSinkTableInfo.getBootstrapServers());
+  83 
+  84         for (String key : kafkaSinkTableInfo.getKafkaParamKeys()) {
+  85             properties.setProperty(key, kafkaSinkTableInfo.getKafkaParam(key));
+  86         }
+  87         this.partitioner = Optional.of(new CustomerFlinkPartition&lt;&gt;());
+  88         this.partitionKeys = getPartitionKeys(kafkaSinkTableInfo);
+  89         this.fieldNames = kafkaSinkTableInfo.getFields();
+  90         TypeInformation[] types = new TypeInformation[kafkaSinkTableInfo.getFields().length];
+  91         for (int i = 0; i &lt; kafkaSinkTableInfo.getFieldClasses().length; i++) {
+  92             types[i] = TypeInformation.of(kafkaSinkTableInfo.getFieldClasses()[i]);
+  93         }
+  94         this.fieldTypes = types;
+  95 
+  96         TableSchema.Builder schemaBuilder = TableSchema.builder();
+  97         for (int i = 0; i &lt; fieldNames.length; i++) {
+  98             schemaBuilder.field(fieldNames[i], fieldTypes[i]);
+  99         }
+ 100         this.schema = schemaBuilder.build();
+ 101 
+ 102         Integer parallelism = kafkaSinkTableInfo.getParallelism();
+ 103         if (parallelism != null) {
+ 104             this.parallelism = parallelism;
+ 105         }
+ 106 
+ 107 &lt;&lt;&lt;&lt;&lt;&lt;&lt; GitAnalyzerPlus_ours
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 108         this.flinkKafkaProducer = (FlinkKafkaProducer&lt;Row&gt;) new KafkaProducerFactory()</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"><abbr title=" 109                 .createKafkaProducer(kafkaSinkTableInfo, getOutputType().getTypeAt(1), properties, partitioner, partitionKeys);"> 109                 .createKafkaProducer(kafkaSinkTableInfo, getOutputType().getTypeAt(1), properties, partit🔵</abbr></span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 110 </span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"><abbr title=" 111         this.sinkOperatorName = SINK_OPERATOR_NAME_TPL.replace(&quot;${topic}&quot;, topic).replace(&quot;${table}&quot;, kafkaSinkTableInfo.getName());"> 111         this.sinkOperatorName = SINK_OPERATOR_NAME_TPL.replace(&quot;${topic}&quot;, topic).replace(&quot;${table}&quot;, kaf🔵</abbr></span>
+ 112 ||||||| GitAnalyzerPlus_base
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 113 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 114     @Override</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 115     public TypeInformation&lt;Row&gt; getRecordType() {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 116         return new RowTypeInfo(fieldTypes, fieldNames);</span>
+ 117 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 118         typeInformation = new CRowTypeInfo(new RowTypeInfo(fieldTypes, fieldNames));</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 119         this.flinkKafkaProducer = (FlinkKafkaProducer&lt;CRow&gt;) new KafkaProducerFactory()</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"><abbr title=" 120                 .createKafkaProducer(kafkaSinkTableInfo, typeInformation, properties, partitioner, partitionKeys);"> 120                 .createKafkaProducer(kafkaSinkTableInfo, typeInformation, properties, partitioner, partit🔵</abbr></span>
+ 121 &gt;&gt;&gt;&gt;&gt;&gt;&gt; GitAnalyzerPlus_theirs
+ 122         return this;
+ 123     }
+ 124 
+ 125     @Override
+ 126     public TypeInformation&lt;Row&gt; getRecordType() {
+ 127         return new RowTypeInfo(fieldTypes, fieldNames);
+ 128     }
+ 129 
+ 130     @Override
+ 131     public void emitDataStream(DataStream&lt;Tuple2&lt;Boolean, Row&gt;&gt; dataStream) {
+ 132 &lt;&lt;&lt;&lt;&lt;&lt;&lt; GitAnalyzerPlus_ours
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 133         consumeDataStream(dataStream);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 134     }</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 135 </span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 136     @Override</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 137     public DataStreamSink&lt;Row&gt; consumeDataStream(DataStream&lt;Tuple2&lt;Boolean, Row&gt;&gt; dataStream) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 138         DataStream&lt;Row&gt; ds = dataStream</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 139                 .filter((Tuple2&lt;Boolean, Row&gt; record) -&gt; record.f0)</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 140                 .map((Tuple2&lt;Boolean, Row&gt; record) -&gt; record.f1)</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 141                 .returns(getOutputType().getTypeAt(1))</span>
+ 142 ||||||| GitAnalyzerPlus_base
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 143     }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 144 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 145     @Override</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 146     public TupleTypeInfo&lt;Tuple2&lt;Boolean, Row&gt;&gt; getOutputType() {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"><abbr title=" 147         return new TupleTypeInfo(org.apache.flink.table.api.Types.BOOLEAN(), new RowTypeInfo(fieldTypes, fieldNames));"> 147         return new TupleTypeInfo(org.apache.flink.table.api.Types.BOOLEAN(), new RowTypeInfo(fieldTypes, 🔵</abbr></span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 148     }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 149 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 150     @Override</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 151     public String[] getFieldNames() {</span>
+ 152 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 153         DataStream&lt;CRow&gt; mapDataStream = dataStream</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 154                 .map((Tuple2&lt;Boolean, Row&gt; record) -&gt; new CRow(record.f1, record.f0))</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 155                 .returns(typeInformation)</span>
+ 156 &gt;&gt;&gt;&gt;&gt;&gt;&gt; GitAnalyzerPlus_theirs
+ 157                 .setParallelism(parallelism);
+ 158 
+ 159         DataStreamSink&lt;Row&gt; dataStreamSink = ds.addSink(flinkKafkaProducer).name(sinkOperatorName);
+ 160         return dataStreamSink;
+ 161 
+ 162     }
+ 163 
+ 164     @Override
+ 165     public TupleTypeInfo&lt;Tuple2&lt;Boolean, Row&gt;&gt; getOutputType() {
+<abbr title=" 166         return new TupleTypeInfo(org.apache.flink.table.api.Types.BOOLEAN(), new RowTypeInfo(fieldTypes, fieldNames));"> 166         return new TupleTypeInfo(org.apache.flink.table.api.Types.BOOLEAN(), new RowTypeInfo(fieldTypes, 🔵</abbr>
+ 167     }
+ 168 
+ 169 
+ 170     @Override
+ 171     public TableSchema getTableSchema() {
+ 172         return schema;
+ 173     }
+ 174 
+ 175 
+ 176     @Override
+<abbr title=" 177     public TableSink&lt;Tuple2&lt;Boolean, Row&gt;&gt; configure(String[] fieldNames, TypeInformation&lt;?&gt;[] fieldTypes) {"> 177     public TableSink&lt;Tuple2&lt;Boolean, Row&gt;&gt; configure(String[] fieldNames, TypeInformation&lt;?&gt;[] fieldTypes🔵</abbr>
+ 178         this.fieldNames = fieldNames;
+ 179         this.fieldTypes = fieldTypes;
+ 180         return this;
+ 181     }
+ 182 
+ 183     private String[] getPartitionKeys(KafkaSinkTableInfo kafkaSinkTableInfo) {
+ 184         if (StringUtils.isNotBlank(kafkaSinkTableInfo.getPartitionKeys())) {
+ 185             return StringUtils.split(kafkaSinkTableInfo.getPartitionKeys(), &#x27;,&#x27;);
+ 186         }
+ 187         return null;
+ 188     }
+ 189 }</pre></td>
+                            <td><pre>   1 /*
+   2  * Licensed to the Apache Software Foundation (ASF) under one
+   3  * or more contributor license agreements.  See the NOTICE file
+   4  * distributed with this work for additional information
+   5  * regarding copyright ownership.  The ASF licenses this file
+   6  * to you under the Apache License, Version 2.0 (the
+   7  * &quot;License&quot;); you may not use this file except in compliance
+   8  * with the License.  You may obtain a copy of the License at
+   9  *
+  10  *     http://www.apache.org/licenses/LICENSE-2.0
+  11  *
+  12  * Unless required by applicable law or agreed to in writing, software
+  13  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15  * See the License for the specific language governing permissions and
+  16  * limitations under the License.
+  17  */
+  18 
+  19 package com.dtstack.flink.sql.sink.kafka;
+  20 
+  21 import com.dtstack.flink.sql.sink.IStreamSinkGener;
+  22 import com.dtstack.flink.sql.sink.kafka.table.KafkaSinkTableInfo;
+  23 import com.dtstack.flink.sql.table.AbstractTargetTableInfo;
+  24 import org.apache.commons.lang3.StringUtils;
+  25 import org.apache.flink.api.common.typeinfo.TypeInformation;
+  26 import org.apache.flink.api.java.tuple.Tuple2;
+  27 import org.apache.flink.api.java.typeutils.RowTypeInfo;
+  28 import org.apache.flink.api.java.typeutils.TupleTypeInfo;
+  29 import org.apache.flink.streaming.api.datastream.DataStream;
+  30 import org.apache.flink.streaming.api.datastream.DataStreamSink;
+  31 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
+  32 import org.apache.flink.streaming.connectors.kafka.partitioner.FlinkKafkaPartitioner;
+  33 import org.apache.flink.table.api.TableSchema;
+  34 import org.apache.flink.table.runtime.types.CRow;
+  35 import org.apache.flink.table.runtime.types.CRowTypeInfo;
+  36 import org.apache.flink.table.sinks.RetractStreamTableSink;
+  37 import org.apache.flink.table.sinks.TableSink;
+  38 import org.apache.flink.types.Row;
+  39 
+  40 import java.util.Optional;
+  41 import java.util.Properties;
+  42 
+  43 /**
+  44  * @author: chuixue
+  45  * @create: 2019-11-05 11:45
+  46  * @description:
+  47  **/
+  48 public class KafkaSink implements RetractStreamTableSink&lt;Row&gt;, IStreamSinkGener&lt;KafkaSink&gt; {
+  49     private static final String SINK_OPERATOR_NAME_TPL = &quot;${topic}_${table}&quot;;
+  50 
+  51     protected String[] fieldNames;
+  52 
+  53     protected TypeInformation&lt;?&gt;[] fieldTypes;
+  54 
+  55     protected String topic;
+  56 
+  57     protected int parallelism;
+  58 
+  59     protected Properties properties;
+  60 
+  61     protected FlinkKafkaProducer&lt;CRow&gt; flinkKafkaProducer;
+  62     protected CRowTypeInfo typeInformation;
+  63 
+  64 
+  65     /** The schema of the table. */
+  66     private TableSchema schema;
+  67 
+  68     /** Partitioner to select Kafka partition for each item. */
+  69     protected Optional&lt;FlinkKafkaPartitioner&lt;CRow&gt;&gt; partitioner;
+  70 
+  71     private String[] partitionKeys;
+  72 
+  73     protected String sinkOperatorName;
+  74 
+  75 
+  76     @Override
+  77     public KafkaSink genStreamSink(AbstractTargetTableInfo targetTableInfo) {
+  78         KafkaSinkTableInfo kafkaSinkTableInfo = (KafkaSinkTableInfo) targetTableInfo;
+  79         this.topic = kafkaSinkTableInfo.getTopic();
+  80 
+  81         properties = new Properties();
+  82         properties.setProperty(&quot;bootstrap.servers&quot;, kafkaSinkTableInfo.getBootstrapServers());
+  83 
+  84         for (String key : kafkaSinkTableInfo.getKafkaParamKeys()) {
+  85             properties.setProperty(key, kafkaSinkTableInfo.getKafkaParam(key));
+  86         }
+  87         this.partitioner = Optional.of(new CustomerFlinkPartition&lt;&gt;());
+  88         this.partitionKeys = getPartitionKeys(kafkaSinkTableInfo);
+  89         this.fieldNames = kafkaSinkTableInfo.getFields();
+  90         TypeInformation[] types = new TypeInformation[kafkaSinkTableInfo.getFields().length];
+  91         for (int i = 0; i &lt; kafkaSinkTableInfo.getFieldClasses().length; i++) {
+  92             types[i] = TypeInformation.of(kafkaSinkTableInfo.getFieldClasses()[i]);
+  93         }
+  94         this.fieldTypes = types;
+  95 
+  96         TableSchema.Builder schemaBuilder = TableSchema.builder();
+  97         for (int i=0;i&lt;fieldNames.length;i++) {
+  98             schemaBuilder.field(fieldNames[i], fieldTypes[i]);
+  99         }
+ 100         this.schema = schemaBuilder.build();
+ 101 
+ 102         Integer parallelism = kafkaSinkTableInfo.getParallelism();
+ 103         if (parallelism != null) {
+ 104             this.parallelism = parallelism;
+ 105         }
+ 106 
+ 107 &lt;&lt;&lt;&lt;&lt;&lt;&lt; MINE
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 108         this.flinkKafkaProducer = (FlinkKafkaProducer&lt;Row&gt;) new KafkaProducerFactory()</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"><abbr title=" 109                 .createKafkaProducer(kafkaSinkTableInfo, getOutputType().getTypeAt(1), properties, partitioner, partitionKeys);"> 109                 .createKafkaProducer(kafkaSinkTableInfo, getOutputType().getTypeAt(1), properties, partit🔵</abbr></span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 110 </span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"><abbr title=" 111         this.sinkOperatorName = SINK_OPERATOR_NAME_TPL.replace(&quot;${topic}&quot;, topic).replace(&quot;${table}&quot;, kafkaSinkTableInfo.getName());"> 111         this.sinkOperatorName = SINK_OPERATOR_NAME_TPL.replace(&quot;${topic}&quot;, topic).replace(&quot;${table}&quot;, kaf🔵</abbr></span>
+ 112 ||||||| BASE
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"><abbr title=" 113         this.flinkKafkaProducer = (FlinkKafkaProducer&lt;Row&gt;) new KafkaProducerFactory().createKafkaProducer(kafkaSinkTableInfo, getOutputType().getTypeAt(1), properties, partitioner, partitionKeys);"> 113         this.flinkKafkaProducer = (FlinkKafkaProducer&lt;Row&gt;) new KafkaProducerFactory().createKafkaProduce🔵</abbr></span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 114         return this;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 115     }</span>
+ 116 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 117         typeInformation = new CRowTypeInfo(new RowTypeInfo(fieldTypes, fieldNames));</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 118         this.flinkKafkaProducer = (FlinkKafkaProducer&lt;CRow&gt;) new KafkaProducerFactory()</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"><abbr title=" 119                 .createKafkaProducer(kafkaSinkTableInfo, typeInformation, properties, partitioner, partitionKeys);"> 119                 .createKafkaProducer(kafkaSinkTableInfo, typeInformation, properties, partitioner, partit🔵</abbr></span>
+ 120 &gt;&gt;&gt;&gt;&gt;&gt;&gt; YOURS
+ 121         return this;
+ 122     }
+ 123 
+ 124     @Override
+ 125     public TypeInformation&lt;Row&gt; getRecordType() {
+ 126         return new RowTypeInfo(fieldTypes, fieldNames);
+ 127     }
+ 128 
+ 129     @Override
+ 130     public void emitDataStream(DataStream&lt;Tuple2&lt;Boolean, Row&gt;&gt; dataStream) {
+ 131 &lt;&lt;&lt;&lt;&lt;&lt;&lt; MINE
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 132         consumeDataStream(dataStream);</span>
+ 133 ||||||| BASE
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 134         DataStream&lt;Row&gt; mapDataStream = dataStream.filter((Tuple2&lt;Boolean, Row&gt; record) -&gt; record.f0)</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 135                 .map((Tuple2&lt;Boolean, Row&gt; record) -&gt; record.f1)</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 136                 .returns(getOutputType().getTypeAt(1))</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 137                 .setParallelism(parallelism);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 138 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"><abbr title=" 139         mapDataStream.addSink(flinkKafkaProducer).name(TableConnectorUtils.generateRuntimeName(this.getClass(), getFieldNames()));"> 139         mapDataStream.addSink(flinkKafkaProducer).name(TableConnectorUtils.generateRuntimeName(this.getCl🔵</abbr></span>
+ 140 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 141         DataStream&lt;CRow&gt; mapDataStream = dataStream</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 142                 .map((Tuple2&lt;Boolean, Row&gt; record) -&gt; new CRow(record.f1, record.f0))</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 143                 .returns(typeInformation)</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 144                 .setParallelism(parallelism);</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 145 </span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"><abbr title=" 146         mapDataStream.addSink(flinkKafkaProducer).name(TableConnectorUtils.generateRuntimeName(this.getClass(), getFieldNames()));"> 146         mapDataStream.addSink(flinkKafkaProducer).name(TableConnectorUtils.generateRuntimeName(this.getCl🔵</abbr></span>
+ 147 &gt;&gt;&gt;&gt;&gt;&gt;&gt; YOURS
+ 148     }
+ 149 
+ 150     @Override
+ 151     public DataStreamSink&lt;Row&gt; consumeDataStream(DataStream&lt;Tuple2&lt;Boolean, Row&gt;&gt; dataStream) {
+ 152         DataStream&lt;Row&gt; ds = dataStream
+ 153                 .filter((Tuple2&lt;Boolean, Row&gt; record) -&gt; record.f0)
+ 154                 .map((Tuple2&lt;Boolean, Row&gt; record) -&gt; record.f1)
+ 155                 .returns(getOutputType().getTypeAt(1))
+ 156                 .setParallelism(parallelism);
+ 157 
+ 158         DataStreamSink&lt;Row&gt; dataStreamSink = ds.addSink(flinkKafkaProducer).name(sinkOperatorName);
+ 159         return dataStreamSink;
+ 160 
+ 161     }
+ 162 
+ 163     @Override
+ 164     public TupleTypeInfo&lt;Tuple2&lt;Boolean, Row&gt;&gt; getOutputType() {
+<abbr title=" 165         return new TupleTypeInfo(org.apache.flink.table.api.Types.BOOLEAN(), new RowTypeInfo(fieldTypes, fieldNames));"> 165         return new TupleTypeInfo(org.apache.flink.table.api.Types.BOOLEAN(), new RowTypeInfo(fieldTypes, 🔵</abbr>
+ 166     }
+ 167 
+ 168 
+ 169     @Override
+ 170     public TableSchema getTableSchema() {
+ 171         return schema;
+ 172     }
+ 173 
+ 174 
+ 175     @Override
+<abbr title=" 176     public TableSink&lt;Tuple2&lt;Boolean, Row&gt;&gt; configure(String[] fieldNames, TypeInformation&lt;?&gt;[] fieldTypes) {"> 176     public TableSink&lt;Tuple2&lt;Boolean, Row&gt;&gt; configure(String[] fieldNames, TypeInformation&lt;?&gt;[] fieldTypes🔵</abbr>
+ 177         this.fieldNames = fieldNames;
+ 178         this.fieldTypes = fieldTypes;
+ 179         return this;
+ 180     }
+ 181 
+ 182     private String[] getPartitionKeys(KafkaSinkTableInfo kafkaSinkTableInfo){
+ 183         if(StringUtils.isNotBlank(kafkaSinkTableInfo.getPartitionKeys())){
+ 184             return StringUtils.split(kafkaSinkTableInfo.getPartitionKeys(), &#x27;,&#x27;);
+ 185         }
+ 186         return null;
+ 187     }
+ 188 }</pre></td>
+                            <td><pre>   1 /*
+   2  * Licensed to the Apache Software Foundation (ASF) under one
+   3  * or more contributor license agreements.  See the NOTICE file
+   4  * distributed with this work for additional information
+   5  * regarding copyright ownership.  The ASF licenses this file
+   6  * to you under the Apache License, Version 2.0 (the
+   7  * &quot;License&quot;); you may not use this file except in compliance
+   8  * with the License.  You may obtain a copy of the License at
+   9  *
+  10  *     http://www.apache.org/licenses/LICENSE-2.0
+  11  *
+  12  * Unless required by applicable law or agreed to in writing, software
+  13  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15  * See the License for the specific language governing permissions and
+  16  * limitations under the License.
+  17  */
+  18 package com.dtstack.flink.sql.sink.kafka;
+  19 
+  20 import com.dtstack.flink.sql.sink.IStreamSinkGener;
+  21 import com.dtstack.flink.sql.sink.kafka.table.KafkaSinkTableInfo;
+  22 import com.dtstack.flink.sql.table.AbstractTargetTableInfo;
+  23 import java.util.Optional;
+  24 import java.util.Properties;
+  25 import org.apache.commons.lang3.StringUtils;
+  26 import org.apache.flink.api.common.typeinfo.TypeInformation;
+  27 import org.apache.flink.api.java.tuple.Tuple2;
+  28 import org.apache.flink.api.java.typeutils.RowTypeInfo;
+  29 import org.apache.flink.api.java.typeutils.TupleTypeInfo;
+  30 import org.apache.flink.streaming.api.datastream.DataStream;
+  31 import org.apache.flink.streaming.api.datastream.DataStreamSink;
+  32 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
+  33 import org.apache.flink.streaming.connectors.kafka.partitioner.FlinkKafkaPartitioner;
+  34 import org.apache.flink.table.api.TableSchema;
+  35 import org.apache.flink.table.runtime.types.CRow;
+  36 import org.apache.flink.table.runtime.types.CRowTypeInfo;
+  37 import org.apache.flink.table.sinks.RetractStreamTableSink;
+  38 import org.apache.flink.table.sinks.TableSink;
+  39 import org.apache.flink.types.Row;
+  40 
+  41 
+  42 /**
+  43  * @author: chuixue
+  44  * @create: 2019-11-05 11:45
+  45  * @description:
+  46  **/
+  47 public class KafkaSink implements RetractStreamTableSink&lt;Row&gt; , IStreamSinkGener&lt;KafkaSink&gt; {
+  48     private static final String SINK_OPERATOR_NAME_TPL = &quot;${topic}_${table}&quot;;
+  49 
+  50     protected String[] fieldNames;
+  51 
+  52     protected TypeInformation&lt;?&gt;[] fieldTypes;
+  53 
+  54     protected String topic;
+  55 
+  56     protected int parallelism;
+  57 
+  58     protected Properties properties;
+  59 
+  60     protected FlinkKafkaProducer&lt;CRow&gt; flinkKafkaProducer;
+  61 
+  62     protected CRowTypeInfo typeInformation;
+  63 
+  64     /** The schema of the table. */
+  65     private TableSchema schema;
+  66 
+  67     /** Partitioner to select Kafka partition for each item. */
+  68     protected Optional&lt;FlinkKafkaPartitioner&lt;CRow&gt;&gt; partitioner;
+  69 
+  70     private String[] partitionKeys;
+  71 
+  72     protected String sinkOperatorName;
+  73 
+  74     @Override
+  75     public KafkaSink genStreamSink(AbstractTargetTableInfo targetTableInfo) {
+  76         KafkaSinkTableInfo kafkaSinkTableInfo = ((KafkaSinkTableInfo) (targetTableInfo));
+  77         this.topic = kafkaSinkTableInfo.getTopic();
+  78         properties = new Properties();
+  79         properties.setProperty(&quot;bootstrap.servers&quot;, kafkaSinkTableInfo.getBootstrapServers());
+  80         for (String key : kafkaSinkTableInfo.getKafkaParamKeys()) {
+  81             properties.setProperty(key, kafkaSinkTableInfo.getKafkaParam(key));
+  82         }
+  83         this.partitioner = Optional.of(new CustomerFlinkPartition&lt;&gt;());
+  84         this.partitionKeys = getPartitionKeys(kafkaSinkTableInfo);
+  85         this.fieldNames = kafkaSinkTableInfo.getFields();
+  86         TypeInformation[] types = new TypeInformation[kafkaSinkTableInfo.getFields().length];
+  87         for (int i = 0; i &lt; kafkaSinkTableInfo.getFieldClasses().length; i++) {
+  88             types[i] = TypeInformation.of(kafkaSinkTableInfo.getFieldClasses()[i]);
+  89         }
+  90         this.fieldTypes = types;
+  91         TableSchema.Builder schemaBuilder = TableSchema.builder();
+  92         for (int i = 0; i &lt; fieldNames.length; i++) {
+  93             schemaBuilder.field(fieldNames[i], fieldTypes[i]);
+  94         }
+  95         this.schema = schemaBuilder.build();
+  96         Integer parallelism = kafkaSinkTableInfo.getParallelism();
+  97         if (parallelism != null) {
+  98             this.parallelism = parallelism;
+  99         }
+ 100         typeInformation = new CRowTypeInfo(new RowTypeInfo(fieldTypes, fieldNames));
+<abbr title=" 101         this.flinkKafkaProducer = ((FlinkKafkaProducer&lt;CRow&gt;) (new KafkaProducerFactory().createKafkaProducer(kafkaSinkTableInfo, typeInformation, properties, partitioner, partitionKeys)));"> 101         this.flinkKafkaProducer = ((FlinkKafkaProducer&lt;CRow&gt;) (new KafkaProducerFactory().createKafkaProd🔵</abbr>
+<abbr title=" 102         this.sinkOperatorName = SINK_OPERATOR_NAME_TPL.replace(&quot;${topic}&quot;, topic).replace(&quot;${table}&quot;, kafkaSinkTableInfo.getName());"> 102         this.sinkOperatorName = SINK_OPERATOR_NAME_TPL.replace(&quot;${topic}&quot;, topic).replace(&quot;${table}&quot;, kaf🔵</abbr>
+ 103         return this;
+ 104     }
+ 105 
+ 106     @Override
+ 107     public TypeInformation&lt;Row&gt; getRecordType() {
+ 108         return new RowTypeInfo(fieldTypes, fieldNames);
+ 109     }
+ 110 
+ 111     @Override
+ 112     public void emitDataStream(DataStream&lt;Tuple2&lt;Boolean, Row&gt;&gt; dataStream) {
+ 113         consumeDataStream(dataStream);
+ 114     }
+ 115 
+ 116     @Override
+ 117     public DataStreamSink&lt;Row&gt; consumeDataStream(DataStream&lt;Tuple2&lt;Boolean, Row&gt;&gt; dataStream) {
+<abbr title=" 118         DataStream&lt;CRow&gt; ds = dataStream.map((Tuple2&lt;Boolean, Row&gt; record) -&gt; new CRow(record.f1, record.f0)).returns(typeInformation).setParallelism(parallelism);"> 118         DataStream&lt;CRow&gt; ds = dataStream.map((Tuple2&lt;Boolean, Row&gt; record) -&gt; new CRow(record.f1, record.🔵</abbr>
+ 119         DataStreamSink&lt;Row&gt; dataStreamSink = ds.addSink(flinkKafkaProducer).name(sinkOperatorName);
+ 120         return dataStreamSink;
+ 121     }
+ 122 
+ 123     @Override
+ 124     public TupleTypeInfo&lt;Tuple2&lt;Boolean, Row&gt;&gt; getOutputType() {
+<abbr title=" 125         return new TupleTypeInfo(org.apache.flink.table.api.Types.BOOLEAN(), new RowTypeInfo(fieldTypes, fieldNames));"> 125         return new TupleTypeInfo(org.apache.flink.table.api.Types.BOOLEAN(), new RowTypeInfo(fieldTypes, 🔵</abbr>
+ 126     }
+ 127 
+ 128     @Override
+ 129     public TableSchema getTableSchema() {
+ 130         return schema;
+ 131     }
+ 132 
+ 133     @Override
+<abbr title=" 134     public TableSink&lt;Tuple2&lt;Boolean, Row&gt;&gt; configure(String[] fieldNames, TypeInformation&lt;?&gt;[] fieldTypes) {"> 134     public TableSink&lt;Tuple2&lt;Boolean, Row&gt;&gt; configure(String[] fieldNames, TypeInformation&lt;?&gt;[] fieldTypes🔵</abbr>
+ 135         this.fieldNames = fieldNames;
+ 136         this.fieldTypes = fieldTypes;
+ 137         return this;
+ 138     }
+ 139 
+ 140     private String[] getPartitionKeys(KafkaSinkTableInfo kafkaSinkTableInfo){
+ 141         if(StringUtils.isNotBlank(kafkaSinkTableInfo.getPartitionKeys())){
+ 142             return StringUtils.split(kafkaSinkTableInfo.getPartitionKeys(), &#x27;,&#x27;);
+ 143         }
+ 144         return null;
+ 145     }
+ 146 }
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ </pre></td>
+                        </tr>
+                    </table>
+                </div>
+                <div id="bottom">
+                    <table style="margin:auto">
+                        <tr>
+                            <th>ours vs. base</th>
+                            <th>theirs vs. base</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1  /*
+   2   * Licensed to the Apache Software Foundation (ASF) under one
+   3   * or more contributor license agreements.  See the NOTICE file
+   4   * distributed with this work for additional information
+   5   * regarding copyright ownership.  The ASF licenses this file
+   6   * to you under the Apache License, Version 2.0 (the
+   7   * &quot;License&quot;); you may not use this file except in compliance
+   8   * with the License.  You may obtain a copy of the License at
+   9   *
+  10   *     http://www.apache.org/licenses/LICENSE-2.0
+  11   *
+  12   * Unless required by applicable law or agreed to in writing, software
+  13   * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15   * See the License for the specific language governing permissions and
+  16   * limitations under the License.
+  17   */
+  18  
+  19  package com.dtstack.flink.sql.sink.kafka;
+  20  
+  21  import com.dtstack.flink.sql.sink.IStreamSinkGener;
+  22  import com.dtstack.flink.sql.sink.kafka.table.KafkaSinkTableInfo;
+  23  import com.dtstack.flink.sql.table.AbstractTargetTableInfo;
+  24  import org.apache.commons.lang3.StringUtils;
+  25  import org.apache.flink.api.common.typeinfo.TypeInformation;
+  26  import org.apache.flink.api.java.tuple.Tuple2;
+  27  import org.apache.flink.api.java.typeutils.RowTypeInfo;
+  28  import org.apache.flink.api.java.typeutils.TupleTypeInfo;
+  29  import org.apache.flink.streaming.api.datastream.DataStream;
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  30 +import org.apache.flink.streaming.api.datastream.DataStreamSink;</span>
+  31  import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  32 -import org.apache.flink.streaming.connectors.kafka.partitioner.FlinkFixedPartitioner;</span>
+  33  import org.apache.flink.streaming.connectors.kafka.partitioner.FlinkKafkaPartitioner;
+  34  import org.apache.flink.table.api.TableSchema;
+
+
+  35  import org.apache.flink.table.sinks.RetractStreamTableSink;
+  36  import org.apache.flink.table.sinks.TableSink;
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  37 -import org.apache.flink.table.utils.TableConnectorUtils;</span>
+  38  import org.apache.flink.types.Row;
+  39  
+  40  import java.util.Optional;
+  41  import java.util.Properties;
+  42  
+  43  /**
+  44   * @author: chuixue
+  45   * @create: 2019-11-05 11:45
+  46   * @description:
+  47   **/
+  48  public class KafkaSink implements RetractStreamTableSink&lt;Row&gt;, IStreamSinkGener&lt;KafkaSink&gt; {
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  49 +    private static final String SINK_OPERATOR_NAME_TPL = &quot;${topic}_${table}&quot;;</span>
+  50  
+  51      protected String[] fieldNames;
+  52  
+  53      protected TypeInformation&lt;?&gt;[] fieldTypes;
+  54  
+  55      protected String topic;
+  56  
+  57      protected int parallelism;
+  58  
+  59      protected Properties properties;
+  60  
+  61      protected FlinkKafkaProducer&lt;Row&gt; flinkKafkaProducer;
+
+
+
+  62  
+  63      /** The schema of the table. */
+  64      private TableSchema schema;
+  65  
+  66      /** Partitioner to select Kafka partition for each item. */
+  67      protected Optional&lt;FlinkKafkaPartitioner&lt;Row&gt;&gt; partitioner;
+
+  68  
+  69      private String[] partitionKeys;
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  70 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  71 +    protected String sinkOperatorName;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  72 +</span>
+  73  
+  74      @Override
+  75      public KafkaSink genStreamSink(AbstractTargetTableInfo targetTableInfo) {
+  76          KafkaSinkTableInfo kafkaSinkTableInfo = (KafkaSinkTableInfo) targetTableInfo;
+  77          this.topic = kafkaSinkTableInfo.getTopic();
+  78  
+  79          properties = new Properties();
+  80          properties.setProperty(&quot;bootstrap.servers&quot;, kafkaSinkTableInfo.getBootstrapServers());
+  81  
+  82          for (String key : kafkaSinkTableInfo.getKafkaParamKeys()) {
+  83              properties.setProperty(key, kafkaSinkTableInfo.getKafkaParam(key));
+  84          }
+  85          this.partitioner = Optional.of(new CustomerFlinkPartition&lt;&gt;());
+  86          this.partitionKeys = getPartitionKeys(kafkaSinkTableInfo);
+  87          this.fieldNames = kafkaSinkTableInfo.getFields();
+  88          TypeInformation[] types = new TypeInformation[kafkaSinkTableInfo.getFields().length];
+  89          for (int i = 0; i &lt; kafkaSinkTableInfo.getFieldClasses().length; i++) {
+  90              types[i] = TypeInformation.of(kafkaSinkTableInfo.getFieldClasses()[i]);
+  91          }
+  92          this.fieldTypes = types;
+  93  
+  94          TableSchema.Builder schemaBuilder = TableSchema.builder();
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  95 -        for (int i=0;i&lt;fieldNames.length;i++) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  96 +        for (int i = 0; i &lt; fieldNames.length; i++) {</span>
+  97              schemaBuilder.field(fieldNames[i], fieldTypes[i]);
+  98          }
+  99          this.schema = schemaBuilder.build();
+ 100  
+ 101          Integer parallelism = kafkaSinkTableInfo.getParallelism();
+ 102          if (parallelism != null) {
+ 103              this.parallelism = parallelism;
+ 104          }
+ 105  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"><abbr title=" 106 -        this.flinkKafkaProducer = (FlinkKafkaProducer&lt;Row&gt;) new KafkaProducerFactory().createKafkaProducer(kafkaSinkTableInfo, getOutputType().getTypeAt(1), properties, partitioner, partitionKeys);"> 106 -        this.flinkKafkaProducer = (FlinkKafkaProducer&lt;Row&gt;) new KafkaProducerFactory().createKafkaProducer(kafkaSi🔵</abbr></span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 107 +        this.flinkKafkaProducer = (FlinkKafkaProducer&lt;Row&gt;) new KafkaProducerFactory()</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"><abbr title=" 108 +                .createKafkaProducer(kafkaSinkTableInfo, getOutputType().getTypeAt(1), properties, partitioner, partitionKeys);"> 108 +                .createKafkaProducer(kafkaSinkTableInfo, getOutputType().getTypeAt(1), properties, partitioner, pa🔵</abbr></span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 109 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"><abbr title=" 110 +        this.sinkOperatorName = SINK_OPERATOR_NAME_TPL.replace(&quot;${topic}&quot;, topic).replace(&quot;${table}&quot;, kafkaSinkTableInfo.getName());"> 110 +        this.sinkOperatorName = SINK_OPERATOR_NAME_TPL.replace(&quot;${topic}&quot;, topic).replace(&quot;${table}&quot;, kafkaSinkTab🔵</abbr></span>
+ 111          return this;
+ 112      }
+ 113  
+ 114      @Override
+ 115      public TypeInformation&lt;Row&gt; getRecordType() {
+ 116          return new RowTypeInfo(fieldTypes, fieldNames);
+ 117      }
+ 118  
+ 119      @Override
+ 120      public void emitDataStream(DataStream&lt;Tuple2&lt;Boolean, Row&gt;&gt; dataStream) {
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 121 -        DataStream&lt;Row&gt; mapDataStream = dataStream.filter((Tuple2&lt;Boolean, Row&gt; record) -&gt; record.f0)</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 122 +        consumeDataStream(dataStream);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 123 +    }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 124 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 125 +    @Override</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 126 +    public DataStreamSink&lt;Row&gt; consumeDataStream(DataStream&lt;Tuple2&lt;Boolean, Row&gt;&gt; dataStream) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 127 +        DataStream&lt;Row&gt; ds = dataStream</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 128 +                .filter((Tuple2&lt;Boolean, Row&gt; record) -&gt; record.f0)</span>
+ 129                  .map((Tuple2&lt;Boolean, Row&gt; record) -&gt; record.f1)
+ 130                  .returns(getOutputType().getTypeAt(1))
+
+
+
+ 131                  .setParallelism(parallelism);
+ 132  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"><abbr title=" 133 -        mapDataStream.addSink(flinkKafkaProducer).name(TableConnectorUtils.generateRuntimeName(this.getClass(), getFieldNames()));"> 133 -        mapDataStream.addSink(flinkKafkaProducer).name(TableConnectorUtils.generateRuntimeName(this.getClass(), ge🔵</abbr></span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 134 +        DataStreamSink&lt;Row&gt; dataStreamSink = ds.addSink(flinkKafkaProducer).name(sinkOperatorName);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 135 +        return dataStreamSink;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 136 +</span>
+ 137      }
+ 138  
+ 139      @Override
+ 140      public TupleTypeInfo&lt;Tuple2&lt;Boolean, Row&gt;&gt; getOutputType() {
+<abbr title=" 141          return new TupleTypeInfo(org.apache.flink.table.api.Types.BOOLEAN(), new RowTypeInfo(fieldTypes, fieldNames));"> 141          return new TupleTypeInfo(org.apache.flink.table.api.Types.BOOLEAN(), new RowTypeInfo(fieldTypes, fieldName🔵</abbr>
+ 142      }
+ 143  
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 144 +</span>
+ 145      @Override
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 146 -    public String[] getFieldNames() {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 147 -        return fieldNames;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 148 +    public TableSchema getTableSchema() {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 149 +        return schema;</span>
+ 150      }
+ 151  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 152 -    @Override</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 153 -    public TypeInformation&lt;?&gt;[] getFieldTypes() {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 154 -        return fieldTypes;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 155 -    }</span>
+ 156  
+ 157      @Override
+ 158      public TableSink&lt;Tuple2&lt;Boolean, Row&gt;&gt; configure(String[] fieldNames, TypeInformation&lt;?&gt;[] fieldTypes) {
+ 159          this.fieldNames = fieldNames;
+ 160          this.fieldTypes = fieldTypes;
+ 161          return this;
+ 162      }
+ 163  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 164 -    private String[] getPartitionKeys(KafkaSinkTableInfo kafkaSinkTableInfo){</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 165 -        if(StringUtils.isNotBlank(kafkaSinkTableInfo.getPartitionKeys())){</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 166 +    private String[] getPartitionKeys(KafkaSinkTableInfo kafkaSinkTableInfo) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 167 +        if (StringUtils.isNotBlank(kafkaSinkTableInfo.getPartitionKeys())) {</span>
+ 168              return StringUtils.split(kafkaSinkTableInfo.getPartitionKeys(), &#x27;,&#x27;);
+ 169          }
+ 170          return null;
+ 171      }
+ 172  }</pre></td>
+                            <td><pre>   1  /*
+   2   * Licensed to the Apache Software Foundation (ASF) under one
+   3   * or more contributor license agreements.  See the NOTICE file
+   4   * distributed with this work for additional information
+   5   * regarding copyright ownership.  The ASF licenses this file
+   6   * to you under the Apache License, Version 2.0 (the
+   7   * &quot;License&quot;); you may not use this file except in compliance
+   8   * with the License.  You may obtain a copy of the License at
+   9   *
+  10   *     http://www.apache.org/licenses/LICENSE-2.0
+  11   *
+  12   * Unless required by applicable law or agreed to in writing, software
+  13   * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15   * See the License for the specific language governing permissions and
+  16   * limitations under the License.
+  17   */
+  18  
+  19  package com.dtstack.flink.sql.sink.kafka;
+  20  
+  21  import com.dtstack.flink.sql.sink.IStreamSinkGener;
+  22  import com.dtstack.flink.sql.sink.kafka.table.KafkaSinkTableInfo;
+  23  import com.dtstack.flink.sql.table.AbstractTargetTableInfo;
+  24  import org.apache.commons.lang3.StringUtils;
+  25  import org.apache.flink.api.common.typeinfo.TypeInformation;
+  26  import org.apache.flink.api.java.tuple.Tuple2;
+  27  import org.apache.flink.api.java.typeutils.RowTypeInfo;
+  28  import org.apache.flink.api.java.typeutils.TupleTypeInfo;
+  29  import org.apache.flink.streaming.api.datastream.DataStream;
+
+  30  import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
+  31  import org.apache.flink.streaming.connectors.kafka.partitioner.FlinkFixedPartitioner;
+  32  import org.apache.flink.streaming.connectors.kafka.partitioner.FlinkKafkaPartitioner;
+  33  import org.apache.flink.table.api.TableSchema;
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  34 +import org.apache.flink.table.runtime.types.CRow;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  35 +import org.apache.flink.table.runtime.types.CRowTypeInfo;</span>
+  36  import org.apache.flink.table.sinks.RetractStreamTableSink;
+  37  import org.apache.flink.table.sinks.TableSink;
+  38  import org.apache.flink.table.utils.TableConnectorUtils;
+  39  import org.apache.flink.types.Row;
+  40  
+  41  import java.util.Optional;
+  42  import java.util.Properties;
+  43  
+  44  /**
+  45   * @author: chuixue
+  46   * @create: 2019-11-05 11:45
+  47   * @description:
+  48   **/
+  49  public class KafkaSink implements RetractStreamTableSink&lt;Row&gt;, IStreamSinkGener&lt;KafkaSink&gt; {
+
+  50  
+  51      protected String[] fieldNames;
+  52  
+  53      protected TypeInformation&lt;?&gt;[] fieldTypes;
+  54  
+  55      protected String topic;
+  56  
+  57      protected int parallelism;
+  58  
+  59      protected Properties properties;
+  60  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  61 -    protected FlinkKafkaProducer&lt;Row&gt; flinkKafkaProducer;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  62 +    protected FlinkKafkaProducer&lt;CRow&gt; flinkKafkaProducer;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  63 +    protected CRowTypeInfo typeInformation;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  64 +</span>
+  65  
+  66      /** The schema of the table. */
+  67      private TableSchema schema;
+  68  
+  69      /** Partitioner to select Kafka partition for each item. */
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  70 -    protected Optional&lt;FlinkKafkaPartitioner&lt;Row&gt;&gt; partitioner;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  71 +    protected Optional&lt;FlinkKafkaPartitioner&lt;CRow&gt;&gt; partitioner;</span>
+  72  
+  73      private String[] partitionKeys;
+
+
+
+  74  
+  75      @Override
+  76      public KafkaSink genStreamSink(AbstractTargetTableInfo targetTableInfo) {
+  77          KafkaSinkTableInfo kafkaSinkTableInfo = (KafkaSinkTableInfo) targetTableInfo;
+  78          this.topic = kafkaSinkTableInfo.getTopic();
+  79  
+  80          properties = new Properties();
+  81          properties.setProperty(&quot;bootstrap.servers&quot;, kafkaSinkTableInfo.getBootstrapServers());
+  82  
+  83          for (String key : kafkaSinkTableInfo.getKafkaParamKeys()) {
+  84              properties.setProperty(key, kafkaSinkTableInfo.getKafkaParam(key));
+  85          }
+  86          this.partitioner = Optional.of(new CustomerFlinkPartition&lt;&gt;());
+  87          this.partitionKeys = getPartitionKeys(kafkaSinkTableInfo);
+  88          this.fieldNames = kafkaSinkTableInfo.getFields();
+  89          TypeInformation[] types = new TypeInformation[kafkaSinkTableInfo.getFields().length];
+  90          for (int i = 0; i &lt; kafkaSinkTableInfo.getFieldClasses().length; i++) {
+  91              types[i] = TypeInformation.of(kafkaSinkTableInfo.getFieldClasses()[i]);
+  92          }
+  93          this.fieldTypes = types;
+  94  
+  95          TableSchema.Builder schemaBuilder = TableSchema.builder();
+  96          for (int i=0;i&lt;fieldNames.length;i++) {
+
+  97              schemaBuilder.field(fieldNames[i], fieldTypes[i]);
+  98          }
+  99          this.schema = schemaBuilder.build();
+ 100  
+ 101          Integer parallelism = kafkaSinkTableInfo.getParallelism();
+ 102          if (parallelism != null) {
+ 103              this.parallelism = parallelism;
+ 104          }
+ 105  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"><abbr title=" 106 -        this.flinkKafkaProducer = (FlinkKafkaProducer&lt;Row&gt;) new KafkaProducerFactory().createKafkaProducer(kafkaSinkTableInfo, getOutputType().getTypeAt(1), properties, partitioner, partitionKeys);"> 106 -        this.flinkKafkaProducer = (FlinkKafkaProducer&lt;Row&gt;) new KafkaProducerFactory().createKafkaProducer(kafkaSi🔵</abbr></span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 107 +        typeInformation = new CRowTypeInfo(new RowTypeInfo(fieldTypes, fieldNames));</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 108 +        this.flinkKafkaProducer = (FlinkKafkaProducer&lt;CRow&gt;) new KafkaProducerFactory()</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 109 +                .createKafkaProducer(kafkaSinkTableInfo, typeInformation, properties, partitioner, partitionKeys);</span>
+
+ 110          return this;
+ 111      }
+ 112  
+ 113      @Override
+ 114      public TypeInformation&lt;Row&gt; getRecordType() {
+ 115          return new RowTypeInfo(fieldTypes, fieldNames);
+ 116      }
+ 117  
+ 118      @Override
+ 119      public void emitDataStream(DataStream&lt;Tuple2&lt;Boolean, Row&gt;&gt; dataStream) {
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 120 -        DataStream&lt;Row&gt; mapDataStream = dataStream.filter((Tuple2&lt;Boolean, Row&gt; record) -&gt; record.f0)</span>
+
+
+
+
+
+
+
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 121 -                .map((Tuple2&lt;Boolean, Row&gt; record) -&gt; record.f1)</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 122 -                .returns(getOutputType().getTypeAt(1))</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 123 +        DataStream&lt;CRow&gt; mapDataStream = dataStream</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 124 +                .map((Tuple2&lt;Boolean, Row&gt; record) -&gt; new CRow(record.f1, record.f0))</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 125 +                .returns(typeInformation)</span>
+ 126                  .setParallelism(parallelism);
+ 127  
+<abbr title=" 128          mapDataStream.addSink(flinkKafkaProducer).name(TableConnectorUtils.generateRuntimeName(this.getClass(), getFieldNames()));"> 128          mapDataStream.addSink(flinkKafkaProducer).name(TableConnectorUtils.generateRuntimeName(this.getClass(), ge🔵</abbr>
+
+
+
+ 129      }
+ 130  
+ 131      @Override
+ 132      public TupleTypeInfo&lt;Tuple2&lt;Boolean, Row&gt;&gt; getOutputType() {
+<abbr title=" 133          return new TupleTypeInfo(org.apache.flink.table.api.Types.BOOLEAN(), new RowTypeInfo(fieldTypes, fieldNames));"> 133          return new TupleTypeInfo(org.apache.flink.table.api.Types.BOOLEAN(), new RowTypeInfo(fieldTypes, fieldName🔵</abbr>
+ 134      }
+ 135  
+
+ 136      @Override
+ 137      public String[] getFieldNames() {
+ 138          return fieldNames;
+
+
+ 139      }
+ 140  
+ 141      @Override
+ 142      public TypeInformation&lt;?&gt;[] getFieldTypes() {
+ 143          return fieldTypes;
+ 144      }
+ 145  
+ 146      @Override
+ 147      public TableSink&lt;Tuple2&lt;Boolean, Row&gt;&gt; configure(String[] fieldNames, TypeInformation&lt;?&gt;[] fieldTypes) {
+ 148          this.fieldNames = fieldNames;
+ 149          this.fieldTypes = fieldTypes;
+ 150          return this;
+ 151      }
+ 152  
+ 153      private String[] getPartitionKeys(KafkaSinkTableInfo kafkaSinkTableInfo){
+ 154          if(StringUtils.isNotBlank(kafkaSinkTableInfo.getPartitionKeys())){
+
+
+ 155              return StringUtils.split(kafkaSinkTableInfo.getPartitionKeys(), &#x27;,&#x27;);
+ 156          }
+ 157          return null;
+ 158      }
+ 159  }</pre></td>
+                        </tr>
+                    </table>
+                </div>
+              </body>
+            </html>
+            

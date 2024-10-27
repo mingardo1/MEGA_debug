@@ -1,0 +1,1162 @@
+<!DOCTYPE html>
+    <html lang="en">
+              <head>
+                <meta charset="utf-8">
+                <title>32</title>
+                    <style>
+                        #top {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        #bottom {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        abbr {
+                          /* Here is the delay */
+                          transition-delay:0s;
+                        }
+                    </style>
+              </head>
+              <body>
+                <span style="height: 4vh">
+                    32
+                    <a href="31.html">prev</a>
+                    <a href="33.html">next</a>
+                    <a href="32_chunks.html">chunks</a>
+                    <a href="index.html">index</a>
+                    AriaLyy/Aria_1469ca1ceaae9c691eee7790de89a3ee1f571403_Aria/src/main/java/com/arialyy/aria/core/download/DNormalConfigHandler.java
+                    <textarea rows=1 onclick='navigator.clipboard.writeText(this.value)'>cd C:\studies\se\mega\git-analyzer-plus\notebooks\debug
+del /Q *
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\AriaLyy\Aria show &quot;1469ca1ceaae9c691eee7790de89a3ee1f571403:Aria/src/main/java/com/arialyy/aria/core/download/DNormalConfigHandler.java&quot; &gt; committed.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\AriaLyy\Aria show &quot;1469ca1ceaae9c691eee7790de89a3ee1f571403^1:Aria/src/main/java/com/arialyy/aria/core/download/DNormalConfigHandler.java&quot; &gt; ours.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\AriaLyy\Aria show &quot;1469ca1ceaae9c691eee7790de89a3ee1f571403^2:Aria/src/main/java/com/arialyy/aria/core/download/DNormalConfigHandler.java&quot; &gt; theirs.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\AriaLyy\Aria show &quot;39a43c836d3309cbbf82de6d51309fe71fc25292:Aria/src/main/java/com/arialyy/aria/core/download/DNormalConfigHandler.java&quot; &gt; base.java
+copy ours.java 1ours.java
+copy ours.java 2ours.java
+copy theirs.java 1theirs.java
+copy theirs.java 2theirs.java
+copy base.java 1base.java
+copy base.java 2base.java
+&quot;C:\Program Files\Java\jdk1.8.0_241\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\jFSTMerge\build\libs\jFSTMerge-all.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\jfstmerge.java --show-base
+&quot;C:\Program Files\Eclipse Adoptium\jdk-17.0.11.9-hotspot\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\spork\target\spork-0.5.0-SNAPSHOT.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\spork.java
+del /Q 1*.java
+del /Q 2*.java
+del /Q jfstmerge.java.merge
+</textarea>
+                    {strict: [[bj]], subset: [[bj]]}
+                </span>
+                <div id="top">
+
+                    <table>
+                        <tr>
+                            <th>line based (standard git)</th>
+                            <th>jfstmerge</th>
+                            <th>spork</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1 /*
+   2  * Copyright (C) 2016 AriaLyy(https://github.com/AriaLyy/Aria)
+   3  *
+   4  * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+   5  * you may not use this file except in compliance with the License.
+   6  * You may obtain a copy of the License at
+   7  *
+   8  *      http://www.apache.org/licenses/LICENSE-2.0
+   9  *
+  10  * Unless required by applicable law or agreed to in writing, software
+  11  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  12  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  13  * See the License for the specific language governing permissions and
+  14  * limitations under the License.
+  15  */
+  16 package com.arialyy.aria.core.download;
+  17 
+  18 import android.text.TextUtils;
+  19 import com.arialyy.aria.core.common.RecordHandler;
+  20 import com.arialyy.aria.core.inf.ITargetHandler;
+  21 import com.arialyy.aria.core.inf.IConfigHandler;
+  22 import com.arialyy.aria.core.inf.ITaskWrapper;
+  23 import com.arialyy.aria.core.manager.TaskWrapperManager;
+  24 import com.arialyy.aria.core.queue.DownloadTaskQueue;
+  25 import com.arialyy.aria.orm.DbEntity;
+  26 import com.arialyy.aria.util.ALog;
+  27 import com.arialyy.aria.util.CheckUtil;
+  28 import com.arialyy.aria.util.CommonUtil;
+  29 import java.io.File;
+  30 
+  31 /**
+  32  * Created by AriaL on 2019/4/5.
+  33  * 普通下载任务通用功能处理
+  34  */
+  35 class DNormalConfigHandler&lt;TARGET extends AbsDTarget&gt; implements IConfigHandler {
+  36   private final String TAG = &quot;DNormalDelegate&quot;;
+  37   private DownloadEntity mEntity;
+  38 
+  39   private TARGET mTarget;
+  40   private String mNewUrl;
+  41   /**
+  42    * 设置的文件保存路径的临时变量
+  43    */
+  44   private String mTempFilePath;
+  45 
+  46   /**
+  47    * {@code true}强制下载，不考虑文件路径是否被占用
+  48    */
+  49   private boolean forceDownload = false;
+  50   /**
+  51    * 资源地址
+  52    */
+  53   private String mUrl;
+  54 
+  55   DNormalConfigHandler(TARGET target, String url, String targetName) {
+  56     this.mTarget = target;
+  57     initTarget(url, targetName);
+  58   }
+  59 
+  60   private void initTarget(String url, String targetName) {
+  61     DTaskWrapper taskWrapper =
+  62         TaskWrapperManager.getInstance().getHttpTaskWrapper(DTaskWrapper.class, url);
+  63     mEntity = taskWrapper.getEntity();
+  64 
+  65     mUrl = url;
+  66     mTarget.setTargetName(targetName);
+  67     mTarget.setTaskWrapper(taskWrapper);
+  68     if (mEntity != null) {
+  69       mTempFilePath = mEntity.getDownloadPath();
+  70     }
+  71   }
+  72 
+  73   TARGET updateUrl(String newUrl) {
+  74     if (TextUtils.isEmpty(newUrl)) {
+  75       ALog.e(TAG, &quot;url更新失败，newUrl为null&quot;);
+  76       return mTarget;
+  77     }
+  78     if (mUrl.equals(newUrl)) {
+  79       ALog.e(TAG, &quot;url更新失败，新的下载url和旧的url一致&quot;);
+  80       return mTarget;
+  81     }
+  82     mNewUrl = newUrl;
+  83     mTarget.getTaskWrapper().setRefreshInfo(true);
+  84     return mTarget;
+  85   }
+  86 
+  87   @Override public DownloadEntity getEntity() {
+  88     return mTarget.getEntity();
+  89   }
+  90 
+  91   @Override public boolean taskExists() {
+  92     return DbEntity.checkDataExist(DownloadEntity.class, &quot;url=?&quot;, mUrl);
+  93   }
+  94 
+  95   @Override public boolean isRunning() {
+  96     DownloadTask task = DownloadTaskQueue.getInstance().getTask(mEntity.getKey());
+  97     return task != null &amp;&amp; task.isRunning();
+  98   }
+  99 
+ 100   @Override public boolean checkEntity() {
+ 101     boolean b = checkUrl() &amp;&amp; checkFilePath();
+ 102     if (b) {
+ 103       mEntity.save();
+ 104     }
+ 105     if (mTarget.getTaskWrapper().getRequestType() == ITaskWrapper.M3U8_FILE
+ 106         &amp;&amp; mEntity.getFileSize() == 0) {
+ 107       ALog.e(TAG, &quot;由于m3u8协议的特殊性质，你需要设置文件长度才能获取到正确的下载进度百分比。设置方法：asM3U8().setFileSize(xxx)&quot;);
+ 108     }
+ 109     return b;
+ 110   }
+ 111 
+ 112   @Override public boolean checkFilePath() {
+ 113     String filePath = mTempFilePath;
+ 114     if (TextUtils.isEmpty(filePath)) {
+ 115       ALog.e(TAG, &quot;下载失败，文件保存路径为null&quot;);
+ 116       return false;
+ 117     } else if (!filePath.startsWith(&quot;/&quot;)) {
+ 118       ALog.e(TAG, String.format(&quot;下载失败，文件保存路径【%s】错误&quot;, filePath));
+ 119       return false;
+ 120     }
+ 121     File file = new File(filePath);
+ 122     if (file.isDirectory()) {
+ 123       if (mTarget.getTargetType() == ITargetHandler.D_HTTP) {
+ 124         ALog.e(TAG,
+ 125             String.format(&quot;下载失败，保存路径【%s】不能为文件夹，路径需要是完整的文件路径，如：/mnt/sdcard/game.zip&quot;, filePath));
+ 126         return false;
+ 127       } else if (mTarget.getTargetType() == ITargetHandler.D_FTP) {
+ 128         filePath += mEntity.getFileName();
+ 129       }
+ 130     } else {
+ 131       // http文件名设置
+ 132       if (TextUtils.isEmpty(mEntity.getFileName())) {
+ 133         mEntity.setFileName(file.getName());
+ 134       }
+ 135     }
+ 136 
+ 137     //设置文件保存路径，如果新文件路径和旧文件路径不同，则修改路径
+ 138     if (!filePath.equals(mEntity.getFilePath())) {
+ 139       // 检查路径冲突
+ 140       if (DbEntity.checkDataExist(DownloadEntity.class, &quot;downloadPath=?&quot;, filePath)) {
+ 141         if (!forceDownload) {
+ 142           ALog.e(TAG, String.format(&quot;下载失败，保存路径【%s】已经被其它任务占用，请设置其它保存路径&quot;, filePath));
+ 143           return false;
+ 144         } else {
+ 145 &lt;&lt;&lt;&lt;&lt;&lt;&lt; GitAnalyzerPlus_ours
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 146           ALog.w(TAG, String.format(&quot;保存路径【%s】已经被其它任务占用，当前任务将覆盖该路径的文件&quot;, filePath));</span>
+ 147 ||||||| GitAnalyzerPlus_base
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 148           CommonUtil.delTaskRecord(filePath, 1);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 149           mTarget.setTaskWrapper(</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 150               TaskWrapperManager.getInstance()</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 151                   .getHttpTaskWrapper(DTaskWrapper.class, mUrl));</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 152         }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 153       }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 154       File oldFile = new File(mEntity.getDownloadPath());</span>
+ 155 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 156           ALog.w(TAG, &quot;保存路径【&quot; + filePath + &quot;】已经被其它任务占用，当前任务将覆盖该路径的文件&quot;);</span>
+ 157 &gt;&gt;&gt;&gt;&gt;&gt;&gt; GitAnalyzerPlus_theirs
+ 158           CommonUtil.delTaskRecord(filePath, RecordHandler.TYPE_DOWNLOAD);
+ 159           mTarget.setTaskWrapper(
+ 160               TaskWrapperManager.getInstance()
+ 161                   .getHttpTaskWrapper(DTaskWrapper.class, mUrl));
+ 162         }
+ 163       }
+ 164       File oldFile = new File(mEntity.getDownloadPath());
+ 165       File newFile = new File(filePath);
+ 166       mEntity.setFilePath(filePath);
+ 167       mEntity.setFileName(newFile.getName());
+ 168       // 如过使用Content-Disposition中的文件名，将不会执行重命名工作
+ 169       if (mTarget.getTaskWrapper().asHttp().isUseServerFileName()) {
+ 170         return true;
+ 171       }
+ 172       if (oldFile.exists()) {
+ 173         // 处理普通任务的重命名
+ 174         CommonUtil.modifyTaskRecord(oldFile.getPath(), newFile.getPath());
+ 175         ALog.i(TAG, String.format(&quot;将任务重命名为：%s&quot;, newFile.getName()));
+ 176       } else if (CommonUtil.blockTaskExists(oldFile.getPath())) {
+ 177         // 处理分块任务的重命名
+ 178         CommonUtil.modifyTaskRecord(oldFile.getPath(), newFile.getPath());
+ 179         ALog.i(TAG, String.format(&quot;将分块任务重命名为：%s&quot;, newFile.getName()));
+ 180       }
+ 181     }
+ 182     return true;
+ 183   }
+ 184 
+ 185   @Override public boolean checkUrl() {
+ 186     final String url = mEntity.getUrl();
+ 187     if (TextUtils.isEmpty(url)) {
+ 188       ALog.e(TAG, &quot;下载失败，url为null&quot;);
+ 189       return false;
+ 190     } else if (!CheckUtil.checkUrlNotThrow(url)) {
+ 191       ALog.e(TAG, &quot;下载失败，url【&quot; + url + &quot;】错误&quot;);
+ 192       return false;
+ 193     }
+ 194     int index = url.indexOf(&quot;://&quot;);
+ 195     if (index == -1) {
+ 196       ALog.e(TAG, &quot;下载失败，url【&quot; + url + &quot;】不合法&quot;);
+ 197       return false;
+ 198     }
+ 199     if (!TextUtils.isEmpty(mNewUrl)) {
+ 200       mEntity.setUrl(mNewUrl);
+ 201     }
+ 202     return true;
+ 203   }
+ 204 
+ 205   void setForceDownload(boolean forceDownload) {
+ 206     this.forceDownload = forceDownload;
+ 207   }
+ 208 
+ 209   void setUrl(String url) {
+ 210     this.mUrl = url;
+ 211   }
+ 212 
+ 213   String getUrl() {
+ 214     return mUrl;
+ 215   }
+ 216 
+ 217   void setTempFilePath(String mTempFilePath) {
+ 218     this.mTempFilePath = mTempFilePath;
+ 219   }
+ 220 }</pre></td>
+                            <td><pre>   1 /*
+   2  * Copyright (C) 2016 AriaLyy(https://github.com/AriaLyy/Aria)
+   3  *
+   4  * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+   5  * you may not use this file except in compliance with the License.
+   6  * You may obtain a copy of the License at
+   7  *
+   8  *      http://www.apache.org/licenses/LICENSE-2.0
+   9  *
+  10  * Unless required by applicable law or agreed to in writing, software
+  11  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  12  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  13  * See the License for the specific language governing permissions and
+  14  * limitations under the License.
+  15  */
+  16 package com.arialyy.aria.core.download;
+  17 
+  18 import android.text.TextUtils;
+  19 import com.arialyy.aria.core.common.RecordHandler;
+  20 import com.arialyy.aria.core.inf.ITargetHandler;
+  21 import com.arialyy.aria.core.inf.IConfigHandler;
+  22 import com.arialyy.aria.core.inf.ITaskWrapper;
+  23 import com.arialyy.aria.core.manager.TaskWrapperManager;
+  24 import com.arialyy.aria.core.queue.DownloadTaskQueue;
+  25 import com.arialyy.aria.orm.DbEntity;
+  26 import com.arialyy.aria.util.ALog;
+  27 import com.arialyy.aria.util.CheckUtil;
+  28 import com.arialyy.aria.util.CommonUtil;
+  29 import java.io.File;
+  30 
+  31 /**
+  32  * Created by AriaL on 2019/4/5.
+  33  * 普通下载任务通用功能处理
+  34  */
+  35 
+  36 
+  37 /**
+  38  * Created by AriaL on 2019/4/5.
+  39  * 普通下载任务通用功能处理
+  40  */
+  41 class DNormalConfigHandler&lt;TARGET extends AbsDTarget&gt; implements IConfigHandler {
+  42   private final String TAG = &quot;DNormalDelegate&quot;;
+  43   private DownloadEntity mEntity;
+  44 
+  45   private TARGET mTarget;
+  46   private String mNewUrl;
+  47   /**
+  48    * 设置的文件保存路径的临时变量
+  49    */
+  50   private String mTempFilePath;
+  51 
+  52   /**
+  53    * {@code true}强制下载，不考虑文件路径是否被占用
+  54    */
+  55   private boolean forceDownload = false;
+  56   /**
+  57    * 资源地址
+  58    */
+  59   private String mUrl;
+  60 
+  61   DNormalConfigHandler(TARGET target, String url, String targetName) {
+  62     this.mTarget = target;
+  63     initTarget(url, targetName);
+  64   }
+  65 
+  66   private void initTarget(String url, String targetName) {
+  67     DTaskWrapper taskWrapper =
+  68         TaskWrapperManager.getInstance().getHttpTaskWrapper(DTaskWrapper.class, url);
+  69     mEntity = taskWrapper.getEntity();
+  70 
+  71     mUrl = url;
+  72     mTarget.setTargetName(targetName);
+  73     mTarget.setTaskWrapper(taskWrapper);
+  74     if (mEntity != null) {
+  75       mTempFilePath = mEntity.getDownloadPath();
+  76     }
+  77   }
+  78 
+  79   TARGET updateUrl(String newUrl) {
+  80     if (TextUtils.isEmpty(newUrl)) {
+  81       ALog.e(TAG, &quot;url更新失败，newUrl为null&quot;);
+  82       return mTarget;
+  83     }
+  84     if (mUrl.equals(newUrl)) {
+  85       ALog.e(TAG, &quot;url更新失败，新的下载url和旧的url一致&quot;);
+  86       return mTarget;
+  87     }
+  88     mNewUrl = newUrl;
+  89     mTarget.getTaskWrapper().setRefreshInfo(true);
+  90     return mTarget;
+  91   }
+  92 
+  93   @Override public DownloadEntity getEntity() {
+  94     return mTarget.getEntity();
+  95   }
+  96 
+  97   @Override public boolean taskExists() {
+  98     return DbEntity.checkDataExist(DownloadEntity.class, &quot;url=?&quot;, mUrl);
+  99   }
+ 100 
+ 101   @Override public boolean isRunning() {
+ 102     DownloadTask task = DownloadTaskQueue.getInstance().getTask(mEntity.getKey());
+ 103     return task != null &amp;&amp; task.isRunning();
+ 104   }
+ 105 
+ 106   @Override public boolean checkEntity() {
+ 107     boolean b = checkUrl() &amp;&amp; checkFilePath();
+ 108     if (b) {
+ 109       mEntity.save();
+ 110     }
+ 111     if (mTarget.getTaskWrapper().getRequestType() == ITaskWrapper.M3U8_FILE
+ 112         &amp;&amp; mEntity.getFileSize() == 0) {
+ 113       ALog.e(TAG, &quot;由于m3u8协议的特殊性质，你需要设置文件长度才能获取到正确的下载进度百分比。设置方法：asM3U8().setFileSize(xxx)&quot;);
+ 114     }
+ 115     return b;
+ 116   }
+ 117 
+ 118   @Override public boolean checkFilePath() {
+ 119     String filePath = mTempFilePath;
+ 120     if (TextUtils.isEmpty(filePath)) {
+ 121       ALog.e(TAG, &quot;下载失败，文件保存路径为null&quot;);
+ 122       return false;
+ 123     } else if (!filePath.startsWith(&quot;/&quot;)) {
+ 124       ALog.e(TAG, String.format(&quot;下载失败，文件保存路径【%s】错误&quot;, filePath));
+ 125       return false;
+ 126     }
+ 127     File file = new File(filePath);
+ 128     if (file.isDirectory()) {
+ 129       if (mTarget.getTargetType() == ITargetHandler.D_HTTP) {
+ 130         ALog.e(TAG,
+ 131             String.format(&quot;下载失败，保存路径【%s】不能为文件夹，路径需要是完整的文件路径，如：/mnt/sdcard/game.zip&quot;, filePath));
+ 132         return false;
+ 133       } else if (mTarget.getTargetType() == ITargetHandler.D_FTP) {
+ 134         filePath += mEntity.getFileName();
+ 135       }
+ 136     } else {
+ 137       // http文件名设置
+ 138       if (TextUtils.isEmpty(mEntity.getFileName())) {
+ 139         mEntity.setFileName(file.getName());
+ 140       }
+ 141     }
+ 142 
+ 143     //设置文件保存路径，如果新文件路径和旧文件路径不同，则修改路径
+ 144     if (!filePath.equals(mEntity.getFilePath())) {
+ 145       // 检查路径冲突
+ 146       if (DbEntity.checkDataExist(DownloadEntity.class, &quot;downloadPath=?&quot;, filePath)) {
+ 147         if (!forceDownload) {
+ 148           ALog.e(TAG, String.format(&quot;下载失败，保存路径【%s】已经被其它任务占用，请设置其它保存路径&quot;, filePath));
+ 149           return false;
+ 150         } else {
+ 151 &lt;&lt;&lt;&lt;&lt;&lt;&lt; MINE
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 152           ALog.w(TAG, String.format(&quot;保存路径【%s】已经被其它任务占用，当前任务将覆盖该路径的文件&quot;, filePath));</span>
+ 153 ||||||| BASE
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 154           ALog.w(TAG, &quot;保存路径【&quot; + filePath + &quot;】已经被其它任务占用，当前任务将覆盖该路径的文件&quot;);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 155           CommonUtil.delTaskRecord(filePath, 1);</span>
+ 156 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 157           ALog.w(TAG, &quot;保存路径【&quot; + filePath + &quot;】已经被其它任务占用，当前任务将覆盖该路径的文件&quot;);</span>
+ 158 &gt;&gt;&gt;&gt;&gt;&gt;&gt; YOURS
+ 159           CommonUtil.delTaskRecord(filePath, RecordHandler.TYPE_DOWNLOAD);
+ 160           mTarget.setTaskWrapper(
+ 161               TaskWrapperManager.getInstance()
+ 162                   .getHttpTaskWrapper(DTaskWrapper.class, mUrl));
+ 163         }
+ 164       }
+ 165       File oldFile = new File(mEntity.getDownloadPath());
+ 166       File newFile = new File(filePath);
+ 167       mEntity.setFilePath(filePath);
+ 168       mEntity.setFileName(newFile.getName());
+ 169       // 如过使用Content-Disposition中的文件名，将不会执行重命名工作
+ 170       if (mTarget.getTaskWrapper().asHttp().isUseServerFileName()) {
+ 171         return true;
+ 172       }
+ 173       if (oldFile.exists()) {
+ 174         // 处理普通任务的重命名
+ 175         CommonUtil.modifyTaskRecord(oldFile.getPath(), newFile.getPath());
+ 176         ALog.i(TAG, String.format(&quot;将任务重命名为：%s&quot;, newFile.getName()));
+ 177       } else if (CommonUtil.blockTaskExists(oldFile.getPath())) {
+ 178         // 处理分块任务的重命名
+ 179         CommonUtil.modifyTaskRecord(oldFile.getPath(), newFile.getPath());
+ 180         ALog.i(TAG, String.format(&quot;将分块任务重命名为：%s&quot;, newFile.getName()));
+ 181       }
+ 182     }
+ 183     return true;
+ 184   }
+ 185 
+ 186   @Override public boolean checkUrl() {
+ 187     final String url = mEntity.getUrl();
+ 188     if (TextUtils.isEmpty(url)) {
+ 189       ALog.e(TAG, &quot;下载失败，url为null&quot;);
+ 190       return false;
+ 191     } else if (!CheckUtil.checkUrlNotThrow(url)) {
+ 192       ALog.e(TAG, &quot;下载失败，url【&quot; + url + &quot;】错误&quot;);
+ 193       return false;
+ 194     }
+ 195     int index = url.indexOf(&quot;://&quot;);
+ 196     if (index == -1) {
+ 197       ALog.e(TAG, &quot;下载失败，url【&quot; + url + &quot;】不合法&quot;);
+ 198       return false;
+ 199     }
+ 200     if (!TextUtils.isEmpty(mNewUrl)) {
+ 201       mEntity.setUrl(mNewUrl);
+ 202     }
+ 203     return true;
+ 204   }
+ 205 
+ 206   void setForceDownload(boolean forceDownload) {
+ 207     this.forceDownload = forceDownload;
+ 208   }
+ 209 
+ 210   void setUrl(String url) {
+ 211     this.mUrl = url;
+ 212   }
+ 213 
+ 214   String getUrl() {
+ 215     return mUrl;
+ 216   }
+ 217 
+ 218   void setTempFilePath(String mTempFilePath) {
+ 219     this.mTempFilePath = mTempFilePath;
+ 220   }
+ 221 }</pre></td>
+                            <td><pre>   1 /*
+   2  * Copyright (C) 2016 AriaLyy(https://github.com/AriaLyy/Aria)
+   3  *
+   4  * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+   5  * you may not use this file except in compliance with the License.
+   6  * You may obtain a copy of the License at
+   7  *
+   8  *      http://www.apache.org/licenses/LICENSE-2.0
+   9  *
+  10  * Unless required by applicable law or agreed to in writing, software
+  11  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  12  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  13  * See the License for the specific language governing permissions and
+  14  * limitations under the License.
+  15  */
+  16 package com.arialyy.aria.core.download;
+  17 
+  18 import android.text.TextUtils;
+  19 import com.arialyy.aria.core.common.RecordHandler;
+  20 import com.arialyy.aria.core.inf.IConfigHandler;
+  21 import com.arialyy.aria.core.inf.ITargetHandler;
+  22 import com.arialyy.aria.core.inf.ITaskWrapper;
+  23 import com.arialyy.aria.core.manager.TaskWrapperManager;
+  24 import com.arialyy.aria.core.queue.DownloadTaskQueue;
+  25 import com.arialyy.aria.orm.DbEntity;
+  26 import com.arialyy.aria.util.ALog;
+  27 import com.arialyy.aria.util.CheckUtil;
+  28 import com.arialyy.aria.util.CommonUtil;
+  29 import java.io.File;
+  30 
+  31 
+  32 /**
+  33  * Created by AriaL on 2019/4/5.
+  34  * 普通下载任务通用功能处理
+  35  */
+  36 class DNormalConfigHandler&lt;TARGET extends AbsDTarget&gt; implements IConfigHandler {
+  37   private final String TAG = &quot;DNormalDelegate&quot;;
+  38 
+  39   private DownloadEntity mEntity;
+  40 
+  41   private TARGET mTarget;
+  42 
+  43   private String mNewUrl;
+  44 
+  45   /**
+  46    * 设置的文件保存路径的临时变量
+  47    */
+  48   private String mTempFilePath;
+  49 
+  50   /**
+  51    * {@code true}强制下载，不考虑文件路径是否被占用
+  52    */
+  53   private boolean forceDownload = false;
+  54 
+  55   /**
+  56    * 资源地址
+  57    */
+  58   private String mUrl;
+  59 
+  60   DNormalConfigHandler(TARGET target, String url, String targetName) {
+  61     this.mTarget = target;
+  62     initTarget(url, targetName);
+  63   }
+  64 
+  65   private void initTarget(String url, String targetName) {
+  66     DTaskWrapper taskWrapper =
+  67         TaskWrapperManager.getInstance().getHttpTaskWrapper(DTaskWrapper.class, url);
+  68     mEntity = taskWrapper.getEntity();
+  69 
+  70     mUrl = url;
+  71     mTarget.setTargetName(targetName);
+  72     mTarget.setTaskWrapper(taskWrapper);
+  73     if (mEntity != null) {
+  74       mTempFilePath = mEntity.getDownloadPath();
+  75     }
+  76   }
+  77 
+  78   TARGET updateUrl(String newUrl) {
+  79     if (TextUtils.isEmpty(newUrl)) {
+  80       ALog.e(TAG, &quot;url更新失败，newUrl为null&quot;);
+  81       return mTarget;
+  82     }
+  83     if (mUrl.equals(newUrl)) {
+  84       ALog.e(TAG, &quot;url更新失败，新的下载url和旧的url一致&quot;);
+  85       return mTarget;
+  86     }
+  87     mNewUrl = newUrl;
+  88     mTarget.getTaskWrapper().setRefreshInfo(true);
+  89     return mTarget;
+  90   }
+  91 
+  92   @Override public DownloadEntity getEntity() {
+  93     return mTarget.getEntity();
+  94   }
+  95 
+  96   @Override public boolean taskExists() {
+  97     return DbEntity.checkDataExist(DownloadEntity.class, &quot;url=?&quot;, mUrl);
+  98   }
+  99 
+ 100   @Override public boolean isRunning() {
+ 101     DownloadTask task = DownloadTaskQueue.getInstance().getTask(mEntity.getKey());
+ 102     return task != null &amp;&amp; task.isRunning();
+ 103   }
+ 104 
+ 105   @Override
+ 106   public boolean checkEntity() {
+ 107     boolean b = checkUrl() &amp;&amp; checkFilePath();
+ 108     if (b) {
+ 109       mEntity.save();
+ 110     }
+<abbr title=" 111     if ((mTarget.getTaskWrapper().getRequestType() == ITaskWrapper.M3U8_FILE) &amp;&amp; (mEntity.getFileSize() == 0)) {"> 111     if ((mTarget.getTaskWrapper().getRequestType() == ITaskWrapper.M3U8_FILE) &amp;&amp; (mEntity.getFileSize() =🔵</abbr>
+ 112       ALog.e(TAG, &quot;由于m3u8协议的特殊性质，你需要设置文件长度才能获取到正确的下载进度百分比。设置方法：asM3U8().setFileSize(xxx)&quot;);
+ 113     }
+ 114     return b;
+ 115   }
+ 116 
+ 117   @Override
+ 118   public boolean checkFilePath() {
+ 119     String filePath = mTempFilePath;
+ 120     if (TextUtils.isEmpty(filePath)) {
+ 121       ALog.e(TAG, &quot;下载失败，文件保存路径为null&quot;);
+ 122       return false;
+ 123     } else if (!filePath.startsWith(&quot;/&quot;)) {
+ 124       ALog.e(TAG, String.format(&quot;下载失败，文件保存路径【%s】错误&quot;, filePath));
+ 125       return false;
+ 126     }
+ 127     File file = new File(filePath);
+ 128     if (file.isDirectory()) {
+ 129       if (mTarget.getTargetType() == ITargetHandler.D_HTTP) {
+ 130         ALog.e(TAG, String.format(&quot;下载失败，保存路径【%s】不能为文件夹，路径需要是完整的文件路径，如：/mnt/sdcard/game.zip&quot;, filePath));
+ 131         return false;
+ 132       } else if (mTarget.getTargetType() == ITargetHandler.D_FTP) {
+ 133         filePath += mEntity.getFileName();
+ 134       }
+ 135     } else // http文件名设置
+ 136     if (TextUtils.isEmpty(mEntity.getFileName())) {
+ 137       mEntity.setFileName(file.getName());
+ 138     }
+ 139     //设置文件保存路径，如果新文件路径和旧文件路径不同，则修改路径
+ 140     if (!filePath.equals(mEntity.getFilePath())) {
+ 141       // 检查路径冲突
+ 142       if (DbEntity.checkDataExist(DownloadEntity.class, &quot;downloadPath=?&quot;, filePath)) {
+ 143         if (!forceDownload) {
+ 144           ALog.e(TAG, String.format(&quot;下载失败，保存路径【%s】已经被其它任务占用，请设置其它保存路径&quot;, filePath));
+ 145           return false;
+ 146         } else {
+ 147           ALog.w(TAG, String.format(&quot;保存路径【%s】已经被其它任务占用，当前任务将覆盖该路径的文件&quot;, filePath));
+ 148           CommonUtil.delTaskRecord(filePath, RecordHandler.TYPE_DOWNLOAD);
+<abbr title=" 149           mTarget.setTaskWrapper(TaskWrapperManager.getInstance().getHttpTaskWrapper(DTaskWrapper.class, mUrl));"> 149           mTarget.setTaskWrapper(TaskWrapperManager.getInstance().getHttpTaskWrapper(DTaskWrapper.class, 🔵</abbr>
+ 150         }
+ 151       }
+ 152       File oldFile = new File(mEntity.getDownloadPath());
+ 153       File newFile = new File(filePath);
+ 154       mEntity.setFilePath(filePath);
+ 155       mEntity.setFileName(newFile.getName());
+ 156       // 如过使用Content-Disposition中的文件名，将不会执行重命名工作
+ 157       if (mTarget.getTaskWrapper().asHttp().isUseServerFileName()) {
+ 158         return true;
+ 159       }
+ 160       if (oldFile.exists()) {
+ 161         // 处理普通任务的重命名
+ 162         CommonUtil.modifyTaskRecord(oldFile.getPath(), newFile.getPath());
+ 163         ALog.i(TAG, String.format(&quot;将任务重命名为：%s&quot;, newFile.getName()));
+ 164       } else if (CommonUtil.blockTaskExists(oldFile.getPath())) {
+ 165         // 处理分块任务的重命名
+ 166         CommonUtil.modifyTaskRecord(oldFile.getPath(), newFile.getPath());
+ 167         ALog.i(TAG, String.format(&quot;将分块任务重命名为：%s&quot;, newFile.getName()));
+ 168       }
+ 169     }
+ 170     return true;
+ 171   }
+ 172 
+ 173   @Override public boolean checkUrl() {
+ 174     final String url = mEntity.getUrl();
+ 175     if (TextUtils.isEmpty(url)) {
+ 176       ALog.e(TAG, &quot;下载失败，url为null&quot;);
+ 177       return false;
+ 178     } else if (!CheckUtil.checkUrlNotThrow(url)) {
+ 179       ALog.e(TAG, &quot;下载失败，url【&quot; + url + &quot;】错误&quot;);
+ 180       return false;
+ 181     }
+ 182     int index = url.indexOf(&quot;://&quot;);
+ 183     if (index == -1) {
+ 184       ALog.e(TAG, &quot;下载失败，url【&quot; + url + &quot;】不合法&quot;);
+ 185       return false;
+ 186     }
+ 187     if (!TextUtils.isEmpty(mNewUrl)) {
+ 188       mEntity.setUrl(mNewUrl);
+ 189     }
+ 190     return true;
+ 191   }
+ 192 
+ 193   void setForceDownload(boolean forceDownload) {
+ 194     this.forceDownload = forceDownload;
+ 195   }
+ 196 
+ 197   void setUrl(String url) {
+ 198     this.mUrl = url;
+ 199   }
+ 200 
+ 201   String getUrl() {
+ 202     return mUrl;
+ 203   }
+ 204 
+ 205   void setTempFilePath(String mTempFilePath) {
+ 206     this.mTempFilePath = mTempFilePath;
+ 207   }
+ 208 }
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ </pre></td>
+                        </tr>
+                    </table>
+                </div>
+                <div id="bottom">
+                    <table style="margin:auto">
+                        <tr>
+                            <th>ours vs. base</th>
+                            <th>theirs vs. base</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1  /*
+   2   * Copyright (C) 2016 AriaLyy(https://github.com/AriaLyy/Aria)
+   3   *
+   4   * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+   5   * you may not use this file except in compliance with the License.
+   6   * You may obtain a copy of the License at
+   7   *
+   8   *      http://www.apache.org/licenses/LICENSE-2.0
+   9   *
+  10   * Unless required by applicable law or agreed to in writing, software
+  11   * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  12   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  13   * See the License for the specific language governing permissions and
+  14   * limitations under the License.
+  15   */
+  16  package com.arialyy.aria.core.download;
+  17  
+  18  import android.text.TextUtils;
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  19 +import com.arialyy.aria.core.common.RecordHandler;</span>
+  20  import com.arialyy.aria.core.inf.ITargetHandler;
+  21  import com.arialyy.aria.core.inf.IConfigHandler;
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  22 +import com.arialyy.aria.core.inf.ITaskWrapper;</span>
+  23  import com.arialyy.aria.core.manager.TaskWrapperManager;
+  24  import com.arialyy.aria.core.queue.DownloadTaskQueue;
+  25  import com.arialyy.aria.orm.DbEntity;
+  26  import com.arialyy.aria.util.ALog;
+  27  import com.arialyy.aria.util.CheckUtil;
+  28  import com.arialyy.aria.util.CommonUtil;
+  29  import java.io.File;
+  30  
+  31  /**
+  32   * Created by AriaL on 2019/4/5.
+  33   * 普通下载任务通用功能处理
+  34   */
+  35  class DNormalConfigHandler&lt;TARGET extends AbsDTarget&gt; implements IConfigHandler {
+  36    private final String TAG = &quot;DNormalDelegate&quot;;
+  37    private DownloadEntity mEntity;
+  38  
+  39    private TARGET mTarget;
+  40    private String mNewUrl;
+  41    /**
+  42     * 设置的文件保存路径的临时变量
+  43     */
+  44    private String mTempFilePath;
+  45  
+  46    /**
+  47     * {@code true}强制下载，不考虑文件路径是否被占用
+  48     */
+  49    private boolean forceDownload = false;
+  50    /**
+  51     * 资源地址
+  52     */
+  53    private String mUrl;
+  54  
+  55    DNormalConfigHandler(TARGET target, String url, String targetName) {
+  56      this.mTarget = target;
+  57      initTarget(url, targetName);
+  58    }
+  59  
+  60    private void initTarget(String url, String targetName) {
+  61      DTaskWrapper taskWrapper =
+  62          TaskWrapperManager.getInstance().getHttpTaskWrapper(DTaskWrapper.class, url);
+  63      mEntity = taskWrapper.getEntity();
+  64  
+  65      mUrl = url;
+  66      mTarget.setTargetName(targetName);
+  67      mTarget.setTaskWrapper(taskWrapper);
+  68      if (mEntity != null) {
+  69        mTempFilePath = mEntity.getDownloadPath();
+  70      }
+  71    }
+  72  
+  73    TARGET updateUrl(String newUrl) {
+  74      if (TextUtils.isEmpty(newUrl)) {
+  75        ALog.e(TAG, &quot;url更新失败，newUrl为null&quot;);
+  76        return mTarget;
+  77      }
+  78      if (mUrl.equals(newUrl)) {
+  79        ALog.e(TAG, &quot;url更新失败，新的下载url和旧的url一致&quot;);
+  80        return mTarget;
+  81      }
+  82      mNewUrl = newUrl;
+  83      mTarget.getTaskWrapper().setRefreshInfo(true);
+  84      return mTarget;
+  85    }
+  86  
+  87    @Override public DownloadEntity getEntity() {
+  88      return mTarget.getEntity();
+  89    }
+  90  
+  91    @Override public boolean taskExists() {
+  92      return DbEntity.checkDataExist(DownloadEntity.class, &quot;url=?&quot;, mUrl);
+  93    }
+  94  
+  95    @Override public boolean isRunning() {
+  96      DownloadTask task = DownloadTaskQueue.getInstance().getTask(mEntity.getKey());
+  97      return task != null &amp;&amp; task.isRunning();
+  98    }
+  99  
+ 100    @Override public boolean checkEntity() {
+ 101      boolean b = checkUrl() &amp;&amp; checkFilePath();
+ 102      if (b) {
+ 103        mEntity.save();
+ 104      }
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 105 +    if (mTarget.getTaskWrapper().getRequestType() == ITaskWrapper.M3U8_FILE</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 106 +        &amp;&amp; mEntity.getFileSize() == 0) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 107 +      ALog.e(TAG, &quot;由于m3u8协议的特殊性质，你需要设置文件长度才能获取到正确的下载进度百分比。设置方法：asM3U8().setFileSize(xxx)&quot;);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 108 +    }</span>
+ 109      return b;
+ 110    }
+ 111  
+ 112    @Override public boolean checkFilePath() {
+ 113      String filePath = mTempFilePath;
+ 114      if (TextUtils.isEmpty(filePath)) {
+ 115        ALog.e(TAG, &quot;下载失败，文件保存路径为null&quot;);
+ 116        return false;
+ 117      } else if (!filePath.startsWith(&quot;/&quot;)) {
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 118 -      ALog.e(TAG, &quot;下载失败，文件保存路径【&quot; + filePath + &quot;】错误&quot;);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 119 +      ALog.e(TAG, String.format(&quot;下载失败，文件保存路径【%s】错误&quot;, filePath));</span>
+ 120        return false;
+ 121      }
+ 122      File file = new File(filePath);
+ 123      if (file.isDirectory()) {
+ 124        if (mTarget.getTargetType() == ITargetHandler.D_HTTP) {
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 125 -        ALog.e(TAG, &quot;下载失败，保存路径【&quot; + filePath + &quot;】不能为文件夹，路径需要是完整的文件路径，如：/mnt/sdcard/game.zip&quot;);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 126 +        ALog.e(TAG,</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 127 +            String.format(&quot;下载失败，保存路径【%s】不能为文件夹，路径需要是完整的文件路径，如：/mnt/sdcard/game.zip&quot;, filePath));</span>
+ 128          return false;
+ 129        } else if (mTarget.getTargetType() == ITargetHandler.D_FTP) {
+ 130          filePath += mEntity.getFileName();
+ 131        }
+ 132      } else {
+ 133        // http文件名设置
+ 134        if (TextUtils.isEmpty(mEntity.getFileName())) {
+ 135          mEntity.setFileName(file.getName());
+ 136        }
+ 137      }
+ 138  
+ 139      //设置文件保存路径，如果新文件路径和旧文件路径不同，则修改路径
+ 140      if (!filePath.equals(mEntity.getFilePath())) {
+ 141        // 检查路径冲突
+ 142        if (DbEntity.checkDataExist(DownloadEntity.class, &quot;downloadPath=?&quot;, filePath)) {
+ 143          if (!forceDownload) {
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 144 -          ALog.e(TAG, &quot;下载失败，保存路径【&quot; + filePath + &quot;】已经被其它任务占用，请设置其它保存路径&quot;);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 145 +          ALog.e(TAG, String.format(&quot;下载失败，保存路径【%s】已经被其它任务占用，请设置其它保存路径&quot;, filePath));</span>
+ 146            return false;
+ 147          } else {
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 148 -          ALog.w(TAG, &quot;保存路径【&quot; + filePath + &quot;】已经被其它任务占用，当前任务将覆盖该路径的文件&quot;);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 149 -          CommonUtil.delTaskRecord(filePath, 1);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 150 +          ALog.w(TAG, String.format(&quot;保存路径【%s】已经被其它任务占用，当前任务将覆盖该路径的文件&quot;, filePath));</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 151 +          CommonUtil.delTaskRecord(filePath, RecordHandler.TYPE_DOWNLOAD);</span>
+ 152            mTarget.setTaskWrapper(
+ 153                TaskWrapperManager.getInstance()
+ 154                    .getHttpTaskWrapper(DTaskWrapper.class, mUrl));
+ 155          }
+ 156        }
+ 157        File oldFile = new File(mEntity.getDownloadPath());
+ 158        File newFile = new File(filePath);
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 159 -      mEntity.setDownloadPath(filePath);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 160 +      mEntity.setFilePath(filePath);</span>
+ 161        mEntity.setFileName(newFile.getName());
+ 162        // 如过使用Content-Disposition中的文件名，将不会执行重命名工作
+ 163        if (mTarget.getTaskWrapper().asHttp().isUseServerFileName()) {
+ 164          return true;
+ 165        }
+ 166        if (oldFile.exists()) {
+ 167          // 处理普通任务的重命名
+ 168          CommonUtil.modifyTaskRecord(oldFile.getPath(), newFile.getPath());
+ 169          ALog.i(TAG, String.format(&quot;将任务重命名为：%s&quot;, newFile.getName()));
+ 170        } else if (CommonUtil.blockTaskExists(oldFile.getPath())) {
+ 171          // 处理分块任务的重命名
+ 172          CommonUtil.modifyTaskRecord(oldFile.getPath(), newFile.getPath());
+ 173          ALog.i(TAG, String.format(&quot;将分块任务重命名为：%s&quot;, newFile.getName()));
+ 174        }
+ 175      }
+ 176      return true;
+ 177    }
+ 178  
+ 179    @Override public boolean checkUrl() {
+ 180      final String url = mEntity.getUrl();
+ 181      if (TextUtils.isEmpty(url)) {
+ 182        ALog.e(TAG, &quot;下载失败，url为null&quot;);
+ 183        return false;
+ 184      } else if (!CheckUtil.checkUrlNotThrow(url)) {
+ 185        ALog.e(TAG, &quot;下载失败，url【&quot; + url + &quot;】错误&quot;);
+ 186        return false;
+ 187      }
+ 188      int index = url.indexOf(&quot;://&quot;);
+ 189      if (index == -1) {
+ 190        ALog.e(TAG, &quot;下载失败，url【&quot; + url + &quot;】不合法&quot;);
+ 191        return false;
+ 192      }
+ 193      if (!TextUtils.isEmpty(mNewUrl)) {
+ 194        mEntity.setUrl(mNewUrl);
+ 195      }
+ 196      return true;
+ 197    }
+ 198  
+ 199    void setForceDownload(boolean forceDownload) {
+ 200      this.forceDownload = forceDownload;
+ 201    }
+ 202  
+ 203    void setUrl(String url) {
+ 204      this.mUrl = url;
+ 205    }
+ 206  
+ 207    String getUrl() {
+ 208      return mUrl;
+ 209    }
+ 210  
+ 211    void setTempFilePath(String mTempFilePath) {
+ 212      this.mTempFilePath = mTempFilePath;
+ 213    }
+ 214  }</pre></td>
+                            <td><pre>   1  /*
+   2   * Copyright (C) 2016 AriaLyy(https://github.com/AriaLyy/Aria)
+   3   *
+   4   * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+   5   * you may not use this file except in compliance with the License.
+   6   * You may obtain a copy of the License at
+   7   *
+   8   *      http://www.apache.org/licenses/LICENSE-2.0
+   9   *
+  10   * Unless required by applicable law or agreed to in writing, software
+  11   * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  12   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  13   * See the License for the specific language governing permissions and
+  14   * limitations under the License.
+  15   */
+  16  package com.arialyy.aria.core.download;
+  17  
+  18  import android.text.TextUtils;
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  19 +import com.arialyy.aria.core.common.RecordHandler;</span>
+  20  import com.arialyy.aria.core.inf.ITargetHandler;
+  21  import com.arialyy.aria.core.inf.IConfigHandler;
+
+  22  import com.arialyy.aria.core.manager.TaskWrapperManager;
+  23  import com.arialyy.aria.core.queue.DownloadTaskQueue;
+  24  import com.arialyy.aria.orm.DbEntity;
+  25  import com.arialyy.aria.util.ALog;
+  26  import com.arialyy.aria.util.CheckUtil;
+  27  import com.arialyy.aria.util.CommonUtil;
+  28  import java.io.File;
+  29  
+  30  /**
+  31   * Created by AriaL on 2019/4/5.
+  32   * 普通下载任务通用功能处理
+  33   */
+  34  class DNormalConfigHandler&lt;TARGET extends AbsDTarget&gt; implements IConfigHandler {
+  35    private final String TAG = &quot;DNormalDelegate&quot;;
+  36    private DownloadEntity mEntity;
+  37  
+  38    private TARGET mTarget;
+  39    private String mNewUrl;
+  40    /**
+  41     * 设置的文件保存路径的临时变量
+  42     */
+  43    private String mTempFilePath;
+  44  
+  45    /**
+  46     * {@code true}强制下载，不考虑文件路径是否被占用
+  47     */
+  48    private boolean forceDownload = false;
+  49    /**
+  50     * 资源地址
+  51     */
+  52    private String mUrl;
+  53  
+  54    DNormalConfigHandler(TARGET target, String url, String targetName) {
+  55      this.mTarget = target;
+  56      initTarget(url, targetName);
+  57    }
+  58  
+  59    private void initTarget(String url, String targetName) {
+  60      DTaskWrapper taskWrapper =
+  61          TaskWrapperManager.getInstance().getHttpTaskWrapper(DTaskWrapper.class, url);
+  62      mEntity = taskWrapper.getEntity();
+  63  
+  64      mUrl = url;
+  65      mTarget.setTargetName(targetName);
+  66      mTarget.setTaskWrapper(taskWrapper);
+  67      if (mEntity != null) {
+  68        mTempFilePath = mEntity.getDownloadPath();
+  69      }
+  70    }
+  71  
+  72    TARGET updateUrl(String newUrl) {
+  73      if (TextUtils.isEmpty(newUrl)) {
+  74        ALog.e(TAG, &quot;url更新失败，newUrl为null&quot;);
+  75        return mTarget;
+  76      }
+  77      if (mUrl.equals(newUrl)) {
+  78        ALog.e(TAG, &quot;url更新失败，新的下载url和旧的url一致&quot;);
+  79        return mTarget;
+  80      }
+  81      mNewUrl = newUrl;
+  82      mTarget.getTaskWrapper().setRefreshInfo(true);
+  83      return mTarget;
+  84    }
+  85  
+  86    @Override public DownloadEntity getEntity() {
+  87      return mTarget.getEntity();
+  88    }
+  89  
+  90    @Override public boolean taskExists() {
+  91      return DbEntity.checkDataExist(DownloadEntity.class, &quot;url=?&quot;, mUrl);
+  92    }
+  93  
+  94    @Override public boolean isRunning() {
+  95      DownloadTask task = DownloadTaskQueue.getInstance().getTask(mEntity.getKey());
+  96      return task != null &amp;&amp; task.isRunning();
+  97    }
+  98  
+  99    @Override public boolean checkEntity() {
+ 100      boolean b = checkUrl() &amp;&amp; checkFilePath();
+ 101      if (b) {
+ 102        mEntity.save();
+ 103      }
+
+
+
+
+ 104      return b;
+ 105    }
+ 106  
+ 107    @Override public boolean checkFilePath() {
+ 108      String filePath = mTempFilePath;
+ 109      if (TextUtils.isEmpty(filePath)) {
+ 110        ALog.e(TAG, &quot;下载失败，文件保存路径为null&quot;);
+ 111        return false;
+ 112      } else if (!filePath.startsWith(&quot;/&quot;)) {
+ 113        ALog.e(TAG, &quot;下载失败，文件保存路径【&quot; + filePath + &quot;】错误&quot;);
+
+ 114        return false;
+ 115      }
+ 116      File file = new File(filePath);
+ 117      if (file.isDirectory()) {
+ 118        if (mTarget.getTargetType() == ITargetHandler.D_HTTP) {
+ 119          ALog.e(TAG, &quot;下载失败，保存路径【&quot; + filePath + &quot;】不能为文件夹，路径需要是完整的文件路径，如：/mnt/sdcard/game.zip&quot;);
+
+
+ 120          return false;
+ 121        } else if (mTarget.getTargetType() == ITargetHandler.D_FTP) {
+ 122          filePath += mEntity.getFileName();
+ 123        }
+ 124      } else {
+ 125        // http文件名设置
+ 126        if (TextUtils.isEmpty(mEntity.getFileName())) {
+ 127          mEntity.setFileName(file.getName());
+ 128        }
+ 129      }
+ 130  
+ 131      //设置文件保存路径，如果新文件路径和旧文件路径不同，则修改路径
+ 132      if (!filePath.equals(mEntity.getFilePath())) {
+ 133        // 检查路径冲突
+ 134        if (DbEntity.checkDataExist(DownloadEntity.class, &quot;downloadPath=?&quot;, filePath)) {
+ 135          if (!forceDownload) {
+ 136            ALog.e(TAG, &quot;下载失败，保存路径【&quot; + filePath + &quot;】已经被其它任务占用，请设置其它保存路径&quot;);
+
+ 137            return false;
+ 138          } else {
+ 139            ALog.w(TAG, &quot;保存路径【&quot; + filePath + &quot;】已经被其它任务占用，当前任务将覆盖该路径的文件&quot;);
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 140 -          CommonUtil.delTaskRecord(filePath, 1);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 141 +          CommonUtil.delTaskRecord(filePath, RecordHandler.TYPE_DOWNLOAD);</span>
+
+ 142            mTarget.setTaskWrapper(
+ 143                TaskWrapperManager.getInstance()
+ 144                    .getHttpTaskWrapper(DTaskWrapper.class, mUrl));
+ 145          }
+ 146        }
+ 147        File oldFile = new File(mEntity.getDownloadPath());
+ 148        File newFile = new File(filePath);
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 149 -      mEntity.setDownloadPath(filePath);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 150 +      mEntity.setFilePath(filePath);</span>
+ 151        mEntity.setFileName(newFile.getName());
+ 152        // 如过使用Content-Disposition中的文件名，将不会执行重命名工作
+ 153        if (mTarget.getTaskWrapper().asHttp().isUseServerFileName()) {
+ 154          return true;
+ 155        }
+ 156        if (oldFile.exists()) {
+ 157          // 处理普通任务的重命名
+ 158          CommonUtil.modifyTaskRecord(oldFile.getPath(), newFile.getPath());
+ 159          ALog.i(TAG, String.format(&quot;将任务重命名为：%s&quot;, newFile.getName()));
+ 160        } else if (CommonUtil.blockTaskExists(oldFile.getPath())) {
+ 161          // 处理分块任务的重命名
+ 162          CommonUtil.modifyTaskRecord(oldFile.getPath(), newFile.getPath());
+ 163          ALog.i(TAG, String.format(&quot;将分块任务重命名为：%s&quot;, newFile.getName()));
+ 164        }
+ 165      }
+ 166      return true;
+ 167    }
+ 168  
+ 169    @Override public boolean checkUrl() {
+ 170      final String url = mEntity.getUrl();
+ 171      if (TextUtils.isEmpty(url)) {
+ 172        ALog.e(TAG, &quot;下载失败，url为null&quot;);
+ 173        return false;
+ 174      } else if (!CheckUtil.checkUrlNotThrow(url)) {
+ 175        ALog.e(TAG, &quot;下载失败，url【&quot; + url + &quot;】错误&quot;);
+ 176        return false;
+ 177      }
+ 178      int index = url.indexOf(&quot;://&quot;);
+ 179      if (index == -1) {
+ 180        ALog.e(TAG, &quot;下载失败，url【&quot; + url + &quot;】不合法&quot;);
+ 181        return false;
+ 182      }
+ 183      if (!TextUtils.isEmpty(mNewUrl)) {
+ 184        mEntity.setUrl(mNewUrl);
+ 185      }
+ 186      return true;
+ 187    }
+ 188  
+ 189    void setForceDownload(boolean forceDownload) {
+ 190      this.forceDownload = forceDownload;
+ 191    }
+ 192  
+ 193    void setUrl(String url) {
+ 194      this.mUrl = url;
+ 195    }
+ 196  
+ 197    String getUrl() {
+ 198      return mUrl;
+ 199    }
+ 200  
+ 201    void setTempFilePath(String mTempFilePath) {
+ 202      this.mTempFilePath = mTempFilePath;
+ 203    }
+ 204  }</pre></td>
+                        </tr>
+                    </table>
+                </div>
+              </body>
+            </html>
+            

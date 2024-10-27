@@ -1,0 +1,1896 @@
+<!DOCTYPE html>
+    <html lang="en">
+              <head>
+                <meta charset="utf-8">
+                <title>603</title>
+                    <style>
+                        #top {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        #bottom {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        abbr {
+                          /* Here is the delay */
+                          transition-delay:0s;
+                        }
+                    </style>
+              </head>
+              <body>
+                <span style="height: 4vh">
+                    603
+                    <a href="602.html">prev</a>
+                    <a href="604.html">next</a>
+                    <a href="603_chunks.html">chunks</a>
+                    <a href="index.html">index</a>
+                    DTStack/flinkStreamSQL_b44a86dc90b7fbefeec65e6c5a467a259b41ec59_core/src/main/java/com/dtstack/flink/sql/environment/StreamEnvConfigManager.java
+                    <textarea rows=1 onclick='navigator.clipboard.writeText(this.value)'>cd C:\studies\se\mega\git-analyzer-plus\notebooks\debug
+del /Q *
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;b44a86dc90b7fbefeec65e6c5a467a259b41ec59:core/src/main/java/com/dtstack/flink/sql/environment/StreamEnvConfigManager.java&quot; &gt; committed.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;b44a86dc90b7fbefeec65e6c5a467a259b41ec59^1:core/src/main/java/com/dtstack/flink/sql/environment/StreamEnvConfigManager.java&quot; &gt; ours.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;b44a86dc90b7fbefeec65e6c5a467a259b41ec59^2:core/src/main/java/com/dtstack/flink/sql/environment/StreamEnvConfigManager.java&quot; &gt; theirs.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;1a973cf785a926fcd45c51fa474acc2ae880f8cb:core/src/main/java/com/dtstack/flink/sql/environment/StreamEnvConfigManager.java&quot; &gt; base.java
+copy ours.java 1ours.java
+copy ours.java 2ours.java
+copy theirs.java 1theirs.java
+copy theirs.java 2theirs.java
+copy base.java 1base.java
+copy base.java 2base.java
+&quot;C:\Program Files\Java\jdk1.8.0_241\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\jFSTMerge\build\libs\jFSTMerge-all.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\jfstmerge.java --show-base
+&quot;C:\Program Files\Eclipse Adoptium\jdk-17.0.11.9-hotspot\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\spork\target\spork-0.5.0-SNAPSHOT.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\spork.java
+del /Q 1*.java
+del /Q 2*.java
+del /Q jfstmerge.java.merge
+</textarea>
+                    {strict: [[b]], subset: [[b]]}
+                </span>
+                <div id="top">
+
+                    <table>
+                        <tr>
+                            <th>line based (standard git)</th>
+                            <th>jfstmerge</th>
+                            <th>spork</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1 /*
+   2  * Licensed to the Apache Software Foundation (ASF) under one
+   3  * or more contributor license agreements.  See the NOTICE file
+   4  * distributed with this work for additional information
+   5  * regarding copyright ownership.  The ASF licenses this file
+   6  * to you under the Apache License, Version 2.0 (the
+   7  * &quot;License&quot;); you may not use this file except in compliance
+   8  * with the License.  You may obtain a copy of the License at
+   9  *
+  10  *     http://www.apache.org/licenses/LICENSE-2.0
+  11  *
+  12  * Unless required by applicable law or agreed to in writing, software
+  13  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15  * See the License for the specific language governing permissions and
+  16  * limitations under the License.
+  17  */
+  18 
+  19 package com.dtstack.flink.sql.environment;
+  20 
+  21 import org.apache.flink.api.common.ExecutionConfig;
+  22 import org.apache.flink.api.common.restartstrategy.RestartStrategies;
+  23 import org.apache.flink.api.common.time.Time;
+  24 import org.apache.flink.api.java.tuple.Tuple2;
+  25 import org.apache.flink.configuration.Configuration;
+  26 import org.apache.flink.contrib.streaming.state.RocksDBStateBackend;
+  27 import org.apache.flink.runtime.state.StateBackend;
+  28 import org.apache.flink.runtime.state.filesystem.FsStateBackend;
+  29 import org.apache.flink.runtime.state.memory.MemoryStateBackend;
+  30 import org.apache.flink.streaming.api.CheckpointingMode;
+  31 import org.apache.flink.streaming.api.TimeCharacteristic;
+  32 import org.apache.flink.streaming.api.environment.CheckpointConfig;
+  33 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+  34 import org.apache.flink.table.api.StreamQueryConfig;
+  35 import org.apache.flink.table.api.java.StreamTableEnvironment;
+  36 
+  37 import com.dtstack.flink.sql.constrant.ConfigConstrant;
+  38 import com.dtstack.flink.sql.enums.EStateBackend;
+  39 import com.dtstack.flink.sql.util.MathUtil;
+  40 import com.dtstack.flink.sql.util.PropertiesUtils;
+  41 import org.apache.commons.lang3.BooleanUtils;
+  42 import org.apache.commons.lang3.StringUtils;
+  43 
+  44 import java.io.IOException;
+  45 import java.lang.reflect.InvocationTargetException;
+  46 import java.lang.reflect.Method;
+  47 import java.util.Arrays;
+  48 import java.util.Map;
+  49 import java.util.Optional;
+  50 import java.util.Properties;
+  51 import java.util.concurrent.TimeUnit;
+  52 import java.util.regex.Matcher;
+  53 import java.util.regex.Pattern;
+  54 
+  55 /**
+  56  *
+  57  *  流执行环境相关配置
+  58  * Date: 2019/11/22
+  59  * Company: www.dtstack.com
+  60  * @author maqi
+  61  */
+  62 public final class StreamEnvConfigManager {
+  63     private StreamEnvConfigManager() {
+  64         throw new AssertionError(&quot;Singleton class.&quot;);
+  65     }
+  66 
+  67     /**
+  68      * 配置StreamExecutionEnvironment运行时参数
+  69      * @param streamEnv
+  70      * @param confProperties
+  71      */
+<abbr title="  72     public static void streamExecutionEnvironmentConfig(StreamExecutionEnvironment streamEnv, Properties confProperties)">  72     public static void streamExecutionEnvironmentConfig(StreamExecutionEnvironment streamEnv, Properties 🔵</abbr>
+<abbr title="  73             throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, IOException {">  73             throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, IOException 🔵</abbr>
+  74 
+  75         confProperties = PropertiesUtils.propertiesTrim(confProperties);
+  76         streamEnv.getConfig().disableClosureCleaner();
+  77         // Disables reusing object
+  78         streamEnv.getConfig().enableObjectReuse();
+  79 
+  80         Configuration globalJobParameters = new Configuration();
+  81         //Configuration unsupported set properties key-value
+<abbr title="  82         Method method = Configuration.class.getDeclaredMethod(&quot;setValueInternal&quot;, String.class, Object.class);">  82         Method method = Configuration.class.getDeclaredMethod(&quot;setValueInternal&quot;, String.class, Object.cl🔵</abbr>
+  83         method.setAccessible(true);
+  84         for (Map.Entry&lt;Object, Object&gt; prop : confProperties.entrySet()) {
+  85             method.invoke(globalJobParameters, prop.getKey(), prop.getValue());
+  86         }
+  87 
+  88         ExecutionConfig exeConfig = streamEnv.getConfig();
+  89         if (exeConfig.getGlobalJobParameters() == null) {
+  90             exeConfig.setGlobalJobParameters(globalJobParameters);
+  91         } else if (exeConfig.getGlobalJobParameters() instanceof Configuration) {
+  92             ((Configuration) exeConfig.getGlobalJobParameters()).addAll(globalJobParameters);
+  93         }
+  94 
+  95         getEnvParallelism(confProperties).ifPresent(streamEnv::setParallelism);
+  96         getMaxEnvParallelism(confProperties).ifPresent(streamEnv::setMaxParallelism);
+  97         getBufferTimeoutMillis(confProperties).ifPresent(streamEnv::setBufferTimeout);
+  98         getStreamTimeCharacteristic(confProperties).ifPresent(streamEnv::setStreamTimeCharacteristic);
+  99         getAutoWatermarkInterval(confProperties).ifPresent(op -&gt; {
+ 100             if (streamEnv.getStreamTimeCharacteristic().equals(TimeCharacteristic.EventTime)) {
+ 101                 streamEnv.getConfig().setAutoWatermarkInterval(op);
+ 102             }
+ 103         });
+ 104 
+ 105 &lt;&lt;&lt;&lt;&lt;&lt;&lt; GitAnalyzerPlus_ours
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 106         if(isRestore(confProperties).get()){</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 107             streamEnv.setRestartStrategy(RestartStrategies.failureRateRestart(</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 108                     ConfigConstrant.FAILUEE_RATE,</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 109                     Time.of(getFailureInterval(confProperties).get(), TimeUnit.MINUTES),</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 110                     Time.of(getDelayInterval(confProperties).get(), TimeUnit.SECONDS)</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 111             ));</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 112         } else {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 113             streamEnv.setRestartStrategy(RestartStrategies.noRestart());</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 114         }</span>
+ 115 ||||||| GitAnalyzerPlus_base
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 116         if(isRestore(confProperties).get()){</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 117             streamEnv.setRestartStrategy(RestartStrategies.failureRateRestart(</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 118                     ConfigConstrant.failureRate,</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 119                     Time.of(getFailureInterval(confProperties).get(), TimeUnit.MINUTES),</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 120                     Time.of(getDelayInterval(confProperties).get(), TimeUnit.SECONDS)</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 121             ));</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 122         } else {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 123             streamEnv.setRestartStrategy(RestartStrategies.noRestart());</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 124         }</span>
+ 125 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 126         streamEnv.setRestartStrategy(RestartStrategies.failureRateRestart(</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 127                 ConfigConstrant.failureRate,</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 128                 Time.of(ConfigConstrant.failureInterval, TimeUnit.MINUTES),</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 129                 Time.of(ConfigConstrant.delayInterval, TimeUnit.SECONDS)</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 130         ));</span>
+ 131 &gt;&gt;&gt;&gt;&gt;&gt;&gt; GitAnalyzerPlus_theirs
+ 132 
+ 133         // checkpoint config
+ 134         Optional&lt;Boolean&gt; checkpointingEnabled = isCheckpointingEnabled(confProperties);
+ 135         if (checkpointingEnabled.get()) {
+ 136             getCheckpointInterval(confProperties).ifPresent(streamEnv::enableCheckpointing);
+<abbr title=" 137             getCheckpointingMode(confProperties).ifPresent(streamEnv.getCheckpointConfig()::setCheckpointingMode);"> 137             getCheckpointingMode(confProperties).ifPresent(streamEnv.getCheckpointConfig()::setCheckpoint🔵</abbr>
+<abbr title=" 138             getCheckpointTimeout(confProperties).ifPresent(streamEnv.getCheckpointConfig()::setCheckpointTimeout);"> 138             getCheckpointTimeout(confProperties).ifPresent(streamEnv.getCheckpointConfig()::setCheckpoint🔵</abbr>
+<abbr title=" 139             getMaxConcurrentCheckpoints(confProperties).ifPresent(streamEnv.getCheckpointConfig()::setMaxConcurrentCheckpoints);"> 139             getMaxConcurrentCheckpoints(confProperties).ifPresent(streamEnv.getCheckpointConfig()::setMax🔵</abbr>
+<abbr title=" 140             getCheckpointCleanup(confProperties).ifPresent(streamEnv.getCheckpointConfig()::enableExternalizedCheckpoints);"> 140             getCheckpointCleanup(confProperties).ifPresent(streamEnv.getCheckpointConfig()::enableExterna🔵</abbr>
+ 141             getStateBackend(confProperties).ifPresent(streamEnv::setStateBackend);
+ 142         }
+ 143     }
+ 144 
+<abbr title=" 145     public static StreamQueryConfig getStreamQueryConfig(StreamTableEnvironment tableEnv, Properties confProperties) {"> 145     public static StreamQueryConfig getStreamQueryConfig(StreamTableEnvironment tableEnv, Properties conf🔵</abbr>
+<abbr title=" 146         return StreamEnvConfigManager.streamTableEnvironmentStateTTLConfig(tableEnv, confProperties).orElseGet(tableEnv::queryConfig);"> 146         return StreamEnvConfigManager.streamTableEnvironmentStateTTLConfig(tableEnv, confProperties).orEl🔵</abbr>
+ 147     }
+ 148 
+ 149     /**
+ 150      * 设置TableEnvironment状态超时时间
+ 151      * @param tableEnv
+ 152      * @param confProperties
+ 153      */
+<abbr title=" 154     public static Optional&lt;StreamQueryConfig&gt; streamTableEnvironmentStateTTLConfig(StreamTableEnvironment tableEnv, Properties confProperties) {"> 154     public static Optional&lt;StreamQueryConfig&gt; streamTableEnvironmentStateTTLConfig(StreamTableEnvironment🔵</abbr>
+ 155         Optional&lt;StreamQueryConfig&gt; streamQueryConfig = Optional.empty();
+ 156         confProperties = PropertiesUtils.propertiesTrim(confProperties);
+ 157         Optional&lt;Tuple2&lt;Time, Time&gt;&gt; tableEnvTTL = getTableEnvTTL(confProperties);
+ 158         if (tableEnvTTL.isPresent()) {
+ 159             Tuple2&lt;Time, Time&gt; timeRange = tableEnvTTL.get();
+ 160             StreamQueryConfig queryConfig = tableEnv.queryConfig();
+ 161             queryConfig.withIdleStateRetentionTime(timeRange.f0, timeRange.f1);
+ 162             streamQueryConfig = Optional.of(queryConfig);
+ 163         }
+ 164         return streamQueryConfig;
+ 165     }
+ 166 
+ 167 
+<abbr title=" 168     // -----------------------StreamExecutionEnvironment config-----------------------------------------------"> 168     // -----------------------StreamExecutionEnvironment config------------------------------------------🔵</abbr>
+ 169     public static Optional&lt;Integer&gt; getEnvParallelism(Properties properties) {
+ 170         String parallelismStr = properties.getProperty(ConfigConstrant.SQL_ENV_PARALLELISM);
+<abbr title=" 171         return StringUtils.isNotBlank(parallelismStr) ? Optional.of(Integer.valueOf(parallelismStr)) : Optional.empty();"> 171         return StringUtils.isNotBlank(parallelismStr) ? Optional.of(Integer.valueOf(parallelismStr)) : Op🔵</abbr>
+ 172     }
+ 173 
+ 174     public static Optional&lt;Integer&gt; getMaxEnvParallelism(Properties properties) {
+ 175         String parallelismStr = properties.getProperty(ConfigConstrant.SQL_MAX_ENV_PARALLELISM);
+<abbr title=" 176         return StringUtils.isNotBlank(parallelismStr) ? Optional.of(Integer.valueOf(parallelismStr)) : Optional.empty();"> 176         return StringUtils.isNotBlank(parallelismStr) ? Optional.of(Integer.valueOf(parallelismStr)) : Op🔵</abbr>
+ 177     }
+ 178 
+ 179     public static Optional&lt;Long&gt; getBufferTimeoutMillis(Properties properties) {
+ 180         String mills = properties.getProperty(ConfigConstrant.SQL_BUFFER_TIMEOUT_MILLIS);
+ 181         return StringUtils.isNotBlank(mills) ? Optional.of(Long.valueOf(mills)) : Optional.empty();
+ 182     }
+ 183 
+ 184     public static Optional&lt;Long&gt; getAutoWatermarkInterval(Properties properties) {
+<abbr title=" 185         String autoWatermarkInterval = properties.getProperty(ConfigConstrant.AUTO_WATERMARK_INTERVAL_KEY);"> 185         String autoWatermarkInterval = properties.getProperty(ConfigConstrant.AUTO_WATERMARK_INTERVAL_KEY🔵</abbr>
+<abbr title=" 186         return StringUtils.isNotBlank(autoWatermarkInterval) ? Optional.of(Long.valueOf(autoWatermarkInterval)) : Optional.empty();"> 186         return StringUtils.isNotBlank(autoWatermarkInterval) ? Optional.of(Long.valueOf(autoWatermarkInte🔵</abbr>
+ 187     }
+ 188 
+ 189     /**
+ 190      * #ProcessingTime(默认), IngestionTime, EventTime
+ 191      * @param properties
+ 192      */
+ 193     public static Optional&lt;TimeCharacteristic&gt; getStreamTimeCharacteristic(Properties properties) {
+ 194         if (!properties.containsKey(ConfigConstrant.FLINK_TIME_CHARACTERISTIC_KEY)) {
+ 195             return Optional.empty();
+ 196         }
+ 197         String characteristicStr = properties.getProperty(ConfigConstrant.FLINK_TIME_CHARACTERISTIC_KEY);
+ 198         Optional&lt;TimeCharacteristic&gt; characteristic = Arrays.stream(TimeCharacteristic.values())
+ 199                 .filter(tc -&gt; characteristicStr.equalsIgnoreCase(tc.toString())).findAny();
+ 200 
+ 201         if (!characteristic.isPresent()) {
+<abbr title=" 202             throw new RuntimeException(&quot;illegal property :&quot; + ConfigConstrant.FLINK_TIME_CHARACTERISTIC_KEY);"> 202             throw new RuntimeException(&quot;illegal property :&quot; + ConfigConstrant.FLINK_TIME_CHARACTERISTIC_K🔵</abbr>
+ 203         }
+ 204         return characteristic;
+ 205     }
+ 206 
+ 207     public static Optional&lt;Boolean&gt; isCheckpointingEnabled(Properties properties) {
+<abbr title=" 208         boolean checkpointEnabled = !(properties.getProperty(ConfigConstrant.SQL_CHECKPOINT_INTERVAL_KEY) == null"> 208         boolean checkpointEnabled = !(properties.getProperty(ConfigConstrant.SQL_CHECKPOINT_INTERVAL_KEY)🔵</abbr>
+ 209                 &amp;&amp; properties.getProperty(ConfigConstrant.FLINK_CHECKPOINT_INTERVAL_KEY) == null);
+ 210         return Optional.of(checkpointEnabled);
+ 211     }
+ 212 
+ 213     public static Optional&lt;Long&gt; getCheckpointInterval(Properties properties) {
+ 214         // 两个参数主要用来做上层兼容
+<abbr title=" 215         Long sqlInterval = Long.valueOf(properties.getProperty(ConfigConstrant.SQL_CHECKPOINT_INTERVAL_KEY, &quot;0&quot;));"> 215         Long sqlInterval = Long.valueOf(properties.getProperty(ConfigConstrant.SQL_CHECKPOINT_INTERVAL_KE🔵</abbr>
+<abbr title=" 216         Long flinkInterval = Long.valueOf(properties.getProperty(ConfigConstrant.FLINK_CHECKPOINT_INTERVAL_KEY, &quot;0&quot;));"> 216         Long flinkInterval = Long.valueOf(properties.getProperty(ConfigConstrant.FLINK_CHECKPOINT_INTERVA🔵</abbr>
+ 217         long checkpointInterval = Math.max(sqlInterval, flinkInterval);
+ 218         return Optional.of(checkpointInterval);
+ 219     }
+ 220 
+ 221     public static Optional&lt;CheckpointingMode&gt; getCheckpointingMode(Properties properties) {
+ 222         String checkpointingModeStr = properties.getProperty(ConfigConstrant.FLINK_CHECKPOINT_MODE_KEY);
+ 223         CheckpointingMode checkpointingMode = null;
+ 224         if (!StringUtils.isEmpty(checkpointingModeStr)) {
+ 225             checkpointingMode = CheckpointingMode.valueOf(checkpointingModeStr.toUpperCase());
+ 226         }
+ 227         return checkpointingMode == null ? Optional.empty() : Optional.of(checkpointingMode);
+ 228     }
+ 229 
+ 230     public static Optional&lt;Long&gt; getCheckpointTimeout(Properties properties) {
+<abbr title=" 231         String checkpointTimeoutStr = properties.getProperty(ConfigConstrant.FLINK_CHECKPOINT_TIMEOUT_KEY);"> 231         String checkpointTimeoutStr = properties.getProperty(ConfigConstrant.FLINK_CHECKPOINT_TIMEOUT_KEY🔵</abbr>
+ 232 
+ 233         if (!StringUtils.isEmpty(checkpointTimeoutStr)) {
+ 234             Long checkpointTimeout = Long.valueOf(checkpointTimeoutStr);
+ 235             return Optional.of(checkpointTimeout);
+ 236         }
+ 237         return Optional.empty();
+ 238     }
+ 239 
+ 240     public static Optional&lt;Integer&gt; getMaxConcurrentCheckpoints(Properties properties) {
+<abbr title=" 241         String maxConcurrCheckpointsStr = properties.getProperty(ConfigConstrant.FLINK_MAXCONCURRENTCHECKPOINTS_KEY);"> 241         String maxConcurrCheckpointsStr = properties.getProperty(ConfigConstrant.FLINK_MAXCONCURRENTCHECK🔵</abbr>
+ 242         if (!StringUtils.isEmpty(maxConcurrCheckpointsStr)) {
+ 243             Integer maxConcurrCheckpoints = Integer.valueOf(maxConcurrCheckpointsStr);
+ 244             return Optional.of(maxConcurrCheckpoints);
+ 245         }
+ 246         return Optional.empty();
+ 247     }
+ 248 
+<abbr title=" 249     public static Optional&lt;CheckpointConfig.ExternalizedCheckpointCleanup&gt; getCheckpointCleanup(Properties properties) {"> 249     public static Optional&lt;CheckpointConfig.ExternalizedCheckpointCleanup&gt; getCheckpointCleanup(Propertie🔵</abbr>
+<abbr title=" 250         Boolean sqlCleanMode = MathUtil.getBoolean(properties.getProperty(ConfigConstrant.SQL_CHECKPOINT_CLEANUPMODE_KEY), false);"> 250         Boolean sqlCleanMode = MathUtil.getBoolean(properties.getProperty(ConfigConstrant.SQL_CHECKPOINT_🔵</abbr>
+<abbr title=" 251         Boolean flinkCleanMode = MathUtil.getBoolean(properties.getProperty(ConfigConstrant.FLINK_CHECKPOINT_CLEANUPMODE_KEY), false);"> 251         Boolean flinkCleanMode = MathUtil.getBoolean(properties.getProperty(ConfigConstrant.FLINK_CHECKPO🔵</abbr>
+ 252 
+<abbr title=" 253         CheckpointConfig.ExternalizedCheckpointCleanup externalizedCheckpointCleanup = (sqlCleanMode || flinkCleanMode) ?"> 253         CheckpointConfig.ExternalizedCheckpointCleanup externalizedCheckpointCleanup = (sqlCleanMode || f🔵</abbr>
+<abbr title=" 254                 CheckpointConfig.ExternalizedCheckpointCleanup.DELETE_ON_CANCELLATION : CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION;"> 254                 CheckpointConfig.ExternalizedCheckpointCleanup.DELETE_ON_CANCELLATION : CheckpointConfig.🔵</abbr>
+ 255         return Optional.of(externalizedCheckpointCleanup);
+ 256     }
+ 257 
+ 258     public static Optional&lt;StateBackend&gt; getStateBackend(Properties properties) throws IOException {
+ 259         String backendType = properties.getProperty(ConfigConstrant.STATE_BACKEND_KEY);
+ 260         String checkpointDataUri = properties.getProperty(ConfigConstrant.CHECKPOINTS_DIRECTORY_KEY);
+<abbr title=" 261         String backendIncremental = properties.getProperty(ConfigConstrant.STATE_BACKEND_INCREMENTAL_KEY, &quot;true&quot;);"> 261         String backendIncremental = properties.getProperty(ConfigConstrant.STATE_BACKEND_INCREMENTAL_KEY,🔵</abbr>
+ 262 
+ 263         if (!StringUtils.isEmpty(backendType)) {
+ 264             return createStateBackend(backendType, checkpointDataUri, backendIncremental);
+ 265         }
+ 266         return Optional.empty();
+ 267     }
+ 268 
+<abbr title=" 269     private static Optional&lt;StateBackend&gt; createStateBackend(String backendType, String checkpointDataUri, String backendIncremental) throws IOException {"> 269     private static Optional&lt;StateBackend&gt; createStateBackend(String backendType, String checkpointDataUri🔵</abbr>
+ 270         EStateBackend stateBackendType = EStateBackend.convertFromString(backendType);
+ 271         StateBackend stateBackend = null;
+ 272         switch (stateBackendType) {
+ 273             case MEMORY:
+ 274                 stateBackend = new MemoryStateBackend();
+ 275                 break;
+ 276             case FILESYSTEM:
+ 277                 checkpointDataUriEmptyCheck(checkpointDataUri, backendType);
+ 278                 stateBackend = new FsStateBackend(checkpointDataUri);
+ 279                 break;
+ 280             case ROCKSDB:
+ 281                 checkpointDataUriEmptyCheck(checkpointDataUri, backendType);
+<abbr title=" 282                 stateBackend = new RocksDBStateBackend(checkpointDataUri, BooleanUtils.toBoolean(backendIncremental));"> 282                 stateBackend = new RocksDBStateBackend(checkpointDataUri, BooleanUtils.toBoolean(backendI🔵</abbr>
+ 283                 break;
+ 284             default:
+ 285                 break;
+ 286         }
+ 287         return stateBackend == null ? Optional.empty() : Optional.of(stateBackend);
+ 288     }
+ 289 
+ 290     private static void checkpointDataUriEmptyCheck(String checkpointDataUri, String backendType) {
+ 291         if (StringUtils.isEmpty(checkpointDataUri)) {
+ 292             throw new RuntimeException(backendType + &quot; backend checkpointDataUri not null!&quot;);
+ 293         }
+ 294     }
+ 295 
+ 296     // -----------------TableEnvironment state ttl config------------------------------
+ 297 
+ 298     private static final String TTL_PATTERN_STR = &quot;^+?([1-9][0-9]*)([dDhHmMsS])$&quot;;
+ 299     private static final Pattern TTL_PATTERN = Pattern.compile(TTL_PATTERN_STR);
+ 300 
+ 301     public static Optional&lt;Tuple2&lt;Time, Time&gt;&gt; getTableEnvTTL(Properties properties) {
+ 302         String ttlMintimeStr = properties.getProperty(ConfigConstrant.SQL_TTL_MINTIME);
+ 303         String ttlMaxtimeStr = properties.getProperty(ConfigConstrant.SQL_TTL_MAXTIME);
+ 304         if (StringUtils.isNotEmpty(ttlMintimeStr) || StringUtils.isNotEmpty(ttlMaxtimeStr)) {
+ 305             verityTtl(ttlMintimeStr, ttlMaxtimeStr);
+ 306             Matcher ttlMintimeStrMatcher = TTL_PATTERN.matcher(ttlMintimeStr);
+ 307             Matcher ttlMaxtimeStrMatcher = TTL_PATTERN.matcher(ttlMaxtimeStr);
+ 308 
+ 309             Long ttlMintime = 0L;
+ 310             Long ttlMaxtime = 0L;
+ 311             if (ttlMintimeStrMatcher.find()) {
+<abbr title=" 312                 ttlMintime = getTtlTime(Integer.parseInt(ttlMintimeStrMatcher.group(1)), ttlMintimeStrMatcher.group(2));"> 312                 ttlMintime = getTtlTime(Integer.parseInt(ttlMintimeStrMatcher.group(1)), ttlMintimeStrMat🔵</abbr>
+ 313             }
+ 314             if (ttlMaxtimeStrMatcher.find()) {
+<abbr title=" 315                 ttlMaxtime = getTtlTime(Integer.parseInt(ttlMaxtimeStrMatcher.group(1)), ttlMaxtimeStrMatcher.group(2));"> 315                 ttlMaxtime = getTtlTime(Integer.parseInt(ttlMaxtimeStrMatcher.group(1)), ttlMaxtimeStrMat🔵</abbr>
+ 316             }
+ 317             if (0L != ttlMintime &amp;&amp; 0L != ttlMaxtime) {
+<abbr title=" 318                 return Optional.of(new Tuple2&lt;&gt;(Time.milliseconds(ttlMintime), Time.milliseconds(ttlMaxtime)));"> 318                 return Optional.of(new Tuple2&lt;&gt;(Time.milliseconds(ttlMintime), Time.milliseconds(ttlMaxti🔵</abbr>
+ 319             }
+ 320         }
+ 321         return Optional.empty();
+ 322     }
+ 323 
+ 324     /**
+ 325      * ttl 校验
+ 326      * @param ttlMintimeStr 最小时间
+ 327      * @param ttlMaxtimeStr 最大时间
+ 328      */
+ 329     private static void verityTtl(String ttlMintimeStr, String ttlMaxtimeStr) {
+ 330         if (null == ttlMintimeStr
+ 331                 || null == ttlMaxtimeStr
+ 332                 || !TTL_PATTERN.matcher(ttlMintimeStr).find()
+ 333                 || !TTL_PATTERN.matcher(ttlMaxtimeStr).find()) {
+<abbr title=" 334             throw new RuntimeException(&quot;sql.ttl.min 、sql.ttl.max must be set at the same time . example sql.ttl.min=1h,sql.ttl.max=2h&quot;);"> 334             throw new RuntimeException(&quot;sql.ttl.min 、sql.ttl.max must be set at the same time . example s🔵</abbr>
+ 335         }
+ 336     }
+ 337 
+ 338     /**
+ 339      * 不同单位时间到毫秒的转换
+ 340      * @param timeNumber 时间值，如：30
+ 341      * @param timeUnit 单位，d:天，h:小时，m:分，s:秒
+ 342      * @return
+ 343      */
+ 344     private static Long getTtlTime(Integer timeNumber, String timeUnit) {
+ 345         if (&quot;d&quot;.equalsIgnoreCase(timeUnit)) {
+ 346             return timeNumber * 1000L * 60 * 60 * 24;
+ 347         } else if (&quot;h&quot;.equalsIgnoreCase(timeUnit)) {
+ 348             return timeNumber * 1000L * 60 * 60;
+ 349         } else if (&quot;m&quot;.equalsIgnoreCase(timeUnit)) {
+ 350             return timeNumber * 1000L * 60;
+ 351         } else if (&quot;s&quot;.equalsIgnoreCase(timeUnit)) {
+ 352             return timeNumber * 1000L;
+ 353         } else {
+ 354             throw new RuntimeException(&quot;not support &quot; + timeNumber + timeUnit);
+ 355         }
+ 356     }
+ 357 
+ 358 
+ 359 }</pre></td>
+                            <td><pre>   1 /*
+   2  * Licensed to the Apache Software Foundation (ASF) under one
+   3  * or more contributor license agreements.  See the NOTICE file
+   4  * distributed with this work for additional information
+   5  * regarding copyright ownership.  The ASF licenses this file
+   6  * to you under the Apache License, Version 2.0 (the
+   7  * &quot;License&quot;); you may not use this file except in compliance
+   8  * with the License.  You may obtain a copy of the License at
+   9  *
+  10  *     http://www.apache.org/licenses/LICENSE-2.0
+  11  *
+  12  * Unless required by applicable law or agreed to in writing, software
+  13  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15  * See the License for the specific language governing permissions and
+  16  * limitations under the License.
+  17  */
+  18 
+  19 package com.dtstack.flink.sql.environment;
+  20 
+  21 import org.apache.flink.api.common.ExecutionConfig;
+  22 import org.apache.flink.api.common.restartstrategy.RestartStrategies;
+  23 import org.apache.flink.api.common.time.Time;
+  24 import org.apache.flink.api.java.tuple.Tuple2;
+  25 import org.apache.flink.configuration.Configuration;
+  26 import org.apache.flink.contrib.streaming.state.RocksDBStateBackend;
+  27 import org.apache.flink.runtime.state.StateBackend;
+  28 import org.apache.flink.runtime.state.filesystem.FsStateBackend;
+  29 import org.apache.flink.runtime.state.memory.MemoryStateBackend;
+  30 import org.apache.flink.streaming.api.CheckpointingMode;
+  31 import org.apache.flink.streaming.api.TimeCharacteristic;
+  32 import org.apache.flink.streaming.api.environment.CheckpointConfig;
+  33 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+  34 import org.apache.flink.table.api.StreamQueryConfig;
+  35 import org.apache.flink.table.api.java.StreamTableEnvironment;
+  36 
+  37 import com.dtstack.flink.sql.constrant.ConfigConstrant;
+  38 import com.dtstack.flink.sql.enums.EStateBackend;
+  39 import com.dtstack.flink.sql.util.MathUtil;
+  40 import com.dtstack.flink.sql.util.PropertiesUtils;
+  41 import org.apache.commons.lang3.BooleanUtils;
+  42 import org.apache.commons.lang3.StringUtils;
+  43 
+  44 import java.io.IOException;
+  45 import java.lang.reflect.InvocationTargetException;
+  46 import java.lang.reflect.Method;
+  47 import java.util.Arrays;
+  48 import java.util.Map;
+  49 import java.util.Optional;
+  50 import java.util.Properties;
+  51 import java.util.concurrent.TimeUnit;
+  52 import java.util.regex.Matcher;
+  53 import java.util.regex.Pattern;
+  54 
+  55 /**
+  56  *
+  57  *  流执行环境相关配置
+  58  * Date: 2019/11/22
+  59  * Company: www.dtstack.com
+  60  * @author maqi
+  61  */
+  62 public final class StreamEnvConfigManager {
+  63     private StreamEnvConfigManager() {
+  64         throw new AssertionError(&quot;Singleton class.&quot;);
+  65     }
+  66 
+  67     /**
+  68      * 配置StreamExecutionEnvironment运行时参数
+  69      * @param streamEnv
+  70      * @param confProperties
+  71      */
+<abbr title="  72     public static void streamExecutionEnvironmentConfig(StreamExecutionEnvironment streamEnv, Properties confProperties)">  72     public static void streamExecutionEnvironmentConfig(StreamExecutionEnvironment streamEnv, Properties 🔵</abbr>
+<abbr title="  73             throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, IOException {">  73             throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, IOException 🔵</abbr>
+  74 
+  75         confProperties = PropertiesUtils.propertiesTrim(confProperties);
+  76         streamEnv.getConfig().disableClosureCleaner();
+  77         // Disables reusing object
+  78         streamEnv.getConfig().enableObjectReuse();
+  79 
+  80         Configuration globalJobParameters = new Configuration();
+  81         //Configuration unsupported set properties key-value
+<abbr title="  82         Method method = Configuration.class.getDeclaredMethod(&quot;setValueInternal&quot;, String.class, Object.class);">  82         Method method = Configuration.class.getDeclaredMethod(&quot;setValueInternal&quot;, String.class, Object.cl🔵</abbr>
+  83         method.setAccessible(true);
+  84         for (Map.Entry&lt;Object, Object&gt; prop : confProperties.entrySet()) {
+  85             method.invoke(globalJobParameters, prop.getKey(), prop.getValue());
+  86         }
+  87 
+  88         ExecutionConfig exeConfig = streamEnv.getConfig();
+  89         if (exeConfig.getGlobalJobParameters() == null) {
+  90             exeConfig.setGlobalJobParameters(globalJobParameters);
+  91         } else if (exeConfig.getGlobalJobParameters() instanceof Configuration) {
+  92             ((Configuration) exeConfig.getGlobalJobParameters()).addAll(globalJobParameters);
+  93         }
+  94 
+  95         getEnvParallelism(confProperties).ifPresent(streamEnv::setParallelism);
+  96         getMaxEnvParallelism(confProperties).ifPresent(streamEnv::setMaxParallelism);
+  97         getBufferTimeoutMillis(confProperties).ifPresent(streamEnv::setBufferTimeout);
+  98         getStreamTimeCharacteristic(confProperties).ifPresent(streamEnv::setStreamTimeCharacteristic);
+  99         getAutoWatermarkInterval(confProperties).ifPresent(op -&gt; {
+ 100             if (streamEnv.getStreamTimeCharacteristic().equals(TimeCharacteristic.EventTime)) {
+ 101                 streamEnv.getConfig().setAutoWatermarkInterval(op);
+ 102             }
+ 103         });
+ 104 
+ 105         if(isRestore(confProperties).get()){
+ 106         streamEnv.setRestartStrategy(RestartStrategies.failureRateRestart(
+ 107                     ConfigConstrant.FAILUEE_RATE,
+ 108                     Time.of(getFailureInterval(confProperties).get(), TimeUnit.MINUTES),
+ 109                     Time.of(getDelayInterval(confProperties).get(), TimeUnit.SECONDS)
+ 110         ));
+ 111         } else {
+ 112             streamEnv.setRestartStrategy(RestartStrategies.noRestart());
+ 113         }
+ 114 
+ 115         // checkpoint config
+ 116         Optional&lt;Boolean&gt; checkpointingEnabled = isCheckpointingEnabled(confProperties);
+ 117         if (checkpointingEnabled.get()) {
+ 118             getCheckpointInterval(confProperties).ifPresent(streamEnv::enableCheckpointing);
+<abbr title=" 119             getCheckpointingMode(confProperties).ifPresent(streamEnv.getCheckpointConfig()::setCheckpointingMode);"> 119             getCheckpointingMode(confProperties).ifPresent(streamEnv.getCheckpointConfig()::setCheckpoint🔵</abbr>
+<abbr title=" 120             getCheckpointTimeout(confProperties).ifPresent(streamEnv.getCheckpointConfig()::setCheckpointTimeout);"> 120             getCheckpointTimeout(confProperties).ifPresent(streamEnv.getCheckpointConfig()::setCheckpoint🔵</abbr>
+<abbr title=" 121             getMaxConcurrentCheckpoints(confProperties).ifPresent(streamEnv.getCheckpointConfig()::setMaxConcurrentCheckpoints);"> 121             getMaxConcurrentCheckpoints(confProperties).ifPresent(streamEnv.getCheckpointConfig()::setMax🔵</abbr>
+<abbr title=" 122             getCheckpointCleanup(confProperties).ifPresent(streamEnv.getCheckpointConfig()::enableExternalizedCheckpoints);"> 122             getCheckpointCleanup(confProperties).ifPresent(streamEnv.getCheckpointConfig()::enableExterna🔵</abbr>
+ 123             getStateBackend(confProperties).ifPresent(streamEnv::setStateBackend);
+ 124         }
+ 125     }
+ 126 
+<abbr title=" 127     public static StreamQueryConfig getStreamQueryConfig(StreamTableEnvironment tableEnv, Properties confProperties) {"> 127     public static StreamQueryConfig getStreamQueryConfig(StreamTableEnvironment tableEnv, Properties conf🔵</abbr>
+<abbr title=" 128         return StreamEnvConfigManager.streamTableEnvironmentStateTTLConfig(tableEnv, confProperties).orElseGet(tableEnv::queryConfig);"> 128         return StreamEnvConfigManager.streamTableEnvironmentStateTTLConfig(tableEnv, confProperties).orEl🔵</abbr>
+ 129     }
+ 130 
+ 131     /**
+ 132      * 设置TableEnvironment状态超时时间
+ 133      * @param tableEnv
+ 134      * @param confProperties
+ 135      */
+<abbr title=" 136     public static Optional&lt;StreamQueryConfig&gt; streamTableEnvironmentStateTTLConfig(StreamTableEnvironment tableEnv, Properties confProperties) {"> 136     public static Optional&lt;StreamQueryConfig&gt; streamTableEnvironmentStateTTLConfig(StreamTableEnvironment🔵</abbr>
+ 137         Optional&lt;StreamQueryConfig&gt; streamQueryConfig = Optional.empty();
+ 138         confProperties = PropertiesUtils.propertiesTrim(confProperties);
+ 139         Optional&lt;Tuple2&lt;Time, Time&gt;&gt; tableEnvTTL = getTableEnvTTL(confProperties);
+ 140         if (tableEnvTTL.isPresent()) {
+ 141             Tuple2&lt;Time, Time&gt; timeRange = tableEnvTTL.get();
+ 142             StreamQueryConfig queryConfig = tableEnv.queryConfig();
+ 143             queryConfig.withIdleStateRetentionTime(timeRange.f0, timeRange.f1);
+ 144             streamQueryConfig = Optional.of(queryConfig);
+ 145         }
+ 146         return streamQueryConfig;
+ 147     }
+ 148 
+ 149 
+<abbr title=" 150     // -----------------------StreamExecutionEnvironment config-----------------------------------------------"> 150     // -----------------------StreamExecutionEnvironment config------------------------------------------🔵</abbr>
+ 151     public static Optional&lt;Integer&gt; getEnvParallelism(Properties properties) {
+ 152         String parallelismStr = properties.getProperty(ConfigConstrant.SQL_ENV_PARALLELISM);
+<abbr title=" 153         return StringUtils.isNotBlank(parallelismStr) ? Optional.of(Integer.valueOf(parallelismStr)) : Optional.empty();"> 153         return StringUtils.isNotBlank(parallelismStr) ? Optional.of(Integer.valueOf(parallelismStr)) : Op🔵</abbr>
+ 154     }
+ 155 
+ 156     public static Optional&lt;Integer&gt; getMaxEnvParallelism(Properties properties) {
+ 157         String parallelismStr = properties.getProperty(ConfigConstrant.SQL_MAX_ENV_PARALLELISM);
+<abbr title=" 158         return StringUtils.isNotBlank(parallelismStr) ? Optional.of(Integer.valueOf(parallelismStr)) : Optional.empty();"> 158         return StringUtils.isNotBlank(parallelismStr) ? Optional.of(Integer.valueOf(parallelismStr)) : Op🔵</abbr>
+ 159     }
+ 160 
+ 161     public static Optional&lt;Long&gt; getBufferTimeoutMillis(Properties properties) {
+ 162         String mills = properties.getProperty(ConfigConstrant.SQL_BUFFER_TIMEOUT_MILLIS);
+ 163         return StringUtils.isNotBlank(mills) ? Optional.of(Long.valueOf(mills)) : Optional.empty();
+ 164     }
+ 165 
+ 166     public static Optional&lt;Long&gt; getAutoWatermarkInterval(Properties properties) {
+<abbr title=" 167         String autoWatermarkInterval = properties.getProperty(ConfigConstrant.AUTO_WATERMARK_INTERVAL_KEY);"> 167         String autoWatermarkInterval = properties.getProperty(ConfigConstrant.AUTO_WATERMARK_INTERVAL_KEY🔵</abbr>
+<abbr title=" 168         return StringUtils.isNotBlank(autoWatermarkInterval) ? Optional.of(Long.valueOf(autoWatermarkInterval)) : Optional.empty();"> 168         return StringUtils.isNotBlank(autoWatermarkInterval) ? Optional.of(Long.valueOf(autoWatermarkInte🔵</abbr>
+ 169     }
+ 170 
+ 171     public static Optional&lt;Boolean&gt; isRestore(Properties properties){
+ 172         String restoreEnable = properties.getProperty(ConfigConstrant.RESTOREENABLE, &quot;true&quot;);
+ 173         return Optional.of(Boolean.valueOf(restoreEnable));
+ 174     }
+ 175 
+ 176     public static Optional&lt;Integer&gt; getDelayInterval(Properties properties){
+ 177         String delayInterval = properties.getProperty(ConfigConstrant.DELAYINTERVAL, &quot;10&quot;);
+ 178         return Optional.of(Integer.valueOf(delayInterval));
+ 179     }
+ 180     public static Optional&lt;Integer&gt; getFailureInterval(Properties properties){
+ 181         String failureInterval = properties.getProperty(ConfigConstrant.FAILUREINTERVAL, &quot;6&quot;);
+ 182         return Optional.of(Integer.valueOf(failureInterval));
+ 183     }
+ 184 
+ 185     /**
+ 186      * #ProcessingTime(默认), IngestionTime, EventTime
+ 187      * @param properties
+ 188      */
+ 189     public static Optional&lt;TimeCharacteristic&gt; getStreamTimeCharacteristic(Properties properties) {
+ 190         if (!properties.containsKey(ConfigConstrant.FLINK_TIME_CHARACTERISTIC_KEY)) {
+ 191             return Optional.empty();
+ 192         }
+ 193         String characteristicStr = properties.getProperty(ConfigConstrant.FLINK_TIME_CHARACTERISTIC_KEY);
+ 194         Optional&lt;TimeCharacteristic&gt; characteristic = Arrays.stream(TimeCharacteristic.values())
+ 195                 .filter(tc -&gt; characteristicStr.equalsIgnoreCase(tc.toString())).findAny();
+ 196 
+ 197         if (!characteristic.isPresent()) {
+<abbr title=" 198             throw new RuntimeException(&quot;illegal property :&quot; + ConfigConstrant.FLINK_TIME_CHARACTERISTIC_KEY);"> 198             throw new RuntimeException(&quot;illegal property :&quot; + ConfigConstrant.FLINK_TIME_CHARACTERISTIC_K🔵</abbr>
+ 199         }
+ 200         return characteristic;
+ 201     }
+ 202 
+ 203     public static Optional&lt;Boolean&gt; isCheckpointingEnabled(Properties properties) {
+<abbr title=" 204         boolean checkpointEnabled = !(properties.getProperty(ConfigConstrant.SQL_CHECKPOINT_INTERVAL_KEY) == null"> 204         boolean checkpointEnabled = !(properties.getProperty(ConfigConstrant.SQL_CHECKPOINT_INTERVAL_KEY)🔵</abbr>
+ 205                 &amp;&amp; properties.getProperty(ConfigConstrant.FLINK_CHECKPOINT_INTERVAL_KEY) == null);
+ 206         return Optional.of(checkpointEnabled);
+ 207     }
+ 208 
+ 209     public static Optional&lt;Long&gt; getCheckpointInterval(Properties properties) {
+ 210         // 两个参数主要用来做上层兼容
+<abbr title=" 211         Long sqlInterval = Long.valueOf(properties.getProperty(ConfigConstrant.SQL_CHECKPOINT_INTERVAL_KEY, &quot;0&quot;));"> 211         Long sqlInterval = Long.valueOf(properties.getProperty(ConfigConstrant.SQL_CHECKPOINT_INTERVAL_KE🔵</abbr>
+<abbr title=" 212         Long flinkInterval = Long.valueOf(properties.getProperty(ConfigConstrant.FLINK_CHECKPOINT_INTERVAL_KEY, &quot;0&quot;));"> 212         Long flinkInterval = Long.valueOf(properties.getProperty(ConfigConstrant.FLINK_CHECKPOINT_INTERVA🔵</abbr>
+ 213         long checkpointInterval = Math.max(sqlInterval, flinkInterval);
+ 214         return Optional.of(checkpointInterval);
+ 215     }
+ 216 
+ 217     public static Optional&lt;CheckpointingMode&gt; getCheckpointingMode(Properties properties) {
+ 218         String checkpointingModeStr = properties.getProperty(ConfigConstrant.FLINK_CHECKPOINT_MODE_KEY);
+ 219         CheckpointingMode checkpointingMode = null;
+ 220         if (!StringUtils.isEmpty(checkpointingModeStr)) {
+ 221             checkpointingMode = CheckpointingMode.valueOf(checkpointingModeStr.toUpperCase());
+ 222         }
+ 223         return checkpointingMode == null ? Optional.empty() : Optional.of(checkpointingMode);
+ 224     }
+ 225 
+ 226     public static Optional&lt;Long&gt; getCheckpointTimeout(Properties properties) {
+<abbr title=" 227         String checkpointTimeoutStr = properties.getProperty(ConfigConstrant.FLINK_CHECKPOINT_TIMEOUT_KEY);"> 227         String checkpointTimeoutStr = properties.getProperty(ConfigConstrant.FLINK_CHECKPOINT_TIMEOUT_KEY🔵</abbr>
+ 228 
+ 229         if (!StringUtils.isEmpty(checkpointTimeoutStr)) {
+ 230             Long checkpointTimeout = Long.valueOf(checkpointTimeoutStr);
+ 231             return Optional.of(checkpointTimeout);
+ 232         }
+ 233         return Optional.empty();
+ 234     }
+ 235 
+ 236     public static Optional&lt;Integer&gt; getMaxConcurrentCheckpoints(Properties properties) {
+<abbr title=" 237         String maxConcurrCheckpointsStr = properties.getProperty(ConfigConstrant.FLINK_MAXCONCURRENTCHECKPOINTS_KEY);"> 237         String maxConcurrCheckpointsStr = properties.getProperty(ConfigConstrant.FLINK_MAXCONCURRENTCHECK🔵</abbr>
+ 238         if (!StringUtils.isEmpty(maxConcurrCheckpointsStr)) {
+ 239             Integer maxConcurrCheckpoints = Integer.valueOf(maxConcurrCheckpointsStr);
+ 240             return Optional.of(maxConcurrCheckpoints);
+ 241         }
+ 242         return Optional.empty();
+ 243     }
+ 244 
+<abbr title=" 245     public static Optional&lt;CheckpointConfig.ExternalizedCheckpointCleanup&gt; getCheckpointCleanup(Properties properties) {"> 245     public static Optional&lt;CheckpointConfig.ExternalizedCheckpointCleanup&gt; getCheckpointCleanup(Propertie🔵</abbr>
+<abbr title=" 246         Boolean sqlCleanMode = MathUtil.getBoolean(properties.getProperty(ConfigConstrant.SQL_CHECKPOINT_CLEANUPMODE_KEY), false);"> 246         Boolean sqlCleanMode = MathUtil.getBoolean(properties.getProperty(ConfigConstrant.SQL_CHECKPOINT_🔵</abbr>
+<abbr title=" 247         Boolean flinkCleanMode = MathUtil.getBoolean(properties.getProperty(ConfigConstrant.FLINK_CHECKPOINT_CLEANUPMODE_KEY), false);"> 247         Boolean flinkCleanMode = MathUtil.getBoolean(properties.getProperty(ConfigConstrant.FLINK_CHECKPO🔵</abbr>
+ 248 
+<abbr title=" 249         CheckpointConfig.ExternalizedCheckpointCleanup externalizedCheckpointCleanup = (sqlCleanMode || flinkCleanMode) ?"> 249         CheckpointConfig.ExternalizedCheckpointCleanup externalizedCheckpointCleanup = (sqlCleanMode || f🔵</abbr>
+<abbr title=" 250                 CheckpointConfig.ExternalizedCheckpointCleanup.DELETE_ON_CANCELLATION : CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION;"> 250                 CheckpointConfig.ExternalizedCheckpointCleanup.DELETE_ON_CANCELLATION : CheckpointConfig.🔵</abbr>
+ 251         return Optional.of(externalizedCheckpointCleanup);
+ 252     }
+ 253 
+ 254     public static Optional&lt;StateBackend&gt; getStateBackend(Properties properties) throws IOException {
+ 255         String backendType = properties.getProperty(ConfigConstrant.STATE_BACKEND_KEY);
+ 256         String checkpointDataUri = properties.getProperty(ConfigConstrant.CHECKPOINTS_DIRECTORY_KEY);
+<abbr title=" 257         String backendIncremental = properties.getProperty(ConfigConstrant.STATE_BACKEND_INCREMENTAL_KEY, &quot;true&quot;);"> 257         String backendIncremental = properties.getProperty(ConfigConstrant.STATE_BACKEND_INCREMENTAL_KEY,🔵</abbr>
+ 258 
+ 259         if (!StringUtils.isEmpty(backendType)) {
+ 260             return createStateBackend(backendType, checkpointDataUri, backendIncremental);
+ 261         }
+ 262         return Optional.empty();
+ 263     }
+ 264 
+<abbr title=" 265     private static Optional&lt;StateBackend&gt; createStateBackend(String backendType, String checkpointDataUri, String backendIncremental) throws IOException {"> 265     private static Optional&lt;StateBackend&gt; createStateBackend(String backendType, String checkpointDataUri🔵</abbr>
+ 266         EStateBackend stateBackendType = EStateBackend.convertFromString(backendType);
+ 267         StateBackend stateBackend = null;
+ 268         switch (stateBackendType) {
+ 269             case MEMORY:
+ 270                 stateBackend = new MemoryStateBackend();
+ 271                 break;
+ 272             case FILESYSTEM:
+ 273                 checkpointDataUriEmptyCheck(checkpointDataUri, backendType);
+ 274                 stateBackend = new FsStateBackend(checkpointDataUri);
+ 275                 break;
+ 276             case ROCKSDB:
+ 277                 checkpointDataUriEmptyCheck(checkpointDataUri, backendType);
+<abbr title=" 278                 stateBackend = new RocksDBStateBackend(checkpointDataUri, BooleanUtils.toBoolean(backendIncremental));"> 278                 stateBackend = new RocksDBStateBackend(checkpointDataUri, BooleanUtils.toBoolean(backendI🔵</abbr>
+ 279                 break;
+ 280             default:
+ 281                 break;
+ 282         }
+ 283         return stateBackend == null ? Optional.empty() : Optional.of(stateBackend);
+ 284     }
+ 285 
+ 286     private static void checkpointDataUriEmptyCheck(String checkpointDataUri, String backendType) {
+ 287         if (StringUtils.isEmpty(checkpointDataUri)) {
+ 288             throw new RuntimeException(backendType + &quot; backend checkpointDataUri not null!&quot;);
+ 289         }
+ 290     }
+ 291 
+ 292     // -----------------TableEnvironment state ttl config------------------------------
+ 293 
+ 294     private static final String TTL_PATTERN_STR = &quot;^+?([1-9][0-9]*)([dDhHmMsS])$&quot;;
+ 295     private static final Pattern TTL_PATTERN = Pattern.compile(TTL_PATTERN_STR);
+ 296 
+ 297     public static Optional&lt;Tuple2&lt;Time, Time&gt;&gt; getTableEnvTTL(Properties properties) {
+ 298         String ttlMintimeStr = properties.getProperty(ConfigConstrant.SQL_TTL_MINTIME);
+ 299         String ttlMaxtimeStr = properties.getProperty(ConfigConstrant.SQL_TTL_MAXTIME);
+ 300         if (StringUtils.isNotEmpty(ttlMintimeStr) || StringUtils.isNotEmpty(ttlMaxtimeStr)) {
+ 301             verityTtl(ttlMintimeStr, ttlMaxtimeStr);
+ 302             Matcher ttlMintimeStrMatcher = TTL_PATTERN.matcher(ttlMintimeStr);
+ 303             Matcher ttlMaxtimeStrMatcher = TTL_PATTERN.matcher(ttlMaxtimeStr);
+ 304 
+ 305             Long ttlMintime = 0L;
+ 306             Long ttlMaxtime = 0L;
+ 307             if (ttlMintimeStrMatcher.find()) {
+<abbr title=" 308                 ttlMintime = getTtlTime(Integer.parseInt(ttlMintimeStrMatcher.group(1)), ttlMintimeStrMatcher.group(2));"> 308                 ttlMintime = getTtlTime(Integer.parseInt(ttlMintimeStrMatcher.group(1)), ttlMintimeStrMat🔵</abbr>
+ 309             }
+ 310             if (ttlMaxtimeStrMatcher.find()) {
+<abbr title=" 311                 ttlMaxtime = getTtlTime(Integer.parseInt(ttlMaxtimeStrMatcher.group(1)), ttlMaxtimeStrMatcher.group(2));"> 311                 ttlMaxtime = getTtlTime(Integer.parseInt(ttlMaxtimeStrMatcher.group(1)), ttlMaxtimeStrMat🔵</abbr>
+ 312             }
+ 313             if (0L != ttlMintime &amp;&amp; 0L != ttlMaxtime) {
+<abbr title=" 314                 return Optional.of(new Tuple2&lt;&gt;(Time.milliseconds(ttlMintime), Time.milliseconds(ttlMaxtime)));"> 314                 return Optional.of(new Tuple2&lt;&gt;(Time.milliseconds(ttlMintime), Time.milliseconds(ttlMaxti🔵</abbr>
+ 315             }
+ 316         }
+ 317         return Optional.empty();
+ 318     }
+ 319 
+ 320     /**
+ 321      * ttl 校验
+ 322      * @param ttlMintimeStr 最小时间
+ 323      * @param ttlMaxtimeStr 最大时间
+ 324      */
+ 325     private static void verityTtl(String ttlMintimeStr, String ttlMaxtimeStr) {
+ 326         if (null == ttlMintimeStr
+ 327                 || null == ttlMaxtimeStr
+ 328                 || !TTL_PATTERN.matcher(ttlMintimeStr).find()
+ 329                 || !TTL_PATTERN.matcher(ttlMaxtimeStr).find()) {
+<abbr title=" 330             throw new RuntimeException(&quot;sql.ttl.min 、sql.ttl.max must be set at the same time . example sql.ttl.min=1h,sql.ttl.max=2h&quot;);"> 330             throw new RuntimeException(&quot;sql.ttl.min 、sql.ttl.max must be set at the same time . example s🔵</abbr>
+ 331         }
+ 332     }
+ 333 
+ 334     /**
+ 335      * 不同单位时间到毫秒的转换
+ 336      * @param timeNumber 时间值，如：30
+ 337      * @param timeUnit 单位，d:天，h:小时，m:分，s:秒
+ 338      * @return
+ 339      */
+ 340     private static Long getTtlTime(Integer timeNumber, String timeUnit) {
+ 341         if (&quot;d&quot;.equalsIgnoreCase(timeUnit)) {
+ 342             return timeNumber * 1000L * 60 * 60 * 24;
+ 343         } else if (&quot;h&quot;.equalsIgnoreCase(timeUnit)) {
+ 344             return timeNumber * 1000L * 60 * 60;
+ 345         } else if (&quot;m&quot;.equalsIgnoreCase(timeUnit)) {
+ 346             return timeNumber * 1000L * 60;
+ 347         } else if (&quot;s&quot;.equalsIgnoreCase(timeUnit)) {
+ 348             return timeNumber * 1000L;
+ 349         } else {
+ 350             throw new RuntimeException(&quot;not support &quot; + timeNumber + timeUnit);
+ 351         }
+ 352     }
+ 353 
+ 354 
+ 355 }
+ 
+ 
+ </pre></td>
+                            <td><pre>   1 /*
+   2  * Licensed to the Apache Software Foundation (ASF) under one
+   3  * or more contributor license agreements.  See the NOTICE file
+   4  * distributed with this work for additional information
+   5  * regarding copyright ownership.  The ASF licenses this file
+   6  * to you under the Apache License, Version 2.0 (the
+   7  * &quot;License&quot;); you may not use this file except in compliance
+   8  * with the License.  You may obtain a copy of the License at
+   9  *
+  10  *     http://www.apache.org/licenses/LICENSE-2.0
+  11  *
+  12  * Unless required by applicable law or agreed to in writing, software
+  13  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15  * See the License for the specific language governing permissions and
+  16  * limitations under the License.
+  17  */
+  18 package com.dtstack.flink.sql.environment;
+  19 
+  20 import com.dtstack.flink.sql.constrant.ConfigConstrant;
+  21 import com.dtstack.flink.sql.enums.EStateBackend;
+  22 import com.dtstack.flink.sql.util.MathUtil;
+  23 import com.dtstack.flink.sql.util.PropertiesUtils;
+  24 import java.io.IOException;
+  25 import java.lang.reflect.InvocationTargetException;
+  26 import java.lang.reflect.Method;
+  27 import java.util.Arrays;
+  28 import java.util.Map;
+  29 import java.util.Optional;
+  30 import java.util.Properties;
+  31 import java.util.concurrent.TimeUnit;
+  32 import java.util.regex.Matcher;
+  33 import java.util.regex.Pattern;
+  34 import org.apache.commons.lang3.BooleanUtils;
+  35 import org.apache.commons.lang3.StringUtils;
+  36 import org.apache.flink.api.common.ExecutionConfig;
+  37 import org.apache.flink.api.common.restartstrategy.RestartStrategies;
+  38 import org.apache.flink.api.common.time.Time;
+  39 import org.apache.flink.api.java.tuple.Tuple2;
+  40 import org.apache.flink.configuration.Configuration;
+  41 import org.apache.flink.contrib.streaming.state.RocksDBStateBackend;
+  42 import org.apache.flink.runtime.state.StateBackend;
+  43 import org.apache.flink.runtime.state.filesystem.FsStateBackend;
+  44 import org.apache.flink.runtime.state.memory.MemoryStateBackend;
+  45 import org.apache.flink.streaming.api.CheckpointingMode;
+  46 import org.apache.flink.streaming.api.TimeCharacteristic;
+  47 import org.apache.flink.streaming.api.environment.CheckpointConfig;
+  48 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+  49 import org.apache.flink.table.api.StreamQueryConfig;
+  50 import org.apache.flink.table.api.java.StreamTableEnvironment;
+  51 
+  52 
+  53 /**
+  54  *
+  55  *  流执行环境相关配置
+  56  * Date: 2019/11/22
+  57  * Company: www.dtstack.com
+  58  * @author maqi
+  59  */
+  60 public final class StreamEnvConfigManager {
+  61     private StreamEnvConfigManager() {
+  62         throw new AssertionError(&quot;Singleton class.&quot;);
+  63     }
+  64 
+  65     /**
+  66      * 配置StreamExecutionEnvironment运行时参数
+  67      * @param streamEnv
+  68      * @param confProperties
+  69      */
+<abbr title="  70     public static void streamExecutionEnvironmentConfig(StreamExecutionEnvironment streamEnv, Properties confProperties) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, IOException {">  70     public static void streamExecutionEnvironmentConfig(StreamExecutionEnvironment streamEnv, Properties 🔵</abbr>
+  71         confProperties = PropertiesUtils.propertiesTrim(confProperties);
+  72         streamEnv.getConfig().disableClosureCleaner();
+  73         // Disables reusing object
+  74         streamEnv.getConfig().enableObjectReuse();
+  75         Configuration globalJobParameters = new Configuration();
+  76         // Configuration unsupported set properties key-value
+<abbr title="  77         Method method = Configuration.class.getDeclaredMethod(&quot;setValueInternal&quot;, java.lang.String.class, java.lang.Object.class);">  77         Method method = Configuration.class.getDeclaredMethod(&quot;setValueInternal&quot;, java.lang.String.class,🔵</abbr>
+  78         method.setAccessible(true);
+  79         for (Map.Entry&lt;Object, Object&gt; prop : confProperties.entrySet()) {
+  80             method.invoke(globalJobParameters, prop.getKey(), prop.getValue());
+  81         }
+  82         ExecutionConfig exeConfig = streamEnv.getConfig();
+  83         if (exeConfig.getGlobalJobParameters() == null) {
+  84             exeConfig.setGlobalJobParameters(globalJobParameters);
+  85         } else if (exeConfig.getGlobalJobParameters() instanceof Configuration) {
+  86             ((Configuration) (exeConfig.getGlobalJobParameters())).addAll(globalJobParameters);
+  87         }
+  88         getEnvParallelism(confProperties).ifPresent(streamEnv::setParallelism);
+  89         getMaxEnvParallelism(confProperties).ifPresent(streamEnv::setMaxParallelism);
+  90         getBufferTimeoutMillis(confProperties).ifPresent(streamEnv::setBufferTimeout);
+  91         getStreamTimeCharacteristic(confProperties).ifPresent(streamEnv::setStreamTimeCharacteristic);
+  92         getAutoWatermarkInterval(confProperties).ifPresent(( op) -&gt; {
+  93             if (streamEnv.getStreamTimeCharacteristic().equals(TimeCharacteristic.EventTime)) {
+  94                 streamEnv.getConfig().setAutoWatermarkInterval(op);
+  95             }
+  96         });
+  97         if (isRestore(confProperties).get()) {
+<abbr title="  98             streamEnv.setRestartStrategy(RestartStrategies.failureRateRestart(ConfigConstrant.FAILUEE_RATE, Time.of(getFailureInterval(confProperties).get(), TimeUnit.MINUTES), Time.of(getDelayInterval(confProperties).get(), TimeUnit.SECONDS)));">  98             streamEnv.setRestartStrategy(RestartStrategies.failureRateRestart(ConfigConstrant.FAILUEE_RAT🔵</abbr>
+  99         } else {
+ 100             streamEnv.setRestartStrategy(RestartStrategies.noRestart());
+ 101         }
+ 102         // checkpoint config
+ 103         Optional&lt;Boolean&gt; checkpointingEnabled = isCheckpointingEnabled(confProperties);
+ 104         if (checkpointingEnabled.get()) {
+ 105             getCheckpointInterval(confProperties).ifPresent(streamEnv::enableCheckpointing);
+<abbr title=" 106             getCheckpointingMode(confProperties).ifPresent(streamEnv.getCheckpointConfig()::setCheckpointingMode);"> 106             getCheckpointingMode(confProperties).ifPresent(streamEnv.getCheckpointConfig()::setCheckpoint🔵</abbr>
+<abbr title=" 107             getCheckpointTimeout(confProperties).ifPresent(streamEnv.getCheckpointConfig()::setCheckpointTimeout);"> 107             getCheckpointTimeout(confProperties).ifPresent(streamEnv.getCheckpointConfig()::setCheckpoint🔵</abbr>
+<abbr title=" 108             getMaxConcurrentCheckpoints(confProperties).ifPresent(streamEnv.getCheckpointConfig()::setMaxConcurrentCheckpoints);"> 108             getMaxConcurrentCheckpoints(confProperties).ifPresent(streamEnv.getCheckpointConfig()::setMax🔵</abbr>
+<abbr title=" 109             getCheckpointCleanup(confProperties).ifPresent(streamEnv.getCheckpointConfig()::enableExternalizedCheckpoints);"> 109             getCheckpointCleanup(confProperties).ifPresent(streamEnv.getCheckpointConfig()::enableExterna🔵</abbr>
+ 110             getStateBackend(confProperties).ifPresent(streamEnv::setStateBackend);
+ 111         }
+ 112     }
+ 113 
+<abbr title=" 114     public static StreamQueryConfig getStreamQueryConfig(StreamTableEnvironment tableEnv, Properties confProperties) {"> 114     public static StreamQueryConfig getStreamQueryConfig(StreamTableEnvironment tableEnv, Properties conf🔵</abbr>
+<abbr title=" 115         return StreamEnvConfigManager.streamTableEnvironmentStateTTLConfig(tableEnv, confProperties).orElseGet(tableEnv::queryConfig);"> 115         return StreamEnvConfigManager.streamTableEnvironmentStateTTLConfig(tableEnv, confProperties).orEl🔵</abbr>
+ 116     }
+ 117 
+ 118     /**
+ 119      * 设置TableEnvironment状态超时时间
+ 120      * @param tableEnv
+ 121      * @param confProperties
+ 122      */
+<abbr title=" 123     public static Optional&lt;StreamQueryConfig&gt; streamTableEnvironmentStateTTLConfig(StreamTableEnvironment tableEnv, Properties confProperties) {"> 123     public static Optional&lt;StreamQueryConfig&gt; streamTableEnvironmentStateTTLConfig(StreamTableEnvironment🔵</abbr>
+ 124         Optional&lt;StreamQueryConfig&gt; streamQueryConfig = Optional.empty();
+ 125         confProperties = PropertiesUtils.propertiesTrim(confProperties);
+ 126         Optional&lt;Tuple2&lt;Time, Time&gt;&gt; tableEnvTTL = getTableEnvTTL(confProperties);
+ 127         if (tableEnvTTL.isPresent()) {
+ 128             Tuple2&lt;Time, Time&gt; timeRange = tableEnvTTL.get();
+ 129             StreamQueryConfig queryConfig = tableEnv.queryConfig();
+ 130             queryConfig.withIdleStateRetentionTime(timeRange.f0, timeRange.f1);
+ 131             streamQueryConfig = Optional.of(queryConfig);
+ 132         }
+ 133         return streamQueryConfig;
+ 134     }
+ 135 
+<abbr title=" 136     // -----------------------StreamExecutionEnvironment config-----------------------------------------------"> 136     // -----------------------StreamExecutionEnvironment config------------------------------------------🔵</abbr>
+ 137     public static Optional&lt;Integer&gt; getEnvParallelism(Properties properties) {
+ 138         String parallelismStr = properties.getProperty(ConfigConstrant.SQL_ENV_PARALLELISM);
+<abbr title=" 139         return StringUtils.isNotBlank(parallelismStr) ? Optional.of(Integer.valueOf(parallelismStr)) : Optional.empty();"> 139         return StringUtils.isNotBlank(parallelismStr) ? Optional.of(Integer.valueOf(parallelismStr)) : Op🔵</abbr>
+ 140     }
+ 141 
+ 142     public static Optional&lt;Integer&gt; getMaxEnvParallelism(Properties properties) {
+ 143         String parallelismStr = properties.getProperty(ConfigConstrant.SQL_MAX_ENV_PARALLELISM);
+<abbr title=" 144         return StringUtils.isNotBlank(parallelismStr) ? Optional.of(Integer.valueOf(parallelismStr)) : Optional.empty();"> 144         return StringUtils.isNotBlank(parallelismStr) ? Optional.of(Integer.valueOf(parallelismStr)) : Op🔵</abbr>
+ 145     }
+ 146 
+ 147     public static Optional&lt;Long&gt; getBufferTimeoutMillis(Properties properties) {
+ 148         String mills = properties.getProperty(ConfigConstrant.SQL_BUFFER_TIMEOUT_MILLIS);
+ 149         return StringUtils.isNotBlank(mills) ? Optional.of(Long.valueOf(mills)) : Optional.empty();
+ 150     }
+ 151 
+ 152     public static Optional&lt;Long&gt; getAutoWatermarkInterval(Properties properties) {
+<abbr title=" 153         String autoWatermarkInterval = properties.getProperty(ConfigConstrant.AUTO_WATERMARK_INTERVAL_KEY);"> 153         String autoWatermarkInterval = properties.getProperty(ConfigConstrant.AUTO_WATERMARK_INTERVAL_KEY🔵</abbr>
+<abbr title=" 154         return StringUtils.isNotBlank(autoWatermarkInterval) ? Optional.of(Long.valueOf(autoWatermarkInterval)) : Optional.empty();"> 154         return StringUtils.isNotBlank(autoWatermarkInterval) ? Optional.of(Long.valueOf(autoWatermarkInte🔵</abbr>
+ 155     }
+ 156 
+ 157     public static Optional&lt;Boolean&gt; isRestore(Properties properties){
+ 158         String restoreEnable = properties.getProperty(ConfigConstrant.RESTOREENABLE, &quot;true&quot;);
+ 159         return Optional.of(Boolean.valueOf(restoreEnable));
+ 160     }
+ 161 
+ 162     public static Optional&lt;Integer&gt; getDelayInterval(Properties properties){
+ 163         String delayInterval = properties.getProperty(ConfigConstrant.DELAYINTERVAL, &quot;10&quot;);
+ 164         return Optional.of(Integer.valueOf(delayInterval));
+ 165     }
+ 166 
+ 167     public static Optional&lt;Integer&gt; getFailureInterval(Properties properties){
+ 168         String failureInterval = properties.getProperty(ConfigConstrant.FAILUREINTERVAL, &quot;6&quot;);
+ 169         return Optional.of(Integer.valueOf(failureInterval));
+ 170     }
+ 171 
+ 172     /**
+ 173      * #ProcessingTime(默认), IngestionTime, EventTime
+ 174      * @param properties
+ 175      */
+ 176     public static Optional&lt;TimeCharacteristic&gt; getStreamTimeCharacteristic(Properties properties) {
+ 177         if (!properties.containsKey(ConfigConstrant.FLINK_TIME_CHARACTERISTIC_KEY)) {
+ 178             return Optional.empty();
+ 179         }
+ 180         String characteristicStr = properties.getProperty(ConfigConstrant.FLINK_TIME_CHARACTERISTIC_KEY);
+ 181         Optional&lt;TimeCharacteristic&gt; characteristic = Arrays.stream(TimeCharacteristic.values())
+ 182                 .filter(tc -&gt; characteristicStr.equalsIgnoreCase(tc.toString())).findAny();
+ 183 
+ 184         if (!characteristic.isPresent()) {
+<abbr title=" 185             throw new RuntimeException(&quot;illegal property :&quot; + ConfigConstrant.FLINK_TIME_CHARACTERISTIC_KEY);"> 185             throw new RuntimeException(&quot;illegal property :&quot; + ConfigConstrant.FLINK_TIME_CHARACTERISTIC_K🔵</abbr>
+ 186         }
+ 187         return characteristic;
+ 188     }
+ 189 
+ 190     public static Optional&lt;Boolean&gt; isCheckpointingEnabled(Properties properties) {
+<abbr title=" 191         boolean checkpointEnabled = !(properties.getProperty(ConfigConstrant.SQL_CHECKPOINT_INTERVAL_KEY) == null"> 191         boolean checkpointEnabled = !(properties.getProperty(ConfigConstrant.SQL_CHECKPOINT_INTERVAL_KEY)🔵</abbr>
+ 192                 &amp;&amp; properties.getProperty(ConfigConstrant.FLINK_CHECKPOINT_INTERVAL_KEY) == null);
+ 193         return Optional.of(checkpointEnabled);
+ 194     }
+ 195 
+ 196     public static Optional&lt;Long&gt; getCheckpointInterval(Properties properties) {
+ 197         // 两个参数主要用来做上层兼容
+<abbr title=" 198         Long sqlInterval = Long.valueOf(properties.getProperty(ConfigConstrant.SQL_CHECKPOINT_INTERVAL_KEY, &quot;0&quot;));"> 198         Long sqlInterval = Long.valueOf(properties.getProperty(ConfigConstrant.SQL_CHECKPOINT_INTERVAL_KE🔵</abbr>
+<abbr title=" 199         Long flinkInterval = Long.valueOf(properties.getProperty(ConfigConstrant.FLINK_CHECKPOINT_INTERVAL_KEY, &quot;0&quot;));"> 199         Long flinkInterval = Long.valueOf(properties.getProperty(ConfigConstrant.FLINK_CHECKPOINT_INTERVA🔵</abbr>
+ 200         long checkpointInterval = Math.max(sqlInterval, flinkInterval);
+ 201         return Optional.of(checkpointInterval);
+ 202     }
+ 203 
+ 204     public static Optional&lt;CheckpointingMode&gt; getCheckpointingMode(Properties properties) {
+ 205         String checkpointingModeStr = properties.getProperty(ConfigConstrant.FLINK_CHECKPOINT_MODE_KEY);
+ 206         CheckpointingMode checkpointingMode = null;
+ 207         if (!StringUtils.isEmpty(checkpointingModeStr)) {
+ 208             checkpointingMode = CheckpointingMode.valueOf(checkpointingModeStr.toUpperCase());
+ 209         }
+ 210         return checkpointingMode == null ? Optional.empty() : Optional.of(checkpointingMode);
+ 211     }
+ 212 
+ 213     public static Optional&lt;Long&gt; getCheckpointTimeout(Properties properties) {
+<abbr title=" 214         String checkpointTimeoutStr = properties.getProperty(ConfigConstrant.FLINK_CHECKPOINT_TIMEOUT_KEY);"> 214         String checkpointTimeoutStr = properties.getProperty(ConfigConstrant.FLINK_CHECKPOINT_TIMEOUT_KEY🔵</abbr>
+ 215 
+ 216         if (!StringUtils.isEmpty(checkpointTimeoutStr)) {
+ 217             Long checkpointTimeout = Long.valueOf(checkpointTimeoutStr);
+ 218             return Optional.of(checkpointTimeout);
+ 219         }
+ 220         return Optional.empty();
+ 221     }
+ 222 
+ 223     public static Optional&lt;Integer&gt; getMaxConcurrentCheckpoints(Properties properties) {
+<abbr title=" 224         String maxConcurrCheckpointsStr = properties.getProperty(ConfigConstrant.FLINK_MAXCONCURRENTCHECKPOINTS_KEY);"> 224         String maxConcurrCheckpointsStr = properties.getProperty(ConfigConstrant.FLINK_MAXCONCURRENTCHECK🔵</abbr>
+ 225         if (!StringUtils.isEmpty(maxConcurrCheckpointsStr)) {
+ 226             Integer maxConcurrCheckpoints = Integer.valueOf(maxConcurrCheckpointsStr);
+ 227             return Optional.of(maxConcurrCheckpoints);
+ 228         }
+ 229         return Optional.empty();
+ 230     }
+ 231 
+<abbr title=" 232     public static Optional&lt;CheckpointConfig.ExternalizedCheckpointCleanup&gt; getCheckpointCleanup(Properties properties) {"> 232     public static Optional&lt;CheckpointConfig.ExternalizedCheckpointCleanup&gt; getCheckpointCleanup(Propertie🔵</abbr>
+<abbr title=" 233         Boolean sqlCleanMode = MathUtil.getBoolean(properties.getProperty(ConfigConstrant.SQL_CHECKPOINT_CLEANUPMODE_KEY), false);"> 233         Boolean sqlCleanMode = MathUtil.getBoolean(properties.getProperty(ConfigConstrant.SQL_CHECKPOINT_🔵</abbr>
+<abbr title=" 234         Boolean flinkCleanMode = MathUtil.getBoolean(properties.getProperty(ConfigConstrant.FLINK_CHECKPOINT_CLEANUPMODE_KEY), false);"> 234         Boolean flinkCleanMode = MathUtil.getBoolean(properties.getProperty(ConfigConstrant.FLINK_CHECKPO🔵</abbr>
+ 235 
+<abbr title=" 236         CheckpointConfig.ExternalizedCheckpointCleanup externalizedCheckpointCleanup = (sqlCleanMode || flinkCleanMode) ?"> 236         CheckpointConfig.ExternalizedCheckpointCleanup externalizedCheckpointCleanup = (sqlCleanMode || f🔵</abbr>
+<abbr title=" 237                 CheckpointConfig.ExternalizedCheckpointCleanup.DELETE_ON_CANCELLATION : CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION;"> 237                 CheckpointConfig.ExternalizedCheckpointCleanup.DELETE_ON_CANCELLATION : CheckpointConfig.🔵</abbr>
+ 238         return Optional.of(externalizedCheckpointCleanup);
+ 239     }
+ 240 
+ 241     public static Optional&lt;StateBackend&gt; getStateBackend(Properties properties) throws IOException {
+ 242         String backendType = properties.getProperty(ConfigConstrant.STATE_BACKEND_KEY);
+ 243         String checkpointDataUri = properties.getProperty(ConfigConstrant.CHECKPOINTS_DIRECTORY_KEY);
+<abbr title=" 244         String backendIncremental = properties.getProperty(ConfigConstrant.STATE_BACKEND_INCREMENTAL_KEY, &quot;true&quot;);"> 244         String backendIncremental = properties.getProperty(ConfigConstrant.STATE_BACKEND_INCREMENTAL_KEY,🔵</abbr>
+ 245 
+ 246         if (!StringUtils.isEmpty(backendType)) {
+ 247             return createStateBackend(backendType, checkpointDataUri, backendIncremental);
+ 248         }
+ 249         return Optional.empty();
+ 250     }
+ 251 
+<abbr title=" 252     private static Optional&lt;StateBackend&gt; createStateBackend(String backendType, String checkpointDataUri, String backendIncremental) throws IOException {"> 252     private static Optional&lt;StateBackend&gt; createStateBackend(String backendType, String checkpointDataUri🔵</abbr>
+ 253         EStateBackend stateBackendType = EStateBackend.convertFromString(backendType);
+ 254         StateBackend stateBackend = null;
+ 255         switch (stateBackendType) {
+ 256             case MEMORY :
+ 257                 stateBackend = new MemoryStateBackend();
+ 258                 break;
+ 259             case FILESYSTEM :
+ 260                 checkpointDataUriEmptyCheck(checkpointDataUri, backendType);
+ 261                 stateBackend = new FsStateBackend(checkpointDataUri);
+ 262                 break;
+ 263             case ROCKSDB :
+ 264                 checkpointDataUriEmptyCheck(checkpointDataUri, backendType);
+<abbr title=" 265                 stateBackend = new RocksDBStateBackend(checkpointDataUri, BooleanUtils.toBoolean(backendIncremental));"> 265                 stateBackend = new RocksDBStateBackend(checkpointDataUri, BooleanUtils.toBoolean(backendI🔵</abbr>
+ 266                 break;
+ 267             default :
+ 268                 break;
+ 269         }
+ 270         return stateBackend == null ? Optional.empty() : Optional.of(stateBackend);
+ 271     }
+ 272 
+ 273     private static void checkpointDataUriEmptyCheck(String checkpointDataUri, String backendType) {
+ 274         if (StringUtils.isEmpty(checkpointDataUri)) {
+ 275             throw new RuntimeException(backendType + &quot; backend checkpointDataUri not null!&quot;);
+ 276         }
+ 277     }
+ 278 
+ 279     // -----------------TableEnvironment state ttl config------------------------------
+ 280     // -----------------TableEnvironment state ttl config------------------------------
+ 281 
+ 282     private static final String TTL_PATTERN_STR = &quot;^+?([1-9][0-9]*)([dDhHmMsS])$&quot;;
+ 283 
+ 284     private static final Pattern TTL_PATTERN = Pattern.compile(TTL_PATTERN_STR);
+ 285 
+ 286     public static Optional&lt;Tuple2&lt;Time, Time&gt;&gt; getTableEnvTTL(Properties properties) {
+ 287         String ttlMintimeStr = properties.getProperty(ConfigConstrant.SQL_TTL_MINTIME);
+ 288         String ttlMaxtimeStr = properties.getProperty(ConfigConstrant.SQL_TTL_MAXTIME);
+ 289         if (StringUtils.isNotEmpty(ttlMintimeStr) || StringUtils.isNotEmpty(ttlMaxtimeStr)) {
+ 290             verityTtl(ttlMintimeStr, ttlMaxtimeStr);
+ 291             Matcher ttlMintimeStrMatcher = TTL_PATTERN.matcher(ttlMintimeStr);
+ 292             Matcher ttlMaxtimeStrMatcher = TTL_PATTERN.matcher(ttlMaxtimeStr);
+ 293 
+ 294             Long ttlMintime = 0L;
+ 295             Long ttlMaxtime = 0L;
+ 296             if (ttlMintimeStrMatcher.find()) {
+<abbr title=" 297                 ttlMintime = getTtlTime(Integer.parseInt(ttlMintimeStrMatcher.group(1)), ttlMintimeStrMatcher.group(2));"> 297                 ttlMintime = getTtlTime(Integer.parseInt(ttlMintimeStrMatcher.group(1)), ttlMintimeStrMat🔵</abbr>
+ 298             }
+ 299             if (ttlMaxtimeStrMatcher.find()) {
+<abbr title=" 300                 ttlMaxtime = getTtlTime(Integer.parseInt(ttlMaxtimeStrMatcher.group(1)), ttlMaxtimeStrMatcher.group(2));"> 300                 ttlMaxtime = getTtlTime(Integer.parseInt(ttlMaxtimeStrMatcher.group(1)), ttlMaxtimeStrMat🔵</abbr>
+ 301             }
+ 302             if (0L != ttlMintime &amp;&amp; 0L != ttlMaxtime) {
+<abbr title=" 303                 return Optional.of(new Tuple2&lt;&gt;(Time.milliseconds(ttlMintime), Time.milliseconds(ttlMaxtime)));"> 303                 return Optional.of(new Tuple2&lt;&gt;(Time.milliseconds(ttlMintime), Time.milliseconds(ttlMaxti🔵</abbr>
+ 304             }
+ 305         }
+ 306         return Optional.empty();
+ 307     }
+ 308 
+ 309     /**
+ 310      * ttl 校验
+ 311      * @param ttlMintimeStr 最小时间
+ 312      * @param ttlMaxtimeStr 最大时间
+ 313      */
+ 314     private static void verityTtl(String ttlMintimeStr, String ttlMaxtimeStr) {
+ 315         if (null == ttlMintimeStr
+ 316                 || null == ttlMaxtimeStr
+ 317                 || !TTL_PATTERN.matcher(ttlMintimeStr).find()
+ 318                 || !TTL_PATTERN.matcher(ttlMaxtimeStr).find()) {
+<abbr title=" 319             throw new RuntimeException(&quot;sql.ttl.min 、sql.ttl.max must be set at the same time . example sql.ttl.min=1h,sql.ttl.max=2h&quot;);"> 319             throw new RuntimeException(&quot;sql.ttl.min 、sql.ttl.max must be set at the same time . example s🔵</abbr>
+ 320         }
+ 321     }
+ 322 
+ 323     /**
+ 324      * 不同单位时间到毫秒的转换
+ 325      * @param timeNumber 时间值，如：30
+ 326      * @param timeUnit 单位，d:天，h:小时，m:分，s:秒
+ 327      * @return
+ 328      */
+ 329     private static Long getTtlTime(Integer timeNumber, String timeUnit) {
+ 330         if (&quot;d&quot;.equalsIgnoreCase(timeUnit)) {
+ 331             return (((timeNumber * 1000L) * 60) * 60) * 24;
+ 332         } else if (&quot;h&quot;.equalsIgnoreCase(timeUnit)) {
+ 333             return ((timeNumber * 1000L) * 60) * 60;
+ 334         } else if (&quot;m&quot;.equalsIgnoreCase(timeUnit)) {
+ 335             return (timeNumber * 1000L) * 60;
+ 336         } else if (&quot;s&quot;.equalsIgnoreCase(timeUnit)) {
+ 337             return timeNumber * 1000L;
+ 338         } else {
+ 339             throw new RuntimeException((&quot;not support &quot; + timeNumber) + timeUnit);
+ 340         }
+ 341     }
+ 342 }
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ </pre></td>
+                        </tr>
+                    </table>
+                </div>
+                <div id="bottom">
+                    <table style="margin:auto">
+                        <tr>
+                            <th>ours vs. base</th>
+                            <th>theirs vs. base</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1  /*
+   2   * Licensed to the Apache Software Foundation (ASF) under one
+   3   * or more contributor license agreements.  See the NOTICE file
+   4   * distributed with this work for additional information
+   5   * regarding copyright ownership.  The ASF licenses this file
+   6   * to you under the Apache License, Version 2.0 (the
+   7   * &quot;License&quot;); you may not use this file except in compliance
+   8   * with the License.  You may obtain a copy of the License at
+   9   *
+  10   *     http://www.apache.org/licenses/LICENSE-2.0
+  11   *
+  12   * Unless required by applicable law or agreed to in writing, software
+  13   * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15   * See the License for the specific language governing permissions and
+  16   * limitations under the License.
+  17   */
+  18  
+  19  package com.dtstack.flink.sql.environment;
+  20  
+  21  import com.dtstack.flink.sql.constrant.ConfigConstrant;
+  22  import com.dtstack.flink.sql.enums.EStateBackend;
+  23  import com.dtstack.flink.sql.util.MathUtil;
+  24  import com.dtstack.flink.sql.util.PropertiesUtils;
+  25  import org.apache.commons.lang3.BooleanUtils;
+  26  import org.apache.commons.lang3.StringUtils;
+  27  import org.apache.flink.api.common.ExecutionConfig;
+  28  import org.apache.flink.api.common.restartstrategy.RestartStrategies;
+  29  import org.apache.flink.api.common.time.Time;
+  30  import org.apache.flink.api.java.tuple.Tuple2;
+  31  import org.apache.flink.configuration.Configuration;
+  32  import org.apache.flink.contrib.streaming.state.RocksDBStateBackend;
+  33  import org.apache.flink.runtime.state.StateBackend;
+  34  import org.apache.flink.runtime.state.filesystem.FsStateBackend;
+  35  import org.apache.flink.runtime.state.memory.MemoryStateBackend;
+  36  import org.apache.flink.streaming.api.CheckpointingMode;
+  37  import org.apache.flink.streaming.api.TimeCharacteristic;
+  38  import org.apache.flink.streaming.api.environment.CheckpointConfig;
+  39  import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+  40  import org.apache.flink.table.api.StreamQueryConfig;
+  41  import org.apache.flink.table.api.java.StreamTableEnvironment;
+  42  
+
+
+
+
+
+
+
+  43  import java.io.IOException;
+  44  import java.lang.reflect.InvocationTargetException;
+  45  import java.lang.reflect.Method;
+  46  import java.util.Arrays;
+  47  import java.util.Map;
+  48  import java.util.Optional;
+  49  import java.util.Properties;
+  50  import java.util.concurrent.TimeUnit;
+  51  import java.util.regex.Matcher;
+  52  import java.util.regex.Pattern;
+  53  
+  54  /**
+  55   *
+  56   *  流执行环境相关配置
+  57   * Date: 2019/11/22
+  58   * Company: www.dtstack.com
+  59   * @author maqi
+  60   */
+  61  public final class StreamEnvConfigManager {
+  62      private StreamEnvConfigManager() {
+  63          throw new AssertionError(&quot;Singleton class.&quot;);
+  64      }
+  65  
+  66      /**
+  67       * 配置StreamExecutionEnvironment运行时参数
+  68       * @param streamEnv
+  69       * @param confProperties
+  70       */
+<abbr title="  71      public static void streamExecutionEnvironmentConfig(StreamExecutionEnvironment streamEnv, Properties confProperties)">  71      public static void streamExecutionEnvironmentConfig(StreamExecutionEnvironment streamEnv, Properties confPrope🔵</abbr>
+  72              throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, IOException {
+  73  
+  74          confProperties = PropertiesUtils.propertiesTrim(confProperties);
+  75          streamEnv.getConfig().disableClosureCleaner();
+  76          // Disables reusing object
+  77          streamEnv.getConfig().enableObjectReuse();
+  78  
+  79          Configuration globalJobParameters = new Configuration();
+  80          //Configuration unsupported set properties key-value
+  81          Method method = Configuration.class.getDeclaredMethod(&quot;setValueInternal&quot;, String.class, Object.class);
+  82          method.setAccessible(true);
+  83          for (Map.Entry&lt;Object, Object&gt; prop : confProperties.entrySet()) {
+  84              method.invoke(globalJobParameters, prop.getKey(), prop.getValue());
+  85          }
+  86  
+  87          ExecutionConfig exeConfig = streamEnv.getConfig();
+  88          if (exeConfig.getGlobalJobParameters() == null) {
+  89              exeConfig.setGlobalJobParameters(globalJobParameters);
+  90          } else if (exeConfig.getGlobalJobParameters() instanceof Configuration) {
+  91              ((Configuration) exeConfig.getGlobalJobParameters()).addAll(globalJobParameters);
+  92          }
+  93  
+  94          getEnvParallelism(confProperties).ifPresent(streamEnv::setParallelism);
+  95          getMaxEnvParallelism(confProperties).ifPresent(streamEnv::setMaxParallelism);
+  96          getBufferTimeoutMillis(confProperties).ifPresent(streamEnv::setBufferTimeout);
+  97          getStreamTimeCharacteristic(confProperties).ifPresent(streamEnv::setStreamTimeCharacteristic);
+  98          getAutoWatermarkInterval(confProperties).ifPresent(op -&gt; {
+  99              if (streamEnv.getStreamTimeCharacteristic().equals(TimeCharacteristic.EventTime)) {
+ 100                  streamEnv.getConfig().setAutoWatermarkInterval(op);
+ 101              }
+ 102          });
+ 103  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 104 -        streamEnv.setRestartStrategy(RestartStrategies.failureRateRestart(</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 105 -                ConfigConstrant.failureRate,</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 106 -                Time.of(ConfigConstrant.failureInterval, TimeUnit.MINUTES),</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 107 -                Time.of(ConfigConstrant.delayInterval, TimeUnit.SECONDS)</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 108 -        ));</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 109 +        if(isRestore(confProperties).get()){</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 110 +            streamEnv.setRestartStrategy(RestartStrategies.failureRateRestart(</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 111 +                    ConfigConstrant.FAILUEE_RATE,</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 112 +                    Time.of(getFailureInterval(confProperties).get(), TimeUnit.MINUTES),</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 113 +                    Time.of(getDelayInterval(confProperties).get(), TimeUnit.SECONDS)</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 114 +            ));</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 115 +        } else {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 116 +            streamEnv.setRestartStrategy(RestartStrategies.noRestart());</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 117 +        }</span>
+ 118  
+ 119          // checkpoint config
+ 120          Optional&lt;Boolean&gt; checkpointingEnabled = isCheckpointingEnabled(confProperties);
+ 121          if (checkpointingEnabled.get()) {
+ 122              getCheckpointInterval(confProperties).ifPresent(streamEnv::enableCheckpointing);
+ 123              getCheckpointingMode(confProperties).ifPresent(streamEnv.getCheckpointConfig()::setCheckpointingMode);
+ 124              getCheckpointTimeout(confProperties).ifPresent(streamEnv.getCheckpointConfig()::setCheckpointTimeout);
+<abbr title=" 125              getMaxConcurrentCheckpoints(confProperties).ifPresent(streamEnv.getCheckpointConfig()::setMaxConcurrentCheckpoints);"> 125              getMaxConcurrentCheckpoints(confProperties).ifPresent(streamEnv.getCheckpointConfig()::setMaxConcurren🔵</abbr>
+<abbr title=" 126              getCheckpointCleanup(confProperties).ifPresent(streamEnv.getCheckpointConfig()::enableExternalizedCheckpoints);"> 126              getCheckpointCleanup(confProperties).ifPresent(streamEnv.getCheckpointConfig()::enableExternalizedChec🔵</abbr>
+ 127              getStateBackend(confProperties).ifPresent(streamEnv::setStateBackend);
+ 128          }
+ 129      }
+ 130  
+<abbr title=" 131      public static StreamQueryConfig getStreamQueryConfig(StreamTableEnvironment tableEnv, Properties confProperties) {"> 131      public static StreamQueryConfig getStreamQueryConfig(StreamTableEnvironment tableEnv, Properties confPropertie🔵</abbr>
+<abbr title=" 132          return StreamEnvConfigManager.streamTableEnvironmentStateTTLConfig(tableEnv, confProperties).orElseGet(tableEnv::queryConfig);"> 132          return StreamEnvConfigManager.streamTableEnvironmentStateTTLConfig(tableEnv, confProperties).orElseGet(tab🔵</abbr>
+ 133      }
+ 134  
+ 135      /**
+ 136       * 设置TableEnvironment状态超时时间
+ 137       * @param tableEnv
+ 138       * @param confProperties
+ 139       */
+<abbr title=" 140      public static Optional&lt;StreamQueryConfig&gt; streamTableEnvironmentStateTTLConfig(StreamTableEnvironment tableEnv, Properties confProperties) {"> 140      public static Optional&lt;StreamQueryConfig&gt; streamTableEnvironmentStateTTLConfig(StreamTableEnvironment tableEnv🔵</abbr>
+ 141          Optional&lt;StreamQueryConfig&gt; streamQueryConfig = Optional.empty();
+ 142          confProperties = PropertiesUtils.propertiesTrim(confProperties);
+ 143          Optional&lt;Tuple2&lt;Time, Time&gt;&gt; tableEnvTTL = getTableEnvTTL(confProperties);
+ 144          if (tableEnvTTL.isPresent()) {
+ 145              Tuple2&lt;Time, Time&gt; timeRange = tableEnvTTL.get();
+ 146              StreamQueryConfig queryConfig = tableEnv.queryConfig();
+ 147              queryConfig.withIdleStateRetentionTime(timeRange.f0, timeRange.f1);
+ 148              streamQueryConfig = Optional.of(queryConfig);
+ 149          }
+ 150          return streamQueryConfig;
+ 151      }
+ 152  
+ 153  
+ 154      // -----------------------StreamExecutionEnvironment config-----------------------------------------------
+ 155      public static Optional&lt;Integer&gt; getEnvParallelism(Properties properties) {
+ 156          String parallelismStr = properties.getProperty(ConfigConstrant.SQL_ENV_PARALLELISM);
+<abbr title=" 157          return StringUtils.isNotBlank(parallelismStr) ? Optional.of(Integer.valueOf(parallelismStr)) : Optional.empty();"> 157          return StringUtils.isNotBlank(parallelismStr) ? Optional.of(Integer.valueOf(parallelismStr)) : Optional.em🔵</abbr>
+ 158      }
+ 159  
+ 160      public static Optional&lt;Integer&gt; getMaxEnvParallelism(Properties properties) {
+ 161          String parallelismStr = properties.getProperty(ConfigConstrant.SQL_MAX_ENV_PARALLELISM);
+<abbr title=" 162          return StringUtils.isNotBlank(parallelismStr) ? Optional.of(Integer.valueOf(parallelismStr)) : Optional.empty();"> 162          return StringUtils.isNotBlank(parallelismStr) ? Optional.of(Integer.valueOf(parallelismStr)) : Optional.em🔵</abbr>
+ 163      }
+ 164  
+ 165      public static Optional&lt;Long&gt; getBufferTimeoutMillis(Properties properties) {
+ 166          String mills = properties.getProperty(ConfigConstrant.SQL_BUFFER_TIMEOUT_MILLIS);
+ 167          return StringUtils.isNotBlank(mills) ? Optional.of(Long.valueOf(mills)) : Optional.empty();
+ 168      }
+ 169  
+ 170      public static Optional&lt;Long&gt; getAutoWatermarkInterval(Properties properties) {
+ 171          String autoWatermarkInterval = properties.getProperty(ConfigConstrant.AUTO_WATERMARK_INTERVAL_KEY);
+<abbr title=" 172          return StringUtils.isNotBlank(autoWatermarkInterval) ? Optional.of(Long.valueOf(autoWatermarkInterval)) : Optional.empty();"> 172          return StringUtils.isNotBlank(autoWatermarkInterval) ? Optional.of(Long.valueOf(autoWatermarkInterval)) : 🔵</abbr>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 173 +    }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 174 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 175 +    public static Optional&lt;Boolean&gt; isRestore(Properties properties){</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 176 +        String restoreEnable = properties.getProperty(ConfigConstrant.RESTOREENABLE, &quot;true&quot;);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 177 +        return Optional.of(Boolean.valueOf(restoreEnable));</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 178 +    }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 179 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 180 +    public static Optional&lt;Integer&gt; getDelayInterval(Properties properties){</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 181 +        String delayInterval = properties.getProperty(ConfigConstrant.DELAYINTERVAL, &quot;10&quot;);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 182 +        return Optional.of(Integer.valueOf(delayInterval));</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 183 +    }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 184 +    public static Optional&lt;Integer&gt; getFailureInterval(Properties properties){</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 185 +        String failureInterval = properties.getProperty(ConfigConstrant.FAILUREINTERVAL, &quot;6&quot;);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 186 +        return Optional.of(Integer.valueOf(failureInterval));</span>
+ 187      }
+ 188  
+ 189      /**
+ 190       * #ProcessingTime(默认), IngestionTime, EventTime
+ 191       * @param properties
+ 192       */
+ 193      public static Optional&lt;TimeCharacteristic&gt; getStreamTimeCharacteristic(Properties properties) {
+ 194          if (!properties.containsKey(ConfigConstrant.FLINK_TIME_CHARACTERISTIC_KEY)) {
+ 195              return Optional.empty();
+ 196          }
+ 197          String characteristicStr = properties.getProperty(ConfigConstrant.FLINK_TIME_CHARACTERISTIC_KEY);
+ 198          Optional&lt;TimeCharacteristic&gt; characteristic = Arrays.stream(TimeCharacteristic.values())
+ 199                  .filter(tc -&gt; characteristicStr.equalsIgnoreCase(tc.toString())).findAny();
+ 200  
+ 201          if (!characteristic.isPresent()) {
+ 202              throw new RuntimeException(&quot;illegal property :&quot; + ConfigConstrant.FLINK_TIME_CHARACTERISTIC_KEY);
+ 203          }
+ 204          return characteristic;
+ 205      }
+ 206  
+ 207      public static Optional&lt;Boolean&gt; isCheckpointingEnabled(Properties properties) {
+ 208          boolean checkpointEnabled = !(properties.getProperty(ConfigConstrant.SQL_CHECKPOINT_INTERVAL_KEY) == null
+ 209                  &amp;&amp; properties.getProperty(ConfigConstrant.FLINK_CHECKPOINT_INTERVAL_KEY) == null);
+ 210          return Optional.of(checkpointEnabled);
+ 211      }
+ 212  
+ 213      public static Optional&lt;Long&gt; getCheckpointInterval(Properties properties) {
+ 214          // 两个参数主要用来做上层兼容
+ 215          Long sqlInterval = Long.valueOf(properties.getProperty(ConfigConstrant.SQL_CHECKPOINT_INTERVAL_KEY, &quot;0&quot;));
+<abbr title=" 216          Long flinkInterval = Long.valueOf(properties.getProperty(ConfigConstrant.FLINK_CHECKPOINT_INTERVAL_KEY, &quot;0&quot;));"> 216          Long flinkInterval = Long.valueOf(properties.getProperty(ConfigConstrant.FLINK_CHECKPOINT_INTERVAL_KEY, &quot;0🔵</abbr>
+ 217          long checkpointInterval = Math.max(sqlInterval, flinkInterval);
+ 218          return Optional.of(checkpointInterval);
+ 219      }
+ 220  
+ 221      public static Optional&lt;CheckpointingMode&gt; getCheckpointingMode(Properties properties) {
+ 222          String checkpointingModeStr = properties.getProperty(ConfigConstrant.FLINK_CHECKPOINT_MODE_KEY);
+ 223          CheckpointingMode checkpointingMode = null;
+ 224          if (!StringUtils.isEmpty(checkpointingModeStr)) {
+ 225              checkpointingMode = CheckpointingMode.valueOf(checkpointingModeStr.toUpperCase());
+ 226          }
+ 227          return checkpointingMode == null ? Optional.empty() : Optional.of(checkpointingMode);
+ 228      }
+ 229  
+ 230      public static Optional&lt;Long&gt; getCheckpointTimeout(Properties properties) {
+ 231          String checkpointTimeoutStr = properties.getProperty(ConfigConstrant.FLINK_CHECKPOINT_TIMEOUT_KEY);
+ 232  
+ 233          if (!StringUtils.isEmpty(checkpointTimeoutStr)) {
+ 234              Long checkpointTimeout = Long.valueOf(checkpointTimeoutStr);
+ 235              return Optional.of(checkpointTimeout);
+ 236          }
+ 237          return Optional.empty();
+ 238      }
+ 239  
+ 240      public static Optional&lt;Integer&gt; getMaxConcurrentCheckpoints(Properties properties) {
+<abbr title=" 241          String maxConcurrCheckpointsStr = properties.getProperty(ConfigConstrant.FLINK_MAXCONCURRENTCHECKPOINTS_KEY);"> 241          String maxConcurrCheckpointsStr = properties.getProperty(ConfigConstrant.FLINK_MAXCONCURRENTCHECKPOINTS_KE🔵</abbr>
+ 242          if (!StringUtils.isEmpty(maxConcurrCheckpointsStr)) {
+ 243              Integer maxConcurrCheckpoints = Integer.valueOf(maxConcurrCheckpointsStr);
+ 244              return Optional.of(maxConcurrCheckpoints);
+ 245          }
+ 246          return Optional.empty();
+ 247      }
+ 248  
+<abbr title=" 249      public static Optional&lt;CheckpointConfig.ExternalizedCheckpointCleanup&gt; getCheckpointCleanup(Properties properties) {"> 249      public static Optional&lt;CheckpointConfig.ExternalizedCheckpointCleanup&gt; getCheckpointCleanup(Properties propert🔵</abbr>
+<abbr title=" 250          Boolean sqlCleanMode = MathUtil.getBoolean(properties.getProperty(ConfigConstrant.SQL_CHECKPOINT_CLEANUPMODE_KEY), false);"> 250          Boolean sqlCleanMode = MathUtil.getBoolean(properties.getProperty(ConfigConstrant.SQL_CHECKPOINT_CLEANUPMO🔵</abbr>
+<abbr title=" 251          Boolean flinkCleanMode = MathUtil.getBoolean(properties.getProperty(ConfigConstrant.FLINK_CHECKPOINT_CLEANUPMODE_KEY), false);"> 251          Boolean flinkCleanMode = MathUtil.getBoolean(properties.getProperty(ConfigConstrant.FLINK_CHECKPOINT_CLEAN🔵</abbr>
+ 252  
+<abbr title=" 253          CheckpointConfig.ExternalizedCheckpointCleanup externalizedCheckpointCleanup = (sqlCleanMode || flinkCleanMode) ?"> 253          CheckpointConfig.ExternalizedCheckpointCleanup externalizedCheckpointCleanup = (sqlCleanMode || flinkClean🔵</abbr>
+<abbr title=" 254                  CheckpointConfig.ExternalizedCheckpointCleanup.DELETE_ON_CANCELLATION : CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION;"> 254                  CheckpointConfig.ExternalizedCheckpointCleanup.DELETE_ON_CANCELLATION : CheckpointConfig.Externali🔵</abbr>
+ 255          return Optional.of(externalizedCheckpointCleanup);
+ 256      }
+ 257  
+ 258      public static Optional&lt;StateBackend&gt; getStateBackend(Properties properties) throws IOException {
+ 259          String backendType = properties.getProperty(ConfigConstrant.STATE_BACKEND_KEY);
+ 260          String checkpointDataUri = properties.getProperty(ConfigConstrant.CHECKPOINTS_DIRECTORY_KEY);
+ 261          String backendIncremental = properties.getProperty(ConfigConstrant.STATE_BACKEND_INCREMENTAL_KEY, &quot;true&quot;);
+ 262  
+ 263          if (!StringUtils.isEmpty(backendType)) {
+ 264              return createStateBackend(backendType, checkpointDataUri, backendIncremental);
+ 265          }
+ 266          return Optional.empty();
+ 267      }
+ 268  
+<abbr title=" 269      private static Optional&lt;StateBackend&gt; createStateBackend(String backendType, String checkpointDataUri, String backendIncremental) throws IOException {"> 269      private static Optional&lt;StateBackend&gt; createStateBackend(String backendType, String checkpointDataUri, String 🔵</abbr>
+ 270          EStateBackend stateBackendType = EStateBackend.convertFromString(backendType);
+ 271          StateBackend stateBackend = null;
+ 272          switch (stateBackendType) {
+ 273              case MEMORY:
+ 274                  stateBackend = new MemoryStateBackend();
+ 275                  break;
+ 276              case FILESYSTEM:
+ 277                  checkpointDataUriEmptyCheck(checkpointDataUri, backendType);
+ 278                  stateBackend = new FsStateBackend(checkpointDataUri);
+ 279                  break;
+ 280              case ROCKSDB:
+ 281                  checkpointDataUriEmptyCheck(checkpointDataUri, backendType);
+<abbr title=" 282                  stateBackend = new RocksDBStateBackend(checkpointDataUri, BooleanUtils.toBoolean(backendIncremental));"> 282                  stateBackend = new RocksDBStateBackend(checkpointDataUri, BooleanUtils.toBoolean(backendIncrementa🔵</abbr>
+ 283                  break;
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 284 +            default:</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 285 +                break;</span>
+ 286          }
+ 287          return stateBackend == null ? Optional.empty() : Optional.of(stateBackend);
+ 288      }
+ 289  
+ 290      private static void checkpointDataUriEmptyCheck(String checkpointDataUri, String backendType) {
+ 291          if (StringUtils.isEmpty(checkpointDataUri)) {
+ 292              throw new RuntimeException(backendType + &quot; backend checkpointDataUri not null!&quot;);
+ 293          }
+ 294      }
+ 295  
+ 296      // -----------------TableEnvironment state ttl config------------------------------
+ 297  
+ 298      private static final String TTL_PATTERN_STR = &quot;^+?([1-9][0-9]*)([dDhHmMsS])$&quot;;
+ 299      private static final Pattern TTL_PATTERN = Pattern.compile(TTL_PATTERN_STR);
+ 300  
+ 301      public static Optional&lt;Tuple2&lt;Time, Time&gt;&gt; getTableEnvTTL(Properties properties) {
+ 302          String ttlMintimeStr = properties.getProperty(ConfigConstrant.SQL_TTL_MINTIME);
+ 303          String ttlMaxtimeStr = properties.getProperty(ConfigConstrant.SQL_TTL_MAXTIME);
+ 304          if (StringUtils.isNotEmpty(ttlMintimeStr) || StringUtils.isNotEmpty(ttlMaxtimeStr)) {
+ 305              verityTtl(ttlMintimeStr, ttlMaxtimeStr);
+ 306              Matcher ttlMintimeStrMatcher = TTL_PATTERN.matcher(ttlMintimeStr);
+ 307              Matcher ttlMaxtimeStrMatcher = TTL_PATTERN.matcher(ttlMaxtimeStr);
+ 308  
+ 309              Long ttlMintime = 0L;
+ 310              Long ttlMaxtime = 0L;
+ 311              if (ttlMintimeStrMatcher.find()) {
+<abbr title=" 312                  ttlMintime = getTtlTime(Integer.parseInt(ttlMintimeStrMatcher.group(1)), ttlMintimeStrMatcher.group(2));"> 312                  ttlMintime = getTtlTime(Integer.parseInt(ttlMintimeStrMatcher.group(1)), ttlMintimeStrMatcher.grou🔵</abbr>
+ 313              }
+ 314              if (ttlMaxtimeStrMatcher.find()) {
+<abbr title=" 315                  ttlMaxtime = getTtlTime(Integer.parseInt(ttlMaxtimeStrMatcher.group(1)), ttlMaxtimeStrMatcher.group(2));"> 315                  ttlMaxtime = getTtlTime(Integer.parseInt(ttlMaxtimeStrMatcher.group(1)), ttlMaxtimeStrMatcher.grou🔵</abbr>
+ 316              }
+ 317              if (0L != ttlMintime &amp;&amp; 0L != ttlMaxtime) {
+ 318                  return Optional.of(new Tuple2&lt;&gt;(Time.milliseconds(ttlMintime), Time.milliseconds(ttlMaxtime)));
+ 319              }
+ 320          }
+ 321          return Optional.empty();
+ 322      }
+ 323  
+ 324      /**
+ 325       * ttl 校验
+ 326       * @param ttlMintimeStr 最小时间
+ 327       * @param ttlMaxtimeStr 最大时间
+ 328       */
+ 329      private static void verityTtl(String ttlMintimeStr, String ttlMaxtimeStr) {
+ 330          if (null == ttlMintimeStr
+ 331                  || null == ttlMaxtimeStr
+ 332                  || !TTL_PATTERN.matcher(ttlMintimeStr).find()
+ 333                  || !TTL_PATTERN.matcher(ttlMaxtimeStr).find()) {
+<abbr title=" 334              throw new RuntimeException(&quot;sql.ttl.min 、sql.ttl.max must be set at the same time . example sql.ttl.min=1h,sql.ttl.max=2h&quot;);"> 334              throw new RuntimeException(&quot;sql.ttl.min 、sql.ttl.max must be set at the same time . example sql.ttl.mi🔵</abbr>
+ 335          }
+ 336      }
+ 337  
+ 338      /**
+ 339       * 不同单位时间到毫秒的转换
+ 340       * @param timeNumber 时间值，如：30
+ 341       * @param timeUnit 单位，d:天，h:小时，m:分，s:秒
+ 342       * @return
+ 343       */
+ 344      private static Long getTtlTime(Integer timeNumber, String timeUnit) {
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 345 -        if (timeUnit.equalsIgnoreCase(&quot;d&quot;)) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 346 -            return timeNumber * 1000l * 60 * 60 * 24;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 347 -        } else if (timeUnit.equalsIgnoreCase(&quot;h&quot;)) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 348 -            return timeNumber * 1000l * 60 * 60;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 349 -        } else if (timeUnit.equalsIgnoreCase(&quot;m&quot;)) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 350 -            return timeNumber * 1000l * 60;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 351 -        } else if (timeUnit.equalsIgnoreCase(&quot;s&quot;)) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 352 -            return timeNumber * 1000l;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 353 +        if (&quot;d&quot;.equalsIgnoreCase(timeUnit)) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 354 +            return timeNumber * 1000L * 60 * 60 * 24;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 355 +        } else if (&quot;h&quot;.equalsIgnoreCase(timeUnit)) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 356 +            return timeNumber * 1000L * 60 * 60;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 357 +        } else if (&quot;m&quot;.equalsIgnoreCase(timeUnit)) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 358 +            return timeNumber * 1000L * 60;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 359 +        } else if (&quot;s&quot;.equalsIgnoreCase(timeUnit)) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 360 +            return timeNumber * 1000L;</span>
+ 361          } else {
+ 362              throw new RuntimeException(&quot;not support &quot; + timeNumber + timeUnit);
+ 363          }
+ 364      }
+ 365  
+ 366  
+ 367  }</pre></td>
+                            <td><pre>   1  /*
+   2   * Licensed to the Apache Software Foundation (ASF) under one
+   3   * or more contributor license agreements.  See the NOTICE file
+   4   * distributed with this work for additional information
+   5   * regarding copyright ownership.  The ASF licenses this file
+   6   * to you under the Apache License, Version 2.0 (the
+   7   * &quot;License&quot;); you may not use this file except in compliance
+   8   * with the License.  You may obtain a copy of the License at
+   9   *
+  10   *     http://www.apache.org/licenses/LICENSE-2.0
+  11   *
+  12   * Unless required by applicable law or agreed to in writing, software
+  13   * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15   * See the License for the specific language governing permissions and
+  16   * limitations under the License.
+  17   */
+  18  
+  19  package com.dtstack.flink.sql.environment;
+  20  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  21 -import com.dtstack.flink.sql.constrant.ConfigConstrant;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  22 -import com.dtstack.flink.sql.enums.EStateBackend;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  23 -import com.dtstack.flink.sql.util.MathUtil;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  24 -import com.dtstack.flink.sql.util.PropertiesUtils;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  25 -import org.apache.commons.lang3.BooleanUtils;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  26 -import org.apache.commons.lang3.StringUtils;</span>
+  27  import org.apache.flink.api.common.ExecutionConfig;
+  28  import org.apache.flink.api.common.restartstrategy.RestartStrategies;
+  29  import org.apache.flink.api.common.time.Time;
+  30  import org.apache.flink.api.java.tuple.Tuple2;
+  31  import org.apache.flink.configuration.Configuration;
+  32  import org.apache.flink.contrib.streaming.state.RocksDBStateBackend;
+  33  import org.apache.flink.runtime.state.StateBackend;
+  34  import org.apache.flink.runtime.state.filesystem.FsStateBackend;
+  35  import org.apache.flink.runtime.state.memory.MemoryStateBackend;
+  36  import org.apache.flink.streaming.api.CheckpointingMode;
+  37  import org.apache.flink.streaming.api.TimeCharacteristic;
+  38  import org.apache.flink.streaming.api.environment.CheckpointConfig;
+  39  import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+  40  import org.apache.flink.table.api.StreamQueryConfig;
+  41  import org.apache.flink.table.api.java.StreamTableEnvironment;
+  42  
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  43 +import com.dtstack.flink.sql.constrant.ConfigConstrant;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  44 +import com.dtstack.flink.sql.enums.EStateBackend;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  45 +import com.dtstack.flink.sql.util.MathUtil;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  46 +import com.dtstack.flink.sql.util.PropertiesUtils;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  47 +import org.apache.commons.lang3.BooleanUtils;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  48 +import org.apache.commons.lang3.StringUtils;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  49 +</span>
+  50  import java.io.IOException;
+  51  import java.lang.reflect.InvocationTargetException;
+  52  import java.lang.reflect.Method;
+  53  import java.util.Arrays;
+  54  import java.util.Map;
+  55  import java.util.Optional;
+  56  import java.util.Properties;
+  57  import java.util.concurrent.TimeUnit;
+  58  import java.util.regex.Matcher;
+  59  import java.util.regex.Pattern;
+  60  
+  61  /**
+  62   *
+  63   *  流执行环境相关配置
+  64   * Date: 2019/11/22
+  65   * Company: www.dtstack.com
+  66   * @author maqi
+  67   */
+  68  public final class StreamEnvConfigManager {
+  69      private StreamEnvConfigManager() {
+  70          throw new AssertionError(&quot;Singleton class.&quot;);
+  71      }
+  72  
+  73      /**
+  74       * 配置StreamExecutionEnvironment运行时参数
+  75       * @param streamEnv
+  76       * @param confProperties
+  77       */
+<abbr title="  78      public static void streamExecutionEnvironmentConfig(StreamExecutionEnvironment streamEnv, Properties confProperties)">  78      public static void streamExecutionEnvironmentConfig(StreamExecutionEnvironment streamEnv, Properties confPrope🔵</abbr>
+  79              throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, IOException {
+  80  
+  81          confProperties = PropertiesUtils.propertiesTrim(confProperties);
+  82          streamEnv.getConfig().disableClosureCleaner();
+  83          // Disables reusing object
+  84          streamEnv.getConfig().enableObjectReuse();
+  85  
+  86          Configuration globalJobParameters = new Configuration();
+  87          //Configuration unsupported set properties key-value
+  88          Method method = Configuration.class.getDeclaredMethod(&quot;setValueInternal&quot;, String.class, Object.class);
+  89          method.setAccessible(true);
+  90          for (Map.Entry&lt;Object, Object&gt; prop : confProperties.entrySet()) {
+  91              method.invoke(globalJobParameters, prop.getKey(), prop.getValue());
+  92          }
+  93  
+  94          ExecutionConfig exeConfig = streamEnv.getConfig();
+  95          if (exeConfig.getGlobalJobParameters() == null) {
+  96              exeConfig.setGlobalJobParameters(globalJobParameters);
+  97          } else if (exeConfig.getGlobalJobParameters() instanceof Configuration) {
+  98              ((Configuration) exeConfig.getGlobalJobParameters()).addAll(globalJobParameters);
+  99          }
+ 100  
+ 101          getEnvParallelism(confProperties).ifPresent(streamEnv::setParallelism);
+ 102          getMaxEnvParallelism(confProperties).ifPresent(streamEnv::setMaxParallelism);
+ 103          getBufferTimeoutMillis(confProperties).ifPresent(streamEnv::setBufferTimeout);
+ 104          getStreamTimeCharacteristic(confProperties).ifPresent(streamEnv::setStreamTimeCharacteristic);
+ 105          getAutoWatermarkInterval(confProperties).ifPresent(op -&gt; {
+ 106              if (streamEnv.getStreamTimeCharacteristic().equals(TimeCharacteristic.EventTime)) {
+ 107                  streamEnv.getConfig().setAutoWatermarkInterval(op);
+ 108              }
+ 109          });
+ 110  
+ 111          streamEnv.setRestartStrategy(RestartStrategies.failureRateRestart(
+ 112                  ConfigConstrant.failureRate,
+ 113                  Time.of(ConfigConstrant.failureInterval, TimeUnit.MINUTES),
+ 114                  Time.of(ConfigConstrant.delayInterval, TimeUnit.SECONDS)
+ 115          ));
+
+
+
+
+
+
+
+
+
+ 116  
+ 117          // checkpoint config
+ 118          Optional&lt;Boolean&gt; checkpointingEnabled = isCheckpointingEnabled(confProperties);
+ 119          if (checkpointingEnabled.get()) {
+ 120              getCheckpointInterval(confProperties).ifPresent(streamEnv::enableCheckpointing);
+ 121              getCheckpointingMode(confProperties).ifPresent(streamEnv.getCheckpointConfig()::setCheckpointingMode);
+ 122              getCheckpointTimeout(confProperties).ifPresent(streamEnv.getCheckpointConfig()::setCheckpointTimeout);
+<abbr title=" 123              getMaxConcurrentCheckpoints(confProperties).ifPresent(streamEnv.getCheckpointConfig()::setMaxConcurrentCheckpoints);"> 123              getMaxConcurrentCheckpoints(confProperties).ifPresent(streamEnv.getCheckpointConfig()::setMaxConcurren🔵</abbr>
+<abbr title=" 124              getCheckpointCleanup(confProperties).ifPresent(streamEnv.getCheckpointConfig()::enableExternalizedCheckpoints);"> 124              getCheckpointCleanup(confProperties).ifPresent(streamEnv.getCheckpointConfig()::enableExternalizedChec🔵</abbr>
+ 125              getStateBackend(confProperties).ifPresent(streamEnv::setStateBackend);
+ 126          }
+ 127      }
+ 128  
+<abbr title=" 129      public static StreamQueryConfig getStreamQueryConfig(StreamTableEnvironment tableEnv, Properties confProperties) {"> 129      public static StreamQueryConfig getStreamQueryConfig(StreamTableEnvironment tableEnv, Properties confPropertie🔵</abbr>
+<abbr title=" 130          return StreamEnvConfigManager.streamTableEnvironmentStateTTLConfig(tableEnv, confProperties).orElseGet(tableEnv::queryConfig);"> 130          return StreamEnvConfigManager.streamTableEnvironmentStateTTLConfig(tableEnv, confProperties).orElseGet(tab🔵</abbr>
+ 131      }
+ 132  
+ 133      /**
+ 134       * 设置TableEnvironment状态超时时间
+ 135       * @param tableEnv
+ 136       * @param confProperties
+ 137       */
+<abbr title=" 138      public static Optional&lt;StreamQueryConfig&gt; streamTableEnvironmentStateTTLConfig(StreamTableEnvironment tableEnv, Properties confProperties) {"> 138      public static Optional&lt;StreamQueryConfig&gt; streamTableEnvironmentStateTTLConfig(StreamTableEnvironment tableEnv🔵</abbr>
+ 139          Optional&lt;StreamQueryConfig&gt; streamQueryConfig = Optional.empty();
+ 140          confProperties = PropertiesUtils.propertiesTrim(confProperties);
+ 141          Optional&lt;Tuple2&lt;Time, Time&gt;&gt; tableEnvTTL = getTableEnvTTL(confProperties);
+ 142          if (tableEnvTTL.isPresent()) {
+ 143              Tuple2&lt;Time, Time&gt; timeRange = tableEnvTTL.get();
+ 144              StreamQueryConfig queryConfig = tableEnv.queryConfig();
+ 145              queryConfig.withIdleStateRetentionTime(timeRange.f0, timeRange.f1);
+ 146              streamQueryConfig = Optional.of(queryConfig);
+ 147          }
+ 148          return streamQueryConfig;
+ 149      }
+ 150  
+ 151  
+ 152      // -----------------------StreamExecutionEnvironment config-----------------------------------------------
+ 153      public static Optional&lt;Integer&gt; getEnvParallelism(Properties properties) {
+ 154          String parallelismStr = properties.getProperty(ConfigConstrant.SQL_ENV_PARALLELISM);
+<abbr title=" 155          return StringUtils.isNotBlank(parallelismStr) ? Optional.of(Integer.valueOf(parallelismStr)) : Optional.empty();"> 155          return StringUtils.isNotBlank(parallelismStr) ? Optional.of(Integer.valueOf(parallelismStr)) : Optional.em🔵</abbr>
+ 156      }
+ 157  
+ 158      public static Optional&lt;Integer&gt; getMaxEnvParallelism(Properties properties) {
+ 159          String parallelismStr = properties.getProperty(ConfigConstrant.SQL_MAX_ENV_PARALLELISM);
+<abbr title=" 160          return StringUtils.isNotBlank(parallelismStr) ? Optional.of(Integer.valueOf(parallelismStr)) : Optional.empty();"> 160          return StringUtils.isNotBlank(parallelismStr) ? Optional.of(Integer.valueOf(parallelismStr)) : Optional.em🔵</abbr>
+ 161      }
+ 162  
+ 163      public static Optional&lt;Long&gt; getBufferTimeoutMillis(Properties properties) {
+ 164          String mills = properties.getProperty(ConfigConstrant.SQL_BUFFER_TIMEOUT_MILLIS);
+ 165          return StringUtils.isNotBlank(mills) ? Optional.of(Long.valueOf(mills)) : Optional.empty();
+ 166      }
+ 167  
+ 168      public static Optional&lt;Long&gt; getAutoWatermarkInterval(Properties properties) {
+ 169          String autoWatermarkInterval = properties.getProperty(ConfigConstrant.AUTO_WATERMARK_INTERVAL_KEY);
+<abbr title=" 170          return StringUtils.isNotBlank(autoWatermarkInterval) ? Optional.of(Long.valueOf(autoWatermarkInterval)) : Optional.empty();"> 170          return StringUtils.isNotBlank(autoWatermarkInterval) ? Optional.of(Long.valueOf(autoWatermarkInterval)) : 🔵</abbr>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 171      }
+ 172  
+ 173      /**
+ 174       * #ProcessingTime(默认), IngestionTime, EventTime
+ 175       * @param properties
+ 176       */
+ 177      public static Optional&lt;TimeCharacteristic&gt; getStreamTimeCharacteristic(Properties properties) {
+ 178          if (!properties.containsKey(ConfigConstrant.FLINK_TIME_CHARACTERISTIC_KEY)) {
+ 179              return Optional.empty();
+ 180          }
+ 181          String characteristicStr = properties.getProperty(ConfigConstrant.FLINK_TIME_CHARACTERISTIC_KEY);
+ 182          Optional&lt;TimeCharacteristic&gt; characteristic = Arrays.stream(TimeCharacteristic.values())
+ 183                  .filter(tc -&gt; characteristicStr.equalsIgnoreCase(tc.toString())).findAny();
+ 184  
+ 185          if (!characteristic.isPresent()) {
+ 186              throw new RuntimeException(&quot;illegal property :&quot; + ConfigConstrant.FLINK_TIME_CHARACTERISTIC_KEY);
+ 187          }
+ 188          return characteristic;
+ 189      }
+ 190  
+ 191      public static Optional&lt;Boolean&gt; isCheckpointingEnabled(Properties properties) {
+ 192          boolean checkpointEnabled = !(properties.getProperty(ConfigConstrant.SQL_CHECKPOINT_INTERVAL_KEY) == null
+ 193                  &amp;&amp; properties.getProperty(ConfigConstrant.FLINK_CHECKPOINT_INTERVAL_KEY) == null);
+ 194          return Optional.of(checkpointEnabled);
+ 195      }
+ 196  
+ 197      public static Optional&lt;Long&gt; getCheckpointInterval(Properties properties) {
+ 198          // 两个参数主要用来做上层兼容
+ 199          Long sqlInterval = Long.valueOf(properties.getProperty(ConfigConstrant.SQL_CHECKPOINT_INTERVAL_KEY, &quot;0&quot;));
+<abbr title=" 200          Long flinkInterval = Long.valueOf(properties.getProperty(ConfigConstrant.FLINK_CHECKPOINT_INTERVAL_KEY, &quot;0&quot;));"> 200          Long flinkInterval = Long.valueOf(properties.getProperty(ConfigConstrant.FLINK_CHECKPOINT_INTERVAL_KEY, &quot;0🔵</abbr>
+ 201          long checkpointInterval = Math.max(sqlInterval, flinkInterval);
+ 202          return Optional.of(checkpointInterval);
+ 203      }
+ 204  
+ 205      public static Optional&lt;CheckpointingMode&gt; getCheckpointingMode(Properties properties) {
+ 206          String checkpointingModeStr = properties.getProperty(ConfigConstrant.FLINK_CHECKPOINT_MODE_KEY);
+ 207          CheckpointingMode checkpointingMode = null;
+ 208          if (!StringUtils.isEmpty(checkpointingModeStr)) {
+ 209              checkpointingMode = CheckpointingMode.valueOf(checkpointingModeStr.toUpperCase());
+ 210          }
+ 211          return checkpointingMode == null ? Optional.empty() : Optional.of(checkpointingMode);
+ 212      }
+ 213  
+ 214      public static Optional&lt;Long&gt; getCheckpointTimeout(Properties properties) {
+ 215          String checkpointTimeoutStr = properties.getProperty(ConfigConstrant.FLINK_CHECKPOINT_TIMEOUT_KEY);
+ 216  
+ 217          if (!StringUtils.isEmpty(checkpointTimeoutStr)) {
+ 218              Long checkpointTimeout = Long.valueOf(checkpointTimeoutStr);
+ 219              return Optional.of(checkpointTimeout);
+ 220          }
+ 221          return Optional.empty();
+ 222      }
+ 223  
+ 224      public static Optional&lt;Integer&gt; getMaxConcurrentCheckpoints(Properties properties) {
+<abbr title=" 225          String maxConcurrCheckpointsStr = properties.getProperty(ConfigConstrant.FLINK_MAXCONCURRENTCHECKPOINTS_KEY);"> 225          String maxConcurrCheckpointsStr = properties.getProperty(ConfigConstrant.FLINK_MAXCONCURRENTCHECKPOINTS_KE🔵</abbr>
+ 226          if (!StringUtils.isEmpty(maxConcurrCheckpointsStr)) {
+ 227              Integer maxConcurrCheckpoints = Integer.valueOf(maxConcurrCheckpointsStr);
+ 228              return Optional.of(maxConcurrCheckpoints);
+ 229          }
+ 230          return Optional.empty();
+ 231      }
+ 232  
+<abbr title=" 233      public static Optional&lt;CheckpointConfig.ExternalizedCheckpointCleanup&gt; getCheckpointCleanup(Properties properties) {"> 233      public static Optional&lt;CheckpointConfig.ExternalizedCheckpointCleanup&gt; getCheckpointCleanup(Properties propert🔵</abbr>
+<abbr title=" 234          Boolean sqlCleanMode = MathUtil.getBoolean(properties.getProperty(ConfigConstrant.SQL_CHECKPOINT_CLEANUPMODE_KEY), false);"> 234          Boolean sqlCleanMode = MathUtil.getBoolean(properties.getProperty(ConfigConstrant.SQL_CHECKPOINT_CLEANUPMO🔵</abbr>
+<abbr title=" 235          Boolean flinkCleanMode = MathUtil.getBoolean(properties.getProperty(ConfigConstrant.FLINK_CHECKPOINT_CLEANUPMODE_KEY), false);"> 235          Boolean flinkCleanMode = MathUtil.getBoolean(properties.getProperty(ConfigConstrant.FLINK_CHECKPOINT_CLEAN🔵</abbr>
+ 236  
+<abbr title=" 237          CheckpointConfig.ExternalizedCheckpointCleanup externalizedCheckpointCleanup = (sqlCleanMode || flinkCleanMode) ?"> 237          CheckpointConfig.ExternalizedCheckpointCleanup externalizedCheckpointCleanup = (sqlCleanMode || flinkClean🔵</abbr>
+<abbr title=" 238                  CheckpointConfig.ExternalizedCheckpointCleanup.DELETE_ON_CANCELLATION : CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION;"> 238                  CheckpointConfig.ExternalizedCheckpointCleanup.DELETE_ON_CANCELLATION : CheckpointConfig.Externali🔵</abbr>
+ 239          return Optional.of(externalizedCheckpointCleanup);
+ 240      }
+ 241  
+ 242      public static Optional&lt;StateBackend&gt; getStateBackend(Properties properties) throws IOException {
+ 243          String backendType = properties.getProperty(ConfigConstrant.STATE_BACKEND_KEY);
+ 244          String checkpointDataUri = properties.getProperty(ConfigConstrant.CHECKPOINTS_DIRECTORY_KEY);
+ 245          String backendIncremental = properties.getProperty(ConfigConstrant.STATE_BACKEND_INCREMENTAL_KEY, &quot;true&quot;);
+ 246  
+ 247          if (!StringUtils.isEmpty(backendType)) {
+ 248              return createStateBackend(backendType, checkpointDataUri, backendIncremental);
+ 249          }
+ 250          return Optional.empty();
+ 251      }
+ 252  
+<abbr title=" 253      private static Optional&lt;StateBackend&gt; createStateBackend(String backendType, String checkpointDataUri, String backendIncremental) throws IOException {"> 253      private static Optional&lt;StateBackend&gt; createStateBackend(String backendType, String checkpointDataUri, String 🔵</abbr>
+ 254          EStateBackend stateBackendType = EStateBackend.convertFromString(backendType);
+ 255          StateBackend stateBackend = null;
+ 256          switch (stateBackendType) {
+ 257              case MEMORY:
+ 258                  stateBackend = new MemoryStateBackend();
+ 259                  break;
+ 260              case FILESYSTEM:
+ 261                  checkpointDataUriEmptyCheck(checkpointDataUri, backendType);
+ 262                  stateBackend = new FsStateBackend(checkpointDataUri);
+ 263                  break;
+ 264              case ROCKSDB:
+ 265                  checkpointDataUriEmptyCheck(checkpointDataUri, backendType);
+<abbr title=" 266                  stateBackend = new RocksDBStateBackend(checkpointDataUri, BooleanUtils.toBoolean(backendIncremental));"> 266                  stateBackend = new RocksDBStateBackend(checkpointDataUri, BooleanUtils.toBoolean(backendIncrementa🔵</abbr>
+ 267                  break;
+
+
+ 268          }
+ 269          return stateBackend == null ? Optional.empty() : Optional.of(stateBackend);
+ 270      }
+ 271  
+ 272      private static void checkpointDataUriEmptyCheck(String checkpointDataUri, String backendType) {
+ 273          if (StringUtils.isEmpty(checkpointDataUri)) {
+ 274              throw new RuntimeException(backendType + &quot; backend checkpointDataUri not null!&quot;);
+ 275          }
+ 276      }
+ 277  
+ 278      // -----------------TableEnvironment state ttl config------------------------------
+ 279  
+ 280      private static final String TTL_PATTERN_STR = &quot;^+?([1-9][0-9]*)([dDhHmMsS])$&quot;;
+ 281      private static final Pattern TTL_PATTERN = Pattern.compile(TTL_PATTERN_STR);
+ 282  
+ 283      public static Optional&lt;Tuple2&lt;Time, Time&gt;&gt; getTableEnvTTL(Properties properties) {
+ 284          String ttlMintimeStr = properties.getProperty(ConfigConstrant.SQL_TTL_MINTIME);
+ 285          String ttlMaxtimeStr = properties.getProperty(ConfigConstrant.SQL_TTL_MAXTIME);
+ 286          if (StringUtils.isNotEmpty(ttlMintimeStr) || StringUtils.isNotEmpty(ttlMaxtimeStr)) {
+ 287              verityTtl(ttlMintimeStr, ttlMaxtimeStr);
+ 288              Matcher ttlMintimeStrMatcher = TTL_PATTERN.matcher(ttlMintimeStr);
+ 289              Matcher ttlMaxtimeStrMatcher = TTL_PATTERN.matcher(ttlMaxtimeStr);
+ 290  
+ 291              Long ttlMintime = 0L;
+ 292              Long ttlMaxtime = 0L;
+ 293              if (ttlMintimeStrMatcher.find()) {
+<abbr title=" 294                  ttlMintime = getTtlTime(Integer.parseInt(ttlMintimeStrMatcher.group(1)), ttlMintimeStrMatcher.group(2));"> 294                  ttlMintime = getTtlTime(Integer.parseInt(ttlMintimeStrMatcher.group(1)), ttlMintimeStrMatcher.grou🔵</abbr>
+ 295              }
+ 296              if (ttlMaxtimeStrMatcher.find()) {
+<abbr title=" 297                  ttlMaxtime = getTtlTime(Integer.parseInt(ttlMaxtimeStrMatcher.group(1)), ttlMaxtimeStrMatcher.group(2));"> 297                  ttlMaxtime = getTtlTime(Integer.parseInt(ttlMaxtimeStrMatcher.group(1)), ttlMaxtimeStrMatcher.grou🔵</abbr>
+ 298              }
+ 299              if (0L != ttlMintime &amp;&amp; 0L != ttlMaxtime) {
+ 300                  return Optional.of(new Tuple2&lt;&gt;(Time.milliseconds(ttlMintime), Time.milliseconds(ttlMaxtime)));
+ 301              }
+ 302          }
+ 303          return Optional.empty();
+ 304      }
+ 305  
+ 306      /**
+ 307       * ttl 校验
+ 308       * @param ttlMintimeStr 最小时间
+ 309       * @param ttlMaxtimeStr 最大时间
+ 310       */
+ 311      private static void verityTtl(String ttlMintimeStr, String ttlMaxtimeStr) {
+ 312          if (null == ttlMintimeStr
+ 313                  || null == ttlMaxtimeStr
+ 314                  || !TTL_PATTERN.matcher(ttlMintimeStr).find()
+ 315                  || !TTL_PATTERN.matcher(ttlMaxtimeStr).find()) {
+<abbr title=" 316              throw new RuntimeException(&quot;sql.ttl.min 、sql.ttl.max must be set at the same time . example sql.ttl.min=1h,sql.ttl.max=2h&quot;);"> 316              throw new RuntimeException(&quot;sql.ttl.min 、sql.ttl.max must be set at the same time . example sql.ttl.mi🔵</abbr>
+ 317          }
+ 318      }
+ 319  
+ 320      /**
+ 321       * 不同单位时间到毫秒的转换
+ 322       * @param timeNumber 时间值，如：30
+ 323       * @param timeUnit 单位，d:天，h:小时，m:分，s:秒
+ 324       * @return
+ 325       */
+ 326      private static Long getTtlTime(Integer timeNumber, String timeUnit) {
+ 327          if (timeUnit.equalsIgnoreCase(&quot;d&quot;)) {
+ 328              return timeNumber * 1000l * 60 * 60 * 24;
+ 329          } else if (timeUnit.equalsIgnoreCase(&quot;h&quot;)) {
+ 330              return timeNumber * 1000l * 60 * 60;
+ 331          } else if (timeUnit.equalsIgnoreCase(&quot;m&quot;)) {
+ 332              return timeNumber * 1000l * 60;
+ 333          } else if (timeUnit.equalsIgnoreCase(&quot;s&quot;)) {
+ 334              return timeNumber * 1000l;
+
+
+
+
+
+
+
+
+ 335          } else {
+ 336              throw new RuntimeException(&quot;not support &quot; + timeNumber + timeUnit);
+ 337          }
+ 338      }
+ 339  
+ 340  
+ 341  }</pre></td>
+                        </tr>
+                    </table>
+                </div>
+              </body>
+            </html>
+            

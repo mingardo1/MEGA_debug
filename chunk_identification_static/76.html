@@ -1,0 +1,1313 @@
+<!DOCTYPE html>
+    <html lang="en">
+              <head>
+                <meta charset="utf-8">
+                <title>76</title>
+                    <style>
+                        #top {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        #bottom {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        abbr {
+                          /* Here is the delay */
+                          transition-delay:0s;
+                        }
+                    </style>
+              </head>
+              <body>
+                <span style="height: 4vh">
+                    76
+                    <a href="75.html">prev</a>
+                    <a href="77.html">next</a>
+                    <a href="76_chunks.html">chunks</a>
+                    <a href="index.html">index</a>
+                    AriaLyy/Aria_2c75967bfc740973ac4528fbffe7752ada171bdf_app/src/main/java/com/arialyy/simple/upload/UploadActivity.java
+                    <textarea rows=1 onclick='navigator.clipboard.writeText(this.value)'>cd C:\studies\se\mega\git-analyzer-plus\notebooks\debug
+del /Q *
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\AriaLyy\Aria show &quot;2c75967bfc740973ac4528fbffe7752ada171bdf:app/src/main/java/com/arialyy/simple/upload/UploadActivity.java&quot; &gt; committed.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\AriaLyy\Aria show &quot;2c75967bfc740973ac4528fbffe7752ada171bdf^1:app/src/main/java/com/arialyy/simple/upload/UploadActivity.java&quot; &gt; ours.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\AriaLyy\Aria show &quot;2c75967bfc740973ac4528fbffe7752ada171bdf^2:app/src/main/java/com/arialyy/simple/upload/UploadActivity.java&quot; &gt; theirs.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\AriaLyy\Aria show &quot;a3cc5e6e4992f0c2b998a53e3e62e2c50960d0fe:app/src/main/java/com/arialyy/simple/upload/UploadActivity.java&quot; &gt; base.java
+copy ours.java 1ours.java
+copy ours.java 2ours.java
+copy theirs.java 1theirs.java
+copy theirs.java 2theirs.java
+copy base.java 1base.java
+copy base.java 2base.java
+&quot;C:\Program Files\Java\jdk1.8.0_241\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\jFSTMerge\build\libs\jFSTMerge-all.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\jfstmerge.java --show-base
+&quot;C:\Program Files\Eclipse Adoptium\jdk-17.0.11.9-hotspot\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\spork\target\spork-0.5.0-SNAPSHOT.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\spork.java
+del /Q 1*.java
+del /Q 2*.java
+del /Q jfstmerge.java.merge
+</textarea>
+                    {strict: [[bj], [s], [s]], subset: [[sbj]]}
+                </span>
+                <div id="top">
+
+                    <table>
+                        <tr>
+                            <th>line based (standard git)</th>
+                            <th>jfstmerge</th>
+                            <th>spork</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1 package com.arialyy.simple.upload;
+   2 
+   3 import android.os.Bundle;
+   4 import android.os.Handler;
+   5 import android.os.Message;
+   6 import butterknife.Bind;
+   7 import butterknife.OnClick;
+   8 import com.arialyy.aria.core.Aria;
+   9 import com.arialyy.aria.core.upload.IUploadListener;
+  10 import com.arialyy.aria.core.upload.UploadEntity;
+  11 import com.arialyy.aria.core.upload.UploadTask;
+  12 import com.arialyy.aria.core.upload.UploadTaskEntity;
+  13 import com.arialyy.aria.core.upload.UploadUtil;
+  14 import com.arialyy.aria.util.MultipartUtility;
+  15 import com.arialyy.frame.util.FileUtil;
+  16 import com.arialyy.frame.util.show.L;
+  17 import com.arialyy.frame.util.show.T;
+  18 import com.arialyy.simple.R;
+  19 import com.arialyy.simple.base.BaseActivity;
+  20 import com.arialyy.simple.databinding.ActivityUploadMeanBinding;
+  21 import com.arialyy.simple.widget.HorizontalProgressBarWithNumber;
+  22 import java.io.File;
+  23 import java.io.IOException;
+  24 import java.lang.ref.WeakReference;
+  25 import java.util.List;
+  26 
+  27 /**
+  28  * Created by Aria.Lao on 2017/2/9.
+  29  */
+  30 
+  31 public class UploadActivity extends BaseActivity&lt;ActivityUploadMeanBinding&gt; {
+  32   @Bind(R.id.pb) HorizontalProgressBarWithNumber mPb;
+  33   private static final int START = 0;
+  34   private static final int STOP = 1;
+  35   private static final int CANCEL = 2;
+  36   private static final int RUNNING = 3;
+  37   private static final int COMPLETE = 4;
+  38 
+  39   private static final String FILE_PATH = &quot;/sdcard/Download/test.zip&quot;;
+  40 
+  41   private Handler mHandler = new Handler() {
+  42     @Override public void handleMessage(Message msg) {
+  43       super.handleMessage(msg);
+  44       UploadTask task = (UploadTask) msg.obj;
+  45       switch (msg.what) {
+  46         case START:
+  47           getBinding().setFileSize(FileUtil.formatFileSize(task.getFileSize()));
+  48           break;
+  49         case STOP:
+  50           mPb.setProgress(0);
+  51           break;
+  52         case CANCEL:
+  53           mPb.setProgress(0);
+  54           break;
+  55         case RUNNING:
+  56           int p = (int) (task.getCurrentProgress() * 100 / task.getFileSize());
+  57           mPb.setProgress(p);
+  58           break;
+  59         case COMPLETE:
+  60           T.showShort(UploadActivity.this, &quot;上传完成&quot;);
+  61           mPb.setProgress(100);
+  62           break;
+  63       }
+  64     }
+  65   };
+  66 
+  67   @Override protected int setLayoutId() {
+  68     return R.layout.activity_upload_mean;
+  69   }
+  70 
+  71   @Override protected void init(Bundle savedInstanceState) {
+  72     super.init(savedInstanceState);
+  73     //test();
+  74   }
+  75 
+  76   private void test() {
+  77     //String charset = &quot;UTF-8&quot;;
+  78     //File uploadFile1 = new File(&quot;/sdcard/Download/test.zip&quot;);
+  79     //String requestURL = &quot;http://172.18.104.50:8080/upload/sign_file&quot;;
+  80     ////String requestURL = &quot;http://172.18.104.50:8080/greeting&quot;;
+  81     //
+  82     //try {
+  83     //  MultipartUtility multipart = new MultipartUtility(requestURL, charset);
+  84     //
+  85     //  //multipart.addHeaderField(&quot;Test-Header&quot;, &quot;Header-Value&quot;);
+  86     //
+  87     //  multipart.addFilePart(&quot;file&quot;, uploadFile1);
+  88     //  List&lt;String&gt; response = multipart.finish();
+  89     //
+  90     //  System.out.println(&quot;SERVER REPLIED:&quot;);
+  91     //
+  92     //  for (String line : response) {
+  93     //    System.out.println(line);
+  94     //  }
+  95     //} catch (IOException ex) {
+  96     //  System.err.println(ex);
+  97     //}
+  98 
+  99     UploadEntity entity = new UploadEntity();
+ 100     entity.setFilePath(&quot;/sdcard/Download/test.zip&quot;);
+ 101     entity.setFileName(&quot;test.pdf&quot;);
+ 102     UploadTaskEntity taskEntity = new UploadTaskEntity(entity);
+ 103     taskEntity.uploadUrl = &quot;http://172.18.104.50:8080/upload/sign_file&quot;;
+ 104     taskEntity.attachment = &quot;file&quot;;
+ 105     UploadUtil util = new UploadUtil(taskEntity, new IUploadListener() {
+ 106       long fileSize = 0;
+ 107 
+ 108       @Override public void onPre() {
+ 109 
+ 110       }
+ 111 
+ 112       @Override public void onStart(long fileSize) {
+ 113         this.fileSize = fileSize;
+ 114       }
+ 115 
+ 116       @Override public void onResume(long resumeLocation) {
+ 117 
+ 118       }
+ 119 
+ 120       @Override public void onStop(long stopLocation) {
+ 121 
+ 122       }
+ 123 
+ 124       @Override public void onProgress(long currentLocation) {
+ 125         int p = (int) (currentLocation * 100 / fileSize);
+ 126         mPb.setProgress(p);
+ 127       }
+ 128 
+ 129       @Override public void onCancel() {
+ 130 
+ 131       }
+ 132 
+ 133       @Override public void onComplete() {
+ 134 
+ 135       }
+ 136 
+ 137       @Override public void onFail() {
+ 138 
+ 139       }
+ 140     });
+ 141     util.start();
+ 142   }
+ 143 
+ 144   @OnClick(R.id.upload) void upload() {
+ 145     Aria.upload(this)
+ 146         .load(FILE_PATH)
+ 147 &lt;&lt;&lt;&lt;&lt;&lt;&lt; GitAnalyzerPlus_ours
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 148         .setUploadUrl(&quot;http://172.18.104.50:8080/upload/sign_file&quot;)</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 149         .setAttachment(&quot;file&quot;)</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 150         .start();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 151     //new Thread(new Runnable() {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 152     //  @Override public void run() {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 153     //    test();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 154     //  }</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 155     //}).start();</span>
+ 156 ||||||| GitAnalyzerPlus_base
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 157     //    .setUploadUrl(&quot;http://172.18.104.50:8080/upload/sign_file&quot;)</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 158     //    .setAttachment(&quot;file&quot;)</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 159     //    .start();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 160     test();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 161   }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 162 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 163   @OnClick(R.id.stop) void stop() {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 164     Aria.upload(this).load(FILE_PATH).stop();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 165   }</span>
+ 166 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 167         .setUploadUrl(&quot;http://192.168.1.8:8080/upload/sign_file&quot;)</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 168         .setAttachment(&quot;file&quot;)</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 169         .start();</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 170     //test();</span>
+ 171 &gt;&gt;&gt;&gt;&gt;&gt;&gt; GitAnalyzerPlus_theirs
+ 172   }
+ 173 
+ 174   @OnClick(R.id.stop) void stop() {
+ 175     Aria.upload(this).load(FILE_PATH).stop();
+ 176   }
+ 177 
+ 178   @OnClick(R.id.remove) void remove() {
+ 179     Aria.upload(this).load(FILE_PATH).cancel();
+ 180   }
+ 181 
+ 182   @Override protected void onResume() {
+ 183     super.onResume();
+ 184     Aria.upload(this).addSchedulerListener(new UploadListener(mHandler));
+ 185   }
+ 186 
+ 187   static class UploadListener extends Aria.UploadSchedulerListener {
+ 188     WeakReference&lt;Handler&gt; handler;
+ 189 
+ 190     UploadListener(Handler handler) {
+ 191       this.handler = new WeakReference&lt;&gt;(handler);
+ 192     }
+ 193 
+ 194     @Override public void onTaskStart(UploadTask task) {
+ 195       super.onTaskStart(task);
+ 196       handler.get().obtainMessage(START, task).sendToTarget();
+ 197     }
+ 198 
+ 199     @Override public void onTaskStop(UploadTask task) {
+ 200       super.onTaskStop(task);
+ 201       handler.get().obtainMessage(STOP, task).sendToTarget();
+ 202     }
+ 203 
+ 204     @Override public void onTaskCancel(UploadTask task) {
+ 205       super.onTaskCancel(task);
+ 206       handler.get().obtainMessage(CANCEL, task).sendToTarget();
+ 207     }
+ 208 
+ 209     @Override public void onTaskRunning(UploadTask task) {
+ 210       super.onTaskRunning(task);
+ 211       handler.get().obtainMessage(RUNNING, task).sendToTarget();
+ 212     }
+ 213 
+ 214     @Override public void onTaskComplete(UploadTask task) {
+ 215       super.onTaskComplete(task);
+ 216       handler.get().obtainMessage(COMPLETE, task).sendToTarget();
+ 217     }
+ 218   }
+ 219 }
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ </pre></td>
+                            <td><pre>   1 package com.arialyy.simple.upload;
+   2 
+   3 import android.os.Bundle;
+   4 import android.os.Handler;
+   5 import android.os.Message;
+   6 import butterknife.Bind;
+   7 import butterknife.OnClick;
+   8 import com.arialyy.aria.core.Aria;
+   9 import com.arialyy.aria.core.upload.IUploadListener;
+  10 import com.arialyy.aria.core.upload.UploadEntity;
+  11 import com.arialyy.aria.core.upload.UploadTask;
+  12 import com.arialyy.aria.core.upload.UploadTaskEntity;
+  13 import com.arialyy.aria.core.upload.UploadUtil;
+  14 import com.arialyy.aria.util.MultipartUtility;
+  15 import com.arialyy.frame.util.FileUtil;
+  16 import com.arialyy.frame.util.show.L;
+  17 import com.arialyy.frame.util.show.T;
+  18 import com.arialyy.simple.R;
+  19 import com.arialyy.simple.base.BaseActivity;
+  20 import com.arialyy.simple.databinding.ActivityUploadMeanBinding;
+  21 import com.arialyy.simple.widget.HorizontalProgressBarWithNumber;
+  22 import java.io.File;
+  23 import java.io.IOException;
+  24 import java.lang.ref.WeakReference;
+  25 import java.util.List;
+  26 
+  27 /**
+  28  * Created by Aria.Lao on 2017/2/9.
+  29  */
+  30 
+  31 public class UploadActivity extends BaseActivity&lt;ActivityUploadMeanBinding&gt; {
+  32   @Bind(R.id.pb) HorizontalProgressBarWithNumber mPb;
+  33   private static final int START = 0;
+  34   private static final int STOP = 1;
+  35   private static final int CANCEL = 2;
+  36   private static final int RUNNING = 3;
+  37   private static final int COMPLETE = 4;
+  38 
+  39   private static final String FILE_PATH = &quot;/sdcard/Download/test.zip&quot;;
+  40 
+  41   private Handler mHandler = new Handler() {
+  42     @Override public void handleMessage(Message msg) {
+  43       super.handleMessage(msg);
+  44       UploadTask task = (UploadTask) msg.obj;
+  45       switch (msg.what) {
+  46         case START:
+  47           getBinding().setFileSize(FileUtil.formatFileSize(task.getFileSize()));
+  48           break;
+  49         case STOP:
+  50           mPb.setProgress(0);
+  51           break;
+  52         case CANCEL:
+  53           mPb.setProgress(0);
+  54           break;
+  55         case RUNNING:
+  56           int p = (int) (task.getCurrentProgress() * 100 / task.getFileSize());
+  57           mPb.setProgress(p);
+  58           break;
+  59         case COMPLETE:
+  60           T.showShort(UploadActivity.this, &quot;上传完成&quot;);
+  61           mPb.setProgress(100);
+  62           break;
+  63       }
+  64     }
+  65   };
+  66 
+  67   @Override protected int setLayoutId() {
+  68     return R.layout.activity_upload_mean;
+  69   }
+  70 
+  71   @Override protected void init(Bundle savedInstanceState) {
+  72     super.init(savedInstanceState);
+  73     //test();
+  74   }
+  75 
+  76   private void test(){
+  77     //String charset = &quot;UTF-8&quot;;
+  78     //File uploadFile1 = new File(&quot;/sdcard/Download/test.zip&quot;);
+  79     //String requestURL = &quot;http://172.18.104.50:8080/upload/sign_file&quot;;
+  80     ////String requestURL = &quot;http://172.18.104.50:8080/greeting&quot;;
+  81     //
+  82     //try {
+  83     //  MultipartUtility multipart = new MultipartUtility(requestURL, charset);
+  84     //
+  85     //  //multipart.addHeaderField(&quot;Test-Header&quot;, &quot;Header-Value&quot;);
+  86     //
+  87     //  multipart.addFilePart(&quot;file&quot;, uploadFile1);
+  88     //  List&lt;String&gt; response = multipart.finish();
+  89     //
+  90     //  System.out.println(&quot;SERVER REPLIED:&quot;);
+  91     //
+  92     //  for (String line : response) {
+  93     //    System.out.println(line);
+  94     //  }
+  95     //} catch (IOException ex) {
+  96     //  System.err.println(ex);
+  97     //}
+  98 
+  99     UploadEntity entity = new UploadEntity();
+ 100     entity.setFilePath(&quot;/sdcard/Download/test.zip&quot;);
+ 101     entity.setFileName(&quot;test.pdf&quot;);
+ 102     UploadTaskEntity taskEntity = new UploadTaskEntity(entity);
+ 103     taskEntity.uploadUrl = &quot;http://172.18.104.50:8080/upload/sign_file&quot;;
+ 104     taskEntity.attachment = &quot;file&quot;;
+ 105     UploadUtil util = new UploadUtil(taskEntity, new IUploadListener() {
+ 106       long fileSize = 0;
+ 107 
+ 108       @Override public void onPre() {
+ 109 
+ 110     }
+ 111 
+ 112       @Override public void onStart(long fileSize) {
+ 113         this.fileSize = fileSize;
+ 114       }
+ 115 
+ 116       @Override public void onResume(long resumeLocation) {
+ 117 
+ 118       }
+ 119 
+ 120       @Override public void onStop(long stopLocation) {
+ 121 
+ 122       }
+ 123 
+ 124       @Override public void onProgress(long currentLocation) {
+ 125         int p = (int) (currentLocation * 100 / fileSize);
+ 126         mPb.setProgress(p);
+ 127       }
+ 128 
+ 129       @Override public void onCancel() {
+ 130 
+ 131       }
+ 132 
+ 133       @Override public void onComplete() {
+ 134 
+ 135       }
+ 136 
+ 137       @Override public void onFail() {
+ 138 
+ 139       }
+ 140     });
+ 141     util.start();
+ 142   }
+ 143 
+ 144   @OnClick(R.id.upload) void upload() {
+ 145     Aria.upload(this)
+ 146         .load(FILE_PATH)
+ 147 &lt;&lt;&lt;&lt;&lt;&lt;&lt; MINE
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 148         .setUploadUrl(&quot;http://172.18.104.50:8080/upload/sign_file&quot;)</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 149         .setAttachment(&quot;file&quot;)</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 150         .start();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 151     //new Thread(new Runnable() {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 152     //  @Override public void run() {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 153     //    test();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 154     //  }</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 155     //}).start();</span>
+ 156 ||||||| BASE
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 157     //    .setUploadUrl(&quot;http://172.18.104.50:8080/upload/sign_file&quot;)</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 158     //    .setAttachment(&quot;file&quot;)</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 159     //    .start();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 160     test();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 161   }</span>
+ 162 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 163         .setUploadUrl(&quot;http://192.168.1.8:8080/upload/sign_file&quot;)</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 164         .setAttachment(&quot;file&quot;)</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 165         .start();</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 166     //test();</span>
+ 167 &gt;&gt;&gt;&gt;&gt;&gt;&gt; YOURS
+ 168   }
+ 169 
+ 170   @OnClick(R.id.stop) void stop() {
+ 171     Aria.upload(this).load(FILE_PATH).stop();
+ 172   }
+ 173 
+ 174   @OnClick(R.id.remove) void remove() {
+ 175     Aria.upload(this).load(FILE_PATH).cancel();
+ 176   }
+ 177 
+ 178   @Override protected void onResume() {
+ 179     super.onResume();
+ 180     Aria.upload(this).addSchedulerListener(new UploadListener(mHandler));
+ 181   }
+ 182 
+ 183   static class UploadListener extends Aria.UploadSchedulerListener {
+ 184     WeakReference&lt;Handler&gt; handler;
+ 185 
+ 186     UploadListener(Handler handler) {
+ 187       this.handler = new WeakReference&lt;&gt;(handler);
+ 188     }
+ 189 
+ 190     @Override public void onTaskStart(UploadTask task) {
+ 191       super.onTaskStart(task);
+ 192       handler.get().obtainMessage(START, task).sendToTarget();
+ 193     }
+ 194 
+ 195     @Override public void onTaskStop(UploadTask task) {
+ 196       super.onTaskStop(task);
+ 197       handler.get().obtainMessage(STOP, task).sendToTarget();
+ 198     }
+ 199 
+ 200     @Override public void onTaskCancel(UploadTask task) {
+ 201       super.onTaskCancel(task);
+ 202       handler.get().obtainMessage(CANCEL, task).sendToTarget();
+ 203     }
+ 204 
+ 205     @Override public void onTaskRunning(UploadTask task) {
+ 206       super.onTaskRunning(task);
+ 207       handler.get().obtainMessage(RUNNING, task).sendToTarget();
+ 208     }
+ 209 
+ 210     @Override public void onTaskComplete(UploadTask task) {
+ 211       super.onTaskComplete(task);
+ 212       handler.get().obtainMessage(COMPLETE, task).sendToTarget();
+ 213     }
+ 214   }
+ 215 }
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ </pre></td>
+                            <td><pre>   1 package com.arialyy.simple.upload;
+   2 
+   3 import android.os.Bundle;
+   4 import android.os.Handler;
+   5 import android.os.Message;
+   6 import butterknife.Bind;
+   7 import butterknife.OnClick;
+   8 import com.arialyy.aria.core.Aria;
+   9 import com.arialyy.aria.core.upload.IUploadListener;
+  10 import com.arialyy.aria.core.upload.UploadEntity;
+  11 import com.arialyy.aria.core.upload.UploadTask;
+  12 import com.arialyy.aria.core.upload.UploadTaskEntity;
+  13 import com.arialyy.aria.core.upload.UploadUtil;
+  14 import com.arialyy.aria.util.MultipartUtility;
+  15 import com.arialyy.frame.util.FileUtil;
+  16 import com.arialyy.frame.util.show.L;
+  17 import com.arialyy.frame.util.show.T;
+  18 import com.arialyy.simple.R;
+  19 import com.arialyy.simple.base.BaseActivity;
+  20 import com.arialyy.simple.databinding.ActivityUploadMeanBinding;
+  21 import com.arialyy.simple.widget.HorizontalProgressBarWithNumber;
+  22 import java.io.File;
+  23 import java.io.IOException;
+  24 import java.lang.ref.WeakReference;
+  25 import java.util.List;
+  26 
+  27 
+  28 /**
+  29  * Created by Aria.Lao on 2017/2/9.
+  30  */
+  31 public class UploadActivity extends BaseActivity&lt;ActivityUploadMeanBinding&gt; {
+  32   @Bind(R.id.pb) HorizontalProgressBarWithNumber mPb;
+  33 
+  34   private static final int START = 0;
+  35 
+  36   private static final int STOP = 1;
+  37 
+  38   private static final int CANCEL = 2;
+  39 
+  40   private static final int RUNNING = 3;
+  41 
+  42   private static final int COMPLETE = 4;
+  43 
+  44   private static final String FILE_PATH = &quot;/sdcard/Download/test.zip&quot;;
+  45 
+  46   private Handler mHandler = new Handler() {
+  47     @Override public void handleMessage(Message msg) {
+  48       super.handleMessage(msg);
+  49       UploadTask task = (UploadTask) msg.obj;
+  50       switch (msg.what) {
+  51         case START:
+  52           getBinding().setFileSize(FileUtil.formatFileSize(task.getFileSize()));
+  53           break;
+  54         case STOP:
+  55           mPb.setProgress(0);
+  56           break;
+  57         case CANCEL:
+  58           mPb.setProgress(0);
+  59           break;
+  60         case RUNNING:
+  61           int p = (int) (task.getCurrentProgress() * 100 / task.getFileSize());
+  62           mPb.setProgress(p);
+  63           break;
+  64         case COMPLETE:
+  65           T.showShort(UploadActivity.this, &quot;上传完成&quot;);
+  66           mPb.setProgress(100);
+  67           break;
+  68       }
+  69     }
+  70   };
+  71 
+  72   @Override protected int setLayoutId() {
+  73     return R.layout.activity_upload_mean;
+  74   }
+  75 
+  76   @Override protected void init(Bundle savedInstanceState) {
+  77     super.init(savedInstanceState);
+  78     //test();
+  79   }
+  80 
+  81   private void test() {
+  82     //String charset = &quot;UTF-8&quot;;
+  83     //File uploadFile1 = new File(&quot;/sdcard/Download/test.zip&quot;);
+  84     //String requestURL = &quot;http://172.18.104.50:8080/upload/sign_file&quot;;
+  85     ////String requestURL = &quot;http://172.18.104.50:8080/greeting&quot;;
+  86     //
+  87     //try {
+  88     //  MultipartUtility multipart = new MultipartUtility(requestURL, charset);
+  89     //
+  90     //  //multipart.addHeaderField(&quot;Test-Header&quot;, &quot;Header-Value&quot;);
+  91     //
+  92     //  multipart.addFilePart(&quot;file&quot;, uploadFile1);
+  93     //  List&lt;String&gt; response = multipart.finish();
+  94     //
+  95     //  System.out.println(&quot;SERVER REPLIED:&quot;);
+  96     //
+  97     //  for (String line : response) {
+  98     //    System.out.println(line);
+  99     //  }
+ 100     //} catch (IOException ex) {
+ 101     //  System.err.println(ex);
+ 102     //}
+ 103     UploadEntity entity = new UploadEntity();
+ 104     entity.setFilePath(&quot;/sdcard/Download/test.zip&quot;);
+ 105     entity.setFileName(&quot;test.pdf&quot;);
+ 106     UploadTaskEntity taskEntity = new UploadTaskEntity(entity);
+ 107     taskEntity.uploadUrl = &quot;http://172.18.104.50:8080/upload/sign_file&quot;;
+ 108     taskEntity.attachment = &quot;file&quot;;
+ 109     UploadUtil util = new UploadUtil(taskEntity, new IUploadListener() {
+ 110       long fileSize = 0;
+ 111 
+ 112       @Override
+ 113       public void onPre() {
+ 114       }
+ 115 
+ 116       @Override
+ 117       public void onStart(long fileSize) {
+ 118         this.fileSize = fileSize;
+ 119       }
+ 120 
+ 121       @Override
+ 122       public void onResume(long resumeLocation) {
+ 123       }
+ 124 
+ 125       @Override
+ 126       public void onStop(long stopLocation) {
+ 127       }
+ 128 
+ 129       @Override
+ 130       public void onProgress(long currentLocation) {
+ 131         int p = ((int) ((currentLocation * 100) / fileSize));
+ 132         mPb.setProgress(p);
+ 133       }
+ 134 
+ 135       @Override
+ 136       public void onCancel() {
+ 137       }
+ 138 
+ 139       @Override
+ 140       public void onComplete() {
+ 141       }
+ 142 
+ 143       @Override
+ 144       public void onFail() {
+ 145       }
+ 146     });
+ 147     util.start();
+ 148   }
+ 149 
+ 150   @OnClick(R.id.upload)
+ 151   void upload() {
+ 152     Aria.upload(this).load(FILE_PATH).setUploadUrl(
+ 153 &lt;&lt;&lt;&lt;&lt;&lt;&lt; LEFT
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 154 http://172.18.104.50:8080/upload/sign_file</span>
+ 155 ||||||| BASE
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"><abbr title=" 156 /*d94z9sk0k4hf9j3ijd - note the base isn&#x27;t actually empty, spork simply doesn&#x27;t generate a base - gd930kwohrp23k5b6vdk93d3r*/"> 156 /*d94z9sk0k4hf9j3ijd - note the base isn&#x27;t actually empty, spork simply doesn&#x27;t generate a base - gd930kw🔵</abbr></span>
+ 157 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 158 </span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 159 http://192.168.1.8:8080/upload/sign_file</span>
+ 160 &gt;&gt;&gt;&gt;&gt;&gt;&gt; RIGHT
+ 161     ).setAttachment(&quot;file&quot;).start();
+ 162 
+ 163 &lt;&lt;&lt;&lt;&lt;&lt;&lt; LEFT
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 164     //new Thread(new Runnable() {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 165     //  @Override public void run() {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 166     //    test();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 167     //  }</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 168     //}).start();</span>
+ 169 ||||||| BASE
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"><abbr title=" 170 /*d94z9sk0k4hf9j3ijd - note the base isn&#x27;t actually empty, spork simply doesn&#x27;t generate a base - gd930kwohrp23k5b6vdk93d3r*/"> 170 /*d94z9sk0k4hf9j3ijd - note the base isn&#x27;t actually empty, spork simply doesn&#x27;t generate a base - gd930kw🔵</abbr></span>
+ 171 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 172 </span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 173     //test();</span>
+ 174 &gt;&gt;&gt;&gt;&gt;&gt;&gt; RIGHT
+ 175 
+ 176   }
+ 177 
+ 178   @OnClick(R.id.stop) void stop() {
+ 179     Aria.upload(this).load(FILE_PATH).stop();
+ 180   }
+ 181 
+ 182   @OnClick(R.id.remove) void remove() {
+ 183     Aria.upload(this).load(FILE_PATH).cancel();
+ 184   }
+ 185 
+ 186   @Override protected void onResume() {
+ 187     super.onResume();
+ 188     Aria.upload(this).addSchedulerListener(new UploadListener(mHandler));
+ 189   }
+ 190 
+ 191   static class UploadListener extends Aria.UploadSchedulerListener {
+ 192     WeakReference&lt;Handler&gt; handler;
+ 193 
+ 194     UploadListener(Handler handler) {
+ 195       this.handler = new WeakReference&lt;&gt;(handler);
+ 196     }
+ 197 
+ 198     @Override
+ 199     public void onTaskStart(UploadTask task) {
+ 200       super.onTaskStart(task);
+ 201       handler.get().obtainMessage(START, task).sendToTarget();
+ 202     }
+ 203 
+ 204     @Override
+ 205     public void onTaskStop(UploadTask task) {
+ 206       super.onTaskStop(task);
+ 207       handler.get().obtainMessage(STOP, task).sendToTarget();
+ 208     }
+ 209 
+ 210     @Override
+ 211     public void onTaskCancel(UploadTask task) {
+ 212       super.onTaskCancel(task);
+ 213       handler.get().obtainMessage(CANCEL, task).sendToTarget();
+ 214     }
+ 215 
+ 216     @Override
+ 217     public void onTaskRunning(UploadTask task) {
+ 218       super.onTaskRunning(task);
+ 219       handler.get().obtainMessage(RUNNING, task).sendToTarget();
+ 220     }
+ 221 
+ 222     @Override
+ 223     public void onTaskComplete(UploadTask task) {
+ 224       super.onTaskComplete(task);
+ 225       handler.get().obtainMessage(COMPLETE, task).sendToTarget();
+ 226     }
+ 227   }
+ 228 }</pre></td>
+                        </tr>
+                    </table>
+                </div>
+                <div id="bottom">
+                    <table style="margin:auto">
+                        <tr>
+                            <th>ours vs. base</th>
+                            <th>theirs vs. base</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1  package com.arialyy.simple.upload;
+   2  
+   3  import android.os.Bundle;
+   4  import android.os.Handler;
+   5  import android.os.Message;
+   6  import butterknife.Bind;
+   7  import butterknife.OnClick;
+   8  import com.arialyy.aria.core.Aria;
+   9  import com.arialyy.aria.core.upload.IUploadListener;
+  10  import com.arialyy.aria.core.upload.UploadEntity;
+  11  import com.arialyy.aria.core.upload.UploadTask;
+  12  import com.arialyy.aria.core.upload.UploadTaskEntity;
+  13  import com.arialyy.aria.core.upload.UploadUtil;
+  14  import com.arialyy.aria.util.MultipartUtility;
+  15  import com.arialyy.frame.util.FileUtil;
+  16  import com.arialyy.frame.util.show.L;
+  17  import com.arialyy.frame.util.show.T;
+  18  import com.arialyy.simple.R;
+  19  import com.arialyy.simple.base.BaseActivity;
+  20  import com.arialyy.simple.databinding.ActivityUploadMeanBinding;
+  21  import com.arialyy.simple.widget.HorizontalProgressBarWithNumber;
+  22  import java.io.File;
+  23  import java.io.IOException;
+  24  import java.lang.ref.WeakReference;
+  25  import java.util.List;
+  26  
+  27  /**
+  28   * Created by Aria.Lao on 2017/2/9.
+  29   */
+  30  
+  31  public class UploadActivity extends BaseActivity&lt;ActivityUploadMeanBinding&gt; {
+  32    @Bind(R.id.pb) HorizontalProgressBarWithNumber mPb;
+  33    private static final int START = 0;
+  34    private static final int STOP = 1;
+  35    private static final int CANCEL = 2;
+  36    private static final int RUNNING = 3;
+  37    private static final int COMPLETE = 4;
+  38  
+  39    private static final String FILE_PATH = &quot;/sdcard/Download/test.zip&quot;;
+  40  
+  41    private Handler mHandler = new Handler() {
+  42      @Override public void handleMessage(Message msg) {
+  43        super.handleMessage(msg);
+  44        UploadTask task = (UploadTask) msg.obj;
+  45        switch (msg.what) {
+  46          case START:
+  47            getBinding().setFileSize(FileUtil.formatFileSize(task.getFileSize()));
+  48            break;
+  49          case STOP:
+  50            mPb.setProgress(0);
+  51            break;
+  52          case CANCEL:
+  53            mPb.setProgress(0);
+  54            break;
+  55          case RUNNING:
+  56            int p = (int) (task.getCurrentProgress() * 100 / task.getFileSize());
+  57            mPb.setProgress(p);
+  58            break;
+  59          case COMPLETE:
+  60            T.showShort(UploadActivity.this, &quot;上传完成&quot;);
+  61            mPb.setProgress(100);
+  62            break;
+  63        }
+  64      }
+  65    };
+  66  
+  67    @Override protected int setLayoutId() {
+  68      return R.layout.activity_upload_mean;
+  69    }
+  70  
+  71    @Override protected void init(Bundle savedInstanceState) {
+  72      super.init(savedInstanceState);
+  73      //test();
+  74    }
+  75  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  76 -  private void test(){</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  77 -    String charset = &quot;UTF-8&quot;;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  78 -    File uploadFile1 = new File(&quot;/sdcard/Download/test.zip&quot;);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  79 -    String requestURL = &quot;http://172.18.104.50:8080/UploadActivity/sign_file&quot;;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  80 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  81 -    try {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  82 -      MultipartUtility multipart = new MultipartUtility(requestURL, charset);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  83 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  84 -      //multipart.addHeaderField(&quot;Test-Header&quot;, &quot;Header-Value&quot;);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  85 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  86 -      multipart.addFilePart(&quot;file&quot;, uploadFile1);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  87 -      List&lt;String&gt; response = multipart.finish();</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  88 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  89 -      System.out.println(&quot;SERVER REPLIED:&quot;);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  90 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  91 -      for (String line : response) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  92 -        System.out.println(line);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  93 -      }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  94 -    } catch (IOException ex) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  95 -      System.err.println(ex);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  96 -    }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  97 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  98 -    //UploadEntity entity = new UploadEntity();</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  99 -    //entity.setFilePath(&quot;/sdcard/Download/test.zip&quot;);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 100 -    //entity.setFileName(&quot;test.pdf&quot;);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 101 -    //UploadTaskEntity taskEntity = new UploadTaskEntity(entity);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 102 -    //taskEntity.uploadUrl = &quot;http://172.18.104.50:8080/UploadActivity/sign_file&quot;;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 103 -    //taskEntity.attachment = &quot;file&quot;;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 104 -    //UploadUtil util = new UploadUtil(taskEntity, new IUploadListener() {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 105 -    //  long fileSize = 0;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 106 -    //</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 107 -    //  @Override public void onPre() {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 108 -    //</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 109 +  private void test() {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 110 +    //String charset = &quot;UTF-8&quot;;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 111 +    //File uploadFile1 = new File(&quot;/sdcard/Download/test.zip&quot;);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 112 +    //String requestURL = &quot;http://172.18.104.50:8080/upload/sign_file&quot;;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 113 +    ////String requestURL = &quot;http://172.18.104.50:8080/greeting&quot;;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 114 +    //</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 115 +    //try {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 116 +    //  MultipartUtility multipart = new MultipartUtility(requestURL, charset);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 117 +    //</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 118 +    //  //multipart.addHeaderField(&quot;Test-Header&quot;, &quot;Header-Value&quot;);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 119 +    //</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 120 +    //  multipart.addFilePart(&quot;file&quot;, uploadFile1);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 121 +    //  List&lt;String&gt; response = multipart.finish();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 122 +    //</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 123 +    //  System.out.println(&quot;SERVER REPLIED:&quot;);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 124 +    //</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 125 +    //  for (String line : response) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 126 +    //    System.out.println(line);</span>
+ 127      //  }
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 128 -    //</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 129 -    //  @Override public void onStart(long fileSize) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 130 -    //    this.fileSize = fileSize;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 131 +    //} catch (IOException ex) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 132 +    //  System.err.println(ex);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 133 +    //}</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 134 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 135 +    UploadEntity entity = new UploadEntity();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 136 +    entity.setFilePath(&quot;/sdcard/Download/test.zip&quot;);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 137 +    entity.setFileName(&quot;test.pdf&quot;);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 138 +    UploadTaskEntity taskEntity = new UploadTaskEntity(entity);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 139 +    taskEntity.uploadUrl = &quot;http://172.18.104.50:8080/upload/sign_file&quot;;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 140 +    taskEntity.attachment = &quot;file&quot;;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 141 +    UploadUtil util = new UploadUtil(taskEntity, new IUploadListener() {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 142 +      long fileSize = 0;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 143 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 144 +      @Override public void onPre() {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 145 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 146 +      }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 147 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 148 +      @Override public void onStart(long fileSize) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 149 +        this.fileSize = fileSize;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 150 +      }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 151 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 152 +      @Override public void onResume(long resumeLocation) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 153 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 154 +      }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 155 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 156 +      @Override public void onStop(long stopLocation) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 157 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 158 +      }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 159 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 160 +      @Override public void onProgress(long currentLocation) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 161 +        int p = (int) (currentLocation * 100 / fileSize);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 162 +        mPb.setProgress(p);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 163 +      }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 164 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 165 +      @Override public void onCancel() {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 166 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 167 +      }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 168 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 169 +      @Override public void onComplete() {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 170 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 171 +      }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 172 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 173 +      @Override public void onFail() {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 174 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 175 +      }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 176 +    });</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 177 +    util.start();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 178 +  }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 179 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 180 +  @OnClick(R.id.upload) void upload() {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 181 +    Aria.upload(this)</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 182 +        .load(FILE_PATH)</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 183 +        .setUploadUrl(&quot;http://172.18.104.50:8080/upload/sign_file&quot;)</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 184 +        .setAttachment(&quot;file&quot;)</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 185 +        .start();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 186 +    //new Thread(new Runnable() {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 187 +    //  @Override public void run() {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 188 +    //    test();</span>
+ 189      //  }
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 190 -    //</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 191 -    //  @Override public void onResume(long resumeLocation) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 192 -    //</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 193 -    //  }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 194 -    //</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 195 -    //  @Override public void onStop(long stopLocation) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 196 -    //</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 197 -    //  }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 198 -    //</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 199 -    //  @Override public void onProgress(long currentLocation) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 200 -    //    int p = (int) (currentLocation * 100 / fileSize);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 201 -    //    mPb.setProgress(p);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 202 -    //  }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 203 -    //</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 204 -    //  @Override public void onCancel() {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 205 -    //</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 206 -    //  }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 207 -    //</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 208 -    //  @Override public void onComplete() {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 209 -    //</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 210 -    //  }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 211 -    //</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 212 -    //  @Override public void onFail() {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 213 -    //</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 214 -    //  }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 215 -    //});</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 216 -    //util.start();</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 217 -  }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 218 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 219 -  @OnClick(R.id.upload) void upload() {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 220 -    //Aria.upload(this)</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 221 -    //    .load(FILE_PATH)</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 222 -    //    .setUploadUrl(&quot;http://172.18.104.50:8080/upload/sign_file&quot;)</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 223 -    //    .setAttachment(&quot;file&quot;)</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 224 -    //    .start();</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 225 -    test();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 226 +    //}).start();</span>
+
+
+
+
+
+ 227    }
+ 228  
+ 229    @OnClick(R.id.stop) void stop() {
+ 230      Aria.upload(this).load(FILE_PATH).stop();
+ 231    }
+ 232  
+ 233    @OnClick(R.id.remove) void remove() {
+ 234      Aria.upload(this).load(FILE_PATH).cancel();
+ 235    }
+ 236  
+ 237    @Override protected void onResume() {
+ 238      super.onResume();
+ 239      Aria.upload(this).addSchedulerListener(new UploadListener(mHandler));
+ 240    }
+ 241  
+ 242    static class UploadListener extends Aria.UploadSchedulerListener {
+ 243      WeakReference&lt;Handler&gt; handler;
+ 244  
+ 245      UploadListener(Handler handler) {
+ 246        this.handler = new WeakReference&lt;&gt;(handler);
+ 247      }
+ 248  
+ 249      @Override public void onTaskStart(UploadTask task) {
+ 250        super.onTaskStart(task);
+ 251        handler.get().obtainMessage(START, task).sendToTarget();
+ 252      }
+ 253  
+ 254      @Override public void onTaskStop(UploadTask task) {
+ 255        super.onTaskStop(task);
+ 256        handler.get().obtainMessage(STOP, task).sendToTarget();
+ 257      }
+ 258  
+ 259      @Override public void onTaskCancel(UploadTask task) {
+ 260        super.onTaskCancel(task);
+ 261        handler.get().obtainMessage(CANCEL, task).sendToTarget();
+ 262      }
+ 263  
+ 264      @Override public void onTaskRunning(UploadTask task) {
+ 265        super.onTaskRunning(task);
+ 266        handler.get().obtainMessage(RUNNING, task).sendToTarget();
+ 267      }
+ 268  
+ 269      @Override public void onTaskComplete(UploadTask task) {
+ 270        super.onTaskComplete(task);
+ 271        handler.get().obtainMessage(COMPLETE, task).sendToTarget();
+ 272      }
+ 273    }
+ 274  }</pre></td>
+                            <td><pre>   1  package com.arialyy.simple.upload;
+   2  
+   3  import android.os.Bundle;
+   4  import android.os.Handler;
+   5  import android.os.Message;
+   6  import butterknife.Bind;
+   7  import butterknife.OnClick;
+   8  import com.arialyy.aria.core.Aria;
+   9  import com.arialyy.aria.core.upload.IUploadListener;
+  10  import com.arialyy.aria.core.upload.UploadEntity;
+  11  import com.arialyy.aria.core.upload.UploadTask;
+  12  import com.arialyy.aria.core.upload.UploadTaskEntity;
+  13  import com.arialyy.aria.core.upload.UploadUtil;
+  14  import com.arialyy.aria.util.MultipartUtility;
+  15  import com.arialyy.frame.util.FileUtil;
+  16  import com.arialyy.frame.util.show.L;
+  17  import com.arialyy.frame.util.show.T;
+  18  import com.arialyy.simple.R;
+  19  import com.arialyy.simple.base.BaseActivity;
+  20  import com.arialyy.simple.databinding.ActivityUploadMeanBinding;
+  21  import com.arialyy.simple.widget.HorizontalProgressBarWithNumber;
+  22  import java.io.File;
+  23  import java.io.IOException;
+  24  import java.lang.ref.WeakReference;
+  25  import java.util.List;
+  26  
+  27  /**
+  28   * Created by Aria.Lao on 2017/2/9.
+  29   */
+  30  
+  31  public class UploadActivity extends BaseActivity&lt;ActivityUploadMeanBinding&gt; {
+  32    @Bind(R.id.pb) HorizontalProgressBarWithNumber mPb;
+  33    private static final int START = 0;
+  34    private static final int STOP = 1;
+  35    private static final int CANCEL = 2;
+  36    private static final int RUNNING = 3;
+  37    private static final int COMPLETE = 4;
+  38  
+  39    private static final String FILE_PATH = &quot;/sdcard/Download/test.zip&quot;;
+  40  
+  41    private Handler mHandler = new Handler() {
+  42      @Override public void handleMessage(Message msg) {
+  43        super.handleMessage(msg);
+  44        UploadTask task = (UploadTask) msg.obj;
+  45        switch (msg.what) {
+  46          case START:
+  47            getBinding().setFileSize(FileUtil.formatFileSize(task.getFileSize()));
+  48            break;
+  49          case STOP:
+  50            mPb.setProgress(0);
+  51            break;
+  52          case CANCEL:
+  53            mPb.setProgress(0);
+  54            break;
+  55          case RUNNING:
+  56            int p = (int) (task.getCurrentProgress() * 100 / task.getFileSize());
+  57            mPb.setProgress(p);
+  58            break;
+  59          case COMPLETE:
+  60            T.showShort(UploadActivity.this, &quot;上传完成&quot;);
+  61            mPb.setProgress(100);
+  62            break;
+  63        }
+  64      }
+  65    };
+  66  
+  67    @Override protected int setLayoutId() {
+  68      return R.layout.activity_upload_mean;
+  69    }
+  70  
+  71    @Override protected void init(Bundle savedInstanceState) {
+  72      super.init(savedInstanceState);
+  73      //test();
+  74    }
+  75  
+  76    private void test(){
+  77      String charset = &quot;UTF-8&quot;;
+  78      File uploadFile1 = new File(&quot;/sdcard/Download/test.zip&quot;);
+  79      String requestURL = &quot;http://172.18.104.50:8080/UploadActivity/sign_file&quot;;
+  80  
+  81      try {
+  82        MultipartUtility multipart = new MultipartUtility(requestURL, charset);
+  83  
+  84        //multipart.addHeaderField(&quot;Test-Header&quot;, &quot;Header-Value&quot;);
+  85  
+  86        multipart.addFilePart(&quot;file&quot;, uploadFile1);
+  87        List&lt;String&gt; response = multipart.finish();
+  88  
+  89        System.out.println(&quot;SERVER REPLIED:&quot;);
+  90  
+  91        for (String line : response) {
+  92          System.out.println(line);
+  93        }
+  94      } catch (IOException ex) {
+  95        System.err.println(ex);
+  96      }
+  97  
+  98      //UploadEntity entity = new UploadEntity();
+  99      //entity.setFilePath(&quot;/sdcard/Download/test.zip&quot;);
+ 100      //entity.setFileName(&quot;test.pdf&quot;);
+ 101      //UploadTaskEntity taskEntity = new UploadTaskEntity(entity);
+ 102      //taskEntity.uploadUrl = &quot;http://172.18.104.50:8080/UploadActivity/sign_file&quot;;
+ 103      //taskEntity.attachment = &quot;file&quot;;
+ 104      //UploadUtil util = new UploadUtil(taskEntity, new IUploadListener() {
+ 105      //  long fileSize = 0;
+ 106      //
+ 107      //  @Override public void onPre() {
+ 108      //
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 109      //  }
+ 110      //
+ 111      //  @Override public void onStart(long fileSize) {
+ 112      //    this.fileSize = fileSize;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 113      //  }
+ 114      //
+ 115      //  @Override public void onResume(long resumeLocation) {
+ 116      //
+ 117      //  }
+ 118      //
+ 119      //  @Override public void onStop(long stopLocation) {
+ 120      //
+ 121      //  }
+ 122      //
+ 123      //  @Override public void onProgress(long currentLocation) {
+ 124      //    int p = (int) (currentLocation * 100 / fileSize);
+ 125      //    mPb.setProgress(p);
+ 126      //  }
+ 127      //
+ 128      //  @Override public void onCancel() {
+ 129      //
+ 130      //  }
+ 131      //
+ 132      //  @Override public void onComplete() {
+ 133      //
+ 134      //  }
+ 135      //
+ 136      //  @Override public void onFail() {
+ 137      //
+ 138      //  }
+ 139      //});
+ 140      //util.start();
+ 141    }
+ 142  
+ 143    @OnClick(R.id.upload) void upload() {
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 144 -    //Aria.upload(this)</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 145 -    //    .load(FILE_PATH)</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 146 -    //    .setUploadUrl(&quot;http://172.18.104.50:8080/upload/sign_file&quot;)</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 147 -    //    .setAttachment(&quot;file&quot;)</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 148 -    //    .start();</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 149 -    test();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 150 +    Aria.upload(this)</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 151 +        .load(FILE_PATH)</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 152 +        .setUploadUrl(&quot;http://192.168.1.8:8080/upload/sign_file&quot;)</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 153 +        .setAttachment(&quot;file&quot;)</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 154 +        .start();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 155 +    //test();</span>
+ 156    }
+ 157  
+ 158    @OnClick(R.id.stop) void stop() {
+ 159      Aria.upload(this).load(FILE_PATH).stop();
+ 160    }
+ 161  
+ 162    @OnClick(R.id.remove) void remove() {
+ 163      Aria.upload(this).load(FILE_PATH).cancel();
+ 164    }
+ 165  
+ 166    @Override protected void onResume() {
+ 167      super.onResume();
+ 168      Aria.upload(this).addSchedulerListener(new UploadListener(mHandler));
+ 169    }
+ 170  
+ 171    static class UploadListener extends Aria.UploadSchedulerListener {
+ 172      WeakReference&lt;Handler&gt; handler;
+ 173  
+ 174      UploadListener(Handler handler) {
+ 175        this.handler = new WeakReference&lt;&gt;(handler);
+ 176      }
+ 177  
+ 178      @Override public void onTaskStart(UploadTask task) {
+ 179        super.onTaskStart(task);
+ 180        handler.get().obtainMessage(START, task).sendToTarget();
+ 181      }
+ 182  
+ 183      @Override public void onTaskStop(UploadTask task) {
+ 184        super.onTaskStop(task);
+ 185        handler.get().obtainMessage(STOP, task).sendToTarget();
+ 186      }
+ 187  
+ 188      @Override public void onTaskCancel(UploadTask task) {
+ 189        super.onTaskCancel(task);
+ 190        handler.get().obtainMessage(CANCEL, task).sendToTarget();
+ 191      }
+ 192  
+ 193      @Override public void onTaskRunning(UploadTask task) {
+ 194        super.onTaskRunning(task);
+ 195        handler.get().obtainMessage(RUNNING, task).sendToTarget();
+ 196      }
+ 197  
+ 198      @Override public void onTaskComplete(UploadTask task) {
+ 199        super.onTaskComplete(task);
+ 200        handler.get().obtainMessage(COMPLETE, task).sendToTarget();
+ 201      }
+ 202    }
+ 203  }</pre></td>
+                        </tr>
+                    </table>
+                </div>
+              </body>
+            </html>
+            

@@ -1,0 +1,1052 @@
+<!DOCTYPE html>
+    <html lang="en">
+              <head>
+                <meta charset="utf-8">
+                <title>500</title>
+                    <style>
+                        #top {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        #bottom {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        abbr {
+                          /* Here is the delay */
+                          transition-delay:0s;
+                        }
+                    </style>
+              </head>
+              <body>
+                <span style="height: 4vh">
+                    500
+                    <a href="499.html">prev</a>
+                    <a href="501.html">next</a>
+                    <a href="500_chunks.html">chunks</a>
+                    <a href="index.html">index</a>
+                    DTStack/flinkStreamSQL_f7d04befb21c26162c7af61911a0e71624243147_core/src/main/java/com/dtstack/flink/sql/side/SideSQLParser.java
+                    <textarea rows=1 onclick='navigator.clipboard.writeText(this.value)'>cd C:\studies\se\mega\git-analyzer-plus\notebooks\debug
+del /Q *
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;f7d04befb21c26162c7af61911a0e71624243147:core/src/main/java/com/dtstack/flink/sql/side/SideSQLParser.java&quot; &gt; committed.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;f7d04befb21c26162c7af61911a0e71624243147^1:core/src/main/java/com/dtstack/flink/sql/side/SideSQLParser.java&quot; &gt; ours.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;f7d04befb21c26162c7af61911a0e71624243147^2:core/src/main/java/com/dtstack/flink/sql/side/SideSQLParser.java&quot; &gt; theirs.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;b59ef71c4aa3401fd523d61328334a6bac817e1c:core/src/main/java/com/dtstack/flink/sql/side/SideSQLParser.java&quot; &gt; base.java
+copy ours.java 1ours.java
+copy ours.java 2ours.java
+copy theirs.java 1theirs.java
+copy theirs.java 2theirs.java
+copy base.java 1base.java
+copy base.java 2base.java
+&quot;C:\Program Files\Java\jdk1.8.0_241\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\jFSTMerge\build\libs\jFSTMerge-all.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\jfstmerge.java --show-base
+&quot;C:\Program Files\Eclipse Adoptium\jdk-17.0.11.9-hotspot\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\spork\target\spork-0.5.0-SNAPSHOT.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\spork.java
+del /Q 1*.java
+del /Q 2*.java
+del /Q jfstmerge.java.merge
+</textarea>
+                    {strict: [[bj]], subset: [[bj]]}
+                </span>
+                <div id="top">
+
+                    <table>
+                        <tr>
+                            <th>line based (standard git)</th>
+                            <th>jfstmerge</th>
+                            <th>spork</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1 /*
+   2  * Licensed to the Apache Software Foundation (ASF) under one
+   3  * or more contributor license agreements.  See the NOTICE file
+   4  * distributed with this work for additional information
+   5  * regarding copyright ownership.  The ASF licenses this file
+   6  * to you under the Apache License, Version 2.0 (the
+   7  * &quot;License&quot;); you may not use this file except in compliance
+   8  * with the License.  You may obtain a copy of the License at
+   9  *
+  10  *     http://www.apache.org/licenses/LICENSE-2.0
+  11  *
+  12  * Unless required by applicable law or agreed to in writing, software
+  13  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15  * See the License for the specific language governing permissions and
+  16  * limitations under the License.
+  17  */
+  18 
+  19  
+  20 
+  21 package com.dtstack.flink.sql.side;
+  22 
+  23 import com.dtstack.flink.sql.parser.FlinkPlanner;
+  24 import com.dtstack.flink.sql.util.TableUtils;
+  25 import com.google.common.collect.Maps;
+  26 import com.google.common.collect.Queues;
+  27 import com.google.common.collect.Sets;
+  28 import org.apache.calcite.sql.SqlBasicCall;
+  29 import org.apache.calcite.sql.SqlIdentifier;
+  30 import org.apache.calcite.sql.SqlInsert;
+  31 import org.apache.calcite.sql.SqlJoin;
+  32 import org.apache.calcite.sql.SqlKind;
+  33 import org.apache.calcite.sql.SqlNode;
+  34 import org.apache.calcite.sql.SqlNodeList;
+  35 import org.apache.calcite.sql.SqlOrderBy;
+  36 import org.apache.calcite.sql.SqlSelect;
+  37 import org.apache.calcite.sql.SqlWith;
+  38 import org.apache.calcite.sql.SqlWithItem;
+  39 import org.apache.calcite.sql.parser.SqlParseException;
+  40 import org.apache.flink.api.java.tuple.Tuple2;
+  41 import org.apache.flink.table.api.Table;
+  42 import org.apache.flink.table.calcite.FlinkPlannerImpl;
+  43 import org.slf4j.Logger;
+  44 import org.slf4j.LoggerFactory;
+  45 
+  46 import java.util.Map;
+  47 import java.util.Queue;
+  48 import java.util.Set;
+  49 
+  50 import static org.apache.calcite.sql.SqlKind.IDENTIFIER;
+  51 import static org.apache.calcite.sql.SqlKind.LITERAL;
+  52 
+  53 /**
+  54  * Parsing sql, obtain execution information dimension table
+  55  * Date: 2018/7/24
+  56  * Company: www.dtstack.com
+  57  * @author xuchao
+  58  */
+  59 
+  60 public class SideSQLParser {
+  61     private static final Logger LOG = LoggerFactory.getLogger(SideSQLParser.class);
+  62 
+  63     private Map&lt;String, Table&gt; localTableCache = Maps.newHashMap();
+  64 
+  65 &lt;&lt;&lt;&lt;&lt;&lt;&lt; GitAnalyzerPlus_ours
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"><abbr title="  66     public Queue&lt;Object&gt; getExeQueue(String exeSql, Set&lt;String&gt; sideTableSet, String scope) throws SqlParseException {">  66     public Queue&lt;Object&gt; getExeQueue(String exeSql, Set&lt;String&gt; sideTableSet, String scope) throws SqlPar🔵</abbr></span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  67         System.out.println(&quot;----------exec original Sql----------&quot;);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  68         System.out.println(exeSql);</span>
+  69 ||||||| GitAnalyzerPlus_base
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  70     public Queue&lt;Object&gt; getExeQueue(String exeSql, Set&lt;String&gt; sideTableSet) throws SqlParseException {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  71         System.out.println(&quot;----------exec original Sql----------&quot;);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  72         System.out.println(exeSql);</span>
+  73 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  74     public Queue&lt;Object&gt; getExeQueue(String exeSql, Set&lt;String&gt; sideTableSet) throws SqlParseException {</span>
+  75 &gt;&gt;&gt;&gt;&gt;&gt;&gt; GitAnalyzerPlus_theirs
+  76         LOG.info(&quot;----------exec original Sql----------&quot;);
+  77         LOG.info(exeSql);
+  78 
+  79         Queue&lt;Object&gt; queueInfo = Queues.newLinkedBlockingQueue();
+  80         FlinkPlannerImpl flinkPlanner = FlinkPlanner.getFlinkPlanner();
+  81         SqlNode sqlNode = flinkPlanner.parse(exeSql);
+  82 
+  83         parseSql(sqlNode, sideTableSet, queueInfo, null, null, null, scope);
+  84         queueInfo.offer(sqlNode);
+  85         return queueInfo;
+  86     }
+  87 
+  88 
+  89     /**
+  90      *  解析 sql 根据维表 join关系重新组装新的sql
+  91      * @param sqlNode
+  92      * @param sideTableSet
+  93      * @param queueInfo
+  94      * @param parentWhere
+  95      * @param parentSelectList
+  96      * @return
+  97      */
+  98     public Object parseSql(SqlNode sqlNode,
+  99                            Set&lt;String&gt; sideTableSet,
+ 100                            Queue&lt;Object&gt; queueInfo,
+ 101                            SqlNode parentWhere,
+ 102                            SqlNodeList parentSelectList,
+ 103                            SqlNodeList parentGroupByList,
+ 104                            String scope){
+ 105         SqlKind sqlKind = sqlNode.getKind();
+ 106         switch (sqlKind){
+ 107             case WITH: {
+ 108                 SqlWith sqlWith = (SqlWith) sqlNode;
+ 109                 SqlNodeList sqlNodeList = sqlWith.withList;
+ 110                 for (SqlNode withAsTable : sqlNodeList) {
+ 111                     SqlWithItem sqlWithItem = (SqlWithItem) withAsTable;
+<abbr title=" 112                     parseSql(sqlWithItem.query, sideTableSet, queueInfo, parentWhere, parentSelectList, parentGroupByList, scope);"> 112                     parseSql(sqlWithItem.query, sideTableSet, queueInfo, parentWhere, parentSelectList, p🔵</abbr>
+ 113                     queueInfo.add(sqlWithItem);
+ 114                 }
+<abbr title=" 115                 parseSql(sqlWith.body, sideTableSet, queueInfo, parentWhere, parentSelectList, parentGroupByList, scope);"> 115                 parseSql(sqlWith.body, sideTableSet, queueInfo, parentWhere, parentSelectList, parentGrou🔵</abbr>
+ 116                 break;
+ 117             }
+ 118             case INSERT:
+ 119                 SqlNode sqlSource = ((SqlInsert)sqlNode).getSource();
+<abbr title=" 120                 return parseSql(sqlSource, sideTableSet, queueInfo, parentWhere, parentSelectList, parentGroupByList, scope);"> 120                 return parseSql(sqlSource, sideTableSet, queueInfo, parentWhere, parentSelectList, parent🔵</abbr>
+ 121             case SELECT:
+ 122                 SqlNode sqlFrom = ((SqlSelect)sqlNode).getFrom();
+ 123                 SqlNode sqlWhere = ((SqlSelect)sqlNode).getWhere();
+ 124                 SqlNodeList selectList = ((SqlSelect)sqlNode).getSelectList();
+ 125                 SqlNodeList groupByList = ((SqlSelect) sqlNode).getGroup();
+ 126 
+ 127                 if(sqlFrom.getKind() != IDENTIFIER){
+<abbr title=" 128                     Object result = parseSql(sqlFrom, sideTableSet, queueInfo, sqlWhere, selectList, groupByList, scope);"> 128                     Object result = parseSql(sqlFrom, sideTableSet, queueInfo, sqlWhere, selectList, grou🔵</abbr>
+ 129                     if(result instanceof JoinInfo){
+<abbr title=" 130                         return TableUtils.dealSelectResultWithJoinInfo((JoinInfo) result, (SqlSelect) sqlNode, queueInfo);"> 130                         return TableUtils.dealSelectResultWithJoinInfo((JoinInfo) result, (SqlSelect) sql🔵</abbr>
+ 131                     }else if(result instanceof AliasInfo){
+ 132                         String tableName = ((AliasInfo) result).getName();
+ 133                         if(sideTableSet.contains(tableName)){
+ 134                             throw new RuntimeException(&quot;side-table must be used in join operator&quot;);
+ 135                         }
+ 136                     }
+ 137                 }else{
+ 138                     String tableName = ((SqlIdentifier)sqlFrom).getSimple();
+ 139                     if(sideTableSet.contains(tableName)){
+ 140                         throw new RuntimeException(&quot;side-table must be used in join operator&quot;);
+ 141                     }
+ 142                 }
+ 143                 break;
+ 144             case JOIN:
+ 145                 JoinNodeDealer joinNodeDealer = new JoinNodeDealer(this);
+ 146                 Set&lt;Tuple2&lt;String, String&gt;&gt; joinFieldSet = Sets.newHashSet();
+ 147                 Map&lt;String, String&gt; tableRef = Maps.newHashMap();
+ 148                 Map&lt;String, String&gt; fieldRef = Maps.newHashMap();
+ 149                 return joinNodeDealer.dealJoinNode((SqlJoin) sqlNode, sideTableSet, queueInfo,
+<abbr title=" 150                         parentWhere, parentSelectList, parentGroupByList, joinFieldSet, tableRef, fieldRef, scope);"> 150                         parentWhere, parentSelectList, parentGroupByList, joinFieldSet, tableRef, fieldRe🔵</abbr>
+ 151             case AS:
+ 152                 SqlNode info = ((SqlBasicCall)sqlNode).getOperands()[0];
+ 153                 SqlNode alias = ((SqlBasicCall) sqlNode).getOperands()[1];
+ 154                 String infoStr = &quot;&quot;;
+ 155 
+ 156                 if(info.getKind() == IDENTIFIER){
+ 157                     infoStr = info.toString();
+ 158                 } else {
+<abbr title=" 159                     infoStr = parseSql(info, sideTableSet, queueInfo, parentWhere, parentSelectList, parentGroupByList, scope).toString();"> 159                     infoStr = parseSql(info, sideTableSet, queueInfo, parentWhere, parentSelectList, pare🔵</abbr>
+ 160                 }
+ 161 
+ 162                 AliasInfo aliasInfo = new AliasInfo();
+ 163                 aliasInfo.setName(infoStr);
+ 164                 aliasInfo.setAlias(alias.toString());
+ 165 
+ 166                 return aliasInfo;
+ 167 
+ 168             case UNION:
+ 169                 SqlNode unionLeft = ((SqlBasicCall)sqlNode).getOperands()[0];
+ 170                 SqlNode unionRight = ((SqlBasicCall)sqlNode).getOperands()[1];
+ 171 
+<abbr title=" 172                 parseSql(unionLeft, sideTableSet, queueInfo, parentWhere, parentSelectList, parentGroupByList, scope);"> 172                 parseSql(unionLeft, sideTableSet, queueInfo, parentWhere, parentSelectList, parentGroupBy🔵</abbr>
+<abbr title=" 173                 parseSql(unionRight, sideTableSet, queueInfo, parentWhere, parentSelectList, parentGroupByList, scope);"> 173                 parseSql(unionRight, sideTableSet, queueInfo, parentWhere, parentSelectList, parentGroupB🔵</abbr>
+ 174                 break;
+ 175             case ORDER_BY:
+ 176                 SqlOrderBy sqlOrderBy  = (SqlOrderBy) sqlNode;
+<abbr title=" 177                 parseSql(sqlOrderBy.query, sideTableSet, queueInfo, parentWhere, parentSelectList, parentGroupByList, scope);"> 177                 parseSql(sqlOrderBy.query, sideTableSet, queueInfo, parentWhere, parentSelectList, parent🔵</abbr>
+ 178 
+ 179             case LITERAL:
+ 180                 return LITERAL.toString();
+ 181             default:
+ 182                 break;
+ 183         }
+ 184         return &quot;&quot;;
+ 185     }
+ 186 
+ 187 
+ 188 
+ 189 
+ 190     public void setLocalTableCache(Map&lt;String, Table&gt; localTableCache) {
+ 191         this.localTableCache = localTableCache;
+ 192     }
+ 193 
+ 194 }</pre></td>
+                            <td><pre>   1 /*
+   2  * Licensed to the Apache Software Foundation (ASF) under one
+   3  * or more contributor license agreements.  See the NOTICE file
+   4  * distributed with this work for additional information
+   5  * regarding copyright ownership.  The ASF licenses this file
+   6  * to you under the Apache License, Version 2.0 (the
+   7  * &quot;License&quot;); you may not use this file except in compliance
+   8  * with the License.  You may obtain a copy of the License at
+   9  *
+  10  *     http://www.apache.org/licenses/LICENSE-2.0
+  11  *
+  12  * Unless required by applicable law or agreed to in writing, software
+  13  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15  * See the License for the specific language governing permissions and
+  16  * limitations under the License.
+  17  */
+  18 
+  19 
+  20 
+  21 package com.dtstack.flink.sql.side;
+  22 
+  23 import com.dtstack.flink.sql.parser.FlinkPlanner;
+  24 import com.dtstack.flink.sql.util.TableUtils;
+  25 import com.google.common.collect.Maps;
+  26 import com.google.common.collect.Queues;
+  27 import com.google.common.collect.Sets;
+  28 import org.apache.calcite.sql.SqlBasicCall;
+  29 import org.apache.calcite.sql.SqlIdentifier;
+  30 import org.apache.calcite.sql.SqlInsert;
+  31 import org.apache.calcite.sql.SqlJoin;
+  32 import org.apache.calcite.sql.SqlKind;
+  33 import org.apache.calcite.sql.SqlNode;
+  34 import org.apache.calcite.sql.SqlNodeList;
+  35 import org.apache.calcite.sql.SqlOrderBy;
+  36 import org.apache.calcite.sql.SqlSelect;
+  37 import org.apache.calcite.sql.SqlWith;
+  38 import org.apache.calcite.sql.SqlWithItem;
+  39 import org.apache.calcite.sql.parser.SqlParseException;
+  40 import org.apache.flink.api.java.tuple.Tuple2;
+  41 import org.apache.flink.table.api.Table;
+  42 import org.apache.flink.table.calcite.FlinkPlannerImpl;
+  43 import org.slf4j.Logger;
+  44 import org.slf4j.LoggerFactory;
+  45 
+  46 import java.util.Map;
+  47 import java.util.Queue;
+  48 import java.util.Set;
+  49 
+  50 import static org.apache.calcite.sql.SqlKind.IDENTIFIER;
+  51 import static org.apache.calcite.sql.SqlKind.LITERAL;
+  52 
+  53 /**
+  54  * Parsing sql, obtain execution information dimension table
+  55  * Date: 2018/7/24
+  56  * Company: www.dtstack.com
+  57  * @author xuchao
+  58  */
+  59 
+  60 public class SideSQLParser {
+  61     private static final Logger LOG = LoggerFactory.getLogger(SideSQLParser.class);
+  62 
+  63     private Map&lt;String, Table&gt; localTableCache = Maps.newHashMap();
+  64 
+  65 &lt;&lt;&lt;&lt;&lt;&lt;&lt; MINE
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"><abbr title="  66 public Queue&lt;Object&gt; getExeQueue(String exeSql, Set&lt;String&gt; sideTableSet, String scope) throws SqlParseException {">  66 public Queue&lt;Object&gt; getExeQueue(String exeSql, Set&lt;String&gt; sideTableSet, String scope) throws SqlParseEx🔵</abbr></span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  67         System.out.println(&quot;----------exec original Sql----------&quot;);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  68         System.out.println(exeSql);</span>
+  69 ||||||| BASE
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  70 public Queue&lt;Object&gt; getExeQueue(String exeSql, Set&lt;String&gt; sideTableSet) throws SqlParseException {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  71         System.out.println(&quot;----------exec original Sql----------&quot;);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  72         System.out.println(exeSql);</span>
+  73 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  74 public Queue&lt;Object&gt; getExeQueue(String exeSql, Set&lt;String&gt; sideTableSet) throws SqlParseException {</span>
+  75 &gt;&gt;&gt;&gt;&gt;&gt;&gt; YOURS
+  76         LOG.info(&quot;----------exec original Sql----------&quot;);
+  77         LOG.info(exeSql);
+  78 
+  79         Queue&lt;Object&gt; queueInfo = Queues.newLinkedBlockingQueue();
+  80         FlinkPlannerImpl flinkPlanner = FlinkPlanner.getFlinkPlanner();
+  81         SqlNode sqlNode = flinkPlanner.parse(exeSql);
+  82 
+  83         parseSql(sqlNode, sideTableSet, queueInfo, null, null, null, scope);
+  84         queueInfo.offer(sqlNode);
+  85         return queueInfo;
+  86     }
+  87 
+  88 
+  89     /**
+  90      *  解析 sql 根据维表 join关系重新组装新的sql
+  91      * @param sqlNode
+  92      * @param sideTableSet
+  93      * @param queueInfo
+  94      * @param parentWhere
+  95      * @param parentSelectList
+  96      * @return
+  97      */
+  98     public Object parseSql(SqlNode sqlNode,
+  99                            Set&lt;String&gt; sideTableSet,
+ 100                            Queue&lt;Object&gt; queueInfo,
+ 101                            SqlNode parentWhere,
+ 102                            SqlNodeList parentSelectList,
+ 103                            SqlNodeList parentGroupByList,
+ 104                            String scope){
+ 105         SqlKind sqlKind = sqlNode.getKind();
+ 106         switch (sqlKind){
+ 107             case WITH: {
+ 108                 SqlWith sqlWith = (SqlWith) sqlNode;
+ 109                 SqlNodeList sqlNodeList = sqlWith.withList;
+ 110                 for (SqlNode withAsTable : sqlNodeList) {
+ 111                     SqlWithItem sqlWithItem = (SqlWithItem) withAsTable;
+<abbr title=" 112                     parseSql(sqlWithItem.query, sideTableSet, queueInfo, parentWhere, parentSelectList, parentGroupByList, scope);"> 112                     parseSql(sqlWithItem.query, sideTableSet, queueInfo, parentWhere, parentSelectList, p🔵</abbr>
+ 113                     queueInfo.add(sqlWithItem);
+ 114                 }
+<abbr title=" 115                 parseSql(sqlWith.body, sideTableSet, queueInfo, parentWhere, parentSelectList, parentGroupByList, scope);"> 115                 parseSql(sqlWith.body, sideTableSet, queueInfo, parentWhere, parentSelectList, parentGrou🔵</abbr>
+ 116                 break;
+ 117             }
+ 118             case INSERT:
+ 119                 SqlNode sqlSource = ((SqlInsert)sqlNode).getSource();
+<abbr title=" 120                 return parseSql(sqlSource, sideTableSet, queueInfo, parentWhere, parentSelectList, parentGroupByList, scope);"> 120                 return parseSql(sqlSource, sideTableSet, queueInfo, parentWhere, parentSelectList, parent🔵</abbr>
+ 121             case SELECT:
+ 122                 SqlNode sqlFrom = ((SqlSelect)sqlNode).getFrom();
+ 123                 SqlNode sqlWhere = ((SqlSelect)sqlNode).getWhere();
+ 124                 SqlNodeList selectList = ((SqlSelect)sqlNode).getSelectList();
+ 125                 SqlNodeList groupByList = ((SqlSelect) sqlNode).getGroup();
+ 126 
+ 127                 if(sqlFrom.getKind() != IDENTIFIER){
+<abbr title=" 128                     Object result = parseSql(sqlFrom, sideTableSet, queueInfo, sqlWhere, selectList, groupByList, scope);"> 128                     Object result = parseSql(sqlFrom, sideTableSet, queueInfo, sqlWhere, selectList, grou🔵</abbr>
+ 129                     if(result instanceof JoinInfo){
+<abbr title=" 130                         return TableUtils.dealSelectResultWithJoinInfo((JoinInfo) result, (SqlSelect) sqlNode, queueInfo);"> 130                         return TableUtils.dealSelectResultWithJoinInfo((JoinInfo) result, (SqlSelect) sql🔵</abbr>
+ 131                     }else if(result instanceof AliasInfo){
+ 132                         String tableName = ((AliasInfo) result).getName();
+ 133                         if(sideTableSet.contains(tableName)){
+ 134                             throw new RuntimeException(&quot;side-table must be used in join operator&quot;);
+ 135                         }
+ 136                     }
+ 137                 }else{
+ 138                     String tableName = ((SqlIdentifier)sqlFrom).getSimple();
+ 139                     if(sideTableSet.contains(tableName)){
+ 140                         throw new RuntimeException(&quot;side-table must be used in join operator&quot;);
+ 141                     }
+ 142                 }
+ 143                 break;
+ 144             case JOIN:
+ 145                 JoinNodeDealer joinNodeDealer = new JoinNodeDealer(this);
+ 146                 Set&lt;Tuple2&lt;String, String&gt;&gt; joinFieldSet = Sets.newHashSet();
+ 147                 Map&lt;String, String&gt; tableRef = Maps.newHashMap();
+ 148                 Map&lt;String, String&gt; fieldRef = Maps.newHashMap();
+ 149                 return joinNodeDealer.dealJoinNode((SqlJoin) sqlNode, sideTableSet, queueInfo,
+<abbr title=" 150                         parentWhere, parentSelectList, parentGroupByList, joinFieldSet, tableRef, fieldRef, scope);"> 150                         parentWhere, parentSelectList, parentGroupByList, joinFieldSet, tableRef, fieldRe🔵</abbr>
+ 151             case AS:
+ 152                 SqlNode info = ((SqlBasicCall)sqlNode).getOperands()[0];
+ 153                 SqlNode alias = ((SqlBasicCall) sqlNode).getOperands()[1];
+ 154                 String infoStr = &quot;&quot;;
+ 155 
+ 156                 if(info.getKind() == IDENTIFIER){
+ 157                     infoStr = info.toString();
+ 158                 } else {
+<abbr title=" 159                     infoStr = parseSql(info, sideTableSet, queueInfo, parentWhere, parentSelectList, parentGroupByList, scope).toString();"> 159                     infoStr = parseSql(info, sideTableSet, queueInfo, parentWhere, parentSelectList, pare🔵</abbr>
+ 160                 }
+ 161 
+ 162                 AliasInfo aliasInfo = new AliasInfo();
+ 163                 aliasInfo.setName(infoStr);
+ 164                 aliasInfo.setAlias(alias.toString());
+ 165 
+ 166                 return aliasInfo;
+ 167 
+ 168             case UNION:
+ 169                 SqlNode unionLeft = ((SqlBasicCall)sqlNode).getOperands()[0];
+ 170                 SqlNode unionRight = ((SqlBasicCall)sqlNode).getOperands()[1];
+ 171 
+<abbr title=" 172                 parseSql(unionLeft, sideTableSet, queueInfo, parentWhere, parentSelectList, parentGroupByList, scope);"> 172                 parseSql(unionLeft, sideTableSet, queueInfo, parentWhere, parentSelectList, parentGroupBy🔵</abbr>
+<abbr title=" 173                 parseSql(unionRight, sideTableSet, queueInfo, parentWhere, parentSelectList, parentGroupByList, scope);"> 173                 parseSql(unionRight, sideTableSet, queueInfo, parentWhere, parentSelectList, parentGroupB🔵</abbr>
+ 174                 break;
+ 175             case ORDER_BY:
+ 176                 SqlOrderBy sqlOrderBy  = (SqlOrderBy) sqlNode;
+<abbr title=" 177                 parseSql(sqlOrderBy.query, sideTableSet, queueInfo, parentWhere, parentSelectList, parentGroupByList, scope);"> 177                 parseSql(sqlOrderBy.query, sideTableSet, queueInfo, parentWhere, parentSelectList, parent🔵</abbr>
+ 178 
+ 179             case LITERAL:
+ 180                 return LITERAL.toString();
+ 181             default:
+ 182                 break;
+ 183         }
+ 184         return &quot;&quot;;
+ 185     }
+ 186 
+ 187 
+ 188 
+ 189 
+ 190     public void setLocalTableCache(Map&lt;String, Table&gt; localTableCache) {
+ 191         this.localTableCache = localTableCache;
+ 192     }
+ 193 
+ 194 }</pre></td>
+                            <td><pre>   1 /*
+   2  * Licensed to the Apache Software Foundation (ASF) under one
+   3  * or more contributor license agreements.  See the NOTICE file
+   4  * distributed with this work for additional information
+   5  * regarding copyright ownership.  The ASF licenses this file
+   6  * to you under the Apache License, Version 2.0 (the
+   7  * &quot;License&quot;); you may not use this file except in compliance
+   8  * with the License.  You may obtain a copy of the License at
+   9  *
+  10  *     http://www.apache.org/licenses/LICENSE-2.0
+  11  *
+  12  * Unless required by applicable law or agreed to in writing, software
+  13  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15  * See the License for the specific language governing permissions and
+  16  * limitations under the License.
+  17  */
+  18 package com.dtstack.flink.sql.side;
+  19 
+  20 import com.dtstack.flink.sql.parser.FlinkPlanner;
+  21 import com.dtstack.flink.sql.util.TableUtils;
+  22 import com.google.common.collect.Maps;
+  23 import com.google.common.collect.Queues;
+  24 import com.google.common.collect.Sets;
+  25 import java.util.Map;
+  26 import java.util.Queue;
+  27 import java.util.Set;
+  28 import org.apache.calcite.sql.SqlBasicCall;
+  29 import org.apache.calcite.sql.SqlIdentifier;
+  30 import org.apache.calcite.sql.SqlInsert;
+  31 import org.apache.calcite.sql.SqlJoin;
+  32 import org.apache.calcite.sql.SqlKind;
+  33 import org.apache.calcite.sql.SqlNode;
+  34 import org.apache.calcite.sql.SqlNodeList;
+  35 import org.apache.calcite.sql.SqlOrderBy;
+  36 import org.apache.calcite.sql.SqlSelect;
+  37 import org.apache.calcite.sql.SqlWith;
+  38 import org.apache.calcite.sql.SqlWithItem;
+  39 import org.apache.calcite.sql.parser.SqlParseException;
+  40 import org.apache.flink.api.java.tuple.Tuple2;
+  41 import org.apache.flink.table.api.Table;
+  42 import org.apache.flink.table.calcite.FlinkPlannerImpl;
+  43 import org.slf4j.Logger;
+  44 import org.slf4j.LoggerFactory;
+  45 import static org.apache.calcite.sql.SqlKind.IDENTIFIER;
+  46 import static org.apache.calcite.sql.SqlKind.LITERAL;
+  47 
+  48 
+  49 /**
+  50  * Parsing sql, obtain execution information dimension table
+  51  * Date: 2018/7/24
+  52  * Company: www.dtstack.com
+  53  * @author xuchao
+  54  */
+  55 public class SideSQLParser {
+  56     private static final Logger LOG = LoggerFactory.getLogger(SideSQLParser.class);
+  57 
+  58     private Map&lt;String, Table&gt; localTableCache = Maps.newHashMap();
+  59 
+<abbr title="  60     public Queue&lt;Object&gt; getExeQueue(String exeSql, Set&lt;String&gt; sideTableSet, String scope) throws SqlParseException {">  60     public Queue&lt;Object&gt; getExeQueue(String exeSql, Set&lt;String&gt; sideTableSet, String scope) throws SqlPar🔵</abbr>
+  61         LOG.info(&quot;----------exec original Sql----------&quot;);
+  62         LOG.info(exeSql);
+  63         Queue&lt;Object&gt; queueInfo = Queues.newLinkedBlockingQueue();
+  64         FlinkPlannerImpl flinkPlanner = FlinkPlanner.getFlinkPlanner();
+  65         SqlNode sqlNode = flinkPlanner.parse(exeSql);
+  66         parseSql(sqlNode, sideTableSet, queueInfo, null, null, null, scope);
+  67         queueInfo.offer(sqlNode);
+  68         return queueInfo;
+  69     }
+  70 
+  71     /**
+  72      *  解析 sql 根据维表 join关系重新组装新的sql
+  73      * @param sqlNode
+  74      * @param sideTableSet
+  75      * @param queueInfo
+  76      * @param parentWhere
+  77      * @param parentSelectList
+  78      * @return
+  79      */
+<abbr title="  80     public Object parseSql(SqlNode sqlNode, Set&lt;String&gt; sideTableSet, Queue&lt;Object&gt; queueInfo, SqlNode parentWhere, SqlNodeList parentSelectList, SqlNodeList parentGroupByList, String scope) {">  80     public Object parseSql(SqlNode sqlNode, Set&lt;String&gt; sideTableSet, Queue&lt;Object&gt; queueInfo, SqlNode pa🔵</abbr>
+  81         SqlKind sqlKind = sqlNode.getKind();
+  82         switch (sqlKind) {
+  83             case WITH :
+  84                 {
+  85                     SqlWith sqlWith = ((SqlWith) (sqlNode));
+  86                     SqlNodeList sqlNodeList = sqlWith.withList;
+  87                     for (SqlNode withAsTable : sqlNodeList) {
+  88                         SqlWithItem sqlWithItem = ((SqlWithItem) (withAsTable));
+<abbr title="  89                         parseSql(sqlWithItem.query, sideTableSet, queueInfo, parentWhere, parentSelectList, parentGroupByList, scope);">  89                         parseSql(sqlWithItem.query, sideTableSet, queueInfo, parentWhere, parentSelectLis🔵</abbr>
+  90                         queueInfo.add(sqlWithItem);
+  91                     }
+<abbr title="  92                     parseSql(sqlWith.body, sideTableSet, queueInfo, parentWhere, parentSelectList, parentGroupByList, scope);">  92                     parseSql(sqlWith.body, sideTableSet, queueInfo, parentWhere, parentSelectList, parent🔵</abbr>
+  93                     break;
+  94                 }
+  95             case INSERT :
+  96                 SqlNode sqlSource = ((SqlInsert) (sqlNode)).getSource();
+<abbr title="  97                 return parseSql(sqlSource, sideTableSet, queueInfo, parentWhere, parentSelectList, parentGroupByList, scope);">  97                 return parseSql(sqlSource, sideTableSet, queueInfo, parentWhere, parentSelectList, parent🔵</abbr>
+  98             case SELECT :
+  99                 SqlNode sqlFrom = ((SqlSelect) (sqlNode)).getFrom();
+ 100                 SqlNode sqlWhere = ((SqlSelect) (sqlNode)).getWhere();
+ 101                 SqlNodeList selectList = ((SqlSelect) (sqlNode)).getSelectList();
+ 102                 SqlNodeList groupByList = ((SqlSelect) (sqlNode)).getGroup();
+ 103                 if (sqlFrom.getKind() != IDENTIFIER) {
+<abbr title=" 104                     Object result = parseSql(sqlFrom, sideTableSet, queueInfo, sqlWhere, selectList, groupByList, scope);"> 104                     Object result = parseSql(sqlFrom, sideTableSet, queueInfo, sqlWhere, selectList, grou🔵</abbr>
+ 105                     if (result instanceof JoinInfo) {
+<abbr title=" 106                         return TableUtils.dealSelectResultWithJoinInfo(((JoinInfo) (result)), ((SqlSelect) (sqlNode)), queueInfo);"> 106                         return TableUtils.dealSelectResultWithJoinInfo(((JoinInfo) (result)), ((SqlSelect🔵</abbr>
+ 107                     } else if (result instanceof AliasInfo) {
+ 108                         String tableName = ((AliasInfo) (result)).getName();
+ 109                         if (sideTableSet.contains(tableName)) {
+ 110                             throw new RuntimeException(&quot;side-table must be used in join operator&quot;);
+ 111                         }
+ 112                     }
+ 113                 } else {
+ 114                     String tableName = ((SqlIdentifier) (sqlFrom)).getSimple();
+ 115                     if (sideTableSet.contains(tableName)) {
+ 116                         throw new RuntimeException(&quot;side-table must be used in join operator&quot;);
+ 117                     }
+ 118                 }
+ 119                 break;
+ 120             case JOIN :
+ 121                 JoinNodeDealer joinNodeDealer = new JoinNodeDealer(this);
+ 122                 Set&lt;Tuple2&lt;String, String&gt;&gt; joinFieldSet = Sets.newHashSet();
+ 123                 Map&lt;String, String&gt; tableRef = Maps.newHashMap();
+ 124                 Map&lt;String, String&gt; fieldRef = Maps.newHashMap();
+<abbr title=" 125                 return joinNodeDealer.dealJoinNode(((SqlJoin) (sqlNode)), sideTableSet, queueInfo, parentWhere, parentSelectList, parentGroupByList, joinFieldSet, tableRef, fieldRef, scope);"> 125                 return joinNodeDealer.dealJoinNode(((SqlJoin) (sqlNode)), sideTableSet, queueInfo, parent🔵</abbr>
+ 126             case AS :
+ 127                 SqlNode info = ((SqlBasicCall) (sqlNode)).getOperands()[0];
+ 128                 SqlNode alias = ((SqlBasicCall) (sqlNode)).getOperands()[1];
+ 129                 String infoStr = &quot;&quot;;
+ 130                 if (info.getKind() == IDENTIFIER) {
+ 131                     infoStr = info.toString();
+ 132                 } else {
+<abbr title=" 133                     infoStr = parseSql(info, sideTableSet, queueInfo, parentWhere, parentSelectList, parentGroupByList, scope).toString();"> 133                     infoStr = parseSql(info, sideTableSet, queueInfo, parentWhere, parentSelectList, pare🔵</abbr>
+ 134                 }
+ 135                 AliasInfo aliasInfo = new AliasInfo();
+ 136                 aliasInfo.setName(infoStr);
+ 137                 aliasInfo.setAlias(alias.toString());
+ 138                 return aliasInfo;
+ 139             case UNION :
+ 140                 SqlNode unionLeft = ((SqlBasicCall) (sqlNode)).getOperands()[0];
+ 141                 SqlNode unionRight = ((SqlBasicCall) (sqlNode)).getOperands()[1];
+<abbr title=" 142                 parseSql(unionLeft, sideTableSet, queueInfo, parentWhere, parentSelectList, parentGroupByList, scope);"> 142                 parseSql(unionLeft, sideTableSet, queueInfo, parentWhere, parentSelectList, parentGroupBy🔵</abbr>
+<abbr title=" 143                 parseSql(unionRight, sideTableSet, queueInfo, parentWhere, parentSelectList, parentGroupByList, scope);"> 143                 parseSql(unionRight, sideTableSet, queueInfo, parentWhere, parentSelectList, parentGroupB🔵</abbr>
+ 144                 break;
+ 145             case ORDER_BY :
+ 146                 SqlOrderBy sqlOrderBy = ((SqlOrderBy) (sqlNode));
+<abbr title=" 147                 parseSql(sqlOrderBy.query, sideTableSet, queueInfo, parentWhere, parentSelectList, parentGroupByList, scope);"> 147                 parseSql(sqlOrderBy.query, sideTableSet, queueInfo, parentWhere, parentSelectList, parent🔵</abbr>
+ 148             case LITERAL :
+ 149                 return LITERAL.toString();
+ 150             default :
+ 151                 break;
+ 152         }
+ 153         return &quot;&quot;;
+ 154     }
+ 155 
+ 156     public void setLocalTableCache(Map&lt;String, Table&gt; localTableCache) {
+ 157         this.localTableCache = localTableCache;
+ 158     }
+ 159 }
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ </pre></td>
+                        </tr>
+                    </table>
+                </div>
+                <div id="bottom">
+                    <table style="margin:auto">
+                        <tr>
+                            <th>ours vs. base</th>
+                            <th>theirs vs. base</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1  /*
+   2   * Licensed to the Apache Software Foundation (ASF) under one
+   3   * or more contributor license agreements.  See the NOTICE file
+   4   * distributed with this work for additional information
+   5   * regarding copyright ownership.  The ASF licenses this file
+   6   * to you under the Apache License, Version 2.0 (the
+   7   * &quot;License&quot;); you may not use this file except in compliance
+   8   * with the License.  You may obtain a copy of the License at
+   9   *
+  10   *     http://www.apache.org/licenses/LICENSE-2.0
+  11   *
+  12   * Unless required by applicable law or agreed to in writing, software
+  13   * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15   * See the License for the specific language governing permissions and
+  16   * limitations under the License.
+  17   */
+  18  
+  19  
+  20  
+  21  package com.dtstack.flink.sql.side;
+  22  
+  23  import com.dtstack.flink.sql.parser.FlinkPlanner;
+  24  import com.dtstack.flink.sql.util.TableUtils;
+  25  import com.google.common.collect.Maps;
+  26  import com.google.common.collect.Queues;
+  27  import com.google.common.collect.Sets;
+  28  import org.apache.calcite.sql.SqlBasicCall;
+  29  import org.apache.calcite.sql.SqlIdentifier;
+  30  import org.apache.calcite.sql.SqlInsert;
+  31  import org.apache.calcite.sql.SqlJoin;
+  32  import org.apache.calcite.sql.SqlKind;
+  33  import org.apache.calcite.sql.SqlNode;
+  34  import org.apache.calcite.sql.SqlNodeList;
+  35  import org.apache.calcite.sql.SqlOrderBy;
+  36  import org.apache.calcite.sql.SqlSelect;
+  37  import org.apache.calcite.sql.SqlWith;
+  38  import org.apache.calcite.sql.SqlWithItem;
+  39  import org.apache.calcite.sql.parser.SqlParseException;
+  40  import org.apache.flink.api.java.tuple.Tuple2;
+  41  import org.apache.flink.table.api.Table;
+  42  import org.apache.flink.table.calcite.FlinkPlannerImpl;
+  43  import org.slf4j.Logger;
+  44  import org.slf4j.LoggerFactory;
+  45  
+  46  import java.util.Map;
+  47  import java.util.Queue;
+  48  import java.util.Set;
+  49  
+  50  import static org.apache.calcite.sql.SqlKind.*;
+
+
+  51  
+  52  /**
+  53   * Parsing sql, obtain execution information dimension table
+  54   * Date: 2018/7/24
+  55   * Company: www.dtstack.com
+  56   * @author xuchao
+  57   */
+  58  
+  59  public class SideSQLParser {
+  60      private static final Logger LOG = LoggerFactory.getLogger(SideSQLParser.class);
+  61  
+  62      private Map&lt;String, Table&gt; localTableCache = Maps.newHashMap();
+  63  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  64 -    public Queue&lt;Object&gt; getExeQueue(String exeSql, Set&lt;String&gt; sideTableSet) throws SqlParseException {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"><abbr title="  65 +    public Queue&lt;Object&gt; getExeQueue(String exeSql, Set&lt;String&gt; sideTableSet, String scope) throws SqlParseException {">  65 +    public Queue&lt;Object&gt; getExeQueue(String exeSql, Set&lt;String&gt; sideTableSet, String scope) throws SqlParseExcepti🔵</abbr></span>
+  66          System.out.println(&quot;----------exec original Sql----------&quot;);
+  67          System.out.println(exeSql);
+  68          LOG.info(&quot;----------exec original Sql----------&quot;);
+  69          LOG.info(exeSql);
+  70  
+  71          Queue&lt;Object&gt; queueInfo = Queues.newLinkedBlockingQueue();
+  72          FlinkPlannerImpl flinkPlanner = FlinkPlanner.getFlinkPlanner();
+  73          SqlNode sqlNode = flinkPlanner.parse(exeSql);
+  74  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  75 -        parseSql(sqlNode, sideTableSet, queueInfo, null, null, null);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  76 +        parseSql(sqlNode, sideTableSet, queueInfo, null, null, null, scope);</span>
+  77          queueInfo.offer(sqlNode);
+  78          return queueInfo;
+  79      }
+  80  
+  81  
+  82      /**
+  83       *  解析 sql 根据维表 join关系重新组装新的sql
+  84       * @param sqlNode
+  85       * @param sideTableSet
+  86       * @param queueInfo
+  87       * @param parentWhere
+  88       * @param parentSelectList
+  89       * @return
+  90       */
+  91      public Object parseSql(SqlNode sqlNode,
+  92                             Set&lt;String&gt; sideTableSet,
+  93                             Queue&lt;Object&gt; queueInfo,
+  94                             SqlNode parentWhere,
+  95                             SqlNodeList parentSelectList,
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  96 -                           SqlNodeList parentGroupByList){</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  97 +                           SqlNodeList parentGroupByList,</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  98 +                           String scope){</span>
+  99          SqlKind sqlKind = sqlNode.getKind();
+ 100          switch (sqlKind){
+ 101              case WITH: {
+ 102                  SqlWith sqlWith = (SqlWith) sqlNode;
+ 103                  SqlNodeList sqlNodeList = sqlWith.withList;
+ 104                  for (SqlNode withAsTable : sqlNodeList) {
+ 105                      SqlWithItem sqlWithItem = (SqlWithItem) withAsTable;
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"><abbr title=" 106 -                    parseSql(sqlWithItem.query, sideTableSet, queueInfo, parentWhere, parentSelectList, parentGroupByList);"> 106 -                    parseSql(sqlWithItem.query, sideTableSet, queueInfo, parentWhere, parentSelectList, parentGrou🔵</abbr></span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"><abbr title=" 107 +                    parseSql(sqlWithItem.query, sideTableSet, queueInfo, parentWhere, parentSelectList, parentGroupByList, scope);"> 107 +                    parseSql(sqlWithItem.query, sideTableSet, queueInfo, parentWhere, parentSelectList, parentGrou🔵</abbr></span>
+ 108                      queueInfo.add(sqlWithItem);
+ 109                  }
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 110 -                parseSql(sqlWith.body, sideTableSet, queueInfo, parentWhere, parentSelectList, parentGroupByList);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"><abbr title=" 111 +                parseSql(sqlWith.body, sideTableSet, queueInfo, parentWhere, parentSelectList, parentGroupByList, scope);"> 111 +                parseSql(sqlWith.body, sideTableSet, queueInfo, parentWhere, parentSelectList, parentGroupByList, 🔵</abbr></span>
+ 112                  break;
+ 113              }
+ 114              case INSERT:
+ 115                  SqlNode sqlSource = ((SqlInsert)sqlNode).getSource();
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"><abbr title=" 116 -                return parseSql(sqlSource, sideTableSet, queueInfo, parentWhere, parentSelectList, parentGroupByList);"> 116 -                return parseSql(sqlSource, sideTableSet, queueInfo, parentWhere, parentSelectList, parentGroupByLi🔵</abbr></span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"><abbr title=" 117 +                return parseSql(sqlSource, sideTableSet, queueInfo, parentWhere, parentSelectList, parentGroupByList, scope);"> 117 +                return parseSql(sqlSource, sideTableSet, queueInfo, parentWhere, parentSelectList, parentGroupByLi🔵</abbr></span>
+ 118              case SELECT:
+ 119                  SqlNode sqlFrom = ((SqlSelect)sqlNode).getFrom();
+ 120                  SqlNode sqlWhere = ((SqlSelect)sqlNode).getWhere();
+ 121                  SqlNodeList selectList = ((SqlSelect)sqlNode).getSelectList();
+ 122                  SqlNodeList groupByList = ((SqlSelect) sqlNode).getGroup();
+ 123  
+ 124                  if(sqlFrom.getKind() != IDENTIFIER){
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 125 -                    Object result = parseSql(sqlFrom, sideTableSet, queueInfo, sqlWhere, selectList, groupByList);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"><abbr title=" 126 +                    Object result = parseSql(sqlFrom, sideTableSet, queueInfo, sqlWhere, selectList, groupByList, scope);"> 126 +                    Object result = parseSql(sqlFrom, sideTableSet, queueInfo, sqlWhere, selectList, groupByList, 🔵</abbr></span>
+ 127                      if(result instanceof JoinInfo){
+<abbr title=" 128                          return TableUtils.dealSelectResultWithJoinInfo((JoinInfo) result, (SqlSelect) sqlNode, queueInfo);"> 128                          return TableUtils.dealSelectResultWithJoinInfo((JoinInfo) result, (SqlSelect) sqlNode, que🔵</abbr>
+ 129                      }else if(result instanceof AliasInfo){
+ 130                          String tableName = ((AliasInfo) result).getName();
+ 131                          if(sideTableSet.contains(tableName)){
+ 132                              throw new RuntimeException(&quot;side-table must be used in join operator&quot;);
+ 133                          }
+ 134                      }
+ 135                  }else{
+ 136                      String tableName = ((SqlIdentifier)sqlFrom).getSimple();
+ 137                      if(sideTableSet.contains(tableName)){
+ 138                          throw new RuntimeException(&quot;side-table must be used in join operator&quot;);
+ 139                      }
+ 140                  }
+ 141                  break;
+ 142              case JOIN:
+ 143                  JoinNodeDealer joinNodeDealer = new JoinNodeDealer(this);
+ 144                  Set&lt;Tuple2&lt;String, String&gt;&gt; joinFieldSet = Sets.newHashSet();
+ 145                  Map&lt;String, String&gt; tableRef = Maps.newHashMap();
+ 146                  Map&lt;String, String&gt; fieldRef = Maps.newHashMap();
+ 147                  return joinNodeDealer.dealJoinNode((SqlJoin) sqlNode, sideTableSet, queueInfo,
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 148 -                        parentWhere, parentSelectList, parentGroupByList, joinFieldSet, tableRef, fieldRef);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"><abbr title=" 149 +                        parentWhere, parentSelectList, parentGroupByList, joinFieldSet, tableRef, fieldRef, scope);"> 149 +                        parentWhere, parentSelectList, parentGroupByList, joinFieldSet, tableRef, fieldRef, scope)🔵</abbr></span>
+ 150              case AS:
+ 151                  SqlNode info = ((SqlBasicCall)sqlNode).getOperands()[0];
+ 152                  SqlNode alias = ((SqlBasicCall) sqlNode).getOperands()[1];
+ 153                  String infoStr = &quot;&quot;;
+ 154  
+ 155                  if(info.getKind() == IDENTIFIER){
+ 156                      infoStr = info.toString();
+ 157                  } else {
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"><abbr title=" 158 -                    infoStr = parseSql(info, sideTableSet, queueInfo, parentWhere, parentSelectList, parentGroupByList).toString();"> 158 -                    infoStr = parseSql(info, sideTableSet, queueInfo, parentWhere, parentSelectList, parentGroupBy🔵</abbr></span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"><abbr title=" 159 +                    infoStr = parseSql(info, sideTableSet, queueInfo, parentWhere, parentSelectList, parentGroupByList, scope).toString();"> 159 +                    infoStr = parseSql(info, sideTableSet, queueInfo, parentWhere, parentSelectList, parentGroupBy🔵</abbr></span>
+ 160                  }
+ 161  
+ 162                  AliasInfo aliasInfo = new AliasInfo();
+ 163                  aliasInfo.setName(infoStr);
+ 164                  aliasInfo.setAlias(alias.toString());
+ 165  
+ 166                  return aliasInfo;
+ 167  
+ 168              case UNION:
+ 169                  SqlNode unionLeft = ((SqlBasicCall)sqlNode).getOperands()[0];
+ 170                  SqlNode unionRight = ((SqlBasicCall)sqlNode).getOperands()[1];
+ 171  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 172 -                parseSql(unionLeft, sideTableSet, queueInfo, parentWhere, parentSelectList, parentGroupByList);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 173 -                parseSql(unionRight, sideTableSet, queueInfo, parentWhere, parentSelectList, parentGroupByList);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"><abbr title=" 174 +                parseSql(unionLeft, sideTableSet, queueInfo, parentWhere, parentSelectList, parentGroupByList, scope);"> 174 +                parseSql(unionLeft, sideTableSet, queueInfo, parentWhere, parentSelectList, parentGroupByList, sco🔵</abbr></span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"><abbr title=" 175 +                parseSql(unionRight, sideTableSet, queueInfo, parentWhere, parentSelectList, parentGroupByList, scope);"> 175 +                parseSql(unionRight, sideTableSet, queueInfo, parentWhere, parentSelectList, parentGroupByList, sc🔵</abbr></span>
+ 176                  break;
+ 177              case ORDER_BY:
+ 178                  SqlOrderBy sqlOrderBy  = (SqlOrderBy) sqlNode;
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"><abbr title=" 179 -                parseSql(sqlOrderBy.query, sideTableSet, queueInfo, parentWhere, parentSelectList, parentGroupByList);"> 179 -                parseSql(sqlOrderBy.query, sideTableSet, queueInfo, parentWhere, parentSelectList, parentGroupByLi🔵</abbr></span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"><abbr title=" 180 +                parseSql(sqlOrderBy.query, sideTableSet, queueInfo, parentWhere, parentSelectList, parentGroupByList, scope);"> 180 +                parseSql(sqlOrderBy.query, sideTableSet, queueInfo, parentWhere, parentSelectList, parentGroupByLi🔵</abbr></span>
+ 181  
+ 182              case LITERAL:
+ 183                  return LITERAL.toString();
+
+
+ 184          }
+ 185          return &quot;&quot;;
+ 186      }
+ 187  
+ 188  
+ 189  
+ 190  
+ 191      public void setLocalTableCache(Map&lt;String, Table&gt; localTableCache) {
+ 192          this.localTableCache = localTableCache;
+ 193      }
+ 194  
+ 195  }</pre></td>
+                            <td><pre>   1  /*
+   2   * Licensed to the Apache Software Foundation (ASF) under one
+   3   * or more contributor license agreements.  See the NOTICE file
+   4   * distributed with this work for additional information
+   5   * regarding copyright ownership.  The ASF licenses this file
+   6   * to you under the Apache License, Version 2.0 (the
+   7   * &quot;License&quot;); you may not use this file except in compliance
+   8   * with the License.  You may obtain a copy of the License at
+   9   *
+  10   *     http://www.apache.org/licenses/LICENSE-2.0
+  11   *
+  12   * Unless required by applicable law or agreed to in writing, software
+  13   * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15   * See the License for the specific language governing permissions and
+  16   * limitations under the License.
+  17   */
+  18  
+  19  
+  20  
+  21  package com.dtstack.flink.sql.side;
+  22  
+  23  import com.dtstack.flink.sql.parser.FlinkPlanner;
+  24  import com.dtstack.flink.sql.util.TableUtils;
+  25  import com.google.common.collect.Maps;
+  26  import com.google.common.collect.Queues;
+  27  import com.google.common.collect.Sets;
+  28  import org.apache.calcite.sql.SqlBasicCall;
+  29  import org.apache.calcite.sql.SqlIdentifier;
+  30  import org.apache.calcite.sql.SqlInsert;
+  31  import org.apache.calcite.sql.SqlJoin;
+  32  import org.apache.calcite.sql.SqlKind;
+  33  import org.apache.calcite.sql.SqlNode;
+  34  import org.apache.calcite.sql.SqlNodeList;
+  35  import org.apache.calcite.sql.SqlOrderBy;
+  36  import org.apache.calcite.sql.SqlSelect;
+  37  import org.apache.calcite.sql.SqlWith;
+  38  import org.apache.calcite.sql.SqlWithItem;
+  39  import org.apache.calcite.sql.parser.SqlParseException;
+  40  import org.apache.flink.api.java.tuple.Tuple2;
+  41  import org.apache.flink.table.api.Table;
+  42  import org.apache.flink.table.calcite.FlinkPlannerImpl;
+  43  import org.slf4j.Logger;
+  44  import org.slf4j.LoggerFactory;
+  45  
+  46  import java.util.Map;
+  47  import java.util.Queue;
+  48  import java.util.Set;
+  49  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  50 -import static org.apache.calcite.sql.SqlKind.*;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  51 +import static org.apache.calcite.sql.SqlKind.IDENTIFIER;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  52 +import static org.apache.calcite.sql.SqlKind.LITERAL;</span>
+  53  
+  54  /**
+  55   * Parsing sql, obtain execution information dimension table
+  56   * Date: 2018/7/24
+  57   * Company: www.dtstack.com
+  58   * @author xuchao
+  59   */
+  60  
+  61  public class SideSQLParser {
+  62      private static final Logger LOG = LoggerFactory.getLogger(SideSQLParser.class);
+  63  
+  64      private Map&lt;String, Table&gt; localTableCache = Maps.newHashMap();
+  65  
+  66      public Queue&lt;Object&gt; getExeQueue(String exeSql, Set&lt;String&gt; sideTableSet) throws SqlParseException {
+
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  67 -        System.out.println(&quot;----------exec original Sql----------&quot;);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  68 -        System.out.println(exeSql);</span>
+  69          LOG.info(&quot;----------exec original Sql----------&quot;);
+  70          LOG.info(exeSql);
+  71  
+  72          Queue&lt;Object&gt; queueInfo = Queues.newLinkedBlockingQueue();
+  73          FlinkPlannerImpl flinkPlanner = FlinkPlanner.getFlinkPlanner();
+  74          SqlNode sqlNode = flinkPlanner.parse(exeSql);
+  75  
+  76          parseSql(sqlNode, sideTableSet, queueInfo, null, null, null);
+
+  77          queueInfo.offer(sqlNode);
+  78          return queueInfo;
+  79      }
+  80  
+  81  
+  82      /**
+  83       *  解析 sql 根据维表 join关系重新组装新的sql
+  84       * @param sqlNode
+  85       * @param sideTableSet
+  86       * @param queueInfo
+  87       * @param parentWhere
+  88       * @param parentSelectList
+  89       * @return
+  90       */
+  91      public Object parseSql(SqlNode sqlNode,
+  92                             Set&lt;String&gt; sideTableSet,
+  93                             Queue&lt;Object&gt; queueInfo,
+  94                             SqlNode parentWhere,
+  95                             SqlNodeList parentSelectList,
+  96                             SqlNodeList parentGroupByList){
+
+
+  97          SqlKind sqlKind = sqlNode.getKind();
+  98          switch (sqlKind){
+  99              case WITH: {
+ 100                  SqlWith sqlWith = (SqlWith) sqlNode;
+ 101                  SqlNodeList sqlNodeList = sqlWith.withList;
+ 102                  for (SqlNode withAsTable : sqlNodeList) {
+ 103                      SqlWithItem sqlWithItem = (SqlWithItem) withAsTable;
+<abbr title=" 104                      parseSql(sqlWithItem.query, sideTableSet, queueInfo, parentWhere, parentSelectList, parentGroupByList);"> 104                      parseSql(sqlWithItem.query, sideTableSet, queueInfo, parentWhere, parentSelectList, parentGrou🔵</abbr>
+
+ 105                      queueInfo.add(sqlWithItem);
+ 106                  }
+ 107                  parseSql(sqlWith.body, sideTableSet, queueInfo, parentWhere, parentSelectList, parentGroupByList);
+
+ 108                  break;
+ 109              }
+ 110              case INSERT:
+ 111                  SqlNode sqlSource = ((SqlInsert)sqlNode).getSource();
+<abbr title=" 112                  return parseSql(sqlSource, sideTableSet, queueInfo, parentWhere, parentSelectList, parentGroupByList);"> 112                  return parseSql(sqlSource, sideTableSet, queueInfo, parentWhere, parentSelectList, parentGroupByLi🔵</abbr>
+
+ 113              case SELECT:
+ 114                  SqlNode sqlFrom = ((SqlSelect)sqlNode).getFrom();
+ 115                  SqlNode sqlWhere = ((SqlSelect)sqlNode).getWhere();
+ 116                  SqlNodeList selectList = ((SqlSelect)sqlNode).getSelectList();
+ 117                  SqlNodeList groupByList = ((SqlSelect) sqlNode).getGroup();
+ 118  
+ 119                  if(sqlFrom.getKind() != IDENTIFIER){
+ 120                      Object result = parseSql(sqlFrom, sideTableSet, queueInfo, sqlWhere, selectList, groupByList);
+
+ 121                      if(result instanceof JoinInfo){
+<abbr title=" 122                          return TableUtils.dealSelectResultWithJoinInfo((JoinInfo) result, (SqlSelect) sqlNode, queueInfo);"> 122                          return TableUtils.dealSelectResultWithJoinInfo((JoinInfo) result, (SqlSelect) sqlNode, que🔵</abbr>
+ 123                      }else if(result instanceof AliasInfo){
+ 124                          String tableName = ((AliasInfo) result).getName();
+ 125                          if(sideTableSet.contains(tableName)){
+ 126                              throw new RuntimeException(&quot;side-table must be used in join operator&quot;);
+ 127                          }
+ 128                      }
+ 129                  }else{
+ 130                      String tableName = ((SqlIdentifier)sqlFrom).getSimple();
+ 131                      if(sideTableSet.contains(tableName)){
+ 132                          throw new RuntimeException(&quot;side-table must be used in join operator&quot;);
+ 133                      }
+ 134                  }
+ 135                  break;
+ 136              case JOIN:
+ 137                  JoinNodeDealer joinNodeDealer = new JoinNodeDealer(this);
+ 138                  Set&lt;Tuple2&lt;String, String&gt;&gt; joinFieldSet = Sets.newHashSet();
+ 139                  Map&lt;String, String&gt; tableRef = Maps.newHashMap();
+ 140                  Map&lt;String, String&gt; fieldRef = Maps.newHashMap();
+ 141                  return joinNodeDealer.dealJoinNode((SqlJoin) sqlNode, sideTableSet, queueInfo,
+ 142                          parentWhere, parentSelectList, parentGroupByList, joinFieldSet, tableRef, fieldRef);
+
+ 143              case AS:
+ 144                  SqlNode info = ((SqlBasicCall)sqlNode).getOperands()[0];
+ 145                  SqlNode alias = ((SqlBasicCall) sqlNode).getOperands()[1];
+ 146                  String infoStr = &quot;&quot;;
+ 147  
+ 148                  if(info.getKind() == IDENTIFIER){
+ 149                      infoStr = info.toString();
+ 150                  } else {
+<abbr title=" 151                      infoStr = parseSql(info, sideTableSet, queueInfo, parentWhere, parentSelectList, parentGroupByList).toString();"> 151                      infoStr = parseSql(info, sideTableSet, queueInfo, parentWhere, parentSelectList, parentGroupBy🔵</abbr>
+
+ 152                  }
+ 153  
+ 154                  AliasInfo aliasInfo = new AliasInfo();
+ 155                  aliasInfo.setName(infoStr);
+ 156                  aliasInfo.setAlias(alias.toString());
+ 157  
+ 158                  return aliasInfo;
+ 159  
+ 160              case UNION:
+ 161                  SqlNode unionLeft = ((SqlBasicCall)sqlNode).getOperands()[0];
+ 162                  SqlNode unionRight = ((SqlBasicCall)sqlNode).getOperands()[1];
+ 163  
+ 164                  parseSql(unionLeft, sideTableSet, queueInfo, parentWhere, parentSelectList, parentGroupByList);
+ 165                  parseSql(unionRight, sideTableSet, queueInfo, parentWhere, parentSelectList, parentGroupByList);
+
+
+ 166                  break;
+ 167              case ORDER_BY:
+ 168                  SqlOrderBy sqlOrderBy  = (SqlOrderBy) sqlNode;
+<abbr title=" 169                  parseSql(sqlOrderBy.query, sideTableSet, queueInfo, parentWhere, parentSelectList, parentGroupByList);"> 169                  parseSql(sqlOrderBy.query, sideTableSet, queueInfo, parentWhere, parentSelectList, parentGroupByLi🔵</abbr>
+
+ 170  
+ 171              case LITERAL:
+ 172                  return LITERAL.toString();
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 173 +            default:</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 174 +                break;</span>
+ 175          }
+ 176          return &quot;&quot;;
+ 177      }
+ 178  
+ 179  
+ 180  
+ 181  
+ 182      public void setLocalTableCache(Map&lt;String, Table&gt; localTableCache) {
+ 183          this.localTableCache = localTableCache;
+ 184      }
+ 185  
+ 186  }</pre></td>
+                        </tr>
+                    </table>
+                </div>
+              </body>
+            </html>
+            

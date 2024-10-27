@@ -1,0 +1,1521 @@
+<!DOCTYPE html>
+    <html lang="en">
+              <head>
+                <meta charset="utf-8">
+                <title>340</title>
+                    <style>
+                        #top {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        #bottom {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        abbr {
+                          /* Here is the delay */
+                          transition-delay:0s;
+                        }
+                    </style>
+              </head>
+              <body>
+                <span style="height: 4vh">
+                    340
+                    <a href="339.html">prev</a>
+                    <a href="341.html">next</a>
+                    <a href="340_chunks.html">chunks</a>
+                    <a href="index.html">index</a>
+                    DTStack/flinkStreamSQL_cbc70fa886c8cb9647e92d5fa9f8a4c032c94031_impala/impala-sink/src/main/java/com/dtstack/flink/sql/sink/impala/ImpalaSink.java
+                    <textarea rows=1 onclick='navigator.clipboard.writeText(this.value)'>cd C:\studies\se\mega\git-analyzer-plus\notebooks\debug
+del /Q *
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;cbc70fa886c8cb9647e92d5fa9f8a4c032c94031:impala/impala-sink/src/main/java/com/dtstack/flink/sql/sink/impala/ImpalaSink.java&quot; &gt; committed.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;cbc70fa886c8cb9647e92d5fa9f8a4c032c94031^1:impala/impala-sink/src/main/java/com/dtstack/flink/sql/sink/impala/ImpalaSink.java&quot; &gt; ours.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;cbc70fa886c8cb9647e92d5fa9f8a4c032c94031^2:impala/impala-sink/src/main/java/com/dtstack/flink/sql/sink/impala/ImpalaSink.java&quot; &gt; theirs.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;64c00d303220e98a602fec341743013447048eea:impala/impala-sink/src/main/java/com/dtstack/flink/sql/sink/impala/ImpalaSink.java&quot; &gt; base.java
+copy ours.java 1ours.java
+copy ours.java 2ours.java
+copy theirs.java 1theirs.java
+copy theirs.java 2theirs.java
+copy base.java 1base.java
+copy base.java 2base.java
+&quot;C:\Program Files\Java\jdk1.8.0_241\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\jFSTMerge\build\libs\jFSTMerge-all.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\jfstmerge.java --show-base
+&quot;C:\Program Files\Eclipse Adoptium\jdk-17.0.11.9-hotspot\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\spork\target\spork-0.5.0-SNAPSHOT.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\spork.java
+del /Q 1*.java
+del /Q 2*.java
+del /Q jfstmerge.java.merge
+</textarea>
+                    {strict: [[b], [j]], subset: [[b], [j]]}
+                </span>
+                <div id="top">
+
+                    <table>
+                        <tr>
+                            <th>line based (standard git)</th>
+                            <th>jfstmerge</th>
+                            <th>spork</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1 /*
+   2  * Licensed to the Apache Software Foundation (ASF) under one
+   3  * or more contributor license agreements.  See the NOTICE file
+   4  * distributed with this work for additional information
+   5  * regarding copyright ownership.  The ASF licenses this file
+   6  * to you under the Apache License, Version 2.0 (the
+   7  * &quot;License&quot;); you may not use this file except in compliance
+   8  * with the License.  You may obtain a copy of the License at
+   9  *
+  10  *     http://www.apache.org/licenses/LICENSE-2.0
+  11  *
+  12  * Unless required by applicable law or agreed to in writing, software
+  13  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15  * See the License for the specific language governing permissions and
+  16  * limitations under the License.
+  17  */
+  18 
+  19 package com.dtstack.flink.sql.sink.impala;
+  20 
+  21 import com.dtstack.flink.sql.sink.IStreamSinkGener;
+  22 import com.dtstack.flink.sql.sink.impala.table.ImpalaTableInfo;
+  23 import com.dtstack.flink.sql.table.AbstractTableInfo;
+  24 import com.dtstack.flink.sql.table.AbstractTargetTableInfo;
+  25 import org.apache.flink.api.common.typeinfo.TypeInformation;
+  26 import org.apache.flink.api.java.tuple.Tuple2;
+  27 import org.apache.flink.api.java.typeutils.RowTypeInfo;
+  28 import org.apache.flink.api.java.typeutils.TupleTypeInfo;
+  29 import org.apache.flink.streaming.api.datastream.DataStream;
+  30 import org.apache.flink.streaming.api.datastream.DataStreamSink;
+  31 import org.apache.flink.streaming.api.functions.sink.OutputFormatSinkFunction;
+  32 import org.apache.flink.streaming.api.functions.sink.RichSinkFunction;
+  33 import org.apache.flink.table.sinks.RetractStreamTableSink;
+  34 import org.apache.flink.table.sinks.TableSink;
+  35 import org.apache.flink.types.Row;
+  36 
+  37 import java.util.List;
+  38 import java.util.Objects;
+  39 
+  40 /**
+  41  * Date: 2020/10/14
+  42  * Company: www.dtstack.com
+  43  *
+  44  * @author tiezhu
+  45  */
+  46 public class ImpalaSink implements RetractStreamTableSink&lt;Row&gt;, IStreamSinkGener&lt;ImpalaSink&gt; {
+  47 
+  48     private static final String DEFAULT_STORE_TYPE = &quot;kudu&quot;;
+  49 
+  50     protected String[] fieldNames;
+  51     TypeInformation&lt;?&gt;[] fieldTypes;
+  52     protected String dbUrl;
+  53     protected String userName;
+  54     protected String password;
+  55     protected Integer authMech;
+  56 
+  57     protected String keytabPath;
+  58     protected String krb5confPath;
+  59     protected String principal;
+  60 
+  61     protected int batchSize = 100;
+  62     protected long batchWaitInterval = 60 * 1000L;
+  63     protected String tableName;
+  64     protected String registerTabName;
+  65     protected String storeType;
+  66 
+  67     protected List&lt;String&gt; primaryKeys;
+  68     private int parallelism = 1;
+  69     protected String schema;
+  70     protected String updateMode;
+  71     protected Boolean enablePartition;
+  72     public List&lt;String&gt; fieldList;
+  73     public List&lt;String&gt; fieldTypeList;
+  74     public List&lt;AbstractTableInfo.FieldExtraInfo&gt; fieldExtraInfoList;
+  75     protected String partitionFields;
+  76 
+  77     public ImpalaSink() {
+  78         // do Nothing
+  79     }
+  80 
+  81     @Override
+  82 &lt;&lt;&lt;&lt;&lt;&lt;&lt; GitAnalyzerPlus_ours
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  83     public ImpalaOutputFormat getOutputFormat() {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  84         ImpalaDialect impalaDialect = new ImpalaDialect(</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  85                 getFieldTypes(),</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  86                 primaryKeys,</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  87                 impalaTableInfo.getStoreType()</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  88         );</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  89 </span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  90         JDBCOptions jdbcOptions = JDBCOptions.builder()</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  91                 .setDbUrl(getImpalaJdbcUrl())</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  92                 .setDialect(impalaDialect)</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  93                 .setUsername(userName)</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  94                 .setPassword(password)</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  95                 .setTableName(tableName)</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  96                 .build();</span>
+  97 ||||||| GitAnalyzerPlus_base
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  98     public ImpalaOutputFormat getOutputFormat() {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  99         JDBCOptions jdbcOptions = JDBCOptions.builder()</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 100                 .setDbUrl(getImpalaJdbcUrl())</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 101                 .setDialect(new ImpalaDialect(getFieldTypes(), primaryKeys))</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 102                 .setUsername(userName)</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 103                 .setPassword(password)</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 104                 .setTableName(tableName)</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 105                 .build();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 106 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 107         return ImpalaOutputFormat.impalaBuilder()</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 108                 .setOptions(jdbcOptions)</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 109                 .setFieldNames(fieldNames)</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 110                 .setFlushMaxSize(batchNum)</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 111                 .setFlushIntervalMills(batchWaitInterval)</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 112                 .setFieldTypes(sqlTypes)</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 113                 .setKeyFields(primaryKeys)</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 114                 .setPartitionFields(impalaTableInfo.getPartitionFields())</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 115                 .setAllReplace(allReplace)</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 116                 .setUpdateMode(updateMode)</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 117                 .setAuthMech(impalaTableInfo.getAuthMech())</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 118                 .setKeytabPath(impalaTableInfo.getKeyTabFilePath())</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 119                 .setKrb5confPath(impalaTableInfo.getKrb5FilePath())</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 120                 .setPrincipal(impalaTableInfo.getPrincipal())</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 121                 .build();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 122     }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 123 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 124     public String getImpalaJdbcUrl() {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 125         Integer authMech = impalaTableInfo.getAuthMech();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 126         String newUrl = dbUrl;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 127         StringBuffer urlBuffer = new StringBuffer(dbUrl);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 128         if (authMech == EAuthMech.NoAuthentication.getType()) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 129             return newUrl;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 130         } else if (authMech == EAuthMech.Kerberos.getType()) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 131             String krbRealm = impalaTableInfo.getKrbRealm();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 132             String krbHostFqdn = impalaTableInfo.getKrbHostFQDN();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 133             String krbServiceName = impalaTableInfo.getKrbServiceName();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 134             urlBuffer.append(&quot;;&quot;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 135                     .concat(&quot;AuthMech=1;&quot;)</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 136                     .concat(&quot;KrbRealm=&quot;).concat(krbRealm).concat(&quot;;&quot;)</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 137                     .concat(&quot;KrbHostFQDN=&quot;).concat(krbHostFqdn).concat(&quot;;&quot;)</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 138                     .concat(&quot;KrbServiceName=&quot;).concat(krbServiceName).concat(&quot;;&quot;)</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 139             );</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 140             newUrl = urlBuffer.toString();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 141         } else if (authMech == EAuthMech.UserName.getType()) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 142             urlBuffer.append(&quot;;&quot;</span>
+ 143 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 144     public ImpalaSink genStreamSink(AbstractTargetTableInfo targetTableInfo) {</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 145         ImpalaTableInfo impalaTableInfo = (ImpalaTableInfo) targetTableInfo;</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 146         this.dbUrl = getImpalaJdbcUrl(impalaTableInfo);</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 147         this.password = impalaTableInfo.getPassword();</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 148         this.userName = impalaTableInfo.getUserName();</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 149         this.authMech = impalaTableInfo.getAuthMech();</span>
+ 150 &gt;&gt;&gt;&gt;&gt;&gt;&gt; GitAnalyzerPlus_theirs
+ 151 
+ 152         this.principal = impalaTableInfo.getPrincipal();
+ 153         this.keytabPath = impalaTableInfo.getKeyTabFilePath();
+ 154         this.krb5confPath = impalaTableInfo.getKrb5FilePath();
+ 155 
+ 156         this.updateMode = Objects.isNull(impalaTableInfo.getUpdateMode()) ?
+ 157                 &quot;append&quot; : impalaTableInfo.getUpdateMode();
+ 158 
+ 159         this.batchSize = Objects.isNull(impalaTableInfo.getBatchSize()) ?
+ 160                 batchSize : impalaTableInfo.getBatchSize();
+ 161         this.batchWaitInterval = Objects.isNull(impalaTableInfo.getBatchWaitInterval()) ?
+ 162                 batchWaitInterval : impalaTableInfo.getBatchWaitInterval();
+ 163         this.parallelism = Objects.isNull(impalaTableInfo.getParallelism()) ?
+ 164                 parallelism : impalaTableInfo.getParallelism();
+ 165         this.registerTabName = impalaTableInfo.getTableName();
+ 166 
+ 167         this.fieldList = impalaTableInfo.getFieldList();
+ 168         this.fieldTypeList = impalaTableInfo.getFieldTypeList();
+ 169         this.fieldExtraInfoList = impalaTableInfo.getFieldExtraInfoList();
+ 170         this.tableName = impalaTableInfo.getTableName();
+ 171         this.schema = impalaTableInfo.getSchema();
+ 172         this.primaryKeys = impalaTableInfo.getPrimaryKeys();
+ 173         this.partitionFields = impalaTableInfo.getPartitionFields();
+ 174 
+ 175         this.storeType = Objects.isNull(impalaTableInfo.getStoreType()) ?
+ 176                 DEFAULT_STORE_TYPE : impalaTableInfo.getStoreType();
+ 177         this.enablePartition = impalaTableInfo.isEnablePartition();
+ 178 
+ 179         return this;
+ 180     }
+ 181 
+ 182     /**
+ 183      * build Impala Jdbc Url according to authMech
+ 184      *
+ 185      * @param impalaTableInfo impala table info
+ 186      * @return jdbc url with auth mech info
+ 187      */
+ 188     public String getImpalaJdbcUrl(ImpalaTableInfo impalaTableInfo) {
+ 189         Integer authMech = impalaTableInfo.getAuthMech();
+ 190         String newUrl = impalaTableInfo.getUrl();
+ 191         StringBuilder urlBuffer = new StringBuilder(impalaTableInfo.getUrl());
+ 192         if (authMech == EAuthMech.NoAuthentication.getType()) {
+ 193             return newUrl;
+ 194         } else if (authMech == EAuthMech.Kerberos.getType()) {
+ 195             String krbRealm = impalaTableInfo.getKrbRealm();
+ 196             String krbHostFqdn = impalaTableInfo.getKrbHostFQDN();
+ 197             String krbServiceName = impalaTableInfo.getKrbServiceName();
+ 198             urlBuffer.append(&quot;;&quot;
+ 199                     .concat(&quot;AuthMech=1;&quot;)
+ 200                     .concat(&quot;KrbRealm=&quot;).concat(krbRealm).concat(&quot;;&quot;)
+ 201                     .concat(&quot;KrbHostFQDN=&quot;).concat(krbHostFqdn).concat(&quot;;&quot;)
+ 202                     .concat(&quot;KrbServiceName=&quot;).concat(krbServiceName).concat(&quot;;&quot;)
+ 203             );
+ 204             newUrl = urlBuffer.toString();
+ 205         } else if (authMech == EAuthMech.UserName.getType()) {
+ 206             urlBuffer.append(&quot;;&quot;
+ 207                     .concat(&quot;AuthMech=3;&quot;)
+ 208                     .concat(&quot;UID=&quot;).concat(impalaTableInfo.getUserName()).concat(&quot;;&quot;)
+ 209                     .concat(&quot;PWD=;&quot;)
+ 210                     .concat(&quot;UseSasl=0&quot;)
+ 211             );
+ 212             newUrl = urlBuffer.toString();
+ 213         } else if (authMech == EAuthMech.NameANDPassword.getType()) {
+ 214             urlBuffer.append(&quot;;&quot;
+ 215                     .concat(&quot;AuthMech=3;&quot;)
+ 216                     .concat(&quot;UID=&quot;).concat(impalaTableInfo.getUserName()).concat(&quot;;&quot;)
+ 217                     .concat(&quot;PWD=&quot;).concat(impalaTableInfo.getPassword())
+ 218             );
+ 219             newUrl = urlBuffer.toString();
+ 220         } else {
+<abbr title=" 221             throw new IllegalArgumentException(&quot;The value of authMech is illegal, Please select 0, 1, 2, 3&quot;);"> 221             throw new IllegalArgumentException(&quot;The value of authMech is illegal, Please select 0, 1, 2, 🔵</abbr>
+ 222         }
+ 223         return newUrl;
+ 224     }
+ 225 
+ 226     private ImpalaOutputFormat buildImpalaOutputFormat() {
+ 227 
+ 228         return ImpalaOutputFormat.getImpalaBuilder()
+ 229                 .setDbUrl(dbUrl)
+ 230                 .setPassword(password)
+ 231                 .setUserName(userName)
+ 232                 .setSchema(schema)
+ 233                 .setTableName(tableName)
+ 234                 .setUpdateMode(updateMode)
+ 235                 .setBatchSize(batchSize)
+ 236                 .setBatchWaitInterval(batchWaitInterval)
+ 237                 .setPrimaryKeys(primaryKeys)
+ 238                 .setPartitionFields(partitionFields)
+ 239                 .setFieldList(fieldList)
+ 240                 .setFieldTypeList(fieldTypeList)
+ 241                 .setFieldExtraInfoList(fieldExtraInfoList)
+ 242                 .setStoreType(storeType)
+ 243                 .setEnablePartition(enablePartition)
+ 244                 .setUpdateMode(updateMode)
+ 245                 .setAuthMech(authMech)
+ 246                 .setKeyTabPath(keytabPath)
+ 247                 .setKrb5ConfPath(krb5confPath)
+ 248                 .setPrincipal(principal)
+ 249                 .build();
+ 250     }
+ 251 
+ 252     @Override
+ 253     public void emitDataStream(DataStream&lt;Tuple2&lt;Boolean, Row&gt;&gt; dataStream) {
+ 254         consumeDataStream(dataStream);
+ 255     }
+ 256 
+ 257     @Override
+ 258     public DataStreamSink&lt;?&gt; consumeDataStream(DataStream&lt;Tuple2&lt;Boolean, Row&gt;&gt; dataStream) {
+ 259         ImpalaOutputFormat outputFormat = buildImpalaOutputFormat();
+ 260         RichSinkFunction richSinkFunction = new OutputFormatSinkFunction(outputFormat);
+ 261         DataStreamSink dataStreamSink = dataStream.addSink(richSinkFunction)
+ 262                 .setParallelism(parallelism)
+ 263                 .name(tableName);
+ 264         return dataStreamSink;
+ 265     }
+ 266 
+ 267     @Override
+<abbr title=" 268     public TableSink&lt;Tuple2&lt;Boolean, Row&gt;&gt; configure(String[] fieldNames, TypeInformation&lt;?&gt;[] fieldTypes) {"> 268     public TableSink&lt;Tuple2&lt;Boolean, Row&gt;&gt; configure(String[] fieldNames, TypeInformation&lt;?&gt;[] fieldTypes🔵</abbr>
+ 269         this.fieldNames = fieldNames;
+ 270         this.fieldTypes = fieldTypes;
+ 271         return this;
+ 272     }
+ 273 
+ 274     @Override
+ 275     public TupleTypeInfo&lt;Tuple2&lt;Boolean, Row&gt;&gt; getOutputType() {
+ 276         return new TupleTypeInfo&lt;&gt;(org.apache.flink.table.api.Types.BOOLEAN(), getRecordType());
+ 277     }
+ 278 
+ 279     @Override
+ 280     public TypeInformation&lt;Row&gt; getRecordType() {
+ 281         return new RowTypeInfo(fieldTypes, fieldNames);
+ 282     }
+ 283 
+ 284     @Override
+ 285     public String[] getFieldNames() {
+ 286         return fieldNames;
+ 287     }
+ 288 
+ 289     @Override
+ 290     public TypeInformation&lt;?&gt;[] getFieldTypes() {
+ 291         return fieldTypes;
+ 292     }
+ 293 }</pre></td>
+                            <td><pre>   1 /*
+   2  * Licensed to the Apache Software Foundation (ASF) under one
+   3  * or more contributor license agreements.  See the NOTICE file
+   4  * distributed with this work for additional information
+   5  * regarding copyright ownership.  The ASF licenses this file
+   6  * to you under the Apache License, Version 2.0 (the
+   7  * &quot;License&quot;); you may not use this file except in compliance
+   8  * with the License.  You may obtain a copy of the License at
+   9  *
+  10  *     http://www.apache.org/licenses/LICENSE-2.0
+  11  *
+  12  * Unless required by applicable law or agreed to in writing, software
+  13  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15  * See the License for the specific language governing permissions and
+  16  * limitations under the License.
+  17  */
+  18 
+  19 package com.dtstack.flink.sql.sink.impala;
+  20 
+  21 import com.dtstack.flink.sql.sink.IStreamSinkGener;
+  22 import com.dtstack.flink.sql.sink.impala.table.ImpalaTableInfo;
+  23 import com.dtstack.flink.sql.table.AbstractTableInfo;
+  24 import com.dtstack.flink.sql.table.AbstractTargetTableInfo;
+  25 import org.apache.flink.api.common.typeinfo.TypeInformation;
+  26 import org.apache.flink.api.java.tuple.Tuple2;
+  27 import org.apache.flink.api.java.typeutils.RowTypeInfo;
+  28 import org.apache.flink.api.java.typeutils.TupleTypeInfo;
+  29 import org.apache.flink.streaming.api.datastream.DataStream;
+  30 import org.apache.flink.streaming.api.datastream.DataStreamSink;
+  31 import org.apache.flink.streaming.api.functions.sink.OutputFormatSinkFunction;
+  32 import org.apache.flink.streaming.api.functions.sink.RichSinkFunction;
+  33 import org.apache.flink.table.sinks.RetractStreamTableSink;
+  34 import org.apache.flink.table.sinks.TableSink;
+  35 import org.apache.flink.types.Row;
+  36 
+  37 import java.util.List;
+  38 import java.util.Objects;
+  39 
+  40 /**
+  41  * Date: 2020/10/14
+  42  * Company: www.dtstack.com
+  43  *
+  44  * @author tiezhu
+  45  */
+  46 public class ImpalaSink implements RetractStreamTableSink&lt;Row&gt;, IStreamSinkGener&lt;ImpalaSink&gt; {
+  47 
+  48     private static final String DEFAULT_STORE_TYPE = &quot;kudu&quot;;
+  49 
+  50     protected String[] fieldNames;
+  51     TypeInformation&lt;?&gt;[] fieldTypes;
+  52     protected String dbUrl;
+  53     protected String userName;
+  54     protected String password;
+  55     protected Integer authMech;
+  56 
+  57     protected String keytabPath;
+  58     protected String krb5confPath;
+  59     protected String principal;
+  60 
+  61     protected int batchSize = 100;
+  62     protected long batchWaitInterval = 60 * 1000L;
+  63     protected String tableName;
+  64     protected String registerTabName;
+  65     protected String storeType;
+  66 
+  67     protected List&lt;String&gt; primaryKeys;
+  68     private int parallelism = 1;
+  69     protected String schema;
+  70     protected String updateMode;
+  71     protected Boolean enablePartition;
+  72     public List&lt;String&gt; fieldList;
+  73     public List&lt;String&gt; fieldTypeList;
+  74     public List&lt;AbstractTableInfo.FieldExtraInfo&gt; fieldExtraInfoList;
+  75     protected String partitionFields;
+  76 
+  77     public ImpalaSink() {
+  78         // do Nothing
+  79     }
+  80 &lt;&lt;&lt;&lt;&lt;&lt;&lt; MINE
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  81 @Override</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  82     public ImpalaOutputFormat getOutputFormat() {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  83         ImpalaDialect impalaDialect = new ImpalaDialect(</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  84                 getFieldTypes(),</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  85                 primaryKeys,</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  86                 impalaTableInfo.getStoreType()</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  87         );</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  88 </span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  89         JDBCOptions jdbcOptions = JDBCOptions.builder()</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  90                 .setDbUrl(getImpalaJdbcUrl())</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  91                 .setDialect(impalaDialect)</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  92                 .setUsername(userName)</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  93                 .setPassword(password)</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  94                 .setTableName(tableName)</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  95                 .build();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  96 </span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  97         return ImpalaOutputFormat.impalaBuilder()</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  98                 .setOptions(jdbcOptions)</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  99                 .setFieldNames(fieldNames)</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 100                 .setFlushMaxSize(batchNum)</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 101                 .setFlushIntervalMills(batchWaitInterval)</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 102                 .setFieldTypes(sqlTypes)</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 103                 .setKeyFields(primaryKeys)</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 104                 .setPartitionFields(impalaTableInfo.getPartitionFields())</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 105                 .setAllReplace(allReplace)</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 106                 .setUpdateMode(updateMode)</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 107                 .setAuthMech(impalaTableInfo.getAuthMech())</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 108                 .setKeytabPath(impalaTableInfo.getKeyTabFilePath())</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 109                 .setKrb5confPath(impalaTableInfo.getKrb5FilePath())</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 110                 .setPrincipal(impalaTableInfo.getPrincipal())</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 111                 .build();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 112     }</span>
+ 113 ||||||| BASE
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 114 @Override</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 115     public ImpalaOutputFormat getOutputFormat() {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 116         JDBCOptions jdbcOptions = JDBCOptions.builder()</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 117                 .setDbUrl(getImpalaJdbcUrl())</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 118                 .setDialect(new ImpalaDialect(getFieldTypes(), primaryKeys))</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 119                 .setUsername(userName)</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 120                 .setPassword(password)</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 121                 .setTableName(tableName)</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 122                 .build();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 123 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 124         return ImpalaOutputFormat.impalaBuilder()</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 125                 .setOptions(jdbcOptions)</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 126                 .setFieldNames(fieldNames)</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 127                 .setFlushMaxSize(batchNum)</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 128                 .setFlushIntervalMills(batchWaitInterval)</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 129                 .setFieldTypes(sqlTypes)</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 130                 .setKeyFields(primaryKeys)</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 131                 .setPartitionFields(impalaTableInfo.getPartitionFields())</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 132                 .setAllReplace(allReplace)</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 133                 .setUpdateMode(updateMode)</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 134                 .setAuthMech(impalaTableInfo.getAuthMech())</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 135                 .setKeytabPath(impalaTableInfo.getKeyTabFilePath())</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 136                 .setKrb5confPath(impalaTableInfo.getKrb5FilePath())</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 137                 .setPrincipal(impalaTableInfo.getPrincipal())</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 138                 .build();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 139     }</span>
+ 140 =======
+ 141 &gt;&gt;&gt;&gt;&gt;&gt;&gt; YOURS
+ 142 
+ 143 
+ 144     /**
+ 145      * build Impala Jdbc Url according to authMech
+ 146      *
+ 147      * @param impalaTableInfo impala table info
+ 148      * @return jdbc url with auth mech info
+ 149      */
+ 150     public String getImpalaJdbcUrl(ImpalaTableInfo impalaTableInfo) {
+ 151         Integer authMech = impalaTableInfo.getAuthMech();
+ 152         String newUrl = impalaTableInfo.getUrl();
+ 153         StringBuilder urlBuffer = new StringBuilder(impalaTableInfo.getUrl());
+ 154         if (authMech == EAuthMech.NoAuthentication.getType()) {
+ 155             return newUrl;
+ 156         } else if (authMech == EAuthMech.Kerberos.getType()) {
+ 157             String krbRealm = impalaTableInfo.getKrbRealm();
+ 158             String krbHostFqdn = impalaTableInfo.getKrbHostFQDN();
+ 159             String krbServiceName = impalaTableInfo.getKrbServiceName();
+ 160             urlBuffer.append(&quot;;&quot;
+ 161                     .concat(&quot;AuthMech=1;&quot;)
+ 162                     .concat(&quot;KrbRealm=&quot;).concat(krbRealm).concat(&quot;;&quot;)
+ 163                     .concat(&quot;KrbHostFQDN=&quot;).concat(krbHostFqdn).concat(&quot;;&quot;)
+ 164                     .concat(&quot;KrbServiceName=&quot;).concat(krbServiceName).concat(&quot;;&quot;)
+ 165             );
+ 166             newUrl = urlBuffer.toString();
+ 167         } else if (authMech == EAuthMech.UserName.getType()) {
+ 168             urlBuffer.append(&quot;;&quot;
+ 169                     .concat(&quot;AuthMech=3;&quot;)
+ 170                     .concat(&quot;UID=&quot;).concat(impalaTableInfo.getUserName()).concat(&quot;;&quot;)
+ 171                     .concat(&quot;PWD=;&quot;)
+ 172                     .concat(&quot;UseSasl=0&quot;)
+ 173             );
+ 174             newUrl = urlBuffer.toString();
+ 175         } else if (authMech == EAuthMech.NameANDPassword.getType()) {
+ 176             urlBuffer.append(&quot;;&quot;
+ 177                     .concat(&quot;AuthMech=3;&quot;)
+ 178                     .concat(&quot;UID=&quot;).concat(impalaTableInfo.getUserName()).concat(&quot;;&quot;)
+ 179                     .concat(&quot;PWD=&quot;).concat(impalaTableInfo.getPassword())
+ 180             );
+ 181             newUrl = urlBuffer.toString();
+ 182         } else {
+<abbr title=" 183             throw new IllegalArgumentException(&quot;The value of authMech is illegal, Please select 0, 1, 2, 3&quot;);"> 183             throw new IllegalArgumentException(&quot;The value of authMech is illegal, Please select 0, 1, 2, 🔵</abbr>
+ 184         }
+ 185         return newUrl;
+ 186     }
+ 187 
+ 188     @Override
+ 189     public ImpalaSink genStreamSink(AbstractTargetTableInfo targetTableInfo) {
+ 190         ImpalaTableInfo impalaTableInfo = (ImpalaTableInfo) targetTableInfo;
+ 191         this.dbUrl = getImpalaJdbcUrl(impalaTableInfo);
+ 192         this.password = impalaTableInfo.getPassword();
+ 193         this.userName = impalaTableInfo.getUserName();
+ 194         this.authMech = impalaTableInfo.getAuthMech();
+ 195 
+ 196         this.principal = impalaTableInfo.getPrincipal();
+ 197         this.keytabPath = impalaTableInfo.getKeyTabFilePath();
+ 198         this.krb5confPath = impalaTableInfo.getKrb5FilePath();
+ 199 
+ 200         this.updateMode = Objects.isNull(impalaTableInfo.getUpdateMode()) ?
+ 201                 &quot;append&quot; : impalaTableInfo.getUpdateMode();
+ 202 
+ 203         this.batchSize = Objects.isNull(impalaTableInfo.getBatchSize()) ?
+ 204                 batchSize : impalaTableInfo.getBatchSize();
+ 205         this.batchWaitInterval = Objects.isNull(impalaTableInfo.getBatchWaitInterval()) ?
+ 206                 batchWaitInterval : impalaTableInfo.getBatchWaitInterval();
+ 207         this.parallelism = Objects.isNull(impalaTableInfo.getParallelism()) ?
+ 208                 parallelism : impalaTableInfo.getParallelism();
+ 209         this.registerTabName = impalaTableInfo.getTableName();
+ 210 
+ 211         this.fieldList = impalaTableInfo.getFieldList();
+ 212         this.fieldTypeList = impalaTableInfo.getFieldTypeList();
+ 213         this.fieldExtraInfoList = impalaTableInfo.getFieldExtraInfoList();
+ 214         this.tableName = impalaTableInfo.getTableName();
+ 215         this.schema = impalaTableInfo.getSchema();
+ 216         this.primaryKeys = impalaTableInfo.getPrimaryKeys();
+ 217         this.partitionFields = impalaTableInfo.getPartitionFields();
+ 218 
+ 219         this.storeType = Objects.isNull(impalaTableInfo.getStoreType()) ?
+ 220                 DEFAULT_STORE_TYPE : impalaTableInfo.getStoreType();
+ 221         this.enablePartition = impalaTableInfo.isEnablePartition();
+ 222 
+ 223         return this;
+ 224     }
+ 225 
+ 226     private ImpalaOutputFormat buildImpalaOutputFormat() {
+ 227 
+ 228         return ImpalaOutputFormat.getImpalaBuilder()
+ 229                 .setDbUrl(dbUrl)
+ 230                 .setPassword(password)
+ 231                 .setUserName(userName)
+ 232                 .setSchema(schema)
+ 233                 .setTableName(tableName)
+ 234                 .setUpdateMode(updateMode)
+ 235                 .setBatchSize(batchSize)
+ 236                 .setBatchWaitInterval(batchWaitInterval)
+ 237                 .setPrimaryKeys(primaryKeys)
+ 238                 .setPartitionFields(partitionFields)
+ 239                 .setFieldList(fieldList)
+ 240                 .setFieldTypeList(fieldTypeList)
+ 241                 .setFieldExtraInfoList(fieldExtraInfoList)
+ 242                 .setStoreType(storeType)
+ 243                 .setEnablePartition(enablePartition)
+ 244                 .setUpdateMode(updateMode)
+ 245                 .setAuthMech(authMech)
+ 246                 .setKeyTabPath(keytabPath)
+ 247                 .setKrb5ConfPath(krb5confPath)
+ 248                 .setPrincipal(principal)
+ 249                 .build();
+ 250     }
+ 251 
+ 252     @Override
+ 253     public void emitDataStream(DataStream&lt;Tuple2&lt;Boolean, Row&gt;&gt; dataStream) {
+ 254         consumeDataStream(dataStream);
+ 255     }
+ 256 
+ 257     @Override
+ 258     public DataStreamSink&lt;?&gt; consumeDataStream(DataStream&lt;Tuple2&lt;Boolean, Row&gt;&gt; dataStream) {
+ 259         ImpalaOutputFormat outputFormat = buildImpalaOutputFormat();
+ 260         RichSinkFunction richSinkFunction = new OutputFormatSinkFunction(outputFormat);
+ 261         DataStreamSink dataStreamSink = dataStream.addSink(richSinkFunction)
+ 262                 .setParallelism(parallelism)
+ 263                 .name(tableName);
+ 264         return dataStreamSink;
+ 265     }
+ 266 
+ 267     @Override
+<abbr title=" 268     public TableSink&lt;Tuple2&lt;Boolean, Row&gt;&gt; configure(String[] fieldNames, TypeInformation&lt;?&gt;[] fieldTypes) {"> 268     public TableSink&lt;Tuple2&lt;Boolean, Row&gt;&gt; configure(String[] fieldNames, TypeInformation&lt;?&gt;[] fieldTypes🔵</abbr>
+ 269         this.fieldNames = fieldNames;
+ 270         this.fieldTypes = fieldTypes;
+ 271         return this;
+ 272     }
+ 273 
+ 274     @Override
+ 275     public TupleTypeInfo&lt;Tuple2&lt;Boolean, Row&gt;&gt; getOutputType() {
+ 276         return new TupleTypeInfo&lt;&gt;(org.apache.flink.table.api.Types.BOOLEAN(), getRecordType());
+ 277     }
+ 278 
+ 279     @Override
+ 280     public TypeInformation&lt;Row&gt; getRecordType() {
+ 281         return new RowTypeInfo(fieldTypes, fieldNames);
+ 282     }
+ 283 
+ 284     @Override
+ 285     public String[] getFieldNames() {
+ 286         return fieldNames;
+ 287     }
+ 288 
+ 289     @Override
+ 290     public TypeInformation&lt;?&gt;[] getFieldTypes() {
+ 291         return fieldTypes;
+ 292     }
+ 293 }</pre></td>
+                            <td><pre>   1 /*
+   2  * Licensed to the Apache Software Foundation (ASF) under one
+   3  * or more contributor license agreements.  See the NOTICE file
+   4  * distributed with this work for additional information
+   5  * regarding copyright ownership.  The ASF licenses this file
+   6  * to you under the Apache License, Version 2.0 (the
+   7  * &quot;License&quot;); you may not use this file except in compliance
+   8  * with the License.  You may obtain a copy of the License at
+   9  *
+  10  *     http://www.apache.org/licenses/LICENSE-2.0
+  11  *
+  12  * Unless required by applicable law or agreed to in writing, software
+  13  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15  * See the License for the specific language governing permissions and
+  16  * limitations under the License.
+  17  */
+  18 package com.dtstack.flink.sql.sink.impala;
+  19 
+  20 import com.dtstack.flink.sql.sink.IStreamSinkGener;
+  21 import com.dtstack.flink.sql.sink.impala.table.ImpalaTableInfo;
+  22 import com.dtstack.flink.sql.table.AbstractTableInfo;
+  23 import com.dtstack.flink.sql.table.AbstractTargetTableInfo;
+  24 import java.util.List;
+  25 import java.util.Objects;
+  26 import org.apache.flink.api.common.typeinfo.TypeInformation;
+  27 import org.apache.flink.api.java.tuple.Tuple2;
+  28 import org.apache.flink.api.java.typeutils.RowTypeInfo;
+  29 import org.apache.flink.api.java.typeutils.TupleTypeInfo;
+  30 import org.apache.flink.streaming.api.datastream.DataStream;
+  31 import org.apache.flink.streaming.api.datastream.DataStreamSink;
+  32 import org.apache.flink.streaming.api.functions.sink.OutputFormatSinkFunction;
+  33 import org.apache.flink.streaming.api.functions.sink.RichSinkFunction;
+  34 import org.apache.flink.table.sinks.RetractStreamTableSink;
+  35 import org.apache.flink.table.sinks.TableSink;
+  36 import org.apache.flink.types.Row;
+  37 
+  38 
+  39 /**
+  40  * Date: 2020/10/14
+  41  * Company: www.dtstack.com
+  42  *
+  43  * @author xiuzhu
+  44  */
+  45 public class ImpalaSink implements RetractStreamTableSink&lt;Row&gt; , IStreamSinkGener&lt;ImpalaSink&gt; {
+  46     private static final String DEFAULT_STORE_TYPE = &quot;kudu&quot;;
+  47 
+  48     protected String[] fieldNames;
+  49 
+  50     TypeInformation&lt;?&gt;[] fieldTypes;
+  51 
+  52     protected String dbUrl;
+  53 
+  54     protected String userName;
+  55 
+  56     protected String password;
+  57 
+  58     protected Integer authMech;
+  59 
+  60     protected String keytabPath;
+  61 
+  62     protected String krb5confPath;
+  63 
+  64     protected String principal;
+  65 
+  66     protected int batchSize = 100;
+  67 
+  68     protected long batchWaitInterval = 60 * 1000L;
+  69 
+  70     protected String tableName;
+  71 
+  72     protected String registerTabName;
+  73 
+  74     protected String storeType;
+  75 
+  76     protected List&lt;String&gt; primaryKeys;
+  77 
+  78     private int parallelism = 1;
+  79 
+  80     protected String schema;
+  81 
+  82     protected String updateMode;
+  83 
+  84     protected Boolean enablePartition;
+  85 
+  86     public List&lt;String&gt; fieldList;
+  87 
+  88     public List&lt;String&gt; fieldTypeList;
+  89 
+  90     public List&lt;AbstractTableInfo.FieldExtraInfo&gt; fieldExtraInfoList;
+  91 
+  92     protected String partitionFields;
+  93 
+  94     public ImpalaSink() {
+  95         // do Nothing
+  96     }
+  97 
+  98     @Override
+  99     public ImpalaSink genStreamSink(AbstractTargetTableInfo targetTableInfo) {
+ 100         ImpalaTableInfo impalaTableInfo = ((ImpalaTableInfo) (targetTableInfo));
+ 101         this.dbUrl = getImpalaJdbcUrl(impalaTableInfo);
+ 102         this.password = impalaTableInfo.getPassword();
+ 103         this.userName = impalaTableInfo.getUserName();
+ 104         this.authMech = impalaTableInfo.getAuthMech();
+ 105         this.principal = impalaTableInfo.getPrincipal();
+ 106         this.keytabPath = impalaTableInfo.getKeyTabFilePath();
+ 107         this.krb5confPath = impalaTableInfo.getKrb5FilePath();
+<abbr title=" 108         this.updateMode = (Objects.isNull(impalaTableInfo.getUpdateMode())) ? &quot;append&quot; : impalaTableInfo.getUpdateMode();"> 108         this.updateMode = (Objects.isNull(impalaTableInfo.getUpdateMode())) ? &quot;append&quot; : impalaTableInfo.🔵</abbr>
+<abbr title=" 109         this.batchSize = (Objects.isNull(impalaTableInfo.getBatchSize())) ? batchSize : impalaTableInfo.getBatchSize();"> 109         this.batchSize = (Objects.isNull(impalaTableInfo.getBatchSize())) ? batchSize : impalaTableInfo.g🔵</abbr>
+<abbr title=" 110         this.batchWaitInterval = (Objects.isNull(impalaTableInfo.getBatchWaitInterval())) ? batchWaitInterval : impalaTableInfo.getBatchWaitInterval();"> 110         this.batchWaitInterval = (Objects.isNull(impalaTableInfo.getBatchWaitInterval())) ? batchWaitInte🔵</abbr>
+<abbr title=" 111         this.parallelism = (Objects.isNull(impalaTableInfo.getParallelism())) ? parallelism : impalaTableInfo.getParallelism();"> 111         this.parallelism = (Objects.isNull(impalaTableInfo.getParallelism())) ? parallelism : impalaTable🔵</abbr>
+ 112         this.registerTabName = impalaTableInfo.getTableName();
+ 113         this.fieldList = impalaTableInfo.getFieldList();
+ 114         this.fieldTypeList = impalaTableInfo.getFieldTypeList();
+ 115         this.fieldExtraInfoList = impalaTableInfo.getFieldExtraInfoList();
+ 116         this.tableName = impalaTableInfo.getTableName();
+ 117         this.schema = impalaTableInfo.getSchema();
+ 118         this.primaryKeys = impalaTableInfo.getPrimaryKeys();
+ 119         this.partitionFields = impalaTableInfo.getPartitionFields();
+<abbr title=" 120         this.storeType = (Objects.isNull(impalaTableInfo.getStoreType())) ? DEFAULT_STORE_TYPE : impalaTableInfo.getStoreType();"> 120         this.storeType = (Objects.isNull(impalaTableInfo.getStoreType())) ? DEFAULT_STORE_TYPE : impalaTa🔵</abbr>
+ 121         this.enablePartition = impalaTableInfo.isEnablePartition();
+ 122         return this;
+ 123     }
+ 124 
+ 125     /**
+ 126      * build Impala Jdbc Url according to authMech
+ 127      *
+ 128      * @param impalaTableInfo impala table info
+ 129      * @return jdbc url with auth mech info
+ 130      */
+ 131     public String getImpalaJdbcUrl(ImpalaTableInfo impalaTableInfo) {
+ 132         Integer authMech = impalaTableInfo.getAuthMech();
+ 133         String newUrl = impalaTableInfo.getUrl();
+ 134         StringBuilder urlBuffer = new StringBuilder(impalaTableInfo.getUrl());
+ 135         if (authMech == EAuthMech.NoAuthentication.getType()) {
+ 136             return newUrl;
+ 137         } else if (authMech == EAuthMech.Kerberos.getType()) {
+ 138             String krbRealm = impalaTableInfo.getKrbRealm();
+ 139             String krbHostFqdn = impalaTableInfo.getKrbHostFQDN();
+ 140             String krbServiceName = impalaTableInfo.getKrbServiceName();
+<abbr title=" 141             urlBuffer.append(&quot;;&quot;.concat(&quot;AuthMech=1;&quot;).concat(&quot;KrbRealm=&quot;).concat(krbRealm).concat(&quot;;&quot;).concat(&quot;KrbHostFQDN=&quot;).concat(krbHostFqdn).concat(&quot;;&quot;).concat(&quot;KrbServiceName=&quot;).concat(krbServiceName).concat(&quot;;&quot;));"> 141             urlBuffer.append(&quot;;&quot;.concat(&quot;AuthMech=1;&quot;).concat(&quot;KrbRealm=&quot;).concat(krbRealm).concat(&quot;;&quot;).c🔵</abbr>
+ 142             newUrl = urlBuffer.toString();
+ 143         } else if (authMech == EAuthMech.UserName.getType()) {
+<abbr title=" 144             urlBuffer.append(&quot;;&quot;.concat(&quot;AuthMech=3;&quot;).concat(&quot;UID=&quot;).concat(impalaTableInfo.getUserName()).concat(&quot;;&quot;).concat(&quot;PWD=;&quot;).concat(&quot;UseSasl=0&quot;));"> 144             urlBuffer.append(&quot;;&quot;.concat(&quot;AuthMech=3;&quot;).concat(&quot;UID=&quot;).concat(impalaTableInfo.getUserName(🔵</abbr>
+ 145             newUrl = urlBuffer.toString();
+ 146         } else if (authMech == EAuthMech.NameANDPassword.getType()) {
+<abbr title=" 147             urlBuffer.append(&quot;;&quot;.concat(&quot;AuthMech=3;&quot;).concat(&quot;UID=&quot;).concat(impalaTableInfo.getUserName()).concat(&quot;;&quot;).concat(&quot;PWD=&quot;).concat(impalaTableInfo.getPassword()));"> 147             urlBuffer.append(&quot;;&quot;.concat(&quot;AuthMech=3;&quot;).concat(&quot;UID=&quot;).concat(impalaTableInfo.getUserName(🔵</abbr>
+ 148             newUrl = urlBuffer.toString();
+ 149         } else {
+<abbr title=" 150             throw new IllegalArgumentException(&quot;The value of authMech is illegal, Please select 0, 1, 2, 3&quot;);"> 150             throw new IllegalArgumentException(&quot;The value of authMech is illegal, Please select 0, 1, 2, 🔵</abbr>
+ 151         }
+ 152         return newUrl;
+ 153     }
+ 154 
+ 155     private ImpalaOutputFormat buildImpalaOutputFormat() {
+<abbr title=" 156         return ImpalaOutputFormat.getImpalaBuilder().setDbUrl(dbUrl).setPassword(password).setUserName(userName).setSchema(schema).setTableName(tableName).setUpdateMode(updateMode).setBatchSize(batchSize).setBatchWaitInterval(batchWaitInterval).setPrimaryKeys(primaryKeys).setPartitionFields(partitionFields).setFieldList(fieldList).setFieldTypeList(fieldTypeList).setFieldExtraInfoList(fieldExtraInfoList).setStoreType(storeType).setEnablePartition(enablePartition).setUpdateMode(updateMode).setAuthMech(authMech).setKeyTabPath(keytabPath).setKrb5ConfPath(krb5confPath).setPrincipal(principal).build();"> 156         return ImpalaOutputFormat.getImpalaBuilder().setDbUrl(dbUrl).setPassword(password).setUserName(us🔵</abbr>
+ 157     }
+ 158 
+ 159     @Override
+ 160     public void emitDataStream(DataStream&lt;Tuple2&lt;Boolean, Row&gt;&gt; dataStream) {
+ 161         consumeDataStream(dataStream);
+ 162     }
+ 163 
+ 164     @Override
+ 165     public DataStreamSink&lt;?&gt; consumeDataStream(DataStream&lt;Tuple2&lt;Boolean, Row&gt;&gt; dataStream) {
+ 166         ImpalaOutputFormat outputFormat = buildImpalaOutputFormat();
+ 167         RichSinkFunction richSinkFunction = new OutputFormatSinkFunction(outputFormat);
+<abbr title=" 168         DataStreamSink dataStreamSink = dataStream.addSink(richSinkFunction).setParallelism(parallelism).name(tableName);"> 168         DataStreamSink dataStreamSink = dataStream.addSink(richSinkFunction).setParallelism(parallelism).🔵</abbr>
+ 169         return dataStreamSink;
+ 170     }
+ 171 
+ 172     @Override
+<abbr title=" 173     public TableSink&lt;Tuple2&lt;Boolean, Row&gt;&gt; configure(String[] fieldNames, TypeInformation&lt;?&gt;[] fieldTypes) {"> 173     public TableSink&lt;Tuple2&lt;Boolean, Row&gt;&gt; configure(String[] fieldNames, TypeInformation&lt;?&gt;[] fieldTypes🔵</abbr>
+ 174         this.fieldNames = fieldNames;
+ 175         this.fieldTypes = fieldTypes;
+ 176         return this;
+ 177     }
+ 178 
+ 179     @Override
+ 180     public TupleTypeInfo&lt;Tuple2&lt;Boolean, Row&gt;&gt; getOutputType() {
+ 181         return new TupleTypeInfo&lt;&gt;(org.apache.flink.table.api.Types.BOOLEAN(), getRecordType());
+ 182     }
+ 183 
+ 184     @Override
+ 185     public TypeInformation&lt;Row&gt; getRecordType() {
+ 186         return new RowTypeInfo(fieldTypes, fieldNames);
+ 187     }
+ 188 
+ 189     @Override
+ 190     public String[] getFieldNames() {
+ 191         return fieldNames;
+ 192     }
+ 193 
+ 194     @Override
+ 195     public TypeInformation&lt;?&gt;[] getFieldTypes() {
+ 196         return fieldTypes;
+ 197     }
+ 198 }
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ </pre></td>
+                        </tr>
+                    </table>
+                </div>
+                <div id="bottom">
+                    <table style="margin:auto">
+                        <tr>
+                            <th>ours vs. base</th>
+                            <th>theirs vs. base</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1  /*
+   2   * Licensed to the Apache Software Foundation (ASF) under one
+   3   * or more contributor license agreements.  See the NOTICE file
+   4   * distributed with this work for additional information
+   5   * regarding copyright ownership.  The ASF licenses this file
+   6   * to you under the Apache License, Version 2.0 (the
+   7   * &quot;License&quot;); you may not use this file except in compliance
+   8   * with the License.  You may obtain a copy of the License at
+   9   *
+  10   *     http://www.apache.org/licenses/LICENSE-2.0
+  11   *
+  12   * Unless required by applicable law or agreed to in writing, software
+  13   * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15   * See the License for the specific language governing permissions and
+  16   * limitations under the License.
+  17   */
+  18  
+  19  package com.dtstack.flink.sql.sink.impala;
+  20  
+  21  import com.dtstack.flink.sql.sink.IStreamSinkGener;
+  22  import com.dtstack.flink.sql.sink.impala.table.ImpalaTableInfo;
+  23  import com.dtstack.flink.sql.sink.rdb.JDBCOptions;
+  24  import com.dtstack.flink.sql.sink.rdb.AbstractRdbSink;
+
+  25  import com.dtstack.flink.sql.table.AbstractTargetTableInfo;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  26  
+  27  /**
+  28   * Date: 2019/11/11
+
+  29   * Company: www.dtstack.com
+  30   *
+  31   * @author xiuzhu
+
+  32   */
+  33  
+  34  public class ImpalaSink extends AbstractRdbSink implements IStreamSinkGener&lt;AbstractRdbSink&gt; {
+  35  
+  36      private ImpalaTableInfo impalaTableInfo;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  37  
+  38      public ImpalaSink() {
+  39          super(null);
+  40      }
+  41  
+  42      @Override
+  43      public ImpalaOutputFormat getOutputFormat() {
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  44 +        ImpalaDialect impalaDialect = new ImpalaDialect(</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  45 +                getFieldTypes(),</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  46 +                primaryKeys,</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  47 +                impalaTableInfo.getStoreType()</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  48 +        );</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  49 +</span>
+  50          JDBCOptions jdbcOptions = JDBCOptions.builder()
+  51                  .setDbUrl(getImpalaJdbcUrl())
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  52 -                .setDialect(new ImpalaDialect(getFieldTypes(), primaryKeys))</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  53 +                .setDialect(impalaDialect)</span>
+  54                  .setUsername(userName)
+  55                  .setPassword(password)
+  56                  .setTableName(tableName)
+  57                  .build();
+  58  
+  59          return ImpalaOutputFormat.impalaBuilder()
+  60                  .setOptions(jdbcOptions)
+  61                  .setFieldNames(fieldNames)
+  62                  .setFlushMaxSize(batchNum)
+  63                  .setFlushIntervalMills(batchWaitInterval)
+  64                  .setFieldTypes(sqlTypes)
+  65                  .setKeyFields(primaryKeys)
+  66                  .setPartitionFields(impalaTableInfo.getPartitionFields())
+  67                  .setAllReplace(allReplace)
+  68                  .setUpdateMode(updateMode)
+  69                  .setAuthMech(impalaTableInfo.getAuthMech())
+  70                  .setKeytabPath(impalaTableInfo.getKeyTabFilePath())
+  71                  .setKrb5confPath(impalaTableInfo.getKrb5FilePath())
+  72                  .setPrincipal(impalaTableInfo.getPrincipal())
+  73                  .build();
+  74      }
+  75  
+  76      public String getImpalaJdbcUrl() {
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  77          Integer authMech = impalaTableInfo.getAuthMech();
+  78          String newUrl = dbUrl;
+  79          StringBuffer urlBuffer = new StringBuffer(dbUrl);
+
+
+  80          if (authMech == EAuthMech.NoAuthentication.getType()) {
+  81              return newUrl;
+  82          } else if (authMech == EAuthMech.Kerberos.getType()) {
+  83              String krbRealm = impalaTableInfo.getKrbRealm();
+  84              String krbHostFqdn = impalaTableInfo.getKrbHostFQDN();
+  85              String krbServiceName = impalaTableInfo.getKrbServiceName();
+  86              urlBuffer.append(&quot;;&quot;
+  87                      .concat(&quot;AuthMech=1;&quot;)
+  88                      .concat(&quot;KrbRealm=&quot;).concat(krbRealm).concat(&quot;;&quot;)
+  89                      .concat(&quot;KrbHostFQDN=&quot;).concat(krbHostFqdn).concat(&quot;;&quot;)
+  90                      .concat(&quot;KrbServiceName=&quot;).concat(krbServiceName).concat(&quot;;&quot;)
+  91              );
+  92              newUrl = urlBuffer.toString();
+  93          } else if (authMech == EAuthMech.UserName.getType()) {
+  94              urlBuffer.append(&quot;;&quot;
+  95                      .concat(&quot;AuthMech=3;&quot;)
+  96                      .concat(&quot;UID=&quot;).concat(userName).concat(&quot;;&quot;)
+
+  97                      .concat(&quot;PWD=;&quot;)
+  98                      .concat(&quot;UseSasl=0&quot;)
+  99              );
+ 100              newUrl = urlBuffer.toString();
+ 101          } else if (authMech == EAuthMech.NameANDPassword.getType()) {
+ 102              urlBuffer.append(&quot;;&quot;
+ 103                      .concat(&quot;AuthMech=3;&quot;)
+ 104                      .concat(&quot;UID=&quot;).concat(userName).concat(&quot;;&quot;)
+ 105                      .concat(&quot;PWD=&quot;).concat(password)
+
+
+ 106              );
+ 107              newUrl = urlBuffer.toString();
+ 108          } else {
+ 109              throw new IllegalArgumentException(&quot;The value of authMech is illegal, Please select 0, 1, 2, 3&quot;);
+ 110          }
+ 111          return newUrl;
+ 112      }
+ 113  
+ 114      @Override
+ 115      public AbstractRdbSink genStreamSink(AbstractTargetTableInfo targetTableInfo) {
+ 116          super.genStreamSink(targetTableInfo);
+ 117          this.impalaTableInfo = (ImpalaTableInfo) targetTableInfo;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 118          return this;
+ 119      }
+ 120  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 121  }</pre></td>
+                            <td><pre>   1  /*
+   2   * Licensed to the Apache Software Foundation (ASF) under one
+   3   * or more contributor license agreements.  See the NOTICE file
+   4   * distributed with this work for additional information
+   5   * regarding copyright ownership.  The ASF licenses this file
+   6   * to you under the Apache License, Version 2.0 (the
+   7   * &quot;License&quot;); you may not use this file except in compliance
+   8   * with the License.  You may obtain a copy of the License at
+   9   *
+  10   *     http://www.apache.org/licenses/LICENSE-2.0
+  11   *
+  12   * Unless required by applicable law or agreed to in writing, software
+  13   * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15   * See the License for the specific language governing permissions and
+  16   * limitations under the License.
+  17   */
+  18  
+  19  package com.dtstack.flink.sql.sink.impala;
+  20  
+  21  import com.dtstack.flink.sql.sink.IStreamSinkGener;
+  22  import com.dtstack.flink.sql.sink.impala.table.ImpalaTableInfo;
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  23 -import com.dtstack.flink.sql.sink.rdb.JDBCOptions;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  24 -import com.dtstack.flink.sql.sink.rdb.AbstractRdbSink;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  25 +import com.dtstack.flink.sql.table.AbstractTableInfo;</span>
+  26  import com.dtstack.flink.sql.table.AbstractTargetTableInfo;
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  27 +import org.apache.flink.api.common.typeinfo.TypeInformation;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  28 +import org.apache.flink.api.java.tuple.Tuple2;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  29 +import org.apache.flink.api.java.typeutils.RowTypeInfo;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  30 +import org.apache.flink.api.java.typeutils.TupleTypeInfo;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  31 +import org.apache.flink.streaming.api.datastream.DataStream;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  32 +import org.apache.flink.streaming.api.datastream.DataStreamSink;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  33 +import org.apache.flink.streaming.api.functions.sink.OutputFormatSinkFunction;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  34 +import org.apache.flink.streaming.api.functions.sink.RichSinkFunction;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  35 +import org.apache.flink.table.sinks.RetractStreamTableSink;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  36 +import org.apache.flink.table.sinks.TableSink;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  37 +import org.apache.flink.types.Row;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  38 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  39 +import java.util.List;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  40 +import java.util.Objects;</span>
+  41  
+  42  /**
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  43 - * Date: 2019/11/11</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  44 + * Date: 2020/10/14</span>
+  45   * Company: www.dtstack.com
+  46   *
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  47 - * @author xiuzhu</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  48 + * @author tiezhu</span>
+  49   */
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  50 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  51 -public class ImpalaSink extends AbstractRdbSink implements IStreamSinkGener&lt;AbstractRdbSink&gt; {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  52 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  53 -    private ImpalaTableInfo impalaTableInfo;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  54 +public class ImpalaSink implements RetractStreamTableSink&lt;Row&gt;, IStreamSinkGener&lt;ImpalaSink&gt; {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  55 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  56 +    private static final String DEFAULT_STORE_TYPE = &quot;kudu&quot;;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  57 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  58 +    protected String[] fieldNames;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  59 +    TypeInformation&lt;?&gt;[] fieldTypes;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  60 +    protected String dbUrl;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  61 +    protected String userName;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  62 +    protected String password;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  63 +    protected Integer authMech;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  64 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  65 +    protected String keytabPath;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  66 +    protected String krb5confPath;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  67 +    protected String principal;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  68 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  69 +    protected int batchSize = 100;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  70 +    protected long batchWaitInterval = 60 * 1000L;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  71 +    protected String tableName;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  72 +    protected String registerTabName;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  73 +    protected String storeType;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  74 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  75 +    protected List&lt;String&gt; primaryKeys;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  76 +    private int parallelism = 1;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  77 +    protected String schema;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  78 +    protected String updateMode;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  79 +    protected Boolean enablePartition;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  80 +    public List&lt;String&gt; fieldList;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  81 +    public List&lt;String&gt; fieldTypeList;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  82 +    public List&lt;AbstractTableInfo.FieldExtraInfo&gt; fieldExtraInfoList;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  83 +    protected String partitionFields;</span>
+  84  
+  85      public ImpalaSink() {
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  86 -        super(null);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  87 -    }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  88 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  89 -    @Override</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  90 -    public ImpalaOutputFormat getOutputFormat() {</span>
+
+
+
+
+
+
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  91 -        JDBCOptions jdbcOptions = JDBCOptions.builder()</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  92 -                .setDbUrl(getImpalaJdbcUrl())</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  93 -                .setDialect(new ImpalaDialect(getFieldTypes(), primaryKeys))</span>
+
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  94 -                .setUsername(userName)</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  95 -                .setPassword(password)</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  96 -                .setTableName(tableName)</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  97 -                .build();</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  98 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  99 -        return ImpalaOutputFormat.impalaBuilder()</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 100 -                .setOptions(jdbcOptions)</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 101 -                .setFieldNames(fieldNames)</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 102 -                .setFlushMaxSize(batchNum)</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 103 -                .setFlushIntervalMills(batchWaitInterval)</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 104 -                .setFieldTypes(sqlTypes)</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 105 -                .setKeyFields(primaryKeys)</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 106 -                .setPartitionFields(impalaTableInfo.getPartitionFields())</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 107 -                .setAllReplace(allReplace)</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 108 -                .setUpdateMode(updateMode)</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 109 -                .setAuthMech(impalaTableInfo.getAuthMech())</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 110 -                .setKeytabPath(impalaTableInfo.getKeyTabFilePath())</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 111 -                .setKrb5confPath(impalaTableInfo.getKrb5FilePath())</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 112 -                .setPrincipal(impalaTableInfo.getPrincipal())</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 113 -                .build();</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 114 -    }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 115 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 116 -    public String getImpalaJdbcUrl() {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 117 +        // do Nothing</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 118 +    }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 119 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 120 +    @Override</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 121 +    public ImpalaSink genStreamSink(AbstractTargetTableInfo targetTableInfo) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 122 +        ImpalaTableInfo impalaTableInfo = (ImpalaTableInfo) targetTableInfo;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 123 +        this.dbUrl = getImpalaJdbcUrl(impalaTableInfo);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 124 +        this.password = impalaTableInfo.getPassword();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 125 +        this.userName = impalaTableInfo.getUserName();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 126 +        this.authMech = impalaTableInfo.getAuthMech();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 127 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 128 +        this.principal = impalaTableInfo.getPrincipal();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 129 +        this.keytabPath = impalaTableInfo.getKeyTabFilePath();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 130 +        this.krb5confPath = impalaTableInfo.getKrb5FilePath();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 131 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 132 +        this.updateMode = Objects.isNull(impalaTableInfo.getUpdateMode()) ?</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 133 +                &quot;append&quot; : impalaTableInfo.getUpdateMode();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 134 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 135 +        this.batchSize = Objects.isNull(impalaTableInfo.getBatchSize()) ?</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 136 +                batchSize : impalaTableInfo.getBatchSize();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 137 +        this.batchWaitInterval = Objects.isNull(impalaTableInfo.getBatchWaitInterval()) ?</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 138 +                batchWaitInterval : impalaTableInfo.getBatchWaitInterval();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 139 +        this.parallelism = Objects.isNull(impalaTableInfo.getParallelism()) ?</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 140 +                parallelism : impalaTableInfo.getParallelism();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 141 +        this.registerTabName = impalaTableInfo.getTableName();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 142 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 143 +        this.fieldList = impalaTableInfo.getFieldList();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 144 +        this.fieldTypeList = impalaTableInfo.getFieldTypeList();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 145 +        this.fieldExtraInfoList = impalaTableInfo.getFieldExtraInfoList();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 146 +        this.tableName = impalaTableInfo.getTableName();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 147 +        this.schema = impalaTableInfo.getSchema();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 148 +        this.primaryKeys = impalaTableInfo.getPrimaryKeys();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 149 +        this.partitionFields = impalaTableInfo.getPartitionFields();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 150 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 151 +        this.storeType = Objects.isNull(impalaTableInfo.getStoreType()) ?</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 152 +                DEFAULT_STORE_TYPE : impalaTableInfo.getStoreType();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 153 +        this.enablePartition = impalaTableInfo.isEnablePartition();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 154 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 155 +        return this;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 156 +    }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 157 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 158 +    /**</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 159 +     * build Impala Jdbc Url according to authMech</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 160 +     *</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 161 +     * @param impalaTableInfo impala table info</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 162 +     * @return jdbc url with auth mech info</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 163 +     */</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 164 +    public String getImpalaJdbcUrl(ImpalaTableInfo impalaTableInfo) {</span>
+ 165          Integer authMech = impalaTableInfo.getAuthMech();
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 166 -        String newUrl = dbUrl;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 167 -        StringBuffer urlBuffer = new StringBuffer(dbUrl);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 168 +        String newUrl = impalaTableInfo.getUrl();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 169 +        StringBuilder urlBuffer = new StringBuilder(impalaTableInfo.getUrl());</span>
+ 170          if (authMech == EAuthMech.NoAuthentication.getType()) {
+ 171              return newUrl;
+ 172          } else if (authMech == EAuthMech.Kerberos.getType()) {
+ 173              String krbRealm = impalaTableInfo.getKrbRealm();
+ 174              String krbHostFqdn = impalaTableInfo.getKrbHostFQDN();
+ 175              String krbServiceName = impalaTableInfo.getKrbServiceName();
+ 176              urlBuffer.append(&quot;;&quot;
+ 177                      .concat(&quot;AuthMech=1;&quot;)
+ 178                      .concat(&quot;KrbRealm=&quot;).concat(krbRealm).concat(&quot;;&quot;)
+ 179                      .concat(&quot;KrbHostFQDN=&quot;).concat(krbHostFqdn).concat(&quot;;&quot;)
+ 180                      .concat(&quot;KrbServiceName=&quot;).concat(krbServiceName).concat(&quot;;&quot;)
+ 181              );
+ 182              newUrl = urlBuffer.toString();
+ 183          } else if (authMech == EAuthMech.UserName.getType()) {
+ 184              urlBuffer.append(&quot;;&quot;
+ 185                      .concat(&quot;AuthMech=3;&quot;)
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 186 -                    .concat(&quot;UID=&quot;).concat(userName).concat(&quot;;&quot;)</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 187 +                    .concat(&quot;UID=&quot;).concat(impalaTableInfo.getUserName()).concat(&quot;;&quot;)</span>
+ 188                      .concat(&quot;PWD=;&quot;)
+ 189                      .concat(&quot;UseSasl=0&quot;)
+ 190              );
+ 191              newUrl = urlBuffer.toString();
+ 192          } else if (authMech == EAuthMech.NameANDPassword.getType()) {
+ 193              urlBuffer.append(&quot;;&quot;
+ 194                      .concat(&quot;AuthMech=3;&quot;)
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 195 -                    .concat(&quot;UID=&quot;).concat(userName).concat(&quot;;&quot;)</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 196 -                    .concat(&quot;PWD=&quot;).concat(password)</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 197 +                    .concat(&quot;UID=&quot;).concat(impalaTableInfo.getUserName()).concat(&quot;;&quot;)</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 198 +                    .concat(&quot;PWD=&quot;).concat(impalaTableInfo.getPassword())</span>
+ 199              );
+ 200              newUrl = urlBuffer.toString();
+ 201          } else {
+ 202              throw new IllegalArgumentException(&quot;The value of authMech is illegal, Please select 0, 1, 2, 3&quot;);
+ 203          }
+ 204          return newUrl;
+ 205      }
+ 206  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 207 -    @Override</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 208 -    public AbstractRdbSink genStreamSink(AbstractTargetTableInfo targetTableInfo) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 209 -        super.genStreamSink(targetTableInfo);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 210 -        this.impalaTableInfo = (ImpalaTableInfo) targetTableInfo;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 211 +    private ImpalaOutputFormat buildImpalaOutputFormat() {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 212 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 213 +        return ImpalaOutputFormat.getImpalaBuilder()</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 214 +                .setDbUrl(dbUrl)</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 215 +                .setPassword(password)</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 216 +                .setUserName(userName)</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 217 +                .setSchema(schema)</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 218 +                .setTableName(tableName)</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 219 +                .setUpdateMode(updateMode)</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 220 +                .setBatchSize(batchSize)</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 221 +                .setBatchWaitInterval(batchWaitInterval)</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 222 +                .setPrimaryKeys(primaryKeys)</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 223 +                .setPartitionFields(partitionFields)</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 224 +                .setFieldList(fieldList)</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 225 +                .setFieldTypeList(fieldTypeList)</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 226 +                .setFieldExtraInfoList(fieldExtraInfoList)</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 227 +                .setStoreType(storeType)</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 228 +                .setEnablePartition(enablePartition)</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 229 +                .setUpdateMode(updateMode)</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 230 +                .setAuthMech(authMech)</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 231 +                .setKeyTabPath(keytabPath)</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 232 +                .setKrb5ConfPath(krb5confPath)</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 233 +                .setPrincipal(principal)</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 234 +                .build();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 235 +    }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 236 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 237 +    @Override</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 238 +    public void emitDataStream(DataStream&lt;Tuple2&lt;Boolean, Row&gt;&gt; dataStream) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 239 +        consumeDataStream(dataStream);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 240 +    }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 241 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 242 +    @Override</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 243 +    public DataStreamSink&lt;?&gt; consumeDataStream(DataStream&lt;Tuple2&lt;Boolean, Row&gt;&gt; dataStream) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 244 +        ImpalaOutputFormat outputFormat = buildImpalaOutputFormat();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 245 +        RichSinkFunction richSinkFunction = new OutputFormatSinkFunction(outputFormat);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 246 +        DataStreamSink dataStreamSink = dataStream.addSink(richSinkFunction)</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 247 +                .setParallelism(parallelism)</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 248 +                .name(tableName);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 249 +        return dataStreamSink;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 250 +    }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 251 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 252 +    @Override</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 253 +    public TableSink&lt;Tuple2&lt;Boolean, Row&gt;&gt; configure(String[] fieldNames, TypeInformation&lt;?&gt;[] fieldTypes) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 254 +        this.fieldNames = fieldNames;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 255 +        this.fieldTypes = fieldTypes;</span>
+ 256          return this;
+ 257      }
+ 258  
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 259 +    @Override</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 260 +    public TupleTypeInfo&lt;Tuple2&lt;Boolean, Row&gt;&gt; getOutputType() {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 261 +        return new TupleTypeInfo&lt;&gt;(org.apache.flink.table.api.Types.BOOLEAN(), getRecordType());</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 262 +    }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 263 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 264 +    @Override</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 265 +    public TypeInformation&lt;Row&gt; getRecordType() {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 266 +        return new RowTypeInfo(fieldTypes, fieldNames);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 267 +    }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 268 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 269 +    @Override</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 270 +    public String[] getFieldNames() {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 271 +        return fieldNames;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 272 +    }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 273 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 274 +    @Override</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 275 +    public TypeInformation&lt;?&gt;[] getFieldTypes() {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 276 +        return fieldTypes;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 277 +    }</span>
+ 278  }</pre></td>
+                        </tr>
+                    </table>
+                </div>
+              </body>
+            </html>
+            

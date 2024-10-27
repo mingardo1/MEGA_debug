@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+    <html lang="en">
+              <head>
+                <meta charset="utf-8">
+                <title>304</title>
+                    <style>
+                        #top {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        #bottom {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        abbr {
+                          /* Here is the delay */
+                          transition-delay:0s;
+                        }
+                    </style>
+              </head>
+              <body>
+                <span style="height: 4vh">
+                    304
+                    <a href="303.html">prev</a>
+                    <a href="305.html">next</a>
+                    <a href="304_chunks.html">chunks</a>
+                    <a href="index.html">index</a>
+                    DTStack/flinkStreamSQL_65123bafa7a98b91e7a12e47b7750e93793b73ba_redis5/redis5-sink/src/main/java/com/dtstack/flink/sql/sink/redis/RedisSink.java
+                    <textarea rows=1 onclick='navigator.clipboard.writeText(this.value)'>cd C:\studies\se\mega\git-analyzer-plus\notebooks\debug
+del /Q *
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;65123bafa7a98b91e7a12e47b7750e93793b73ba:redis5/redis5-sink/src/main/java/com/dtstack/flink/sql/sink/redis/RedisSink.java&quot; &gt; committed.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;65123bafa7a98b91e7a12e47b7750e93793b73ba^1:redis5/redis5-sink/src/main/java/com/dtstack/flink/sql/sink/redis/RedisSink.java&quot; &gt; ours.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;65123bafa7a98b91e7a12e47b7750e93793b73ba^2:redis5/redis5-sink/src/main/java/com/dtstack/flink/sql/sink/redis/RedisSink.java&quot; &gt; theirs.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;4c42a0206e8e60664945d8380078cfb0f7c2f4e2:redis5/redis5-sink/src/main/java/com/dtstack/flink/sql/sink/redis/RedisSink.java&quot; &gt; base.java
+copy ours.java 1ours.java
+copy ours.java 2ours.java
+copy theirs.java 1theirs.java
+copy theirs.java 2theirs.java
+copy base.java 1base.java
+copy base.java 2base.java
+&quot;C:\Program Files\Java\jdk1.8.0_241\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\jFSTMerge\build\libs\jFSTMerge-all.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\jfstmerge.java --show-base
+&quot;C:\Program Files\Eclipse Adoptium\jdk-17.0.11.9-hotspot\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\spork\target\spork-0.5.0-SNAPSHOT.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\spork.java
+del /Q 1*.java
+del /Q 2*.java
+del /Q jfstmerge.java.merge
+</textarea>
+                    {strict: [[b], [bj]], subset: [[b], [bj]]}
+                </span>
+                <div id="top">
+
+                    <table>
+                        <tr>
+                            <th>line based (standard git)</th>
+                            <th>jfstmerge</th>
+                            <th>spork</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1 /*
+   2  * Licensed to the Apache Software Foundation (ASF) under one
+   3  * or more contributor license agreements.  See the NOTICE file
+   4  * distributed with this work for additional information
+   5  * regarding copyright ownership.  The ASF licenses this file
+   6  * to you under the Apache License, Version 2.0 (the
+   7  * &quot;License&quot;); you may not use this file except in compliance
+   8  * with the License.  You may obtain a copy of the License at
+   9  *
+  10  *     http://www.apache.org/licenses/LICENSE-2.0
+  11  *
+  12  * Unless required by applicable law or agreed to in writing, software
+  13  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15  * See the License for the specific language governing permissions and
+  16  * limitations under the License.
+  17  */
+  18 
+  19 package com.dtstack.flink.sql.sink.redis;
+  20 
+  21 import com.dtstack.flink.sql.sink.IStreamSinkGener;
+  22 import com.dtstack.flink.sql.sink.redis.table.RedisTableInfo;
+  23 import com.dtstack.flink.sql.table.AbstractTargetTableInfo;
+  24 import org.apache.flink.api.common.typeinfo.TypeInformation;
+  25 import org.apache.flink.api.java.tuple.Tuple2;
+  26 import org.apache.flink.api.java.typeutils.RowTypeInfo;
+  27 import org.apache.flink.api.java.typeutils.TupleTypeInfo;
+  28 import org.apache.flink.streaming.api.datastream.DataStream;
+  29 import org.apache.flink.streaming.api.datastream.DataStreamSink;
+  30 import org.apache.flink.streaming.api.functions.sink.OutputFormatSinkFunction;
+  31 import org.apache.flink.streaming.api.functions.sink.RichSinkFunction;
+  32 import org.apache.flink.table.sinks.RetractStreamTableSink;
+  33 import org.apache.flink.table.sinks.TableSink;
+  34 import org.apache.flink.types.Row;
+  35 
+  36 import java.util.List;
+  37 import java.util.Objects;
+  38 
+  39 /**
+  40  * @author yanxi
+  41  */
+  42 public class RedisSink implements RetractStreamTableSink&lt;Row&gt;, IStreamSinkGener&lt;RedisSink&gt; {
+  43 
+  44     protected String[] fieldNames;
+  45 
+  46     protected TypeInformation&lt;?&gt;[] fieldTypes;
+  47 
+  48     protected String url;
+  49 
+  50     protected String database;
+  51 
+  52     protected String tableName;
+  53 
+  54     protected String password;
+  55 
+  56     protected List&lt;String&gt; primaryKeys;
+  57 
+  58     protected int timeout;
+  59 
+  60     protected int redisType;
+  61 
+  62     protected String maxTotal;
+  63 
+  64     protected String maxIdle;
+  65 
+  66     protected String minIdle;
+  67 
+  68     protected String masterName;
+  69 
+  70     protected Integer parallelism = 1;
+  71 
+  72     protected String registerTableName;
+  73 
+  74 &lt;&lt;&lt;&lt;&lt;&lt;&lt; GitAnalyzerPlus_ours
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  75     protected long keyExpiredTime;</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  76 </span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  77     public RedisSink(){</span>
+  78 ||||||| GitAnalyzerPlus_base
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  79     public RedisSink(){</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  80 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  81     }</span>
+  82 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  83     public RedisSink() {</span>
+  84 &gt;&gt;&gt;&gt;&gt;&gt;&gt; GitAnalyzerPlus_theirs
+  85 
+  86     }
+  87 
+  88     @Override
+  89     public RedisSink genStreamSink(AbstractTargetTableInfo targetTableInfo) {
+  90         RedisTableInfo redisTableInfo = (RedisTableInfo) targetTableInfo;
+  91         this.url = redisTableInfo.getUrl();
+  92         this.database = redisTableInfo.getDatabase();
+  93         this.password = redisTableInfo.getPassword();
+  94         this.tableName = redisTableInfo.getTablename();
+  95         this.primaryKeys = redisTableInfo.getPrimaryKeys();
+  96         this.redisType = redisTableInfo.getRedisType();
+  97         this.maxTotal = redisTableInfo.getMaxTotal();
+  98         this.maxIdle = redisTableInfo.getMaxIdle();
+  99         this.minIdle = redisTableInfo.getMinIdle();
+ 100         this.masterName = redisTableInfo.getMasterName();
+ 101         this.timeout = redisTableInfo.getTimeout();
+ 102         this.parallelism = Objects.isNull(redisTableInfo.getParallelism()) ?
+ 103                 parallelism : redisTableInfo.getParallelism();
+ 104         this.registerTableName = redisTableInfo.getName();
+ 105         this.keyExpiredTime = redisTableInfo.getKeyExpiredTime();
+ 106         return this;
+ 107     }
+ 108 
+ 109     @Override
+ 110     public TypeInformation&lt;Row&gt; getRecordType() {
+ 111         return new RowTypeInfo(fieldTypes, fieldNames);
+ 112     }
+ 113 
+ 114     @Override
+ 115     public void emitDataStream(DataStream&lt;Tuple2&lt;Boolean, Row&gt;&gt; dataStream) {
+ 116         consumeDataStream(dataStream);
+ 117     }
+ 118 
+ 119     @Override
+<abbr title=" 120     public DataStreamSink&lt;Tuple2&lt;Boolean, Row&gt;&gt; consumeDataStream(DataStream&lt;Tuple2&lt;Boolean, Row&gt;&gt; dataStream) {"> 120     public DataStreamSink&lt;Tuple2&lt;Boolean, Row&gt;&gt; consumeDataStream(DataStream&lt;Tuple2&lt;Boolean, Row&gt;&gt; dataSt🔵</abbr>
+ 121         RedisOutputFormat.RedisOutputFormatBuilder builder = RedisOutputFormat.buildRedisOutputFormat();
+ 122         RedisOutputFormat redisOutputFormat = builder.setUrl(this.url)
+ 123                 .setDatabase(this.database)
+ 124                 .setTableName(this.tableName)
+ 125                 .setPassword(this.password)
+ 126                 .setFieldNames(this.fieldNames)
+ 127                 .setFieldTypes(this.fieldTypes)
+ 128                 .setPrimaryKeys(this.primaryKeys)
+ 129                 .setTimeout(this.timeout)
+ 130                 .setRedisType(this.redisType)
+ 131                 .setMaxTotal(this.maxTotal)
+ 132                 .setMaxIdle(this.maxIdle)
+ 133                 .setMinIdle(this.minIdle)
+ 134                 .setMasterName(this.masterName)
+ 135 &lt;&lt;&lt;&lt;&lt;&lt;&lt; GitAnalyzerPlus_ours
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 136                 .setKeyExpiredTime(this.keyExpiredTime);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 137         RedisOutputFormat redisOutputFormat = builder.finish();</span>
+ 138 ||||||| GitAnalyzerPlus_base
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 139         RedisOutputFormat redisOutputFormat = builder.finish();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 140         RichSinkFunction richSinkFunction = new OutputFormatSinkFunction(redisOutputFormat);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 141         DataStreamSink dataStreamSink = dataStream.addSink(richSinkFunction)</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 142                 .setParallelism(parallelism)</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 143                 .name(registerTableName);</span>
+ 144 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 145                 .finish();</span>
+ 146 &gt;&gt;&gt;&gt;&gt;&gt;&gt; GitAnalyzerPlus_theirs
+ 147         RichSinkFunction richSinkFunction = new OutputFormatSinkFunction(redisOutputFormat);
+ 148         DataStreamSink dataStreamSink = dataStream.addSink(richSinkFunction)
+ 149                 .setParallelism(parallelism)
+ 150                 .name(registerTableName);
+ 151         return dataStreamSink;
+ 152     }
+ 153 
+ 154     @Override
+ 155     public TupleTypeInfo&lt;Tuple2&lt;Boolean, Row&gt;&gt; getOutputType() {
+ 156         return new TupleTypeInfo(org.apache.flink.table.api.Types.BOOLEAN(), getRecordType());
+ 157     }
+ 158 
+ 159     @Override
+ 160     public String[] getFieldNames() {
+ 161         return fieldNames;
+ 162     }
+ 163 
+ 164     @Override
+ 165     public TypeInformation&lt;?&gt;[] getFieldTypes() {
+ 166         return fieldTypes;
+ 167     }
+ 168 
+ 169     @Override
+<abbr title=" 170     public TableSink&lt;Tuple2&lt;Boolean, Row&gt;&gt; configure(String[] fieldNames, TypeInformation&lt;?&gt;[] fieldTypes) {"> 170     public TableSink&lt;Tuple2&lt;Boolean, Row&gt;&gt; configure(String[] fieldNames, TypeInformation&lt;?&gt;[] fieldTypes🔵</abbr>
+ 171         this.fieldNames = fieldNames;
+ 172         this.fieldTypes = fieldTypes;
+ 173         return this;
+ 174     }
+ 175 }</pre></td>
+                            <td><pre>   1 /*
+   2  * Licensed to the Apache Software Foundation (ASF) under one
+   3  * or more contributor license agreements.  See the NOTICE file
+   4  * distributed with this work for additional information
+   5  * regarding copyright ownership.  The ASF licenses this file
+   6  * to you under the Apache License, Version 2.0 (the
+   7  * &quot;License&quot;); you may not use this file except in compliance
+   8  * with the License.  You may obtain a copy of the License at
+   9  *
+  10  *     http://www.apache.org/licenses/LICENSE-2.0
+  11  *
+  12  * Unless required by applicable law or agreed to in writing, software
+  13  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15  * See the License for the specific language governing permissions and
+  16  * limitations under the License.
+  17  */
+  18 
+  19 package com.dtstack.flink.sql.sink.redis;
+  20 
+  21 import com.dtstack.flink.sql.sink.IStreamSinkGener;
+  22 import com.dtstack.flink.sql.sink.redis.table.RedisTableInfo;
+  23 import com.dtstack.flink.sql.table.AbstractTargetTableInfo;
+  24 import org.apache.flink.api.common.typeinfo.TypeInformation;
+  25 import org.apache.flink.api.java.tuple.Tuple2;
+  26 import org.apache.flink.api.java.typeutils.RowTypeInfo;
+  27 import org.apache.flink.api.java.typeutils.TupleTypeInfo;
+  28 import org.apache.flink.streaming.api.datastream.DataStream;
+  29 import org.apache.flink.streaming.api.datastream.DataStreamSink;
+  30 import org.apache.flink.streaming.api.functions.sink.OutputFormatSinkFunction;
+  31 import org.apache.flink.streaming.api.functions.sink.RichSinkFunction;
+  32 import org.apache.flink.table.sinks.RetractStreamTableSink;
+  33 import org.apache.flink.table.sinks.TableSink;
+  34 import org.apache.flink.types.Row;
+  35 
+  36 import java.util.List;
+  37 import java.util.Objects;
+  38 
+  39 /**
+  40  * @author yanxi
+  41  */
+  42 public class RedisSink implements RetractStreamTableSink&lt;Row&gt;, IStreamSinkGener&lt;RedisSink&gt; {
+  43 
+  44     protected String[] fieldNames;
+  45 
+  46     protected TypeInformation&lt;?&gt;[] fieldTypes;
+  47 
+  48     protected String url;
+  49 
+  50     protected String database;
+  51 
+  52     protected String tableName;
+  53 
+  54     protected String password;
+  55 
+  56     protected List&lt;String&gt; primaryKeys;
+  57 
+  58     protected int timeout;
+  59 
+  60     protected int redisType;
+  61 
+  62     protected String maxTotal;
+  63 
+  64     protected String maxIdle;
+  65 
+  66     protected String minIdle;
+  67 
+  68     protected String masterName;
+  69 
+  70     protected Integer parallelism = 1;
+  71 
+  72     protected String registerTableName;
+  73 
+  74     protected long keyExpiredTime;
+  75 
+  76     public RedisSink(){
+  77 
+  78     }
+  79 
+  80     @Override
+  81     public RedisSink genStreamSink(AbstractTargetTableInfo targetTableInfo) {
+  82         RedisTableInfo redisTableInfo = (RedisTableInfo) targetTableInfo;
+  83         this.url = redisTableInfo.getUrl();
+  84         this.database = redisTableInfo.getDatabase();
+  85         this.password = redisTableInfo.getPassword();
+  86         this.tableName = redisTableInfo.getTablename();
+  87         this.primaryKeys = redisTableInfo.getPrimaryKeys();
+  88         this.redisType = redisTableInfo.getRedisType();
+  89         this.maxTotal = redisTableInfo.getMaxTotal();
+  90         this.maxIdle = redisTableInfo.getMaxIdle();
+  91         this.minIdle = redisTableInfo.getMinIdle();
+  92         this.masterName = redisTableInfo.getMasterName();
+  93         this.timeout = redisTableInfo.getTimeout();
+  94         this.parallelism = Objects.isNull(redisTableInfo.getParallelism()) ?
+  95                 parallelism : redisTableInfo.getParallelism();
+  96         this.registerTableName = redisTableInfo.getName();
+  97         this.keyExpiredTime = redisTableInfo.getKeyExpiredTime();
+  98         return this;
+  99     }
+ 100 
+ 101     @Override
+ 102     public TypeInformation&lt;Row&gt; getRecordType() {
+ 103         return new RowTypeInfo(fieldTypes, fieldNames);
+ 104     }
+ 105 
+ 106     @Override
+ 107     public void emitDataStream(DataStream&lt;Tuple2&lt;Boolean, Row&gt;&gt; dataStream) {
+ 108         consumeDataStream(dataStream);
+ 109     }
+ 110 
+ 111     @Override
+<abbr title=" 112     public DataStreamSink&lt;Tuple2&lt;Boolean, Row&gt;&gt; consumeDataStream(DataStream&lt;Tuple2&lt;Boolean, Row&gt;&gt; dataStream) {"> 112     public DataStreamSink&lt;Tuple2&lt;Boolean, Row&gt;&gt; consumeDataStream(DataStream&lt;Tuple2&lt;Boolean, Row&gt;&gt; dataSt🔵</abbr>
+ 113         RedisOutputFormat.RedisOutputFormatBuilder builder = RedisOutputFormat.buildRedisOutputFormat();
+ 114         RedisOutputFormat redisOutputFormat = builder.setUrl(this.url)
+ 115                 .setDatabase(this.database)
+ 116                 .setTableName(this.tableName)
+ 117                 .setPassword(this.password)
+ 118                 .setFieldNames(this.fieldNames)
+ 119                 .setFieldTypes(this.fieldTypes)
+ 120                 .setPrimaryKeys(this.primaryKeys)
+ 121                 .setTimeout(this.timeout)
+ 122                 .setRedisType(this.redisType)
+ 123                 .setMaxTotal(this.maxTotal)
+ 124                 .setMaxIdle(this.maxIdle)
+ 125                 .setMinIdle(this.minIdle)
+ 126                 .setMasterName(this.masterName)
+ 127 &lt;&lt;&lt;&lt;&lt;&lt;&lt; MINE
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 128                 .setKeyExpiredTime(this.keyExpiredTime);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 129         RedisOutputFormat redisOutputFormat = builder.finish();</span>
+ 130 ||||||| BASE
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 131         RedisOutputFormat redisOutputFormat = builder.finish();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 132         RichSinkFunction richSinkFunction = new OutputFormatSinkFunction(redisOutputFormat);</span>
+ 133 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 134                 .finish();</span>
+ 135 &gt;&gt;&gt;&gt;&gt;&gt;&gt; YOURS
+ 136         RichSinkFunction richSinkFunction = new OutputFormatSinkFunction(redisOutputFormat);
+ 137         DataStreamSink dataStreamSink = dataStream.addSink(richSinkFunction)
+ 138                 .setParallelism(parallelism)
+ 139                 .name(registerTableName);
+ 140         return dataStreamSink;
+ 141     }
+ 142 
+ 143     @Override
+ 144     public TupleTypeInfo&lt;Tuple2&lt;Boolean, Row&gt;&gt; getOutputType() {
+ 145         return new TupleTypeInfo(org.apache.flink.table.api.Types.BOOLEAN(), getRecordType());
+ 146     }
+ 147 
+ 148     @Override
+ 149     public String[] getFieldNames() {
+ 150         return fieldNames;
+ 151     }
+ 152 
+ 153     @Override
+ 154     public TypeInformation&lt;?&gt;[] getFieldTypes() {
+ 155         return fieldTypes;
+ 156     }
+ 157 
+ 158     @Override
+<abbr title=" 159     public TableSink&lt;Tuple2&lt;Boolean, Row&gt;&gt; configure(String[] fieldNames, TypeInformation&lt;?&gt;[] fieldTypes) {"> 159     public TableSink&lt;Tuple2&lt;Boolean, Row&gt;&gt; configure(String[] fieldNames, TypeInformation&lt;?&gt;[] fieldTypes🔵</abbr>
+ 160         this.fieldNames = fieldNames;
+ 161         this.fieldTypes = fieldTypes;
+ 162         return this;
+ 163     }
+ 164 }
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ </pre></td>
+                            <td><pre>   1 /*
+   2  * Licensed to the Apache Software Foundation (ASF) under one
+   3  * or more contributor license agreements.  See the NOTICE file
+   4  * distributed with this work for additional information
+   5  * regarding copyright ownership.  The ASF licenses this file
+   6  * to you under the Apache License, Version 2.0 (the
+   7  * &quot;License&quot;); you may not use this file except in compliance
+   8  * with the License.  You may obtain a copy of the License at
+   9  *
+  10  *     http://www.apache.org/licenses/LICENSE-2.0
+  11  *
+  12  * Unless required by applicable law or agreed to in writing, software
+  13  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15  * See the License for the specific language governing permissions and
+  16  * limitations under the License.
+  17  */
+  18 package com.dtstack.flink.sql.sink.redis;
+  19 
+  20 import com.dtstack.flink.sql.sink.IStreamSinkGener;
+  21 import com.dtstack.flink.sql.sink.redis.table.RedisTableInfo;
+  22 import com.dtstack.flink.sql.table.AbstractTargetTableInfo;
+  23 import java.util.List;
+  24 import java.util.Objects;
+  25 import org.apache.flink.api.common.typeinfo.TypeInformation;
+  26 import org.apache.flink.api.java.tuple.Tuple2;
+  27 import org.apache.flink.api.java.typeutils.RowTypeInfo;
+  28 import org.apache.flink.api.java.typeutils.TupleTypeInfo;
+  29 import org.apache.flink.streaming.api.datastream.DataStream;
+  30 import org.apache.flink.streaming.api.datastream.DataStreamSink;
+  31 import org.apache.flink.streaming.api.functions.sink.OutputFormatSinkFunction;
+  32 import org.apache.flink.streaming.api.functions.sink.RichSinkFunction;
+  33 import org.apache.flink.table.sinks.RetractStreamTableSink;
+  34 import org.apache.flink.table.sinks.TableSink;
+  35 import org.apache.flink.types.Row;
+  36 
+  37 
+  38 /**
+  39  * @author yanxi
+  40  */
+  41 public class RedisSink implements RetractStreamTableSink&lt;Row&gt; , IStreamSinkGener&lt;RedisSink&gt; {
+  42     protected String[] fieldNames;
+  43 
+  44     protected TypeInformation&lt;?&gt;[] fieldTypes;
+  45 
+  46     protected String url;
+  47 
+  48     protected String database;
+  49 
+  50     protected String tableName;
+  51 
+  52     protected String password;
+  53 
+  54     protected List&lt;String&gt; primaryKeys;
+  55 
+  56     protected int timeout;
+  57 
+  58     protected int redisType;
+  59 
+  60     protected String maxTotal;
+  61 
+  62     protected String maxIdle;
+  63 
+  64     protected String minIdle;
+  65 
+  66     protected String masterName;
+  67 
+  68     protected Integer parallelism = 1;
+  69 
+  70     protected String registerTableName;
+  71 
+  72     protected long keyExpiredTime;
+  73 
+  74     public RedisSink() {
+  75     }
+  76 
+  77     @Override
+  78     public RedisSink genStreamSink(AbstractTargetTableInfo targetTableInfo) {
+  79         RedisTableInfo redisTableInfo = ((RedisTableInfo) (targetTableInfo));
+  80         this.url = redisTableInfo.getUrl();
+  81         this.database = redisTableInfo.getDatabase();
+  82         this.password = redisTableInfo.getPassword();
+  83         this.tableName = redisTableInfo.getTablename();
+  84         this.primaryKeys = redisTableInfo.getPrimaryKeys();
+  85         this.redisType = redisTableInfo.getRedisType();
+  86         this.maxTotal = redisTableInfo.getMaxTotal();
+  87         this.maxIdle = redisTableInfo.getMaxIdle();
+  88         this.minIdle = redisTableInfo.getMinIdle();
+  89         this.masterName = redisTableInfo.getMasterName();
+  90         this.timeout = redisTableInfo.getTimeout();
+<abbr title="  91         this.parallelism = (Objects.isNull(redisTableInfo.getParallelism())) ? parallelism : redisTableInfo.getParallelism();">  91         this.parallelism = (Objects.isNull(redisTableInfo.getParallelism())) ? parallelism : redisTableIn🔵</abbr>
+  92         this.registerTableName = redisTableInfo.getName();
+  93         this.keyExpiredTime = redisTableInfo.getKeyExpiredTime();
+  94         return this;
+  95     }
+  96 
+  97     @Override
+  98     public TypeInformation&lt;Row&gt; getRecordType() {
+  99         return new RowTypeInfo(fieldTypes, fieldNames);
+ 100     }
+ 101 
+ 102     @Override
+ 103     public void emitDataStream(DataStream&lt;Tuple2&lt;Boolean, Row&gt;&gt; dataStream) {
+ 104         consumeDataStream(dataStream);
+ 105     }
+ 106 
+ 107     @Override
+<abbr title=" 108     public DataStreamSink&lt;Tuple2&lt;Boolean, Row&gt;&gt; consumeDataStream(DataStream&lt;Tuple2&lt;Boolean, Row&gt;&gt; dataStream) {"> 108     public DataStreamSink&lt;Tuple2&lt;Boolean, Row&gt;&gt; consumeDataStream(DataStream&lt;Tuple2&lt;Boolean, Row&gt;&gt; dataSt🔵</abbr>
+ 109         RedisOutputFormat.RedisOutputFormatBuilder builder = RedisOutputFormat.buildRedisOutputFormat();
+<abbr title=" 110         builder.setUrl(this.url).setDatabase(this.database).setTableName(this.tableName).setPassword(this.password).setFieldNames(this.fieldNames).setFieldTypes(this.fieldTypes).setPrimaryKeys(this.primaryKeys).setTimeout(this.timeout).setRedisType(this.redisType).setMaxTotal(this.maxTotal).setMaxIdle(this.maxIdle).setMinIdle(this.minIdle).setMasterName(this.masterName).setKeyExpiredTime(this.keyExpiredTime);"> 110         builder.setUrl(this.url).setDatabase(this.database).setTableName(this.tableName).setPassword(this🔵</abbr>
+<abbr title=" 111         RedisOutputFormat redisOutputFormat = builder.setUrl(this.url).setDatabase(this.database).setTableName(this.tableName).setPassword(this.password).setFieldNames(this.fieldNames).setFieldTypes(this.fieldTypes).setPrimaryKeys(this.primaryKeys).setTimeout(this.timeout).setRedisType(this.redisType).setMaxTotal(this.maxTotal).setMaxIdle(this.maxIdle).setMinIdle(this.minIdle).setMasterName(this.masterName).finish();"> 111         RedisOutputFormat redisOutputFormat = builder.setUrl(this.url).setDatabase(this.database).setTabl🔵</abbr>
+ 112         RichSinkFunction richSinkFunction = new OutputFormatSinkFunction(redisOutputFormat);
+<abbr title=" 113         DataStreamSink dataStreamSink = dataStream.addSink(richSinkFunction).setParallelism(parallelism).name(registerTableName);"> 113         DataStreamSink dataStreamSink = dataStream.addSink(richSinkFunction).setParallelism(parallelism).🔵</abbr>
+ 114         return dataStreamSink;
+ 115     }
+ 116 
+ 117     @Override
+ 118     public TupleTypeInfo&lt;Tuple2&lt;Boolean, Row&gt;&gt; getOutputType() {
+ 119         return new TupleTypeInfo(org.apache.flink.table.api.Types.BOOLEAN(), getRecordType());
+ 120     }
+ 121 
+ 122     @Override
+ 123     public String[] getFieldNames() {
+ 124         return fieldNames;
+ 125     }
+ 126 
+ 127     @Override
+ 128     public TypeInformation&lt;?&gt;[] getFieldTypes() {
+ 129         return fieldTypes;
+ 130     }
+ 131 
+ 132     @Override
+<abbr title=" 133     public TableSink&lt;Tuple2&lt;Boolean, Row&gt;&gt; configure(String[] fieldNames, TypeInformation&lt;?&gt;[] fieldTypes) {"> 133     public TableSink&lt;Tuple2&lt;Boolean, Row&gt;&gt; configure(String[] fieldNames, TypeInformation&lt;?&gt;[] fieldTypes🔵</abbr>
+ 134         this.fieldNames = fieldNames;
+ 135         this.fieldTypes = fieldTypes;
+ 136         return this;
+ 137     }
+ 138 }
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ </pre></td>
+                        </tr>
+                    </table>
+                </div>
+                <div id="bottom">
+                    <table style="margin:auto">
+                        <tr>
+                            <th>ours vs. base</th>
+                            <th>theirs vs. base</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1  /*
+   2   * Licensed to the Apache Software Foundation (ASF) under one
+   3   * or more contributor license agreements.  See the NOTICE file
+   4   * distributed with this work for additional information
+   5   * regarding copyright ownership.  The ASF licenses this file
+   6   * to you under the Apache License, Version 2.0 (the
+   7   * &quot;License&quot;); you may not use this file except in compliance
+   8   * with the License.  You may obtain a copy of the License at
+   9   *
+  10   *     http://www.apache.org/licenses/LICENSE-2.0
+  11   *
+  12   * Unless required by applicable law or agreed to in writing, software
+  13   * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15   * See the License for the specific language governing permissions and
+  16   * limitations under the License.
+  17   */
+  18  
+  19  package com.dtstack.flink.sql.sink.redis;
+  20  
+  21  import com.dtstack.flink.sql.sink.IStreamSinkGener;
+  22  import com.dtstack.flink.sql.sink.redis.table.RedisTableInfo;
+  23  import com.dtstack.flink.sql.table.AbstractTargetTableInfo;
+  24  import org.apache.flink.api.common.typeinfo.TypeInformation;
+  25  import org.apache.flink.api.java.tuple.Tuple2;
+  26  import org.apache.flink.api.java.typeutils.RowTypeInfo;
+  27  import org.apache.flink.api.java.typeutils.TupleTypeInfo;
+  28  import org.apache.flink.streaming.api.datastream.DataStream;
+  29  import org.apache.flink.streaming.api.datastream.DataStreamSink;
+  30  import org.apache.flink.streaming.api.functions.sink.OutputFormatSinkFunction;
+  31  import org.apache.flink.streaming.api.functions.sink.RichSinkFunction;
+  32  import org.apache.flink.table.sinks.RetractStreamTableSink;
+  33  import org.apache.flink.table.sinks.TableSink;
+  34  import org.apache.flink.types.Row;
+  35  
+  36  import java.util.List;
+  37  import java.util.Objects;
+  38  
+  39  /**
+  40   * @author yanxi
+  41   */
+  42  public class RedisSink implements RetractStreamTableSink&lt;Row&gt;, IStreamSinkGener&lt;RedisSink&gt; {
+  43  
+  44      protected String[] fieldNames;
+  45  
+  46      protected TypeInformation&lt;?&gt;[] fieldTypes;
+  47  
+  48      protected String url;
+  49  
+  50      protected String database;
+  51  
+  52      protected String tableName;
+  53  
+  54      protected String password;
+  55  
+  56      protected List&lt;String&gt; primaryKeys;
+  57  
+  58      protected int timeout;
+  59  
+  60      protected int redisType;
+  61  
+  62      protected String maxTotal;
+  63  
+  64      protected String maxIdle;
+  65  
+  66      protected String minIdle;
+  67  
+  68      protected String masterName;
+  69  
+  70      protected Integer parallelism = 1;
+  71  
+  72      protected String registerTableName;
+  73  
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  74 +    protected long keyExpiredTime;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  75 +</span>
+  76      public RedisSink(){
+
+  77  
+  78      }
+  79  
+  80      @Override
+  81      public RedisSink genStreamSink(AbstractTargetTableInfo targetTableInfo) {
+  82          RedisTableInfo redisTableInfo = (RedisTableInfo) targetTableInfo;
+  83          this.url = redisTableInfo.getUrl();
+  84          this.database = redisTableInfo.getDatabase();
+  85          this.password = redisTableInfo.getPassword();
+  86          this.tableName = redisTableInfo.getTablename();
+  87          this.primaryKeys = redisTableInfo.getPrimaryKeys();
+  88          this.redisType = redisTableInfo.getRedisType();
+  89          this.maxTotal = redisTableInfo.getMaxTotal();
+  90          this.maxIdle = redisTableInfo.getMaxIdle();
+  91          this.minIdle = redisTableInfo.getMinIdle();
+  92          this.masterName = redisTableInfo.getMasterName();
+  93          this.timeout = redisTableInfo.getTimeout();
+  94          this.parallelism = Objects.isNull(redisTableInfo.getParallelism()) ?
+  95                  parallelism : redisTableInfo.getParallelism();
+  96          this.registerTableName = redisTableInfo.getName();
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  97 +        this.keyExpiredTime = redisTableInfo.getKeyExpiredTime();</span>
+  98          return this;
+  99      }
+ 100  
+ 101      @Override
+ 102      public TypeInformation&lt;Row&gt; getRecordType() {
+ 103          return new RowTypeInfo(fieldTypes, fieldNames);
+ 104      }
+ 105  
+ 106      @Override
+ 107      public void emitDataStream(DataStream&lt;Tuple2&lt;Boolean, Row&gt;&gt; dataStream) {
+ 108          consumeDataStream(dataStream);
+ 109      }
+ 110  
+ 111      @Override
+ 112      public DataStreamSink&lt;Tuple2&lt;Boolean, Row&gt;&gt; consumeDataStream(DataStream&lt;Tuple2&lt;Boolean, Row&gt;&gt; dataStream) {
+ 113          RedisOutputFormat.RedisOutputFormatBuilder builder = RedisOutputFormat.buildRedisOutputFormat();
+ 114          builder.setUrl(this.url)
+
+ 115                  .setDatabase(this.database)
+ 116                  .setTableName(this.tableName)
+ 117                  .setPassword(this.password)
+ 118                  .setFieldNames(this.fieldNames)
+ 119                  .setFieldTypes(this.fieldTypes)
+ 120                  .setPrimaryKeys(this.primaryKeys)
+ 121                  .setTimeout(this.timeout)
+ 122                  .setRedisType(this.redisType)
+ 123                  .setMaxTotal(this.maxTotal)
+ 124                  .setMaxIdle(this.maxIdle)
+ 125                  .setMinIdle(this.minIdle)
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 126 -                .setMasterName(this.masterName);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 127 +                .setMasterName(this.masterName)</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 128 +                .setKeyExpiredTime(this.keyExpiredTime);</span>
+ 129          RedisOutputFormat redisOutputFormat = builder.finish();
+
+
+ 130          RichSinkFunction richSinkFunction = new OutputFormatSinkFunction(redisOutputFormat);
+ 131          DataStreamSink dataStreamSink = dataStream.addSink(richSinkFunction)
+ 132                  .setParallelism(parallelism)
+ 133                  .name(registerTableName);
+ 134          return dataStreamSink;
+ 135      }
+ 136  
+ 137      @Override
+ 138      public TupleTypeInfo&lt;Tuple2&lt;Boolean, Row&gt;&gt; getOutputType() {
+ 139          return new TupleTypeInfo(org.apache.flink.table.api.Types.BOOLEAN(), getRecordType());
+ 140      }
+ 141  
+ 142      @Override
+ 143      public String[] getFieldNames() {
+ 144          return fieldNames;
+ 145      }
+ 146  
+ 147      @Override
+ 148      public TypeInformation&lt;?&gt;[] getFieldTypes() {
+ 149          return fieldTypes;
+ 150      }
+ 151  
+ 152      @Override
+ 153      public TableSink&lt;Tuple2&lt;Boolean, Row&gt;&gt; configure(String[] fieldNames, TypeInformation&lt;?&gt;[] fieldTypes) {
+ 154          this.fieldNames = fieldNames;
+ 155          this.fieldTypes = fieldTypes;
+ 156          return this;
+ 157      }
+ 158  }</pre></td>
+                            <td><pre>   1  /*
+   2   * Licensed to the Apache Software Foundation (ASF) under one
+   3   * or more contributor license agreements.  See the NOTICE file
+   4   * distributed with this work for additional information
+   5   * regarding copyright ownership.  The ASF licenses this file
+   6   * to you under the Apache License, Version 2.0 (the
+   7   * &quot;License&quot;); you may not use this file except in compliance
+   8   * with the License.  You may obtain a copy of the License at
+   9   *
+  10   *     http://www.apache.org/licenses/LICENSE-2.0
+  11   *
+  12   * Unless required by applicable law or agreed to in writing, software
+  13   * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15   * See the License for the specific language governing permissions and
+  16   * limitations under the License.
+  17   */
+  18  
+  19  package com.dtstack.flink.sql.sink.redis;
+  20  
+  21  import com.dtstack.flink.sql.sink.IStreamSinkGener;
+  22  import com.dtstack.flink.sql.sink.redis.table.RedisTableInfo;
+  23  import com.dtstack.flink.sql.table.AbstractTargetTableInfo;
+  24  import org.apache.flink.api.common.typeinfo.TypeInformation;
+  25  import org.apache.flink.api.java.tuple.Tuple2;
+  26  import org.apache.flink.api.java.typeutils.RowTypeInfo;
+  27  import org.apache.flink.api.java.typeutils.TupleTypeInfo;
+  28  import org.apache.flink.streaming.api.datastream.DataStream;
+  29  import org.apache.flink.streaming.api.datastream.DataStreamSink;
+  30  import org.apache.flink.streaming.api.functions.sink.OutputFormatSinkFunction;
+  31  import org.apache.flink.streaming.api.functions.sink.RichSinkFunction;
+  32  import org.apache.flink.table.sinks.RetractStreamTableSink;
+  33  import org.apache.flink.table.sinks.TableSink;
+  34  import org.apache.flink.types.Row;
+  35  
+  36  import java.util.List;
+  37  import java.util.Objects;
+  38  
+  39  /**
+  40   * @author yanxi
+  41   */
+  42  public class RedisSink implements RetractStreamTableSink&lt;Row&gt;, IStreamSinkGener&lt;RedisSink&gt; {
+  43  
+  44      protected String[] fieldNames;
+  45  
+  46      protected TypeInformation&lt;?&gt;[] fieldTypes;
+  47  
+  48      protected String url;
+  49  
+  50      protected String database;
+  51  
+  52      protected String tableName;
+  53  
+  54      protected String password;
+  55  
+  56      protected List&lt;String&gt; primaryKeys;
+  57  
+  58      protected int timeout;
+  59  
+  60      protected int redisType;
+  61  
+  62      protected String maxTotal;
+  63  
+  64      protected String maxIdle;
+  65  
+  66      protected String minIdle;
+  67  
+  68      protected String masterName;
+  69  
+  70      protected Integer parallelism = 1;
+  71  
+  72      protected String registerTableName;
+  73  
+
+
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  74 -    public RedisSink(){</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  75 +    public RedisSink() {</span>
+  76  
+  77      }
+  78  
+  79      @Override
+  80      public RedisSink genStreamSink(AbstractTargetTableInfo targetTableInfo) {
+  81          RedisTableInfo redisTableInfo = (RedisTableInfo) targetTableInfo;
+  82          this.url = redisTableInfo.getUrl();
+  83          this.database = redisTableInfo.getDatabase();
+  84          this.password = redisTableInfo.getPassword();
+  85          this.tableName = redisTableInfo.getTablename();
+  86          this.primaryKeys = redisTableInfo.getPrimaryKeys();
+  87          this.redisType = redisTableInfo.getRedisType();
+  88          this.maxTotal = redisTableInfo.getMaxTotal();
+  89          this.maxIdle = redisTableInfo.getMaxIdle();
+  90          this.minIdle = redisTableInfo.getMinIdle();
+  91          this.masterName = redisTableInfo.getMasterName();
+  92          this.timeout = redisTableInfo.getTimeout();
+  93          this.parallelism = Objects.isNull(redisTableInfo.getParallelism()) ?
+  94                  parallelism : redisTableInfo.getParallelism();
+  95          this.registerTableName = redisTableInfo.getName();
+
+  96          return this;
+  97      }
+  98  
+  99      @Override
+ 100      public TypeInformation&lt;Row&gt; getRecordType() {
+ 101          return new RowTypeInfo(fieldTypes, fieldNames);
+ 102      }
+ 103  
+ 104      @Override
+ 105      public void emitDataStream(DataStream&lt;Tuple2&lt;Boolean, Row&gt;&gt; dataStream) {
+ 106          consumeDataStream(dataStream);
+ 107      }
+ 108  
+ 109      @Override
+ 110      public DataStreamSink&lt;Tuple2&lt;Boolean, Row&gt;&gt; consumeDataStream(DataStream&lt;Tuple2&lt;Boolean, Row&gt;&gt; dataStream) {
+ 111          RedisOutputFormat.RedisOutputFormatBuilder builder = RedisOutputFormat.buildRedisOutputFormat();
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 112 -        builder.setUrl(this.url)</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 113 +        RedisOutputFormat redisOutputFormat = builder.setUrl(this.url)</span>
+ 114                  .setDatabase(this.database)
+ 115                  .setTableName(this.tableName)
+ 116                  .setPassword(this.password)
+ 117                  .setFieldNames(this.fieldNames)
+ 118                  .setFieldTypes(this.fieldTypes)
+ 119                  .setPrimaryKeys(this.primaryKeys)
+ 120                  .setTimeout(this.timeout)
+ 121                  .setRedisType(this.redisType)
+ 122                  .setMaxTotal(this.maxTotal)
+ 123                  .setMaxIdle(this.maxIdle)
+ 124                  .setMinIdle(this.minIdle)
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 125 -                .setMasterName(this.masterName);</span>
+
+
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 126 -        RedisOutputFormat redisOutputFormat = builder.finish();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 127 +                .setMasterName(this.masterName)</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 128 +                .finish();</span>
+ 129          RichSinkFunction richSinkFunction = new OutputFormatSinkFunction(redisOutputFormat);
+ 130          DataStreamSink dataStreamSink = dataStream.addSink(richSinkFunction)
+ 131                  .setParallelism(parallelism)
+ 132                  .name(registerTableName);
+ 133          return dataStreamSink;
+ 134      }
+ 135  
+ 136      @Override
+ 137      public TupleTypeInfo&lt;Tuple2&lt;Boolean, Row&gt;&gt; getOutputType() {
+ 138          return new TupleTypeInfo(org.apache.flink.table.api.Types.BOOLEAN(), getRecordType());
+ 139      }
+ 140  
+ 141      @Override
+ 142      public String[] getFieldNames() {
+ 143          return fieldNames;
+ 144      }
+ 145  
+ 146      @Override
+ 147      public TypeInformation&lt;?&gt;[] getFieldTypes() {
+ 148          return fieldTypes;
+ 149      }
+ 150  
+ 151      @Override
+ 152      public TableSink&lt;Tuple2&lt;Boolean, Row&gt;&gt; configure(String[] fieldNames, TypeInformation&lt;?&gt;[] fieldTypes) {
+ 153          this.fieldNames = fieldNames;
+ 154          this.fieldTypes = fieldTypes;
+ 155          return this;
+ 156      }
+ 157  }</pre></td>
+                        </tr>
+                    </table>
+                </div>
+              </body>
+            </html>
+            

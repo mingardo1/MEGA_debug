@@ -1,0 +1,1568 @@
+<!DOCTYPE html>
+    <html lang="en">
+              <head>
+                <meta charset="utf-8">
+                <title>458</title>
+                    <style>
+                        #top {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        #bottom {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        abbr {
+                          /* Here is the delay */
+                          transition-delay:0s;
+                        }
+                    </style>
+              </head>
+              <body>
+                <span style="height: 4vh">
+                    458
+                    <a href="457.html">prev</a>
+                    <a href="459.html">next</a>
+                    <a href="458_chunks.html">chunks</a>
+                    <a href="index.html">index</a>
+                    DTStack/flinkStreamSQL_5553ee5c6410a412ab4ed61d9499805adee8995a_kudu/kudu-side/kudu-async-side/src/main/java/com/dtstack/flink/sql/side/kudu/KuduAsyncReqRow.java
+                    <textarea rows=1 onclick='navigator.clipboard.writeText(this.value)'>cd C:\studies\se\mega\git-analyzer-plus\notebooks\debug
+del /Q *
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;5553ee5c6410a412ab4ed61d9499805adee8995a:kudu/kudu-side/kudu-async-side/src/main/java/com/dtstack/flink/sql/side/kudu/KuduAsyncReqRow.java&quot; &gt; committed.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;5553ee5c6410a412ab4ed61d9499805adee8995a^1:kudu/kudu-side/kudu-async-side/src/main/java/com/dtstack/flink/sql/side/kudu/KuduAsyncReqRow.java&quot; &gt; ours.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;5553ee5c6410a412ab4ed61d9499805adee8995a^2:kudu/kudu-side/kudu-async-side/src/main/java/com/dtstack/flink/sql/side/kudu/KuduAsyncReqRow.java&quot; &gt; theirs.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;e0a10435dcb243a911c0405daebc6aa667d5119d:kudu/kudu-side/kudu-async-side/src/main/java/com/dtstack/flink/sql/side/kudu/KuduAsyncReqRow.java&quot; &gt; base.java
+copy ours.java 1ours.java
+copy ours.java 2ours.java
+copy theirs.java 1theirs.java
+copy theirs.java 2theirs.java
+copy base.java 1base.java
+copy base.java 2base.java
+&quot;C:\Program Files\Java\jdk1.8.0_241\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\jFSTMerge\build\libs\jFSTMerge-all.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\jfstmerge.java --show-base
+&quot;C:\Program Files\Eclipse Adoptium\jdk-17.0.11.9-hotspot\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\spork\target\spork-0.5.0-SNAPSHOT.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\spork.java
+del /Q 1*.java
+del /Q 2*.java
+del /Q jfstmerge.java.merge
+</textarea>
+                    {strict: [[b], [bj]], subset: [[b], [bj]]}
+                </span>
+                <div id="top">
+
+                    <table>
+                        <tr>
+                            <th>line based (standard git)</th>
+                            <th>jfstmerge</th>
+                            <th>spork</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1 package com.dtstack.flink.sql.side.kudu;
+   2 
+   3 import com.dtstack.flink.sql.enums.ECacheContentType;
+   4 import com.dtstack.flink.sql.side.AbstractSideTableInfo;
+   5 import com.dtstack.flink.sql.side.BaseAsyncReqRow;
+   6 import com.dtstack.flink.sql.side.CacheMissVal;
+   7 import com.dtstack.flink.sql.side.FieldInfo;
+   8 import com.dtstack.flink.sql.side.JoinInfo;
+   9 import com.dtstack.flink.sql.side.PredicateInfo;
+  10 import com.dtstack.flink.sql.side.cache.CacheObj;
+  11 import com.dtstack.flink.sql.side.kudu.table.KuduSideTableInfo;
+  12 import com.dtstack.flink.sql.side.kudu.utils.KuduUtil;
+  13 import com.dtstack.flink.sql.util.RowDataComplete;
+  14 import com.google.common.collect.Lists;
+  15 import com.google.common.collect.Maps;
+  16 import com.stumbleupon.async.Callback;
+  17 import com.stumbleupon.async.Deferred;
+  18 import io.vertx.core.json.JsonArray;
+  19 import org.apache.commons.lang3.StringUtils;
+  20 import org.apache.flink.api.java.tuple.Tuple2;
+  21 import org.apache.flink.api.java.typeutils.RowTypeInfo;
+  22 import org.apache.flink.configuration.Configuration;
+  23 import org.apache.flink.streaming.api.functions.async.ResultFuture;
+  24 import org.apache.flink.table.dataformat.BaseRow;
+  25 import org.apache.flink.types.Row;
+  26 import org.apache.flink.util.Preconditions;
+  27 import org.apache.kudu.ColumnSchema;
+  28 import org.apache.kudu.Schema;
+  29 import org.apache.kudu.client.AsyncKuduClient;
+  30 import org.apache.kudu.client.AsyncKuduScanner;
+  31 import org.apache.kudu.client.KuduException;
+  32 import org.apache.kudu.client.KuduPredicate;
+  33 import org.apache.kudu.client.KuduTable;
+  34 import org.apache.kudu.client.RowResult;
+  35 import org.apache.kudu.client.RowResultIterator;
+  36 import org.slf4j.Logger;
+  37 import org.slf4j.LoggerFactory;
+  38 
+  39 &lt;&lt;&lt;&lt;&lt;&lt;&lt; GitAnalyzerPlus_ours
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  40 import java.util.Arrays;</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  41 import java.util.Collections;</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  42 import java.util.List;</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  43 import java.util.Map;</span>
+  44 ||||||| GitAnalyzerPlus_base
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  45 import java.sql.Timestamp;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  46 import java.util.Arrays;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  47 import java.util.Collections;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  48 import java.util.List;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  49 import java.util.Map;</span>
+  50 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  51 import java.sql.Timestamp;</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  52 import java.util.*;</span>
+  53 &gt;&gt;&gt;&gt;&gt;&gt;&gt; GitAnalyzerPlus_theirs
+  54 
+  55 public class KuduAsyncReqRow extends BaseAsyncReqRow {
+  56 
+  57     private static final Logger LOG = LoggerFactory.getLogger(KuduAsyncReqRow.class);
+  58 
+  59     private static final TimeZone LOCAL_TZ = TimeZone.getDefault();
+  60 
+  61     /**
+  62      * 获取连接的尝试次数
+  63      */
+  64     private static final int CONN_RETRY_NUM = 3;
+  65     /**
+  66      * 缓存条数
+  67      */
+  68     private static final Long FETCH_SIZE = 1000L;
+  69 
+  70     private static final long serialVersionUID = 5028583854989267753L;
+  71 
+  72 
+  73     private AsyncKuduClient asyncClient;
+  74 
+  75     private KuduTable table;
+  76 
+  77     private KuduSideTableInfo kuduSideTableInfo;
+  78 
+  79     private AsyncKuduScanner.AsyncKuduScannerBuilder scannerBuilder;
+  80 
+<abbr title="  81     public KuduAsyncReqRow(RowTypeInfo rowTypeInfo, JoinInfo joinInfo, List&lt;FieldInfo&gt; outFieldInfoList, AbstractSideTableInfo sideTableInfo) {">  81     public KuduAsyncReqRow(RowTypeInfo rowTypeInfo, JoinInfo joinInfo, List&lt;FieldInfo&gt; outFieldInfoList, 🔵</abbr>
+  82         super(new KuduAsyncSideInfo(rowTypeInfo, joinInfo, outFieldInfoList, sideTableInfo));
+  83     }
+  84 
+  85     @Override
+  86     public void open(Configuration parameters) throws Exception {
+  87         super.open(parameters);
+  88         kuduSideTableInfo = (KuduSideTableInfo) sideInfo.getSideTableInfo();
+  89         connKuDu();
+  90     }
+  91 
+  92     /**
+  93      * 连接kudu中的表
+  94      *
+  95      * @throws KuduException
+  96      */
+  97     private void connKuDu() throws KuduException {
+  98         if (null == table) {
+  99             String kuduMasters = kuduSideTableInfo.getKuduMasters();
+ 100             String tableName = kuduSideTableInfo.getTableName();
+ 101             Integer workerCount = kuduSideTableInfo.getWorkerCount();
+ 102             Integer defaultSocketReadTimeoutMs = kuduSideTableInfo.getDefaultSocketReadTimeoutMs();
+ 103             Integer defaultOperationTimeoutMs = kuduSideTableInfo.getDefaultOperationTimeoutMs();
+ 104 
+ 105             Preconditions.checkNotNull(kuduMasters, &quot;kuduMasters could not be null&quot;);
+ 106 
+<abbr title=" 107             AsyncKuduClient.AsyncKuduClientBuilder asyncKuduClientBuilder = new AsyncKuduClient.AsyncKuduClientBuilder(kuduMasters);"> 107             AsyncKuduClient.AsyncKuduClientBuilder asyncKuduClientBuilder = new AsyncKuduClient.AsyncKudu🔵</abbr>
+ 108             if (null != workerCount) {
+ 109                 asyncKuduClientBuilder.workerCount(workerCount);
+ 110             }
+ 111 
+ 112             if (null != defaultOperationTimeoutMs) {
+ 113                 asyncKuduClientBuilder.defaultOperationTimeoutMs(defaultOperationTimeoutMs);
+ 114             }
+ 115             asyncClient = asyncKuduClientBuilder.build();
+ 116             if (!asyncClient.syncClient().tableExists(tableName)) {
+ 117                 throw new IllegalArgumentException(&quot;Table Open Failed , please check table exists&quot;);
+ 118             }
+ 119             table = asyncClient.syncClient().openTable(tableName);
+ 120             LOG.info(&quot;connect kudu is successed!&quot;);
+ 121         }
+ 122         scannerBuilder = asyncClient.newScannerBuilder(table);
+ 123         Integer batchSizeBytes = kuduSideTableInfo.getBatchSizeBytes();
+ 124         Long limitNum = kuduSideTableInfo.getLimitNum();
+ 125         Boolean isFaultTolerant = kuduSideTableInfo.getFaultTolerant();
+ 126         //查询需要的字段
+ 127         String[] sideFieldNames = StringUtils.split(sideInfo.getSideSelectFields(), &quot;,&quot;);
+ 128 
+ 129         if (null == limitNum || limitNum &lt;= 0) {
+ 130             scannerBuilder.limit(FETCH_SIZE);
+ 131         } else {
+ 132             scannerBuilder.limit(limitNum);
+ 133         }
+ 134         if (null != batchSizeBytes) {
+ 135             scannerBuilder.batchSizeBytes(batchSizeBytes);
+ 136         }
+ 137         if (null != isFaultTolerant) {
+ 138             scannerBuilder.setFaultTolerant(isFaultTolerant);
+ 139         }
+ 140 
+ 141         List&lt;String&gt; projectColumns = Arrays.asList(sideFieldNames);
+ 142         scannerBuilder.setProjectedColumnNames(projectColumns);
+ 143     }
+ 144 
+ 145     @Override
+<abbr title=" 146     public void handleAsyncInvoke(Map&lt;String, Object&gt; inputParams, Row input, ResultFuture&lt;BaseRow&gt; resultFuture) throws Exception {"> 146     public void handleAsyncInvoke(Map&lt;String, Object&gt; inputParams, Row input, ResultFuture&lt;BaseRow&gt; resul🔵</abbr>
+ 147         Row inputCopy = Row.copy(input);
+ 148         //scannerBuilder 设置为null重新加载过滤条件,然后connkudu重新赋值
+ 149         //todo:代码需要优化
+ 150         scannerBuilder = null;
+ 151         connKuDu();
+ 152         Schema schema = table.getSchema();
+ 153         //  @wenbaoup fix bug
+ 154         inputParams.entrySet().forEach(e -&gt;{
+<abbr title=" 155             scannerBuilder.addPredicate(KuduPredicate.newInListPredicate(schema.getColumn(e.getKey()), Collections.singletonList(e.getValue())));"> 155             scannerBuilder.addPredicate(KuduPredicate.newInListPredicate(schema.getColumn(e.getKey()), Co🔵</abbr>
+ 156         });
+ 157 
+ 158         //  填充谓词信息
+ 159         List&lt;PredicateInfo&gt; predicateInfoes = sideInfo.getSideTableInfo().getPredicateInfoes();
+ 160         if (predicateInfoes.size() &gt; 0) {
+ 161             predicateInfoes.stream().map(info -&gt; {
+ 162                 KuduPredicate kuduPredicate = KuduUtil.buildKuduPredicate(schema, info);
+ 163                 if (null != kuduPredicate) {
+ 164                     scannerBuilder.addPredicate(kuduPredicate);
+ 165                 }
+ 166                 return info;
+ 167             }).count();
+ 168         }
+ 169 
+ 170         List&lt;Map&lt;String, Object&gt;&gt; cacheContent = Lists.newArrayList();
+ 171         AsyncKuduScanner asyncKuduScanner = scannerBuilder.build();
+ 172         List&lt;Row&gt; rowList = Lists.newArrayList();
+ 173         Deferred&lt;RowResultIterator&gt; data = asyncKuduScanner.nextRows();
+ 174         //从之前的同步修改为调用异步的Callback
+<abbr title=" 175         data.addCallbackDeferring(new GetListRowCB(inputCopy, cacheContent, rowList, asyncKuduScanner, resultFuture, buildCacheKey(inputParams)));"> 175         data.addCallbackDeferring(new GetListRowCB(inputCopy, cacheContent, rowList, asyncKuduScanner, re🔵</abbr>
+ 176     }
+ 177 
+ 178     @Override
+ 179     public String buildCacheKey(Map&lt;String, Object&gt; inputParams) {
+ 180         StringBuilder sb = new StringBuilder();
+ 181         for (Object ele : inputParams.values()) {
+ 182             sb.append(ele.toString())
+ 183                     .append(&quot;_&quot;);
+ 184         }
+ 185 
+ 186         return sb.toString();
+ 187     }
+ 188 
+ 189 
+ 190     @Override
+ 191     public Row fillData(Row input, Object sideInput) {
+ 192         Map&lt;String, Object&gt; cacheInfo = (Map&lt;String, Object&gt;) sideInput;
+ 193         Row row = new Row(sideInfo.getOutFieldInfoList().size());
+ 194         for (Map.Entry&lt;Integer, Integer&gt; entry : sideInfo.getInFieldIndex().entrySet()) {
+ 195             Object obj = input.getField(entry.getValue());
+ 196 &lt;&lt;&lt;&lt;&lt;&lt;&lt; GitAnalyzerPlus_ours
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 197             obj = convertTimeIndictorTypeInfo(entry.getValue(), obj);</span>
+ 198 ||||||| GitAnalyzerPlus_base
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"><abbr title=" 199             boolean isTimeIndicatorTypeInfo = TimeIndicatorTypeInfo.class.isAssignableFrom(sideInfo.getRowTypeInfo().getTypeAt(entry.getValue()).getClass());"> 199             boolean isTimeIndicatorTypeInfo = TimeIndicatorTypeInfo.class.isAssignableFrom(sideInfo.getRo🔵</abbr></span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 200 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"><abbr title=" 201             //Type information for indicating event or processing time. However, it behaves like a regular SQL timestamp but is serialized as Long."> 201             //Type information for indicating event or processing time. However, it behaves like a regula🔵</abbr></span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 202             if (obj instanceof Timestamp &amp;&amp; isTimeIndicatorTypeInfo) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 203                 obj = ((Timestamp) obj).getTime();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 204             }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 205             row.setField(entry.getKey(), obj);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 206         }</span>
+ 207 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"><abbr title=" 208             boolean isTimeIndicatorTypeInfo = TimeIndicatorTypeInfo.class.isAssignableFrom(sideInfo.getRowTypeInfo().getTypeAt(entry.getValue()).getClass());"> 208             boolean isTimeIndicatorTypeInfo = TimeIndicatorTypeInfo.class.isAssignableFrom(sideInfo.getRo🔵</abbr></span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 209 </span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"><abbr title=" 210             //Type information for indicating event or processing time. However, it behaves like a regular SQL timestamp but is serialized as Long."> 210             //Type information for indicating event or processing time. However, it behaves like a regula🔵</abbr></span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 211             if (obj instanceof Timestamp &amp;&amp; isTimeIndicatorTypeInfo) {</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 212                 obj = ((Timestamp) obj).getTime();</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 213                 //去除上一层OutputRowtimeProcessFunction 调用时区导致的影响</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"><abbr title=" 214                 obj = ((Timestamp) obj).getTime() + (long)LOCAL_TZ.getOffset(((Timestamp) obj).getTime());"> 214                 obj = ((Timestamp) obj).getTime() + (long)LOCAL_TZ.getOffset(((Timestamp) obj).getTime())🔵</abbr></span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 215             }</span>
+ 216 &gt;&gt;&gt;&gt;&gt;&gt;&gt; GitAnalyzerPlus_theirs
+ 217             row.setField(entry.getKey(), obj);
+ 218         }
+ 219 
+ 220         for (Map.Entry&lt;Integer, String&gt; entry : sideInfo.getSideFieldNameIndex().entrySet()) {
+ 221             if (cacheInfo == null) {
+ 222                 row.setField(entry.getKey(), null);
+ 223             } else {
+ 224                 row.setField(entry.getKey(), cacheInfo.get(entry.getValue()));
+ 225             }
+ 226         }
+ 227 
+ 228         return row;
+ 229     }
+ 230 
+ 231     @Override
+ 232     public void close() throws Exception {
+ 233         super.close();
+ 234         if (null != asyncClient) {
+ 235             try {
+ 236                 asyncClient.close();
+ 237             } catch (Exception e) {
+ 238                 LOG.error(&quot;Error while closing client.&quot;, e);
+ 239             }
+ 240         }
+ 241     }
+ 242 
+ 243     class GetListRowCB implements Callback&lt;Deferred&lt;List&lt;Row&gt;&gt;, RowResultIterator&gt; {
+ 244         private Row input;
+ 245         private List&lt;Map&lt;String, Object&gt;&gt; cacheContent;
+ 246         private List&lt;Row&gt; rowList;
+ 247         private AsyncKuduScanner asyncKuduScanner;
+ 248         private ResultFuture&lt;BaseRow&gt; resultFuture;
+ 249         private String key;
+ 250 
+ 251 
+ 252         public GetListRowCB() {
+ 253         }
+ 254 
+ 255         GetListRowCB(Row input, List&lt;Map&lt;String, Object&gt;&gt; cacheContent, List&lt;Row&gt; rowList,
+ 256                      AsyncKuduScanner asyncKuduScanner, ResultFuture&lt;BaseRow&gt; resultFuture, String key) {
+ 257             this.input = input;
+ 258             this.cacheContent = cacheContent;
+ 259             this.rowList = rowList;
+ 260             this.asyncKuduScanner = asyncKuduScanner;
+ 261             this.resultFuture = resultFuture;
+ 262             this.key = key;
+ 263         }
+ 264 
+ 265         @Override
+ 266         public Deferred&lt;List&lt;Row&gt;&gt; call(RowResultIterator results) throws Exception {
+ 267             for (RowResult result : results) {
+ 268                 Map&lt;String, Object&gt; oneRow = Maps.newHashMap();
+ 269                 for (String sideFieldName1 : StringUtils.split(sideInfo.getSideSelectFields(), &quot;,&quot;)) {
+ 270                     String sideFieldName = sideFieldName1.trim();
+ 271                     ColumnSchema columnSchema = table.getSchema().getColumn(sideFieldName);
+ 272                     if (null != columnSchema) {
+ 273                         KuduUtil.setMapValue(columnSchema.getType(), oneRow, sideFieldName, result);
+ 274                     }
+ 275                 }
+ 276                 Row row = fillData(input, oneRow);
+ 277                 if (openCache()) {
+ 278                     cacheContent.add(oneRow);
+ 279                 }
+ 280                 rowList.add(row);
+ 281             }
+ 282             if (asyncKuduScanner.hasMoreRows()) {
+ 283                 return asyncKuduScanner.nextRows().addCallbackDeferring(this);
+ 284             }
+ 285 
+ 286             if (rowList.size() &gt; 0) {
+ 287                 if (openCache()) {
+ 288                     putCache(key, CacheObj.buildCacheObj(ECacheContentType.MultiLine, cacheContent));
+ 289                 }
+ 290                 RowDataComplete.completeRow(resultFuture, rowList);
+ 291             } else {
+ 292                 dealMissKey(input, resultFuture);
+ 293                 if (openCache()) {
+ 294                     //放置在putCache的Miss中 一段时间内同一个key都会直接返回
+ 295                     putCache(key, CacheMissVal.getMissKeyObj());
+ 296                 }
+ 297             }
+ 298 
+ 299             return null;
+ 300         }
+ 301     }
+ 302 
+ 303 }</pre></td>
+                            <td><pre>   1 package com.dtstack.flink.sql.side.kudu;
+   2 
+   3 import com.dtstack.flink.sql.enums.ECacheContentType;
+   4 import com.dtstack.flink.sql.side.AbstractSideTableInfo;
+   5 import com.dtstack.flink.sql.side.BaseAsyncReqRow;
+   6 import com.dtstack.flink.sql.side.CacheMissVal;
+   7 import com.dtstack.flink.sql.side.FieldInfo;
+   8 import com.dtstack.flink.sql.side.JoinInfo;
+   9 import com.dtstack.flink.sql.side.PredicateInfo;
+  10 import com.dtstack.flink.sql.side.cache.CacheObj;
+  11 import com.dtstack.flink.sql.side.kudu.table.KuduSideTableInfo;
+  12 import com.dtstack.flink.sql.side.kudu.utils.KuduUtil;
+  13 import com.dtstack.flink.sql.util.RowDataComplete;
+  14 import com.google.common.collect.Lists;
+  15 import com.google.common.collect.Maps;
+  16 import com.stumbleupon.async.Callback;
+  17 import com.stumbleupon.async.Deferred;
+  18 import io.vertx.core.json.JsonArray;
+  19 import org.apache.commons.lang3.StringUtils;
+  20 import org.apache.flink.api.java.tuple.Tuple2;
+  21 import org.apache.flink.api.java.typeutils.RowTypeInfo;
+  22 import org.apache.flink.configuration.Configuration;
+  23 import org.apache.flink.streaming.api.functions.async.ResultFuture;
+  24 import org.apache.flink.table.dataformat.BaseRow;
+  25 import org.apache.flink.types.Row;
+  26 import org.apache.flink.util.Preconditions;
+  27 import org.apache.kudu.ColumnSchema;
+  28 import org.apache.kudu.Schema;
+  29 import org.apache.kudu.client.AsyncKuduClient;
+  30 import org.apache.kudu.client.AsyncKuduScanner;
+  31 import org.apache.kudu.client.KuduException;
+  32 import org.apache.kudu.client.KuduPredicate;
+  33 import org.apache.kudu.client.KuduTable;
+  34 import org.apache.kudu.client.RowResult;
+  35 import org.apache.kudu.client.RowResultIterator;
+  36 import org.slf4j.Logger;
+  37 import org.slf4j.LoggerFactory;
+  38 import java.util.*;
+  39 
+  40 public class KuduAsyncReqRow extends BaseAsyncReqRow {
+  41 
+  42     private static final Logger LOG = LoggerFactory.getLogger(KuduAsyncReqRow.class);
+  43 
+  44     private static final TimeZone LOCAL_TZ = TimeZone.getDefault();
+  45 
+  46     /**
+  47      * 获取连接的尝试次数
+  48      */
+  49     private static final int CONN_RETRY_NUM = 3;
+  50     /**
+  51      * 缓存条数
+  52      */
+  53     private static final Long FETCH_SIZE = 1000L;
+  54 
+  55     private static final long serialVersionUID = 5028583854989267753L;
+  56 
+  57 
+  58     private AsyncKuduClient asyncClient;
+  59 
+  60     private KuduTable table;
+  61 
+  62     private KuduSideTableInfo kuduSideTableInfo;
+  63 
+  64     private AsyncKuduScanner.AsyncKuduScannerBuilder scannerBuilder;
+  65 
+<abbr title="  66     public KuduAsyncReqRow(RowTypeInfo rowTypeInfo, JoinInfo joinInfo, List&lt;FieldInfo&gt; outFieldInfoList, AbstractSideTableInfo sideTableInfo) {">  66     public KuduAsyncReqRow(RowTypeInfo rowTypeInfo, JoinInfo joinInfo, List&lt;FieldInfo&gt; outFieldInfoList, 🔵</abbr>
+  67         super(new KuduAsyncSideInfo(rowTypeInfo, joinInfo, outFieldInfoList, sideTableInfo));
+  68     }
+  69 
+  70     @Override
+  71     public void open(Configuration parameters) throws Exception {
+  72         super.open(parameters);
+  73         kuduSideTableInfo = (KuduSideTableInfo) sideInfo.getSideTableInfo();
+  74         connKuDu();
+  75     }
+  76 
+  77     /**
+  78      * 连接kudu中的表
+  79      *
+  80      * @throws KuduException
+  81      */
+  82     private void connKuDu() throws KuduException {
+  83         if (null == table) {
+  84             String kuduMasters = kuduSideTableInfo.getKuduMasters();
+  85             String tableName = kuduSideTableInfo.getTableName();
+  86             Integer workerCount = kuduSideTableInfo.getWorkerCount();
+  87             Integer defaultSocketReadTimeoutMs = kuduSideTableInfo.getDefaultSocketReadTimeoutMs();
+  88             Integer defaultOperationTimeoutMs = kuduSideTableInfo.getDefaultOperationTimeoutMs();
+  89 
+  90             Preconditions.checkNotNull(kuduMasters, &quot;kuduMasters could not be null&quot;);
+  91 
+<abbr title="  92             AsyncKuduClient.AsyncKuduClientBuilder asyncKuduClientBuilder = new AsyncKuduClient.AsyncKuduClientBuilder(kuduMasters);">  92             AsyncKuduClient.AsyncKuduClientBuilder asyncKuduClientBuilder = new AsyncKuduClient.AsyncKudu🔵</abbr>
+  93             if (null != workerCount) {
+  94                 asyncKuduClientBuilder.workerCount(workerCount);
+  95             }
+  96 
+  97             if (null != defaultOperationTimeoutMs) {
+  98                 asyncKuduClientBuilder.defaultOperationTimeoutMs(defaultOperationTimeoutMs);
+  99             }
+ 100             asyncClient = asyncKuduClientBuilder.build();
+ 101             if (!asyncClient.syncClient().tableExists(tableName)) {
+ 102                 throw new IllegalArgumentException(&quot;Table Open Failed , please check table exists&quot;);
+ 103             }
+ 104             table = asyncClient.syncClient().openTable(tableName);
+ 105             LOG.info(&quot;connect kudu is successed!&quot;);
+ 106         }
+ 107         scannerBuilder = asyncClient.newScannerBuilder(table);
+ 108         Integer batchSizeBytes = kuduSideTableInfo.getBatchSizeBytes();
+ 109         Long limitNum = kuduSideTableInfo.getLimitNum();
+ 110         Boolean isFaultTolerant = kuduSideTableInfo.getFaultTolerant();
+ 111         //查询需要的字段
+ 112         String[] sideFieldNames = StringUtils.split(sideInfo.getSideSelectFields(), &quot;,&quot;);
+ 113 
+ 114         if (null == limitNum || limitNum &lt;= 0) {
+ 115             scannerBuilder.limit(FETCH_SIZE);
+ 116         } else {
+ 117             scannerBuilder.limit(limitNum);
+ 118         }
+ 119         if (null != batchSizeBytes) {
+ 120             scannerBuilder.batchSizeBytes(batchSizeBytes);
+ 121         }
+ 122         if (null != isFaultTolerant) {
+ 123             scannerBuilder.setFaultTolerant(isFaultTolerant);
+ 124         }
+ 125 
+ 126         List&lt;String&gt; projectColumns = Arrays.asList(sideFieldNames);
+ 127         scannerBuilder.setProjectedColumnNames(projectColumns);
+ 128     }
+ 129 
+ 130     @Override
+<abbr title=" 131     public void handleAsyncInvoke(Map&lt;String, Object&gt; inputParams, Row input, ResultFuture&lt;BaseRow&gt; resultFuture) throws Exception {"> 131     public void handleAsyncInvoke(Map&lt;String, Object&gt; inputParams, Row input, ResultFuture&lt;BaseRow&gt; resul🔵</abbr>
+ 132         Row inputCopy = Row.copy(input);
+ 133         //scannerBuilder 设置为null重新加载过滤条件,然后connkudu重新赋值
+ 134         //todo:代码需要优化
+ 135         scannerBuilder = null;
+ 136         connKuDu();
+ 137         Schema schema = table.getSchema();
+ 138         //  @wenbaoup fix bug
+ 139         inputParams.entrySet().forEach(e -&gt;{
+<abbr title=" 140             scannerBuilder.addPredicate(KuduPredicate.newInListPredicate(schema.getColumn(e.getKey()), Collections.singletonList(e.getValue())));"> 140             scannerBuilder.addPredicate(KuduPredicate.newInListPredicate(schema.getColumn(e.getKey()), Co🔵</abbr>
+ 141         });
+ 142 
+ 143         //  填充谓词信息
+ 144         List&lt;PredicateInfo&gt; predicateInfoes = sideInfo.getSideTableInfo().getPredicateInfoes();
+ 145         if (predicateInfoes.size() &gt; 0) {
+ 146             predicateInfoes.stream().map(info -&gt; {
+ 147                 KuduPredicate kuduPredicate = KuduUtil.buildKuduPredicate(schema, info);
+ 148                 if (null != kuduPredicate) {
+ 149                     scannerBuilder.addPredicate(kuduPredicate);
+ 150                 }
+ 151                 return info;
+ 152             }).count();
+ 153         }
+ 154 
+ 155         List&lt;Map&lt;String, Object&gt;&gt; cacheContent = Lists.newArrayList();
+ 156         AsyncKuduScanner asyncKuduScanner = scannerBuilder.build();
+ 157         List&lt;Row&gt; rowList = Lists.newArrayList();
+ 158         Deferred&lt;RowResultIterator&gt; data = asyncKuduScanner.nextRows();
+ 159         //从之前的同步修改为调用异步的Callback
+<abbr title=" 160         data.addCallbackDeferring(new GetListRowCB(inputCopy, cacheContent, rowList, asyncKuduScanner, resultFuture, buildCacheKey(inputParams)));"> 160         data.addCallbackDeferring(new GetListRowCB(inputCopy, cacheContent, rowList, asyncKuduScanner, re🔵</abbr>
+ 161     }
+ 162 
+ 163     @Override
+ 164     public String buildCacheKey(Map&lt;String, Object&gt; inputParams) {
+ 165         StringBuilder sb = new StringBuilder();
+ 166         for (Object ele : inputParams.values()) {
+ 167             sb.append(ele.toString())
+ 168                     .append(&quot;_&quot;);
+ 169         }
+ 170 
+ 171         return sb.toString();
+ 172     }
+ 173 
+ 174 
+ 175     @Override
+ 176     public Row fillData(Row input, Object sideInput) {
+ 177         Map&lt;String, Object&gt; cacheInfo = (Map&lt;String, Object&gt;) sideInput;
+ 178         Row row = new Row(sideInfo.getOutFieldInfoList().size());
+ 179         for (Map.Entry&lt;Integer, Integer&gt; entry : sideInfo.getInFieldIndex().entrySet()) {
+ 180             Object obj = input.getField(entry.getValue());
+ 181 &lt;&lt;&lt;&lt;&lt;&lt;&lt; MINE
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 182             obj = convertTimeIndictorTypeInfo(entry.getValue(), obj);</span>
+ 183 ||||||| BASE
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"><abbr title=" 184             boolean isTimeIndicatorTypeInfo = TimeIndicatorTypeInfo.class.isAssignableFrom(sideInfo.getRowTypeInfo().getTypeAt(entry.getValue()).getClass());"> 184             boolean isTimeIndicatorTypeInfo = TimeIndicatorTypeInfo.class.isAssignableFrom(sideInfo.getRo🔵</abbr></span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 185 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"><abbr title=" 186             //Type information for indicating event or processing time. However, it behaves like a regular SQL timestamp but is serialized as Long."> 186             //Type information for indicating event or processing time. However, it behaves like a regula🔵</abbr></span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 187             if (obj instanceof Timestamp &amp;&amp; isTimeIndicatorTypeInfo) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 188                 obj = ((Timestamp) obj).getTime();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 189             }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 190             row.setField(entry.getKey(), obj);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 191         }</span>
+ 192 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"><abbr title=" 193             boolean isTimeIndicatorTypeInfo = TimeIndicatorTypeInfo.class.isAssignableFrom(sideInfo.getRowTypeInfo().getTypeAt(entry.getValue()).getClass());"> 193             boolean isTimeIndicatorTypeInfo = TimeIndicatorTypeInfo.class.isAssignableFrom(sideInfo.getRo🔵</abbr></span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 194 </span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"><abbr title=" 195             //Type information for indicating event or processing time. However, it behaves like a regular SQL timestamp but is serialized as Long."> 195             //Type information for indicating event or processing time. However, it behaves like a regula🔵</abbr></span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 196             if (obj instanceof Timestamp &amp;&amp; isTimeIndicatorTypeInfo) {</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 197                 obj = ((Timestamp) obj).getTime();</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 198                 //去除上一层OutputRowtimeProcessFunction 调用时区导致的影响</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"><abbr title=" 199                 obj = ((Timestamp) obj).getTime() + (long)LOCAL_TZ.getOffset(((Timestamp) obj).getTime());"> 199                 obj = ((Timestamp) obj).getTime() + (long)LOCAL_TZ.getOffset(((Timestamp) obj).getTime())🔵</abbr></span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 200             }</span>
+ 201 &gt;&gt;&gt;&gt;&gt;&gt;&gt; YOURS
+ 202             row.setField(entry.getKey(), obj);
+ 203         }
+ 204 
+ 205         for (Map.Entry&lt;Integer, String&gt; entry : sideInfo.getSideFieldNameIndex().entrySet()) {
+ 206             if (cacheInfo == null) {
+ 207                 row.setField(entry.getKey(), null);
+ 208             } else {
+ 209                 row.setField(entry.getKey(), cacheInfo.get(entry.getValue()));
+ 210             }
+ 211         }
+ 212 
+ 213         return row;
+ 214     }
+ 215 
+ 216     @Override
+ 217     public void close() throws Exception {
+ 218         super.close();
+ 219         if (null != asyncClient) {
+ 220             try {
+ 221                 asyncClient.close();
+ 222             } catch (Exception e) {
+ 223                 LOG.error(&quot;Error while closing client.&quot;, e);
+ 224             }
+ 225         }
+ 226     }
+ 227 
+ 228     class GetListRowCB implements Callback&lt;Deferred&lt;List&lt;Row&gt;&gt;, RowResultIterator&gt; {
+ 229         private Row input;
+ 230         private List&lt;Map&lt;String, Object&gt;&gt; cacheContent;
+ 231         private List&lt;Row&gt; rowList;
+ 232         private AsyncKuduScanner asyncKuduScanner;
+ 233         private ResultFuture&lt;BaseRow&gt; resultFuture;
+ 234         private String key;
+ 235 
+ 236 
+ 237         public GetListRowCB() {
+ 238         }
+ 239 
+ 240         GetListRowCB(Row input, List&lt;Map&lt;String, Object&gt;&gt; cacheContent, List&lt;Row&gt; rowList,
+ 241                      AsyncKuduScanner asyncKuduScanner, ResultFuture&lt;BaseRow&gt; resultFuture, String key) {
+ 242             this.input = input;
+ 243             this.cacheContent = cacheContent;
+ 244             this.rowList = rowList;
+ 245             this.asyncKuduScanner = asyncKuduScanner;
+ 246             this.resultFuture = resultFuture;
+ 247             this.key = key;
+ 248         }
+ 249 
+ 250         @Override
+ 251         public Deferred&lt;List&lt;Row&gt;&gt; call(RowResultIterator results) throws Exception {
+ 252             for (RowResult result : results) {
+ 253                 Map&lt;String, Object&gt; oneRow = Maps.newHashMap();
+ 254                 for (String sideFieldName1 : StringUtils.split(sideInfo.getSideSelectFields(), &quot;,&quot;)) {
+ 255                     String sideFieldName = sideFieldName1.trim();
+ 256                     ColumnSchema columnSchema = table.getSchema().getColumn(sideFieldName);
+ 257                     if (null != columnSchema) {
+ 258                         KuduUtil.setMapValue(columnSchema.getType(), oneRow, sideFieldName, result);
+ 259                     }
+ 260                 }
+ 261                 Row row = fillData(input, oneRow);
+ 262                 if (openCache()) {
+ 263                     cacheContent.add(oneRow);
+ 264                 }
+ 265                 rowList.add(row);
+ 266             }
+ 267             if (asyncKuduScanner.hasMoreRows()) {
+ 268                 return asyncKuduScanner.nextRows().addCallbackDeferring(this);
+ 269             }
+ 270 
+ 271             if (rowList.size() &gt; 0) {
+ 272                 if (openCache()) {
+ 273                     putCache(key, CacheObj.buildCacheObj(ECacheContentType.MultiLine, cacheContent));
+ 274                 }
+ 275                 RowDataComplete.completeRow(resultFuture, rowList);
+ 276             } else {
+ 277                 dealMissKey(input, resultFuture);
+ 278                 if (openCache()) {
+ 279                     //放置在putCache的Miss中 一段时间内同一个key都会直接返回
+ 280                     putCache(key, CacheMissVal.getMissKeyObj());
+ 281                 }
+ 282             }
+ 283 
+ 284             return null;
+ 285         }
+ 286     }
+ 287 
+ 288 }
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ </pre></td>
+                            <td><pre>   1 package com.dtstack.flink.sql.side.kudu;
+   2 
+   3 import com.dtstack.flink.sql.enums.ECacheContentType;
+   4 import com.dtstack.flink.sql.side.AbstractSideTableInfo;
+   5 import com.dtstack.flink.sql.side.BaseAsyncReqRow;
+   6 import com.dtstack.flink.sql.side.CacheMissVal;
+   7 import com.dtstack.flink.sql.side.FieldInfo;
+   8 import com.dtstack.flink.sql.side.JoinInfo;
+   9 import com.dtstack.flink.sql.side.PredicateInfo;
+  10 import com.dtstack.flink.sql.side.cache.CacheObj;
+  11 import com.dtstack.flink.sql.side.kudu.table.KuduSideTableInfo;
+  12 import com.dtstack.flink.sql.side.kudu.utils.KuduUtil;
+  13 import com.dtstack.flink.sql.util.RowDataComplete;
+  14 import com.google.common.collect.Lists;
+  15 import com.google.common.collect.Maps;
+  16 import com.stumbleupon.async.Callback;
+  17 import com.stumbleupon.async.Deferred;
+  18 import io.vertx.core.json.JsonArray;
+  19 import java.util.*;
+  20 import org.apache.commons.lang3.StringUtils;
+  21 import org.apache.flink.api.java.tuple.Tuple2;
+  22 import org.apache.flink.api.java.typeutils.RowTypeInfo;
+  23 import org.apache.flink.configuration.Configuration;
+  24 import org.apache.flink.streaming.api.functions.async.ResultFuture;
+  25 import org.apache.flink.table.dataformat.BaseRow;
+  26 import org.apache.flink.types.Row;
+  27 import org.apache.flink.util.Preconditions;
+  28 import org.apache.kudu.ColumnSchema;
+  29 import org.apache.kudu.Schema;
+  30 import org.apache.kudu.client.AsyncKuduClient;
+  31 import org.apache.kudu.client.AsyncKuduScanner;
+  32 import org.apache.kudu.client.KuduException;
+  33 import org.apache.kudu.client.KuduPredicate;
+  34 import org.apache.kudu.client.KuduTable;
+  35 import org.apache.kudu.client.RowResult;
+  36 import org.apache.kudu.client.RowResultIterator;
+  37 import org.slf4j.Logger;
+  38 import org.slf4j.LoggerFactory;
+  39 
+  40 
+  41 public class KuduAsyncReqRow extends BaseAsyncReqRow {
+  42     private static final Logger LOG = LoggerFactory.getLogger(KuduAsyncReqRow.class);
+  43 
+  44     private static final TimeZone LOCAL_TZ = TimeZone.getDefault();
+  45 
+  46     /**
+  47      * 获取连接的尝试次数
+  48      */
+  49     private static final int CONN_RETRY_NUM = 3;
+  50 
+  51     /**
+  52      * 缓存条数
+  53      */
+  54     private static final Long FETCH_SIZE = 1000L;
+  55 
+  56     private static final long serialVersionUID = 5028583854989267753L;
+  57 
+  58     private AsyncKuduClient asyncClient;
+  59 
+  60     private KuduTable table;
+  61 
+  62     private KuduSideTableInfo kuduSideTableInfo;
+  63 
+  64     private AsyncKuduScanner.AsyncKuduScannerBuilder scannerBuilder;
+  65 
+<abbr title="  66     public KuduAsyncReqRow(RowTypeInfo rowTypeInfo, JoinInfo joinInfo, List&lt;FieldInfo&gt; outFieldInfoList, AbstractSideTableInfo sideTableInfo) {">  66     public KuduAsyncReqRow(RowTypeInfo rowTypeInfo, JoinInfo joinInfo, List&lt;FieldInfo&gt; outFieldInfoList, 🔵</abbr>
+  67         super(new KuduAsyncSideInfo(rowTypeInfo, joinInfo, outFieldInfoList, sideTableInfo));
+  68     }
+  69 
+  70     @Override
+  71     public void open(Configuration parameters) throws Exception {
+  72         super.open(parameters);
+  73         kuduSideTableInfo = ((KuduSideTableInfo) (sideInfo.getSideTableInfo()));
+  74         connKuDu();
+  75     }
+  76 
+  77     /**
+  78      * 连接kudu中的表
+  79      *
+  80      * @throws KuduException
+  81      */
+  82     private void connKuDu() throws KuduException {
+  83         if (null == table) {
+  84             String kuduMasters = kuduSideTableInfo.getKuduMasters();
+  85             String tableName = kuduSideTableInfo.getTableName();
+  86             Integer workerCount = kuduSideTableInfo.getWorkerCount();
+  87             Integer defaultSocketReadTimeoutMs = kuduSideTableInfo.getDefaultSocketReadTimeoutMs();
+  88             Integer defaultOperationTimeoutMs = kuduSideTableInfo.getDefaultOperationTimeoutMs();
+  89             Preconditions.checkNotNull(kuduMasters, &quot;kuduMasters could not be null&quot;);
+<abbr title="  90             AsyncKuduClient.AsyncKuduClientBuilder asyncKuduClientBuilder = new AsyncKuduClient.AsyncKuduClientBuilder(kuduMasters);">  90             AsyncKuduClient.AsyncKuduClientBuilder asyncKuduClientBuilder = new AsyncKuduClient.AsyncKudu🔵</abbr>
+  91             if (null != workerCount) {
+  92                 asyncKuduClientBuilder.workerCount(workerCount);
+  93             }
+  94             if (null != defaultOperationTimeoutMs) {
+  95                 asyncKuduClientBuilder.defaultOperationTimeoutMs(defaultOperationTimeoutMs);
+  96             }
+  97             asyncClient = asyncKuduClientBuilder.build();
+  98             if (!asyncClient.syncClient().tableExists(tableName)) {
+  99                 throw new IllegalArgumentException(&quot;Table Open Failed , please check table exists&quot;);
+ 100             }
+ 101             table = asyncClient.syncClient().openTable(tableName);
+ 102             LOG.info(&quot;connect kudu is successed!&quot;);
+ 103         }
+ 104         scannerBuilder = asyncClient.newScannerBuilder(table);
+ 105         Integer batchSizeBytes = kuduSideTableInfo.getBatchSizeBytes();
+ 106         Long limitNum = kuduSideTableInfo.getLimitNum();
+ 107         Boolean isFaultTolerant = kuduSideTableInfo.getFaultTolerant();
+ 108         //查询需要的字段
+ 109         String[] sideFieldNames = StringUtils.split(sideInfo.getSideSelectFields(), &quot;,&quot;);
+ 110         if ((null == limitNum) || (limitNum &lt;= 0)) {
+ 111             scannerBuilder.limit(FETCH_SIZE);
+ 112         } else {
+ 113             scannerBuilder.limit(limitNum);
+ 114         }
+ 115         if (null != batchSizeBytes) {
+ 116             scannerBuilder.batchSizeBytes(batchSizeBytes);
+ 117         }
+ 118         if (null != isFaultTolerant) {
+ 119             scannerBuilder.setFaultTolerant(isFaultTolerant);
+ 120         }
+ 121         List&lt;String&gt; projectColumns = Arrays.asList(sideFieldNames);
+ 122         scannerBuilder.setProjectedColumnNames(projectColumns);
+ 123     }
+ 124 
+ 125     @Override
+<abbr title=" 126     public void handleAsyncInvoke(Map&lt;String, Object&gt; inputParams, Row input, ResultFuture&lt;BaseRow&gt; resultFuture) throws Exception {"> 126     public void handleAsyncInvoke(Map&lt;String, Object&gt; inputParams, Row input, ResultFuture&lt;BaseRow&gt; resul🔵</abbr>
+ 127         Row inputCopy = Row.copy(input);
+ 128         // scannerBuilder 设置为null重新加载过滤条件,然后connkudu重新赋值
+ 129         // todo:代码需要优化
+ 130         scannerBuilder = null;
+ 131         connKuDu();
+ 132         Schema schema = table.getSchema();
+ 133         // @wenbaoup fix bug
+ 134         inputParams.entrySet().forEach(( e) -&gt; {
+<abbr title=" 135             scannerBuilder.addPredicate(KuduPredicate.newInListPredicate(schema.getColumn(e.getKey()), Collections.singletonList(e.getValue())));"> 135             scannerBuilder.addPredicate(KuduPredicate.newInListPredicate(schema.getColumn(e.getKey()), Co🔵</abbr>
+ 136         });
+ 137         //  填充谓词信息
+ 138         List&lt;PredicateInfo&gt; predicateInfoes = sideInfo.getSideTableInfo().getPredicateInfoes();
+ 139         if (predicateInfoes.size() &gt; 0) {
+ 140             predicateInfoes.stream().map(( info) -&gt; {
+ 141                 KuduPredicate kuduPredicate = KuduUtil.buildKuduPredicate(schema, info);
+ 142                 if (null != kuduPredicate) {
+ 143                     scannerBuilder.addPredicate(kuduPredicate);
+ 144                 }
+ 145                 return info;
+ 146             }).count();
+ 147         }
+ 148         List&lt;Map&lt;String, Object&gt;&gt; cacheContent = Lists.newArrayList();
+ 149         AsyncKuduScanner asyncKuduScanner = scannerBuilder.build();
+ 150         List&lt;Row&gt; rowList = Lists.newArrayList();
+ 151         Deferred&lt;RowResultIterator&gt; data = asyncKuduScanner.nextRows();
+ 152         //从之前的同步修改为调用异步的Callback
+<abbr title=" 153         data.addCallbackDeferring(new GetListRowCB(inputCopy, cacheContent, rowList, asyncKuduScanner, resultFuture, buildCacheKey(inputParams)));"> 153         data.addCallbackDeferring(new GetListRowCB(inputCopy, cacheContent, rowList, asyncKuduScanner, re🔵</abbr>
+ 154     }
+ 155 
+ 156     @Override
+ 157     public String buildCacheKey(Map&lt;String, Object&gt; inputParams) {
+ 158         StringBuilder sb = new StringBuilder();
+ 159         for (Object ele : inputParams.values()) {
+ 160             sb.append(ele.toString())
+ 161                     .append(&quot;_&quot;);
+ 162         }
+ 163 
+ 164         return sb.toString();
+ 165     }
+ 166 
+ 167     @Override
+ 168     public Row fillData(Row input, Object sideInput) {
+ 169         Map&lt;String, Object&gt; cacheInfo = ((Map&lt;String, Object&gt;) (sideInput));
+ 170         Row row = new Row(sideInfo.getOutFieldInfoList().size());
+ 171         for (Map.Entry&lt;Integer, Integer&gt; entry : sideInfo.getInFieldIndex().entrySet()) {
+ 172             Object obj = input.getField(entry.getValue());
+ 173             obj = convertTimeIndictorTypeInfo(entry.getValue(), obj);
+ 174             row.setField(entry.getKey(), obj);
+ 175         }
+ 176         for (Map.Entry&lt;Integer, String&gt; entry : sideInfo.getSideFieldNameIndex().entrySet()) {
+ 177             if (cacheInfo == null) {
+ 178                 row.setField(entry.getKey(), null);
+ 179             } else {
+ 180                 row.setField(entry.getKey(), cacheInfo.get(entry.getValue()));
+ 181             }
+ 182         }
+ 183         return row;
+ 184     }
+ 185 
+ 186     @Override
+ 187     public void close() throws Exception {
+ 188         super.close();
+ 189         if (null != asyncClient) {
+ 190             try {
+ 191                 asyncClient.close();
+ 192             } catch (Exception e) {
+ 193                 LOG.error(&quot;Error while closing client.&quot;, e);
+ 194             }
+ 195         }
+ 196     }
+ 197 
+ 198     class GetListRowCB implements Callback&lt;Deferred&lt;List&lt;Row&gt;&gt;, RowResultIterator&gt; {
+ 199         private Row input;
+ 200 
+ 201         private List&lt;Map&lt;String, Object&gt;&gt; cacheContent;
+ 202 
+ 203         private List&lt;Row&gt; rowList;
+ 204 
+ 205         private AsyncKuduScanner asyncKuduScanner;
+ 206 
+ 207         private ResultFuture&lt;BaseRow&gt; resultFuture;
+ 208 
+ 209         private String key;
+ 210 
+ 211         public GetListRowCB() {
+ 212         }
+ 213 
+<abbr title=" 214         GetListRowCB(Row input, List&lt;Map&lt;String, Object&gt;&gt; cacheContent, List&lt;Row&gt; rowList, AsyncKuduScanner asyncKuduScanner, ResultFuture&lt;BaseRow&gt; resultFuture, String key) {"> 214         GetListRowCB(Row input, List&lt;Map&lt;String, Object&gt;&gt; cacheContent, List&lt;Row&gt; rowList, AsyncKuduScann🔵</abbr>
+ 215             this.input = input;
+ 216             this.cacheContent = cacheContent;
+ 217             this.rowList = rowList;
+ 218             this.asyncKuduScanner = asyncKuduScanner;
+ 219             this.resultFuture = resultFuture;
+ 220             this.key = key;
+ 221         }
+ 222 
+ 223         @Override
+ 224         public Deferred&lt;List&lt;Row&gt;&gt; call(RowResultIterator results) throws Exception {
+ 225             for (RowResult result : results) {
+ 226                 Map&lt;String, Object&gt; oneRow = Maps.newHashMap();
+ 227                 for (String sideFieldName1 : StringUtils.split(sideInfo.getSideSelectFields(), &quot;,&quot;)) {
+ 228                     String sideFieldName = sideFieldName1.trim();
+ 229                     ColumnSchema columnSchema = table.getSchema().getColumn(sideFieldName);
+ 230                     if (null != columnSchema) {
+ 231                         KuduUtil.setMapValue(columnSchema.getType(), oneRow, sideFieldName, result);
+ 232                     }
+ 233                 }
+ 234                 Row row = fillData(input, oneRow);
+ 235                 if (openCache()) {
+ 236                     cacheContent.add(oneRow);
+ 237                 }
+ 238                 rowList.add(row);
+ 239             }
+ 240             if (asyncKuduScanner.hasMoreRows()) {
+ 241                 return asyncKuduScanner.nextRows().addCallbackDeferring(this);
+ 242             }
+ 243             if (rowList.size() &gt; 0) {
+ 244                 if (openCache()) {
+ 245                     putCache(key, CacheObj.buildCacheObj(ECacheContentType.MultiLine, cacheContent));
+ 246                 }
+ 247                 RowDataComplete.completeRow(resultFuture, rowList);
+ 248             } else {
+ 249                 dealMissKey(input, resultFuture);
+ 250                 if (openCache()) {
+ 251                     // 放置在putCache的Miss中 一段时间内同一个key都会直接返回
+ 252                     putCache(key, CacheMissVal.getMissKeyObj());
+ 253                 }
+ 254             }
+ 255             return null;
+ 256         }
+ 257     }
+ 258 }
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ </pre></td>
+                        </tr>
+                    </table>
+                </div>
+                <div id="bottom">
+                    <table style="margin:auto">
+                        <tr>
+                            <th>ours vs. base</th>
+                            <th>theirs vs. base</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1  package com.dtstack.flink.sql.side.kudu;
+   2  
+   3  import com.dtstack.flink.sql.enums.ECacheContentType;
+   4  import com.dtstack.flink.sql.side.AbstractSideTableInfo;
+   5  import com.dtstack.flink.sql.side.BaseAsyncReqRow;
+   6  import com.dtstack.flink.sql.side.CacheMissVal;
+   7  import com.dtstack.flink.sql.side.FieldInfo;
+   8  import com.dtstack.flink.sql.side.JoinInfo;
+   9  import com.dtstack.flink.sql.side.PredicateInfo;
+  10  import com.dtstack.flink.sql.side.cache.CacheObj;
+  11  import com.dtstack.flink.sql.side.kudu.table.KuduSideTableInfo;
+  12  import com.dtstack.flink.sql.side.kudu.utils.KuduUtil;
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  13 +import com.dtstack.flink.sql.util.RowDataComplete;</span>
+  14  import com.google.common.collect.Lists;
+  15  import com.google.common.collect.Maps;
+  16  import com.stumbleupon.async.Callback;
+  17  import com.stumbleupon.async.Deferred;
+  18  import io.vertx.core.json.JsonArray;
+  19  import org.apache.commons.lang3.StringUtils;
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  20 +import org.apache.flink.api.java.tuple.Tuple2;</span>
+  21  import org.apache.flink.api.java.typeutils.RowTypeInfo;
+  22  import org.apache.flink.configuration.Configuration;
+  23  import org.apache.flink.streaming.api.functions.async.ResultFuture;
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  24 -import org.apache.flink.table.runtime.types.CRow;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  25 -import org.apache.flink.table.typeutils.TimeIndicatorTypeInfo;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  26 +import org.apache.flink.table.dataformat.BaseRow;</span>
+  27  import org.apache.flink.types.Row;
+  28  import org.apache.flink.util.Preconditions;
+  29  import org.apache.kudu.ColumnSchema;
+  30  import org.apache.kudu.Schema;
+  31  import org.apache.kudu.client.AsyncKuduClient;
+  32  import org.apache.kudu.client.AsyncKuduScanner;
+  33  import org.apache.kudu.client.KuduException;
+  34  import org.apache.kudu.client.KuduPredicate;
+  35  import org.apache.kudu.client.KuduTable;
+  36  import org.apache.kudu.client.RowResult;
+  37  import org.apache.kudu.client.RowResultIterator;
+  38  import org.slf4j.Logger;
+  39  import org.slf4j.LoggerFactory;
+  40  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  41 -import java.sql.Timestamp;</span>
+  42  import java.util.Arrays;
+  43  import java.util.Collections;
+  44  import java.util.List;
+  45  import java.util.Map;
+
+  46  
+  47  public class KuduAsyncReqRow extends BaseAsyncReqRow {
+  48  
+  49      private static final Logger LOG = LoggerFactory.getLogger(KuduAsyncReqRow.class);
+
+
+
+  50      /**
+  51       * 获取连接的尝试次数
+  52       */
+  53      private static final int CONN_RETRY_NUM = 3;
+  54      /**
+  55       * 缓存条数
+  56       */
+  57      private static final Long FETCH_SIZE = 1000L;
+  58  
+  59      private static final long serialVersionUID = 5028583854989267753L;
+  60  
+  61  
+  62      private AsyncKuduClient asyncClient;
+  63  
+  64      private KuduTable table;
+  65  
+  66      private KuduSideTableInfo kuduSideTableInfo;
+  67  
+  68      private AsyncKuduScanner.AsyncKuduScannerBuilder scannerBuilder;
+  69  
+<abbr title="  70      public KuduAsyncReqRow(RowTypeInfo rowTypeInfo, JoinInfo joinInfo, List&lt;FieldInfo&gt; outFieldInfoList, AbstractSideTableInfo sideTableInfo) {">  70      public KuduAsyncReqRow(RowTypeInfo rowTypeInfo, JoinInfo joinInfo, List&lt;FieldInfo&gt; outFieldInfoList, AbstractS🔵</abbr>
+  71          super(new KuduAsyncSideInfo(rowTypeInfo, joinInfo, outFieldInfoList, sideTableInfo));
+  72      }
+  73  
+  74      @Override
+  75      public void open(Configuration parameters) throws Exception {
+  76          super.open(parameters);
+  77          kuduSideTableInfo = (KuduSideTableInfo) sideInfo.getSideTableInfo();
+  78          connKuDu();
+  79      }
+  80  
+  81      /**
+  82       * 连接kudu中的表
+  83       *
+  84       * @throws KuduException
+  85       */
+  86      private void connKuDu() throws KuduException {
+  87          if (null == table) {
+  88              String kuduMasters = kuduSideTableInfo.getKuduMasters();
+  89              String tableName = kuduSideTableInfo.getTableName();
+  90              Integer workerCount = kuduSideTableInfo.getWorkerCount();
+  91              Integer defaultSocketReadTimeoutMs = kuduSideTableInfo.getDefaultSocketReadTimeoutMs();
+  92              Integer defaultOperationTimeoutMs = kuduSideTableInfo.getDefaultOperationTimeoutMs();
+  93  
+  94              Preconditions.checkNotNull(kuduMasters, &quot;kuduMasters could not be null&quot;);
+  95  
+<abbr title="  96              AsyncKuduClient.AsyncKuduClientBuilder asyncKuduClientBuilder = new AsyncKuduClient.AsyncKuduClientBuilder(kuduMasters);">  96              AsyncKuduClient.AsyncKuduClientBuilder asyncKuduClientBuilder = new AsyncKuduClient.AsyncKuduClientBui🔵</abbr>
+  97              if (null != workerCount) {
+  98                  asyncKuduClientBuilder.workerCount(workerCount);
+  99              }
+ 100  
+ 101              if (null != defaultOperationTimeoutMs) {
+ 102                  asyncKuduClientBuilder.defaultOperationTimeoutMs(defaultOperationTimeoutMs);
+ 103              }
+ 104              asyncClient = asyncKuduClientBuilder.build();
+ 105              if (!asyncClient.syncClient().tableExists(tableName)) {
+ 106                  throw new IllegalArgumentException(&quot;Table Open Failed , please check table exists&quot;);
+ 107              }
+ 108              table = asyncClient.syncClient().openTable(tableName);
+ 109              LOG.info(&quot;connect kudu is successed!&quot;);
+ 110          }
+ 111          scannerBuilder = asyncClient.newScannerBuilder(table);
+ 112          Integer batchSizeBytes = kuduSideTableInfo.getBatchSizeBytes();
+ 113          Long limitNum = kuduSideTableInfo.getLimitNum();
+ 114          Boolean isFaultTolerant = kuduSideTableInfo.getFaultTolerant();
+ 115          //查询需要的字段
+ 116          String[] sideFieldNames = StringUtils.split(sideInfo.getSideSelectFields(), &quot;,&quot;);
+ 117  
+ 118          if (null == limitNum || limitNum &lt;= 0) {
+ 119              scannerBuilder.limit(FETCH_SIZE);
+ 120          } else {
+ 121              scannerBuilder.limit(limitNum);
+ 122          }
+ 123          if (null != batchSizeBytes) {
+ 124              scannerBuilder.batchSizeBytes(batchSizeBytes);
+ 125          }
+ 126          if (null != isFaultTolerant) {
+ 127              scannerBuilder.setFaultTolerant(isFaultTolerant);
+ 128          }
+ 129  
+ 130          List&lt;String&gt; projectColumns = Arrays.asList(sideFieldNames);
+ 131          scannerBuilder.setProjectedColumnNames(projectColumns);
+ 132      }
+ 133  
+ 134      @Override
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"><abbr title=" 135 -    public void handleAsyncInvoke(Map&lt;String, Object&gt; inputParams, CRow input, ResultFuture&lt;CRow&gt; resultFuture) throws Exception {"> 135 -    public void handleAsyncInvoke(Map&lt;String, Object&gt; inputParams, CRow input, ResultFuture&lt;CRow&gt; resultFuture) th🔵</abbr></span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 136 -        CRow inputCopy = new CRow(input.row(), input.change());</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"><abbr title=" 137 +    public void handleAsyncInvoke(Map&lt;String, Object&gt; inputParams, Row input, ResultFuture&lt;BaseRow&gt; resultFuture) throws Exception {"> 137 +    public void handleAsyncInvoke(Map&lt;String, Object&gt; inputParams, Row input, ResultFuture&lt;BaseRow&gt; resultFuture) 🔵</abbr></span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 138 +        Row inputCopy = Row.copy(input);</span>
+ 139          //scannerBuilder 设置为null重新加载过滤条件,然后connkudu重新赋值
+ 140          //todo:代码需要优化
+ 141          scannerBuilder = null;
+ 142          connKuDu();
+ 143          Schema schema = table.getSchema();
+ 144          //  @wenbaoup fix bug
+ 145          inputParams.entrySet().forEach(e -&gt;{
+<abbr title=" 146              scannerBuilder.addPredicate(KuduPredicate.newInListPredicate(schema.getColumn(e.getKey()), Collections.singletonList(e.getValue())));"> 146              scannerBuilder.addPredicate(KuduPredicate.newInListPredicate(schema.getColumn(e.getKey()), Collections🔵</abbr>
+ 147          });
+ 148  
+ 149          //  填充谓词信息
+ 150          List&lt;PredicateInfo&gt; predicateInfoes = sideInfo.getSideTableInfo().getPredicateInfoes();
+ 151          if (predicateInfoes.size() &gt; 0) {
+ 152              predicateInfoes.stream().map(info -&gt; {
+ 153                  KuduPredicate kuduPredicate = KuduUtil.buildKuduPredicate(schema, info);
+ 154                  if (null != kuduPredicate) {
+ 155                      scannerBuilder.addPredicate(kuduPredicate);
+ 156                  }
+ 157                  return info;
+ 158              }).count();
+ 159          }
+ 160  
+ 161          List&lt;Map&lt;String, Object&gt;&gt; cacheContent = Lists.newArrayList();
+ 162          AsyncKuduScanner asyncKuduScanner = scannerBuilder.build();
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 163 -        List&lt;CRow&gt; rowList = Lists.newArrayList();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 164 +        List&lt;Row&gt; rowList = Lists.newArrayList();</span>
+ 165          Deferred&lt;RowResultIterator&gt; data = asyncKuduScanner.nextRows();
+ 166          //从之前的同步修改为调用异步的Callback
+<abbr title=" 167          data.addCallbackDeferring(new GetListRowCB(inputCopy, cacheContent, rowList, asyncKuduScanner, resultFuture, buildCacheKey(inputParams)));"> 167          data.addCallbackDeferring(new GetListRowCB(inputCopy, cacheContent, rowList, asyncKuduScanner, resultFutur🔵</abbr>
+ 168      }
+ 169  
+ 170      @Override
+ 171      public String buildCacheKey(Map&lt;String, Object&gt; inputParams) {
+ 172          StringBuilder sb = new StringBuilder();
+ 173          for (Object ele : inputParams.values()) {
+ 174              sb.append(ele.toString())
+ 175                      .append(&quot;_&quot;);
+ 176          }
+ 177  
+ 178          return sb.toString();
+ 179      }
+ 180  
+ 181  
+ 182      @Override
+ 183      public Row fillData(Row input, Object sideInput) {
+ 184          Map&lt;String, Object&gt; cacheInfo = (Map&lt;String, Object&gt;) sideInput;
+ 185          Row row = new Row(sideInfo.getOutFieldInfoList().size());
+ 186          for (Map.Entry&lt;Integer, Integer&gt; entry : sideInfo.getInFieldIndex().entrySet()) {
+ 187              Object obj = input.getField(entry.getValue());
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"><abbr title=" 188 -            boolean isTimeIndicatorTypeInfo = TimeIndicatorTypeInfo.class.isAssignableFrom(sideInfo.getRowTypeInfo().getTypeAt(entry.getValue()).getClass());"> 188 -            boolean isTimeIndicatorTypeInfo = TimeIndicatorTypeInfo.class.isAssignableFrom(sideInfo.getRowTypeInfo🔵</abbr></span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 189 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"><abbr title=" 190 -            //Type information for indicating event or processing time. However, it behaves like a regular SQL timestamp but is serialized as Long."> 190 -            //Type information for indicating event or processing time. However, it behaves like a regular SQL tim🔵</abbr></span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 191 -            if (obj instanceof Timestamp &amp;&amp; isTimeIndicatorTypeInfo) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 192 -                obj = ((Timestamp) obj).getTime();</span>
+
+
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 193 -            }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 194 +            obj = convertTimeIndictorTypeInfo(entry.getValue(), obj);</span>
+ 195              row.setField(entry.getKey(), obj);
+ 196          }
+ 197  
+ 198          for (Map.Entry&lt;Integer, String&gt; entry : sideInfo.getSideFieldNameIndex().entrySet()) {
+ 199              if (cacheInfo == null) {
+ 200                  row.setField(entry.getKey(), null);
+ 201              } else {
+ 202                  row.setField(entry.getKey(), cacheInfo.get(entry.getValue()));
+ 203              }
+ 204          }
+ 205  
+ 206          return row;
+ 207      }
+ 208  
+ 209      @Override
+ 210      public void close() throws Exception {
+ 211          super.close();
+ 212          if (null != asyncClient) {
+ 213              try {
+ 214                  asyncClient.close();
+ 215              } catch (Exception e) {
+ 216                  LOG.error(&quot;Error while closing client.&quot;, e);
+ 217              }
+ 218          }
+ 219      }
+ 220  
+ 221      class GetListRowCB implements Callback&lt;Deferred&lt;List&lt;Row&gt;&gt;, RowResultIterator&gt; {
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 222 -        private CRow input;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 223 +        private Row input;</span>
+ 224          private List&lt;Map&lt;String, Object&gt;&gt; cacheContent;
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 225 -        private List&lt;CRow&gt; rowList;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 226 +        private List&lt;Row&gt; rowList;</span>
+ 227          private AsyncKuduScanner asyncKuduScanner;
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 228 -        private ResultFuture&lt;CRow&gt; resultFuture;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 229 +        private ResultFuture&lt;BaseRow&gt; resultFuture;</span>
+ 230          private String key;
+ 231  
+ 232  
+ 233          public GetListRowCB() {
+ 234          }
+ 235  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"><abbr title=" 236 -        GetListRowCB(CRow input, List&lt;Map&lt;String, Object&gt;&gt; cacheContent, List&lt;CRow&gt; rowList, AsyncKuduScanner asyncKuduScanner, ResultFuture&lt;CRow&gt; resultFuture, String key) {"> 236 -        GetListRowCB(CRow input, List&lt;Map&lt;String, Object&gt;&gt; cacheContent, List&lt;CRow&gt; rowList, AsyncKuduScanner asyn🔵</abbr></span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 237 +        GetListRowCB(Row input, List&lt;Map&lt;String, Object&gt;&gt; cacheContent, List&lt;Row&gt; rowList,</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 238 +                     AsyncKuduScanner asyncKuduScanner, ResultFuture&lt;BaseRow&gt; resultFuture, String key) {</span>
+ 239              this.input = input;
+ 240              this.cacheContent = cacheContent;
+ 241              this.rowList = rowList;
+ 242              this.asyncKuduScanner = asyncKuduScanner;
+ 243              this.resultFuture = resultFuture;
+ 244              this.key = key;
+ 245          }
+ 246  
+ 247          @Override
+ 248          public Deferred&lt;List&lt;Row&gt;&gt; call(RowResultIterator results) throws Exception {
+ 249              for (RowResult result : results) {
+ 250                  Map&lt;String, Object&gt; oneRow = Maps.newHashMap();
+ 251                  for (String sideFieldName1 : StringUtils.split(sideInfo.getSideSelectFields(), &quot;,&quot;)) {
+ 252                      String sideFieldName = sideFieldName1.trim();
+ 253                      ColumnSchema columnSchema = table.getSchema().getColumn(sideFieldName);
+ 254                      if (null != columnSchema) {
+ 255                          KuduUtil.setMapValue(columnSchema.getType(), oneRow, sideFieldName, result);
+ 256                      }
+ 257                  }
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 258 -                Row row = fillData(input.row(), oneRow);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 259 +                Row row = fillData(input, oneRow);</span>
+ 260                  if (openCache()) {
+ 261                      cacheContent.add(oneRow);
+ 262                  }
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 263 -                rowList.add(new CRow(row, input.change()));</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 264 +                rowList.add(row);</span>
+ 265              }
+ 266              if (asyncKuduScanner.hasMoreRows()) {
+ 267                  return asyncKuduScanner.nextRows().addCallbackDeferring(this);
+ 268              }
+ 269  
+ 270              if (rowList.size() &gt; 0) {
+ 271                  if (openCache()) {
+ 272                      putCache(key, CacheObj.buildCacheObj(ECacheContentType.MultiLine, cacheContent));
+ 273                  }
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 274 -                resultFuture.complete(rowList);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 275 +                RowDataComplete.completeRow(resultFuture, rowList);</span>
+ 276              } else {
+ 277                  dealMissKey(input, resultFuture);
+ 278                  if (openCache()) {
+ 279                      //放置在putCache的Miss中 一段时间内同一个key都会直接返回
+ 280                      putCache(key, CacheMissVal.getMissKeyObj());
+ 281                  }
+ 282              }
+ 283  
+ 284              return null;
+ 285          }
+ 286      }
+ 287  
+ 288  }</pre></td>
+                            <td><pre>   1  package com.dtstack.flink.sql.side.kudu;
+   2  
+   3  import com.dtstack.flink.sql.enums.ECacheContentType;
+   4  import com.dtstack.flink.sql.side.AbstractSideTableInfo;
+   5  import com.dtstack.flink.sql.side.BaseAsyncReqRow;
+   6  import com.dtstack.flink.sql.side.CacheMissVal;
+   7  import com.dtstack.flink.sql.side.FieldInfo;
+   8  import com.dtstack.flink.sql.side.JoinInfo;
+   9  import com.dtstack.flink.sql.side.PredicateInfo;
+  10  import com.dtstack.flink.sql.side.cache.CacheObj;
+  11  import com.dtstack.flink.sql.side.kudu.table.KuduSideTableInfo;
+  12  import com.dtstack.flink.sql.side.kudu.utils.KuduUtil;
+
+  13  import com.google.common.collect.Lists;
+  14  import com.google.common.collect.Maps;
+  15  import com.stumbleupon.async.Callback;
+  16  import com.stumbleupon.async.Deferred;
+  17  import io.vertx.core.json.JsonArray;
+  18  import org.apache.commons.lang3.StringUtils;
+
+  19  import org.apache.flink.api.java.typeutils.RowTypeInfo;
+  20  import org.apache.flink.configuration.Configuration;
+  21  import org.apache.flink.streaming.api.functions.async.ResultFuture;
+  22  import org.apache.flink.table.runtime.types.CRow;
+  23  import org.apache.flink.table.typeutils.TimeIndicatorTypeInfo;
+
+  24  import org.apache.flink.types.Row;
+  25  import org.apache.flink.util.Preconditions;
+  26  import org.apache.kudu.ColumnSchema;
+  27  import org.apache.kudu.Schema;
+  28  import org.apache.kudu.client.AsyncKuduClient;
+  29  import org.apache.kudu.client.AsyncKuduScanner;
+  30  import org.apache.kudu.client.KuduException;
+  31  import org.apache.kudu.client.KuduPredicate;
+  32  import org.apache.kudu.client.KuduTable;
+  33  import org.apache.kudu.client.RowResult;
+  34  import org.apache.kudu.client.RowResultIterator;
+  35  import org.slf4j.Logger;
+  36  import org.slf4j.LoggerFactory;
+  37  
+  38  import java.sql.Timestamp;
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  39 -import java.util.Arrays;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  40 -import java.util.Collections;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  41 -import java.util.List;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  42 -import java.util.Map;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  43 +import java.util.*;</span>
+  44  
+  45  public class KuduAsyncReqRow extends BaseAsyncReqRow {
+  46  
+  47      private static final Logger LOG = LoggerFactory.getLogger(KuduAsyncReqRow.class);
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  48 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  49 +    private static final TimeZone LOCAL_TZ = TimeZone.getDefault();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  50 +</span>
+  51      /**
+  52       * 获取连接的尝试次数
+  53       */
+  54      private static final int CONN_RETRY_NUM = 3;
+  55      /**
+  56       * 缓存条数
+  57       */
+  58      private static final Long FETCH_SIZE = 1000L;
+  59  
+  60      private static final long serialVersionUID = 5028583854989267753L;
+  61  
+  62  
+  63      private AsyncKuduClient asyncClient;
+  64  
+  65      private KuduTable table;
+  66  
+  67      private KuduSideTableInfo kuduSideTableInfo;
+  68  
+  69      private AsyncKuduScanner.AsyncKuduScannerBuilder scannerBuilder;
+  70  
+<abbr title="  71      public KuduAsyncReqRow(RowTypeInfo rowTypeInfo, JoinInfo joinInfo, List&lt;FieldInfo&gt; outFieldInfoList, AbstractSideTableInfo sideTableInfo) {">  71      public KuduAsyncReqRow(RowTypeInfo rowTypeInfo, JoinInfo joinInfo, List&lt;FieldInfo&gt; outFieldInfoList, AbstractS🔵</abbr>
+  72          super(new KuduAsyncSideInfo(rowTypeInfo, joinInfo, outFieldInfoList, sideTableInfo));
+  73      }
+  74  
+  75      @Override
+  76      public void open(Configuration parameters) throws Exception {
+  77          super.open(parameters);
+  78          kuduSideTableInfo = (KuduSideTableInfo) sideInfo.getSideTableInfo();
+  79          connKuDu();
+  80      }
+  81  
+  82      /**
+  83       * 连接kudu中的表
+  84       *
+  85       * @throws KuduException
+  86       */
+  87      private void connKuDu() throws KuduException {
+  88          if (null == table) {
+  89              String kuduMasters = kuduSideTableInfo.getKuduMasters();
+  90              String tableName = kuduSideTableInfo.getTableName();
+  91              Integer workerCount = kuduSideTableInfo.getWorkerCount();
+  92              Integer defaultSocketReadTimeoutMs = kuduSideTableInfo.getDefaultSocketReadTimeoutMs();
+  93              Integer defaultOperationTimeoutMs = kuduSideTableInfo.getDefaultOperationTimeoutMs();
+  94  
+  95              Preconditions.checkNotNull(kuduMasters, &quot;kuduMasters could not be null&quot;);
+  96  
+<abbr title="  97              AsyncKuduClient.AsyncKuduClientBuilder asyncKuduClientBuilder = new AsyncKuduClient.AsyncKuduClientBuilder(kuduMasters);">  97              AsyncKuduClient.AsyncKuduClientBuilder asyncKuduClientBuilder = new AsyncKuduClient.AsyncKuduClientBui🔵</abbr>
+  98              if (null != workerCount) {
+  99                  asyncKuduClientBuilder.workerCount(workerCount);
+ 100              }
+ 101  
+ 102              if (null != defaultOperationTimeoutMs) {
+ 103                  asyncKuduClientBuilder.defaultOperationTimeoutMs(defaultOperationTimeoutMs);
+ 104              }
+ 105              asyncClient = asyncKuduClientBuilder.build();
+ 106              if (!asyncClient.syncClient().tableExists(tableName)) {
+ 107                  throw new IllegalArgumentException(&quot;Table Open Failed , please check table exists&quot;);
+ 108              }
+ 109              table = asyncClient.syncClient().openTable(tableName);
+ 110              LOG.info(&quot;connect kudu is successed!&quot;);
+ 111          }
+ 112          scannerBuilder = asyncClient.newScannerBuilder(table);
+ 113          Integer batchSizeBytes = kuduSideTableInfo.getBatchSizeBytes();
+ 114          Long limitNum = kuduSideTableInfo.getLimitNum();
+ 115          Boolean isFaultTolerant = kuduSideTableInfo.getFaultTolerant();
+ 116          //查询需要的字段
+ 117          String[] sideFieldNames = StringUtils.split(sideInfo.getSideSelectFields(), &quot;,&quot;);
+ 118  
+ 119          if (null == limitNum || limitNum &lt;= 0) {
+ 120              scannerBuilder.limit(FETCH_SIZE);
+ 121          } else {
+ 122              scannerBuilder.limit(limitNum);
+ 123          }
+ 124          if (null != batchSizeBytes) {
+ 125              scannerBuilder.batchSizeBytes(batchSizeBytes);
+ 126          }
+ 127          if (null != isFaultTolerant) {
+ 128              scannerBuilder.setFaultTolerant(isFaultTolerant);
+ 129          }
+ 130  
+ 131          List&lt;String&gt; projectColumns = Arrays.asList(sideFieldNames);
+ 132          scannerBuilder.setProjectedColumnNames(projectColumns);
+ 133      }
+ 134  
+ 135      @Override
+<abbr title=" 136      public void handleAsyncInvoke(Map&lt;String, Object&gt; inputParams, CRow input, ResultFuture&lt;CRow&gt; resultFuture) throws Exception {"> 136      public void handleAsyncInvoke(Map&lt;String, Object&gt; inputParams, CRow input, ResultFuture&lt;CRow&gt; resultFuture) th🔵</abbr>
+ 137          CRow inputCopy = new CRow(input.row(), input.change());
+
+
+ 138          //scannerBuilder 设置为null重新加载过滤条件,然后connkudu重新赋值
+ 139          //todo:代码需要优化
+ 140          scannerBuilder = null;
+ 141          connKuDu();
+ 142          Schema schema = table.getSchema();
+ 143          //  @wenbaoup fix bug
+ 144          inputParams.entrySet().forEach(e -&gt;{
+<abbr title=" 145              scannerBuilder.addPredicate(KuduPredicate.newInListPredicate(schema.getColumn(e.getKey()), Collections.singletonList(e.getValue())));"> 145              scannerBuilder.addPredicate(KuduPredicate.newInListPredicate(schema.getColumn(e.getKey()), Collections🔵</abbr>
+ 146          });
+ 147  
+ 148          //  填充谓词信息
+ 149          List&lt;PredicateInfo&gt; predicateInfoes = sideInfo.getSideTableInfo().getPredicateInfoes();
+ 150          if (predicateInfoes.size() &gt; 0) {
+ 151              predicateInfoes.stream().map(info -&gt; {
+ 152                  KuduPredicate kuduPredicate = KuduUtil.buildKuduPredicate(schema, info);
+ 153                  if (null != kuduPredicate) {
+ 154                      scannerBuilder.addPredicate(kuduPredicate);
+ 155                  }
+ 156                  return info;
+ 157              }).count();
+ 158          }
+ 159  
+ 160          List&lt;Map&lt;String, Object&gt;&gt; cacheContent = Lists.newArrayList();
+ 161          AsyncKuduScanner asyncKuduScanner = scannerBuilder.build();
+ 162          List&lt;CRow&gt; rowList = Lists.newArrayList();
+
+ 163          Deferred&lt;RowResultIterator&gt; data = asyncKuduScanner.nextRows();
+ 164          //从之前的同步修改为调用异步的Callback
+<abbr title=" 165          data.addCallbackDeferring(new GetListRowCB(inputCopy, cacheContent, rowList, asyncKuduScanner, resultFuture, buildCacheKey(inputParams)));"> 165          data.addCallbackDeferring(new GetListRowCB(inputCopy, cacheContent, rowList, asyncKuduScanner, resultFutur🔵</abbr>
+ 166      }
+ 167  
+ 168      @Override
+ 169      public String buildCacheKey(Map&lt;String, Object&gt; inputParams) {
+ 170          StringBuilder sb = new StringBuilder();
+ 171          for (Object ele : inputParams.values()) {
+ 172              sb.append(ele.toString())
+ 173                      .append(&quot;_&quot;);
+ 174          }
+ 175  
+ 176          return sb.toString();
+ 177      }
+ 178  
+ 179  
+ 180      @Override
+ 181      public Row fillData(Row input, Object sideInput) {
+ 182          Map&lt;String, Object&gt; cacheInfo = (Map&lt;String, Object&gt;) sideInput;
+ 183          Row row = new Row(sideInfo.getOutFieldInfoList().size());
+ 184          for (Map.Entry&lt;Integer, Integer&gt; entry : sideInfo.getInFieldIndex().entrySet()) {
+ 185              Object obj = input.getField(entry.getValue());
+<abbr title=" 186              boolean isTimeIndicatorTypeInfo = TimeIndicatorTypeInfo.class.isAssignableFrom(sideInfo.getRowTypeInfo().getTypeAt(entry.getValue()).getClass());"> 186              boolean isTimeIndicatorTypeInfo = TimeIndicatorTypeInfo.class.isAssignableFrom(sideInfo.getRowTypeInfo🔵</abbr>
+ 187  
+<abbr title=" 188              //Type information for indicating event or processing time. However, it behaves like a regular SQL timestamp but is serialized as Long."> 188              //Type information for indicating event or processing time. However, it behaves like a regular SQL tim🔵</abbr>
+ 189              if (obj instanceof Timestamp &amp;&amp; isTimeIndicatorTypeInfo) {
+ 190                  obj = ((Timestamp) obj).getTime();
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 191 +                //去除上一层OutputRowtimeProcessFunction 调用时区导致的影响</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 192 +                obj = ((Timestamp) obj).getTime() + (long)LOCAL_TZ.getOffset(((Timestamp) obj).getTime());</span>
+ 193              }
+
+ 194              row.setField(entry.getKey(), obj);
+ 195          }
+ 196  
+ 197          for (Map.Entry&lt;Integer, String&gt; entry : sideInfo.getSideFieldNameIndex().entrySet()) {
+ 198              if (cacheInfo == null) {
+ 199                  row.setField(entry.getKey(), null);
+ 200              } else {
+ 201                  row.setField(entry.getKey(), cacheInfo.get(entry.getValue()));
+ 202              }
+ 203          }
+ 204  
+ 205          return row;
+ 206      }
+ 207  
+ 208      @Override
+ 209      public void close() throws Exception {
+ 210          super.close();
+ 211          if (null != asyncClient) {
+ 212              try {
+ 213                  asyncClient.close();
+ 214              } catch (Exception e) {
+ 215                  LOG.error(&quot;Error while closing client.&quot;, e);
+ 216              }
+ 217          }
+ 218      }
+ 219  
+ 220      class GetListRowCB implements Callback&lt;Deferred&lt;List&lt;Row&gt;&gt;, RowResultIterator&gt; {
+ 221          private CRow input;
+
+ 222          private List&lt;Map&lt;String, Object&gt;&gt; cacheContent;
+ 223          private List&lt;CRow&gt; rowList;
+
+ 224          private AsyncKuduScanner asyncKuduScanner;
+ 225          private ResultFuture&lt;CRow&gt; resultFuture;
+
+ 226          private String key;
+ 227  
+ 228  
+ 229          public GetListRowCB() {
+ 230          }
+ 231  
+<abbr title=" 232          GetListRowCB(CRow input, List&lt;Map&lt;String, Object&gt;&gt; cacheContent, List&lt;CRow&gt; rowList, AsyncKuduScanner asyncKuduScanner, ResultFuture&lt;CRow&gt; resultFuture, String key) {"> 232          GetListRowCB(CRow input, List&lt;Map&lt;String, Object&gt;&gt; cacheContent, List&lt;CRow&gt; rowList, AsyncKuduScanner asyn🔵</abbr>
+
+
+ 233              this.input = input;
+ 234              this.cacheContent = cacheContent;
+ 235              this.rowList = rowList;
+ 236              this.asyncKuduScanner = asyncKuduScanner;
+ 237              this.resultFuture = resultFuture;
+ 238              this.key = key;
+ 239          }
+ 240  
+ 241          @Override
+ 242          public Deferred&lt;List&lt;Row&gt;&gt; call(RowResultIterator results) throws Exception {
+ 243              for (RowResult result : results) {
+ 244                  Map&lt;String, Object&gt; oneRow = Maps.newHashMap();
+ 245                  for (String sideFieldName1 : StringUtils.split(sideInfo.getSideSelectFields(), &quot;,&quot;)) {
+ 246                      String sideFieldName = sideFieldName1.trim();
+ 247                      ColumnSchema columnSchema = table.getSchema().getColumn(sideFieldName);
+ 248                      if (null != columnSchema) {
+ 249                          KuduUtil.setMapValue(columnSchema.getType(), oneRow, sideFieldName, result);
+ 250                      }
+ 251                  }
+ 252                  Row row = fillData(input.row(), oneRow);
+
+ 253                  if (openCache()) {
+ 254                      cacheContent.add(oneRow);
+ 255                  }
+ 256                  rowList.add(new CRow(row, input.change()));
+
+ 257              }
+ 258              if (asyncKuduScanner.hasMoreRows()) {
+ 259                  return asyncKuduScanner.nextRows().addCallbackDeferring(this);
+ 260              }
+ 261  
+ 262              if (rowList.size() &gt; 0) {
+ 263                  if (openCache()) {
+ 264                      putCache(key, CacheObj.buildCacheObj(ECacheContentType.MultiLine, cacheContent));
+ 265                  }
+ 266                  resultFuture.complete(rowList);
+
+ 267              } else {
+ 268                  dealMissKey(input, resultFuture);
+ 269                  if (openCache()) {
+ 270                      //放置在putCache的Miss中 一段时间内同一个key都会直接返回
+ 271                      putCache(key, CacheMissVal.getMissKeyObj());
+ 272                  }
+ 273              }
+ 274  
+ 275              return null;
+ 276          }
+ 277      }
+ 278  
+ 279  }</pre></td>
+                        </tr>
+                    </table>
+                </div>
+              </body>
+            </html>
+            

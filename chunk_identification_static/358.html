@@ -1,0 +1,2151 @@
+<!DOCTYPE html>
+    <html lang="en">
+              <head>
+                <meta charset="utf-8">
+                <title>358</title>
+                    <style>
+                        #top {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        #bottom {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        abbr {
+                          /* Here is the delay */
+                          transition-delay:0s;
+                        }
+                    </style>
+              </head>
+              <body>
+                <span style="height: 4vh">
+                    358
+                    <a href="357.html">prev</a>
+                    <a href="359.html">next</a>
+                    <a href="358_chunks.html">chunks</a>
+                    <a href="index.html">index</a>
+                    DTStack/flinkStreamSQL_8cb6d5aea72f25034c7f3626ec6ef98783b1bee5_hbase/hbase-sink/src/main/java/com/dtstack/flink/sql/sink/hbase/HbaseOutputFormat.java
+                    <textarea rows=1 onclick='navigator.clipboard.writeText(this.value)'>cd C:\studies\se\mega\git-analyzer-plus\notebooks\debug
+del /Q *
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;8cb6d5aea72f25034c7f3626ec6ef98783b1bee5:hbase/hbase-sink/src/main/java/com/dtstack/flink/sql/sink/hbase/HbaseOutputFormat.java&quot; &gt; committed.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;8cb6d5aea72f25034c7f3626ec6ef98783b1bee5^1:hbase/hbase-sink/src/main/java/com/dtstack/flink/sql/sink/hbase/HbaseOutputFormat.java&quot; &gt; ours.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;8cb6d5aea72f25034c7f3626ec6ef98783b1bee5^2:hbase/hbase-sink/src/main/java/com/dtstack/flink/sql/sink/hbase/HbaseOutputFormat.java&quot; &gt; theirs.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;e0745d8713ef7459e406b517c6492b6b4fb88cb6:hbase/hbase-sink/src/main/java/com/dtstack/flink/sql/sink/hbase/HbaseOutputFormat.java&quot; &gt; base.java
+copy ours.java 1ours.java
+copy ours.java 2ours.java
+copy theirs.java 1theirs.java
+copy theirs.java 2theirs.java
+copy base.java 1base.java
+copy base.java 2base.java
+&quot;C:\Program Files\Java\jdk1.8.0_241\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\jFSTMerge\build\libs\jFSTMerge-all.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\jfstmerge.java --show-base
+&quot;C:\Program Files\Eclipse Adoptium\jdk-17.0.11.9-hotspot\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\spork\target\spork-0.5.0-SNAPSHOT.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\spork.java
+del /Q 1*.java
+del /Q 2*.java
+del /Q jfstmerge.java.merge
+</textarea>
+                    {strict: [[bj]], subset: [[bj]]}
+                </span>
+                <div id="top">
+
+                    <table>
+                        <tr>
+                            <th>line based (standard git)</th>
+                            <th>jfstmerge</th>
+                            <th>spork</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1 /*
+   2  * Licensed to the Apache Software Foundation (ASF) under one
+   3  * or more contributor license agreements.  See the NOTICE file
+   4  * distributed with this work for additional information
+   5  * regarding copyright ownership.  The ASF licenses this file
+   6  * to you under the Apache License, Version 2.0 (the
+   7  * &quot;License&quot;); you may not use this file except in compliance
+   8  * with the License.  You may obtain a copy of the License at
+   9  *
+  10  *     http://www.apache.org/licenses/LICENSE-2.0
+  11  *
+  12  * Unless required by applicable law or agreed to in writing, software
+  13  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15  * See the License for the specific language governing permissions and
+  16  * limitations under the License.
+  17  */
+  18 
+  19  
+  20 
+  21 package com.dtstack.flink.sql.sink.hbase;
+  22 
+  23 import com.dtstack.flink.sql.outputformat.AbstractDtRichOutputFormat;
+  24 import com.google.common.collect.Maps;
+  25 import org.apache.commons.lang3.StringUtils;
+  26 import org.apache.flink.api.java.tuple.Tuple2;
+  27 import org.apache.flink.configuration.Configuration;
+  28 import org.apache.flink.types.Row;
+  29 import org.apache.flink.util.Preconditions;
+  30 import org.apache.hadoop.hbase.*;
+  31 import org.apache.hadoop.hbase.client.Connection;
+  32 import org.apache.hadoop.hbase.client.ConnectionFactory;
+  33 import org.apache.hadoop.hbase.client.Put;
+  34 import org.apache.hadoop.hbase.client.Table;
+  35 import org.apache.hadoop.security.UserGroupInformation;
+  36 import org.slf4j.Logger;
+  37 import org.slf4j.LoggerFactory;
+  38 
+  39 import java.io.File;
+  40 import java.io.IOException;
+  41 import java.security.PrivilegedAction;
+  42 import java.util.List;
+  43 import java.util.Map;
+  44 import java.util.Set;
+  45 
+  46 /**
+  47  * @author: jingzhen@dtstack.com
+  48  * date: 2017-6-29
+  49  */
+  50 public class HbaseOutputFormat extends AbstractDtRichOutputFormat&lt;Tuple2&gt; {
+  51 
+  52     private static final Logger LOG = LoggerFactory.getLogger(HbaseOutputFormat.class);
+  53 
+  54     private String host;
+  55     private String zkParent;
+  56     private String rowkey;
+  57     private String tableName;
+  58     private String[] columnNames;
+  59     private String updateMode;
+  60     private String[] columnTypes;
+  61     private Map&lt;String, String&gt; columnNameFamily;
+  62 
+  63     private boolean kerberosAuthEnable;
+  64     private String regionserverKeytabFile;
+  65     private String regionserverPrincipal;
+  66     private String securityKrb5Conf;
+  67     private String zookeeperSaslClient;
+  68     private String clientPrincipal;
+  69     private String clientKeytabFile;
+  70 
+  71     private String[] families;
+  72     private String[] qualifiers;
+  73 
+  74     private transient org.apache.hadoop.conf.Configuration conf;
+  75     private transient Connection conn;
+  76     private transient Table table;
+  77 
+  78     private transient ChoreService choreService;
+  79 
+  80     @Override
+  81     public void configure(Configuration parameters) {
+  82         LOG.warn(&quot;---configure---&quot;);
+  83         conf = HBaseConfiguration.create();
+  84     }
+  85 
+  86     @Override
+  87     public void open(int taskNumber, int numTasks) throws IOException {
+  88         LOG.warn(&quot;---open---&quot;);
+  89         openConn();
+  90         table = conn.getTable(TableName.valueOf(tableName));
+  91         LOG.warn(&quot;---open end(get table from hbase) ---&quot;);
+  92         initMetric();
+  93     }
+  94 
+  95     private void openConn(){
+  96         try{
+  97             if (kerberosAuthEnable) {
+  98                 LOG.info(&quot;open kerberos conn&quot;);
+  99                 openKerberosConn();
+ 100             } else {
+ 101                 LOG.info(&quot;open conn&quot;);
+ 102                 conf.set(HbaseConfigUtils.KEY_HBASE_ZOOKEEPER_QUORUM, host);
+ 103                 conf.set(HbaseConfigUtils.KEY_HBASE_ZOOKEEPER_ZNODE_QUORUM, zkParent);
+ 104                 conn = ConnectionFactory.createConnection(conf);
+ 105             }
+ 106         }catch (Exception e){
+ 107             throw new RuntimeException(e);
+ 108         }
+ 109 
+ 110     }
+ 111     private void openKerberosConn() throws Exception {
+ 112         conf.set(HbaseConfigUtils.KEY_HBASE_ZOOKEEPER_QUORUM, host);
+ 113         conf.set(HbaseConfigUtils.KEY_HBASE_ZOOKEEPER_ZNODE_QUORUM, zkParent);
+ 114 
+ 115         LOG.info(&quot;kerberos config:{}&quot;, this.toString());
+ 116         Preconditions.checkArgument(!StringUtils.isEmpty(clientPrincipal), &quot; clientPrincipal not null!&quot;);
+<abbr title=" 117         Preconditions.checkArgument(!StringUtils.isEmpty(clientKeytabFile), &quot; clientKeytabFile not null!&quot;);"> 117         Preconditions.checkArgument(!StringUtils.isEmpty(clientKeytabFile), &quot; clientKeytabFile not null!&quot;🔵</abbr>
+ 118 
+ 119         fillSyncKerberosConfig(conf, regionserverPrincipal, zookeeperSaslClient, securityKrb5Conf);
+ 120 
+ 121         clientKeytabFile = System.getProperty(&quot;user.dir&quot;) + File.separator + clientKeytabFile;
+<abbr title=" 122         clientPrincipal = !StringUtils.isEmpty(clientPrincipal) ? clientPrincipal : regionserverPrincipal;"> 122         clientPrincipal = !StringUtils.isEmpty(clientPrincipal) ? clientPrincipal : regionserverPrincipal🔵</abbr>
+ 123 
+ 124         conf.set(HbaseConfigUtils.KEY_HBASE_CLIENT_KEYTAB_FILE, clientKeytabFile);
+ 125         conf.set(HbaseConfigUtils.KEY_HBASE_CLIENT_KERBEROS_PRINCIPAL, clientPrincipal);
+ 126 
+<abbr title=" 127         UserGroupInformation userGroupInformation = HbaseConfigUtils.loginAndReturnUGI(conf, clientPrincipal, clientKeytabFile);"> 127         UserGroupInformation userGroupInformation = HbaseConfigUtils.loginAndReturnUGI(conf, clientPrinci🔵</abbr>
+ 128         org.apache.hadoop.conf.Configuration finalConf = conf;
+ 129         conn = userGroupInformation.doAs(new PrivilegedAction&lt;Connection&gt;() {
+ 130             @Override
+ 131             public Connection run() {
+ 132                 try {
+ 133                     ScheduledChore authChore = AuthUtil.getAuthChore(finalConf);
+ 134                     if (authChore != null) {
+ 135                         choreService = new ChoreService(&quot;hbaseKerberosSink&quot;);
+ 136                         choreService.scheduleChore(authChore);
+ 137                     }
+ 138 
+ 139                     return ConnectionFactory.createConnection(finalConf);
+ 140                 } catch (IOException e) {
+ 141                     LOG.error(&quot;Get connection fail with config:{}&quot;, finalConf);
+ 142                     throw new RuntimeException(e);
+ 143                 }
+ 144             }
+ 145         });
+ 146     }
+ 147 
+ 148 
+ 149 
+ 150     @Override
+ 151     public void writeRecord(Tuple2 tuple2) {
+ 152         Tuple2&lt;Boolean, Row&gt; tupleTrans = tuple2;
+ 153         Row row = tupleTrans.f1;
+ 154         dealInsert(row);
+ 155     }
+ 156 
+ 157     protected void dealInsert(Row record) {
+ 158         Put put = getPutByRow(record);
+ 159         if (put == null || put.isEmpty()) {
+ 160             outDirtyRecords.inc();
+ 161             return;
+ 162         }
+ 163 
+ 164         try {
+ 165             table.put(put);
+ 166         } catch (Exception e) {
+ 167             if (outDirtyRecords.getCount() % DIRTY_PRINT_FREQUENCY == 0 || LOG.isDebugEnabled()) {
+ 168                 LOG.error(&quot;record insert failed ..{}&quot;, record.toString());
+ 169                 LOG.error(&quot;&quot;, e);
+ 170             }
+ 171             outDirtyRecords.inc();
+ 172         }
+ 173 
+ 174         if (outRecords.getCount() % ROW_PRINT_FREQUENCY == 0) {
+ 175             LOG.info(record.toString());
+ 176         }
+ 177         outRecords.inc();
+ 178     }
+ 179 
+ 180     private Put getPutByRow(Row record) {
+ 181         String rowKey = buildRowKey(record);
+ 182         if (StringUtils.isEmpty(rowKey)) {
+ 183             return null;
+ 184         }
+ 185         Put put = new Put(rowKey.getBytes());
+ 186         for (int i = 0; i &lt; record.getArity(); ++i) {
+ 187             Object fieldVal = record.getField(i);
+ 188             byte[] val = null;
+ 189             if (fieldVal != null) {
+ 190                 val = fieldVal.toString().getBytes();
+ 191             }
+ 192 &lt;&lt;&lt;&lt;&lt;&lt;&lt; GitAnalyzerPlus_ours
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 193             byte[] val = HbaseUtil.toByte(fieldVal);</span>
+ 194 ||||||| GitAnalyzerPlus_base
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 195             Delete delete = new Delete(Bytes.toBytes(rowKey));</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 196             try {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 197                 table.delete(delete);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 198             } catch (IOException e) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 199                 if (outDirtyRecords.getCount() % DIRTY_PRINT_FREQUENCY == 0 || LOG.isDebugEnabled()) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 200                     LOG.error(&quot;record insert failed ..{}&quot;, record.toString());</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 201                     LOG.error(&quot;&quot;, e);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 202                 }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 203                 outDirtyRecords.inc();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 204             }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 205             if (outRecords.getCount() % ROW_PRINT_FREQUENCY == 0) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 206                 LOG.info(record.toString());</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 207             }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 208             outRecords.inc();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 209         }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 210     }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 211 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 212     private Put getPutByRow(Row record) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 213         String rowKey = buildRowKey(record);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 214         if (StringUtils.isEmpty(rowKey)) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 215             return null;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 216         }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 217         Put put = new Put(rowKey.getBytes());</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 218         for (int i = 0; i &lt; record.getArity(); ++i) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 219             Object fieldVal = record.getField(i);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 220             if (fieldVal == null) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 221                 continue;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 222             }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 223             byte[] val = fieldVal.toString().getBytes();</span>
+ 224 =======
+ 225 &gt;&gt;&gt;&gt;&gt;&gt;&gt; GitAnalyzerPlus_theirs
+ 226             byte[] cf = families[i].getBytes();
+ 227             byte[] qualifier = qualifiers[i].getBytes();
+ 228 
+ 229             put.addColumn(cf, qualifier, val);
+ 230         }
+ 231         return put;
+ 232     }
+ 233 
+ 234     private String buildRowKey(Row record) {
+ 235         String rowKeyValues = getRowKeyValues(record);
+ 236         // all rowkey not null
+ 237         if (StringUtils.isBlank(rowKeyValues)) {
+ 238             LOG.error(&quot;row key value must not null,record is ..{}&quot;, record);
+ 239             outDirtyRecords.inc();
+ 240             return &quot;&quot;;
+ 241         }
+ 242         return rowKeyValues;
+ 243     }
+ 244 
+ 245     private String getRowKeyValues(Row record) {
+ 246         Map&lt;String, Object&gt; row = rowConvertMap(record);
+ 247         RowKeyBuilder rowKeyBuilder = new RowKeyBuilder();
+ 248         rowKeyBuilder.init(rowkey);
+ 249         return rowKeyBuilder.getRowKey(row);
+ 250     }
+ 251 
+ 252     private Map&lt;String, Object&gt; rowConvertMap(Row record){
+ 253         Map&lt;String, Object&gt; rowValue = Maps.newHashMap();
+ 254         for(int i = 0; i &lt; columnNames.length; i++){
+ 255             rowValue.put(columnNames[i], record.getField(i));
+ 256         }
+ 257         return rowValue;
+ 258     }
+ 259 
+ 260     @Override
+ 261     public void close() throws IOException {
+ 262         if (conn != null) {
+ 263             conn.close();
+ 264             conn = null;
+ 265         }
+ 266     }
+ 267     private HbaseOutputFormat() {
+ 268     }
+ 269 
+ 270     public static HbaseOutputFormatBuilder buildHbaseOutputFormat() {
+ 271         return new HbaseOutputFormatBuilder();
+ 272     }
+ 273 
+ 274     public static class HbaseOutputFormatBuilder {
+ 275 
+ 276         private HbaseOutputFormat format;
+ 277 
+ 278         private HbaseOutputFormatBuilder() {
+ 279             format = new HbaseOutputFormat();
+ 280         }
+ 281 
+ 282         public HbaseOutputFormatBuilder setHost(String host) {
+ 283             format.host = host;
+ 284             return this;
+ 285         }
+ 286 
+ 287         public HbaseOutputFormatBuilder setZkParent(String parent) {
+ 288             format.zkParent = parent;
+ 289             return this;
+ 290         }
+ 291 
+ 292 
+ 293         public HbaseOutputFormatBuilder setTable(String tableName) {
+ 294             format.tableName = tableName;
+ 295             return this;
+ 296         }
+ 297 
+ 298         public HbaseOutputFormatBuilder setRowkey(String rowkey) {
+ 299             format.rowkey = rowkey;
+ 300             return this;
+ 301         }
+ 302 
+ 303         public HbaseOutputFormatBuilder setColumnNames(String[] columnNames) {
+ 304             format.columnNames = columnNames;
+ 305             return this;
+ 306         }
+ 307 
+ 308         public HbaseOutputFormatBuilder setColumnTypes(String[] columnTypes) {
+ 309             format.columnTypes = columnTypes;
+ 310             return this;
+ 311         }
+ 312 
+ 313         public HbaseOutputFormatBuilder setColumnNameFamily(Map&lt;String, String&gt; columnNameFamily) {
+ 314             format.columnNameFamily = columnNameFamily;
+ 315             return this;
+ 316         }
+ 317 
+ 318         public HbaseOutputFormatBuilder setKerberosAuthEnable(boolean kerberosAuthEnable) {
+ 319             format.kerberosAuthEnable = kerberosAuthEnable;
+ 320             return this;
+ 321         }
+ 322 
+ 323         public HbaseOutputFormatBuilder setRegionserverKeytabFile(String regionserverKeytabFile) {
+ 324             format.regionserverKeytabFile = regionserverKeytabFile;
+ 325             return this;
+ 326         }
+ 327 
+ 328         public HbaseOutputFormatBuilder setRegionserverPrincipal(String regionserverPrincipal) {
+ 329             format.regionserverPrincipal = regionserverPrincipal;
+ 330             return this;
+ 331         }
+ 332 
+ 333         public HbaseOutputFormatBuilder setSecurityKrb5Conf(String securityKrb5Conf) {
+ 334             format.securityKrb5Conf = securityKrb5Conf;
+ 335             return this;
+ 336         }
+ 337 
+ 338         public HbaseOutputFormatBuilder setZookeeperSaslClient(String zookeeperSaslClient) {
+ 339             format.zookeeperSaslClient = zookeeperSaslClient;
+ 340             return this;
+ 341         }
+ 342 
+ 343         public HbaseOutputFormatBuilder setClientPrincipal(String clientPrincipal) {
+ 344             format.clientPrincipal = clientPrincipal;
+ 345             return this;
+ 346         }
+ 347 
+ 348         public HbaseOutputFormatBuilder setClientKeytabFile(String clientKeytabFile) {
+ 349             format.clientKeytabFile = clientKeytabFile;
+ 350             return this;
+ 351         }
+ 352 
+ 353 
+ 354         public HbaseOutputFormat finish() {
+ 355             Preconditions.checkNotNull(format.host, &quot;zookeeperQuorum should be specified&quot;);
+ 356             Preconditions.checkNotNull(format.tableName, &quot;tableName should be specified&quot;);
+ 357             Preconditions.checkNotNull(format.columnNames, &quot;columnNames should be specified&quot;);
+<abbr title=" 358             Preconditions.checkArgument(format.columnNames.length != 0, &quot;columnNames length should not be zero&quot;);"> 358             Preconditions.checkArgument(format.columnNames.length != 0, &quot;columnNames length should not be🔵</abbr>
+ 359 
+ 360             String[] families = new String[format.columnNames.length];
+ 361             String[] qualifiers = new String[format.columnNames.length];
+ 362 
+ 363             if (format.columnNameFamily != null) {
+ 364                 Set&lt;String&gt; keySet = format.columnNameFamily.keySet();
+ 365                 String[] columns = keySet.toArray(new String[keySet.size()]);
+ 366                 for (int i = 0; i &lt; columns.length; ++i) {
+ 367                     String col = columns[i];
+ 368                     String[] part = col.split(&quot;:&quot;);
+ 369                     families[i] = part[0];
+ 370                     qualifiers[i] = part[1];
+ 371                 }
+ 372             }
+ 373             format.families = families;
+ 374             format.qualifiers = qualifiers;
+ 375 
+ 376             return format;
+ 377         }
+ 378 
+ 379     }
+ 380 
+<abbr title=" 381     private void fillSyncKerberosConfig(org.apache.hadoop.conf.Configuration config, String regionserverPrincipal,"> 381     private void fillSyncKerberosConfig(org.apache.hadoop.conf.Configuration config, String regionserverP🔵</abbr>
+<abbr title=" 382                                         String zookeeperSaslClient, String securityKrb5Conf) throws IOException {"> 382                                         String zookeeperSaslClient, String securityKrb5Conf) throws IOExc🔵</abbr>
+ 383         if (StringUtils.isEmpty(regionserverPrincipal)) {
+<abbr title=" 384             throw new IllegalArgumentException(&quot;Must provide regionserverPrincipal when authentication is Kerberos&quot;);"> 384             throw new IllegalArgumentException(&quot;Must provide regionserverPrincipal when authentication is🔵</abbr>
+ 385         }
+ 386         config.set(HbaseConfigUtils.KEY_HBASE_MASTER_KERBEROS_PRINCIPAL, regionserverPrincipal);
+ 387         config.set(HbaseConfigUtils.KEY_HBASE_REGIONSERVER_KERBEROS_PRINCIPAL, regionserverPrincipal);
+ 388         config.set(HbaseConfigUtils.KEY_HBASE_SECURITY_AUTHORIZATION, &quot;true&quot;);
+ 389         config.set(HbaseConfigUtils.KEY_HBASE_SECURITY_AUTHENTICATION, &quot;kerberos&quot;);
+ 390 
+ 391 
+ 392         if (!StringUtils.isEmpty(zookeeperSaslClient)) {
+ 393             System.setProperty(HbaseConfigUtils.KEY_ZOOKEEPER_SASL_CLIENT, zookeeperSaslClient);
+ 394         }
+ 395 
+ 396         if (!StringUtils.isEmpty(securityKrb5Conf)) {
+ 397             String krb5ConfPath = System.getProperty(&quot;user.dir&quot;) + File.separator + securityKrb5Conf;
+ 398             LOG.info(&quot;krb5ConfPath:{}&quot;, krb5ConfPath);
+ 399             System.setProperty(HbaseConfigUtils.KEY_JAVA_SECURITY_KRB5_CONF, krb5ConfPath);
+ 400         }
+ 401     }
+ 402 
+ 403     @Override
+ 404     public String toString() {
+ 405         return &quot;HbaseOutputFormat kerberos{&quot; +
+ 406                 &quot;kerberosAuthEnable=&quot; + kerberosAuthEnable +
+ 407                 &quot;, regionserverKeytabFile=&#x27;&quot; + regionserverKeytabFile + &#x27;\&#x27;&#x27; +
+ 408                 &quot;, regionserverPrincipal=&#x27;&quot; + regionserverPrincipal + &#x27;\&#x27;&#x27; +
+ 409                 &quot;, securityKrb5Conf=&#x27;&quot; + securityKrb5Conf + &#x27;\&#x27;&#x27; +
+ 410                 &quot;, zookeeperSaslClient=&#x27;&quot; + zookeeperSaslClient + &#x27;\&#x27;&#x27; +
+ 411                 &quot;, clientPrincipal=&#x27;&quot; + clientPrincipal + &#x27;\&#x27;&#x27; +
+ 412                 &quot;, clientKeytabFile=&#x27;&quot; + clientKeytabFile + &#x27;\&#x27;&#x27; +
+ 413                 &#x27;}&#x27;;
+ 414     }
+ 415 
+ 416 }</pre></td>
+                            <td><pre>   1 /*
+   2  * Licensed to the Apache Software Foundation (ASF) under one
+   3  * or more contributor license agreements.  See the NOTICE file
+   4  * distributed with this work for additional information
+   5  * regarding copyright ownership.  The ASF licenses this file
+   6  * to you under the Apache License, Version 2.0 (the
+   7  * &quot;License&quot;); you may not use this file except in compliance
+   8  * with the License.  You may obtain a copy of the License at
+   9  *
+  10  *     http://www.apache.org/licenses/LICENSE-2.0
+  11  *
+  12  * Unless required by applicable law or agreed to in writing, software
+  13  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15  * See the License for the specific language governing permissions and
+  16  * limitations under the License.
+  17  */
+  18 
+  19 
+  20 
+  21 package com.dtstack.flink.sql.sink.hbase;
+  22 
+  23 import com.dtstack.flink.sql.outputformat.AbstractDtRichOutputFormat;
+  24 import com.google.common.collect.Maps;
+  25 import org.apache.commons.lang3.StringUtils;
+  26 import org.apache.flink.api.java.tuple.Tuple2;
+  27 import org.apache.flink.configuration.Configuration;
+  28 import org.apache.flink.types.Row;
+  29 import org.apache.flink.util.Preconditions;
+  30 import org.apache.hadoop.hbase.*;
+  31 import org.apache.hadoop.hbase.client.Connection;
+  32 import org.apache.hadoop.hbase.client.ConnectionFactory;
+  33 import org.apache.hadoop.hbase.client.Put;
+  34 import org.apache.hadoop.hbase.client.Table;
+  35 import org.apache.hadoop.security.UserGroupInformation;
+  36 import org.slf4j.Logger;
+  37 import org.slf4j.LoggerFactory;
+  38 
+  39 import java.io.File;
+  40 import java.io.IOException;
+  41 import java.security.PrivilegedAction;
+  42 import java.util.List;
+  43 import java.util.Map;
+  44 import java.util.Set;
+  45 
+  46 /**
+  47  * @author: jingzhen@dtstack.com
+  48  * date: 2017-6-29
+  49  */
+  50 public class HbaseOutputFormat extends AbstractDtRichOutputFormat&lt;Tuple2&gt; {
+  51 
+  52     private static final Logger LOG = LoggerFactory.getLogger(HbaseOutputFormat.class);
+  53 
+  54     private String host;
+  55     private String zkParent;
+  56     private String rowkey;
+  57     private String tableName;
+  58     private String[] columnNames;
+  59     private String updateMode;
+  60     private String[] columnTypes;
+  61     private Map&lt;String, String&gt; columnNameFamily;
+  62 
+  63     private boolean kerberosAuthEnable;
+  64     private String regionserverKeytabFile;
+  65     private String regionserverPrincipal;
+  66     private String securityKrb5Conf;
+  67     private String zookeeperSaslClient;
+  68     private String clientPrincipal;
+  69     private String clientKeytabFile;
+  70 
+  71     private String[] families;
+  72     private String[] qualifiers;
+  73 
+  74     private transient org.apache.hadoop.conf.Configuration conf;
+  75     private transient Connection conn;
+  76     private transient Table table;
+  77 
+  78     private transient ChoreService choreService;
+  79 
+  80     @Override
+  81     public void configure(Configuration parameters) {
+  82         LOG.warn(&quot;---configure---&quot;);
+  83         conf = HBaseConfiguration.create();
+  84     }
+  85 
+  86     @Override
+  87     public void open(int taskNumber, int numTasks) throws IOException {
+  88         LOG.warn(&quot;---open---&quot;);
+  89         openConn();
+  90         table = conn.getTable(TableName.valueOf(tableName));
+  91         LOG.warn(&quot;---open end(get table from hbase) ---&quot;);
+  92         initMetric();
+  93     }
+  94 
+  95     private void openConn(){
+  96         try{
+  97             if (kerberosAuthEnable) {
+  98                 LOG.info(&quot;open kerberos conn&quot;);
+  99                 openKerberosConn();
+ 100             } else {
+ 101                 LOG.info(&quot;open conn&quot;);
+ 102                 conf.set(HbaseConfigUtils.KEY_HBASE_ZOOKEEPER_QUORUM, host);
+ 103                 conf.set(HbaseConfigUtils.KEY_HBASE_ZOOKEEPER_ZNODE_QUORUM, zkParent);
+ 104                 conn = ConnectionFactory.createConnection(conf);
+ 105             }
+ 106         }catch (Exception e){
+ 107             throw new RuntimeException(e);
+ 108         }
+ 109 
+ 110     }
+ 111     private void openKerberosConn() throws Exception {
+ 112         conf.set(HbaseConfigUtils.KEY_HBASE_ZOOKEEPER_QUORUM, host);
+ 113         conf.set(HbaseConfigUtils.KEY_HBASE_ZOOKEEPER_ZNODE_QUORUM, zkParent);
+ 114 
+ 115         LOG.info(&quot;kerberos config:{}&quot;, this.toString());
+ 116         Preconditions.checkArgument(!StringUtils.isEmpty(clientPrincipal), &quot; clientPrincipal not null!&quot;);
+<abbr title=" 117         Preconditions.checkArgument(!StringUtils.isEmpty(clientKeytabFile), &quot; clientKeytabFile not null!&quot;);"> 117         Preconditions.checkArgument(!StringUtils.isEmpty(clientKeytabFile), &quot; clientKeytabFile not null!&quot;🔵</abbr>
+ 118 
+ 119         fillSyncKerberosConfig(conf, regionserverPrincipal, zookeeperSaslClient, securityKrb5Conf);
+ 120 
+ 121         clientKeytabFile = System.getProperty(&quot;user.dir&quot;) + File.separator + clientKeytabFile;
+<abbr title=" 122         clientPrincipal = !StringUtils.isEmpty(clientPrincipal) ? clientPrincipal : regionserverPrincipal;"> 122         clientPrincipal = !StringUtils.isEmpty(clientPrincipal) ? clientPrincipal : regionserverPrincipal🔵</abbr>
+ 123 
+ 124         conf.set(HbaseConfigUtils.KEY_HBASE_CLIENT_KEYTAB_FILE, clientKeytabFile);
+ 125         conf.set(HbaseConfigUtils.KEY_HBASE_CLIENT_KERBEROS_PRINCIPAL, clientPrincipal);
+ 126 
+<abbr title=" 127         UserGroupInformation userGroupInformation = HbaseConfigUtils.loginAndReturnUGI(conf, clientPrincipal, clientKeytabFile);"> 127         UserGroupInformation userGroupInformation = HbaseConfigUtils.loginAndReturnUGI(conf, clientPrinci🔵</abbr>
+ 128         org.apache.hadoop.conf.Configuration finalConf = conf;
+ 129         conn = userGroupInformation.doAs(new PrivilegedAction&lt;Connection&gt;() {
+ 130             @Override
+ 131             public Connection run() {
+ 132                 try {
+ 133                     ScheduledChore authChore = AuthUtil.getAuthChore(finalConf);
+ 134                     if (authChore != null) {
+ 135                         choreService = new ChoreService(&quot;hbaseKerberosSink&quot;);
+ 136                         choreService.scheduleChore(authChore);
+ 137                     }
+ 138 
+ 139                     return ConnectionFactory.createConnection(finalConf);
+ 140                 } catch (IOException e) {
+ 141                     LOG.error(&quot;Get connection fail with config:{}&quot;, finalConf);
+ 142                     throw new RuntimeException(e);
+ 143                 }
+ 144             }
+ 145         });
+ 146     }
+ 147 
+ 148 
+ 149 
+ 150     @Override
+ 151     public void writeRecord(Tuple2 tuple2) {
+ 152         Tuple2&lt;Boolean, Row&gt; tupleTrans = tuple2;
+ 153         Row row = tupleTrans.f1;
+ 154             dealInsert(row);
+ 155     }
+ 156 
+ 157     protected void dealInsert(Row record) {
+ 158         Put put = getPutByRow(record);
+ 159         if (put == null || put.isEmpty()) {
+ 160             outDirtyRecords.inc();
+ 161             return;
+ 162         }
+ 163 
+ 164             try {
+ 165             table.put(put);
+ 166         } catch (Exception e) {
+ 167                 if (outDirtyRecords.getCount() % DIRTY_PRINT_FREQUENCY == 0 || LOG.isDebugEnabled()) {
+ 168                     LOG.error(&quot;record insert failed ..{}&quot;, record.toString());
+ 169                     LOG.error(&quot;&quot;, e);
+ 170                 }
+ 171                 outDirtyRecords.inc();
+ 172             }
+ 173 
+ 174             if (outRecords.getCount() % ROW_PRINT_FREQUENCY == 0) {
+ 175                 LOG.info(record.toString());
+ 176             }
+ 177             outRecords.inc();
+ 178         }
+ 179 
+ 180     private Put getPutByRow(Row record) {
+ 181         String rowKey = buildRowKey(record);
+ 182         if (StringUtils.isEmpty(rowKey)) {
+ 183             return null;
+ 184         }
+ 185         Put put = new Put(rowKey.getBytes());
+ 186         for (int i = 0; i &lt; record.getArity(); ++i) {
+ 187             Object fieldVal = record.getField(i);
+ 188             byte[] val = null;
+ 189             if (fieldVal != null) {
+ 190                 val = fieldVal.toString().getBytes();
+ 191             }
+ 192 &lt;&lt;&lt;&lt;&lt;&lt;&lt; MINE
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 193             byte[] val = HbaseUtil.toByte(fieldVal);</span>
+ 194 ||||||| BASE
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 195             byte[] val = fieldVal.toString().getBytes();</span>
+ 196 =======
+ 197 &gt;&gt;&gt;&gt;&gt;&gt;&gt; YOURS
+ 198             byte[] cf = families[i].getBytes();
+ 199             byte[] qualifier = qualifiers[i].getBytes();
+ 200 
+ 201             put.addColumn(cf, qualifier, val);
+ 202         }
+ 203         return put;
+ 204     }
+ 205 
+ 206     private String buildRowKey(Row record) {
+ 207         String rowKeyValues = getRowKeyValues(record);
+ 208         // all rowkey not null
+ 209         if (StringUtils.isBlank(rowKeyValues)) {
+ 210             LOG.error(&quot;row key value must not null,record is ..{}&quot;, record);
+ 211             outDirtyRecords.inc();
+ 212             return &quot;&quot;;
+ 213         }
+ 214         return rowKeyValues;
+ 215     }
+ 216 
+ 217     private String getRowKeyValues(Row record) {
+ 218         Map&lt;String, Object&gt; row = rowConvertMap(record);
+ 219         RowKeyBuilder rowKeyBuilder = new RowKeyBuilder();
+ 220         rowKeyBuilder.init(rowkey);
+ 221         return rowKeyBuilder.getRowKey(row);
+ 222     }
+ 223 
+ 224     private Map&lt;String, Object&gt; rowConvertMap(Row record){
+ 225         Map&lt;String, Object&gt; rowValue = Maps.newHashMap();
+ 226         for(int i = 0; i &lt; columnNames.length; i++){
+ 227             rowValue.put(columnNames[i], record.getField(i));
+ 228         }
+ 229         return rowValue;
+ 230     }
+ 231 
+ 232     @Override
+ 233     public void close() throws IOException {
+ 234         if (conn != null) {
+ 235             conn.close();
+ 236             conn = null;
+ 237         }
+ 238     }
+ 239     private HbaseOutputFormat() {
+ 240     }
+ 241 
+ 242     public static HbaseOutputFormatBuilder buildHbaseOutputFormat() {
+ 243         return new HbaseOutputFormatBuilder();
+ 244     }
+ 245 
+ 246     public static class HbaseOutputFormatBuilder {
+ 247 
+ 248         private HbaseOutputFormat format;
+ 249 
+ 250         private HbaseOutputFormatBuilder() {
+ 251             format = new HbaseOutputFormat();
+ 252         }
+ 253 
+ 254         public HbaseOutputFormatBuilder setHost(String host) {
+ 255             format.host = host;
+ 256             return this;
+ 257         }
+ 258 
+ 259         public HbaseOutputFormatBuilder setZkParent(String parent) {
+ 260             format.zkParent = parent;
+ 261             return this;
+ 262         }
+ 263 
+ 264 
+ 265         public HbaseOutputFormatBuilder setTable(String tableName) {
+ 266             format.tableName = tableName;
+ 267             return this;
+ 268         }
+ 269 
+ 270         public HbaseOutputFormatBuilder setRowkey(String rowkey) {
+ 271             format.rowkey = rowkey;
+ 272             return this;
+ 273         }
+ 274 
+ 275         public HbaseOutputFormatBuilder setColumnNames(String[] columnNames) {
+ 276             format.columnNames = columnNames;
+ 277             return this;
+ 278         }
+ 279 
+ 280         public HbaseOutputFormatBuilder setColumnTypes(String[] columnTypes) {
+ 281             format.columnTypes = columnTypes;
+ 282             return this;
+ 283         }
+ 284 
+ 285         public HbaseOutputFormatBuilder setColumnNameFamily(Map&lt;String, String&gt; columnNameFamily) {
+ 286             format.columnNameFamily = columnNameFamily;
+ 287             return this;
+ 288         }
+ 289 
+ 290         public HbaseOutputFormatBuilder setKerberosAuthEnable(boolean kerberosAuthEnable) {
+ 291             format.kerberosAuthEnable = kerberosAuthEnable;
+ 292             return this;
+ 293         }
+ 294 
+ 295         public HbaseOutputFormatBuilder setRegionserverKeytabFile(String regionserverKeytabFile) {
+ 296             format.regionserverKeytabFile = regionserverKeytabFile;
+ 297             return this;
+ 298         }
+ 299 
+ 300         public HbaseOutputFormatBuilder setRegionserverPrincipal(String regionserverPrincipal) {
+ 301             format.regionserverPrincipal = regionserverPrincipal;
+ 302             return this;
+ 303         }
+ 304 
+ 305         public HbaseOutputFormatBuilder setSecurityKrb5Conf(String securityKrb5Conf) {
+ 306             format.securityKrb5Conf = securityKrb5Conf;
+ 307             return this;
+ 308         }
+ 309 
+ 310         public HbaseOutputFormatBuilder setZookeeperSaslClient(String zookeeperSaslClient) {
+ 311             format.zookeeperSaslClient = zookeeperSaslClient;
+ 312             return this;
+ 313         }
+ 314 
+ 315         public HbaseOutputFormatBuilder setClientPrincipal(String clientPrincipal) {
+ 316             format.clientPrincipal = clientPrincipal;
+ 317             return this;
+ 318         }
+ 319 
+ 320         public HbaseOutputFormatBuilder setClientKeytabFile(String clientKeytabFile) {
+ 321             format.clientKeytabFile = clientKeytabFile;
+ 322             return this;
+ 323         }
+ 324 
+ 325 
+ 326         public HbaseOutputFormat finish() {
+ 327             Preconditions.checkNotNull(format.host, &quot;zookeeperQuorum should be specified&quot;);
+ 328             Preconditions.checkNotNull(format.tableName, &quot;tableName should be specified&quot;);
+ 329             Preconditions.checkNotNull(format.columnNames, &quot;columnNames should be specified&quot;);
+<abbr title=" 330             Preconditions.checkArgument(format.columnNames.length != 0, &quot;columnNames length should not be zero&quot;);"> 330             Preconditions.checkArgument(format.columnNames.length != 0, &quot;columnNames length should not be🔵</abbr>
+ 331 
+ 332             String[] families = new String[format.columnNames.length];
+ 333             String[] qualifiers = new String[format.columnNames.length];
+ 334 
+ 335             if (format.columnNameFamily != null) {
+ 336                 Set&lt;String&gt; keySet = format.columnNameFamily.keySet();
+ 337                 String[] columns = keySet.toArray(new String[keySet.size()]);
+ 338                 for (int i = 0; i &lt; columns.length; ++i) {
+ 339                     String col = columns[i];
+ 340                     String[] part = col.split(&quot;:&quot;);
+ 341                     families[i] = part[0];
+ 342                     qualifiers[i] = part[1];
+ 343                 }
+ 344             }
+ 345             format.families = families;
+ 346             format.qualifiers = qualifiers;
+ 347 
+ 348             return format;
+ 349         }
+ 350 
+ 351     }
+ 352 
+<abbr title=" 353     private void fillSyncKerberosConfig(org.apache.hadoop.conf.Configuration config, String regionserverPrincipal,"> 353     private void fillSyncKerberosConfig(org.apache.hadoop.conf.Configuration config, String regionserverP🔵</abbr>
+<abbr title=" 354                                         String zookeeperSaslClient, String securityKrb5Conf) throws IOException {"> 354                                         String zookeeperSaslClient, String securityKrb5Conf) throws IOExc🔵</abbr>
+ 355         if (StringUtils.isEmpty(regionserverPrincipal)) {
+<abbr title=" 356             throw new IllegalArgumentException(&quot;Must provide regionserverPrincipal when authentication is Kerberos&quot;);"> 356             throw new IllegalArgumentException(&quot;Must provide regionserverPrincipal when authentication is🔵</abbr>
+ 357         }
+ 358         config.set(HbaseConfigUtils.KEY_HBASE_MASTER_KERBEROS_PRINCIPAL, regionserverPrincipal);
+ 359         config.set(HbaseConfigUtils.KEY_HBASE_REGIONSERVER_KERBEROS_PRINCIPAL, regionserverPrincipal);
+ 360         config.set(HbaseConfigUtils.KEY_HBASE_SECURITY_AUTHORIZATION, &quot;true&quot;);
+ 361         config.set(HbaseConfigUtils.KEY_HBASE_SECURITY_AUTHENTICATION, &quot;kerberos&quot;);
+ 362 
+ 363 
+ 364         if (!StringUtils.isEmpty(zookeeperSaslClient)) {
+ 365             System.setProperty(HbaseConfigUtils.KEY_ZOOKEEPER_SASL_CLIENT, zookeeperSaslClient);
+ 366         }
+ 367 
+ 368         if (!StringUtils.isEmpty(securityKrb5Conf)) {
+ 369             String krb5ConfPath = System.getProperty(&quot;user.dir&quot;) + File.separator + securityKrb5Conf;
+ 370             LOG.info(&quot;krb5ConfPath:{}&quot;, krb5ConfPath);
+ 371             System.setProperty(HbaseConfigUtils.KEY_JAVA_SECURITY_KRB5_CONF, krb5ConfPath);
+ 372         }
+ 373     }
+ 374 
+ 375     @Override
+ 376     public String toString() {
+ 377         return &quot;HbaseOutputFormat kerberos{&quot; +
+ 378                 &quot;kerberosAuthEnable=&quot; + kerberosAuthEnable +
+ 379                 &quot;, regionserverKeytabFile=&#x27;&quot; + regionserverKeytabFile + &#x27;\&#x27;&#x27; +
+ 380                 &quot;, regionserverPrincipal=&#x27;&quot; + regionserverPrincipal + &#x27;\&#x27;&#x27; +
+ 381                 &quot;, securityKrb5Conf=&#x27;&quot; + securityKrb5Conf + &#x27;\&#x27;&#x27; +
+ 382                 &quot;, zookeeperSaslClient=&#x27;&quot; + zookeeperSaslClient + &#x27;\&#x27;&#x27; +
+ 383                 &quot;, clientPrincipal=&#x27;&quot; + clientPrincipal + &#x27;\&#x27;&#x27; +
+ 384                 &quot;, clientKeytabFile=&#x27;&quot; + clientKeytabFile + &#x27;\&#x27;&#x27; +
+ 385                 &#x27;}&#x27;;
+ 386     }
+ 387 
+ 388 }
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ </pre></td>
+                            <td><pre>   1 /*
+   2  * Licensed to the Apache Software Foundation (ASF) under one
+   3  * or more contributor license agreements.  See the NOTICE file
+   4  * distributed with this work for additional information
+   5  * regarding copyright ownership.  The ASF licenses this file
+   6  * to you under the Apache License, Version 2.0 (the
+   7  * &quot;License&quot;); you may not use this file except in compliance
+   8  * with the License.  You may obtain a copy of the License at
+   9  *
+  10  *     http://www.apache.org/licenses/LICENSE-2.0
+  11  *
+  12  * Unless required by applicable law or agreed to in writing, software
+  13  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15  * See the License for the specific language governing permissions and
+  16  * limitations under the License.
+  17  */
+  18 package com.dtstack.flink.sql.sink.hbase;
+  19 
+  20 import com.dtstack.flink.sql.outputformat.AbstractDtRichOutputFormat;
+  21 import com.google.common.collect.Maps;
+  22 import java.io.File;
+  23 import java.io.IOException;
+  24 import java.security.PrivilegedAction;
+  25 import java.util.List;
+  26 import java.util.Map;
+  27 import java.util.Set;
+  28 import org.apache.commons.lang3.StringUtils;
+  29 import org.apache.flink.api.java.tuple.Tuple2;
+  30 import org.apache.flink.configuration.Configuration;
+  31 import org.apache.flink.types.Row;
+  32 import org.apache.flink.util.Preconditions;
+  33 import org.apache.hadoop.hbase.*;
+  34 import org.apache.hadoop.hbase.client.Connection;
+  35 import org.apache.hadoop.hbase.client.ConnectionFactory;
+  36 import org.apache.hadoop.hbase.client.Put;
+  37 import org.apache.hadoop.hbase.client.Table;
+  38 import org.apache.hadoop.security.UserGroupInformation;
+  39 import org.slf4j.Logger;
+  40 import org.slf4j.LoggerFactory;
+  41 
+  42 
+  43 /**
+  44  * @author: jingzhen@dtstack.com
+  45  * date: 2017-6-29
+  46  */
+  47 public class HbaseOutputFormat extends AbstractDtRichOutputFormat&lt;Tuple2&gt; {
+  48     private static final Logger LOG = LoggerFactory.getLogger(HbaseOutputFormat.class);
+  49 
+  50     private String host;
+  51 
+  52     private String zkParent;
+  53 
+  54     private String rowkey;
+  55 
+  56     private String tableName;
+  57 
+  58     private String[] columnNames;
+  59 
+  60     private String updateMode;
+  61 
+  62     private String[] columnTypes;
+  63 
+  64     private Map&lt;String, String&gt; columnNameFamily;
+  65 
+  66     private boolean kerberosAuthEnable;
+  67 
+  68     private String regionserverKeytabFile;
+  69 
+  70     private String regionserverPrincipal;
+  71 
+  72     private String securityKrb5Conf;
+  73 
+  74     private String zookeeperSaslClient;
+  75 
+  76     private String clientPrincipal;
+  77 
+  78     private String clientKeytabFile;
+  79 
+  80     private String[] families;
+  81 
+  82     private String[] qualifiers;
+  83 
+  84     private transient org.apache.hadoop.conf.Configuration conf;
+  85 
+  86     private transient Connection conn;
+  87 
+  88     private transient Table table;
+  89 
+  90     private transient ChoreService choreService;
+  91 
+  92     @Override
+  93     public void configure(Configuration parameters) {
+  94         LOG.warn(&quot;---configure---&quot;);
+  95         conf = HBaseConfiguration.create();
+  96     }
+  97 
+  98     @Override
+  99     public void open(int taskNumber, int numTasks) throws IOException {
+ 100         LOG.warn(&quot;---open---&quot;);
+ 101         openConn();
+ 102         table = conn.getTable(TableName.valueOf(tableName));
+ 103         LOG.warn(&quot;---open end(get table from hbase) ---&quot;);
+ 104         initMetric();
+ 105     }
+ 106 
+ 107     private void openConn(){
+ 108         try{
+ 109             if (kerberosAuthEnable) {
+ 110                 LOG.info(&quot;open kerberos conn&quot;);
+ 111                 openKerberosConn();
+ 112             } else {
+ 113                 LOG.info(&quot;open conn&quot;);
+ 114                 conf.set(HbaseConfigUtils.KEY_HBASE_ZOOKEEPER_QUORUM, host);
+ 115                 conf.set(HbaseConfigUtils.KEY_HBASE_ZOOKEEPER_ZNODE_QUORUM, zkParent);
+ 116                 conn = ConnectionFactory.createConnection(conf);
+ 117             }
+ 118         }catch (Exception e){
+ 119             throw new RuntimeException(e);
+ 120         }
+ 121 
+ 122     }
+ 123 
+ 124     private void openKerberosConn() throws Exception {
+ 125         conf.set(HbaseConfigUtils.KEY_HBASE_ZOOKEEPER_QUORUM, host);
+ 126         conf.set(HbaseConfigUtils.KEY_HBASE_ZOOKEEPER_ZNODE_QUORUM, zkParent);
+ 127         LOG.info(&quot;kerberos config:{}&quot;, this.toString());
+ 128         Preconditions.checkArgument(!StringUtils.isEmpty(clientPrincipal), &quot; clientPrincipal not null!&quot;);
+<abbr title=" 129         Preconditions.checkArgument(!StringUtils.isEmpty(clientKeytabFile), &quot; clientKeytabFile not null!&quot;);"> 129         Preconditions.checkArgument(!StringUtils.isEmpty(clientKeytabFile), &quot; clientKeytabFile not null!&quot;🔵</abbr>
+ 130         fillSyncKerberosConfig(conf, regionserverPrincipal, zookeeperSaslClient, securityKrb5Conf);
+ 131         clientKeytabFile = (System.getProperty(&quot;user.dir&quot;) + File.separator) + clientKeytabFile;
+<abbr title=" 132         clientPrincipal = (!StringUtils.isEmpty(clientPrincipal)) ? clientPrincipal : regionserverPrincipal;"> 132         clientPrincipal = (!StringUtils.isEmpty(clientPrincipal)) ? clientPrincipal : regionserverPrincip🔵</abbr>
+ 133         conf.set(HbaseConfigUtils.KEY_HBASE_CLIENT_KEYTAB_FILE, clientKeytabFile);
+ 134         conf.set(HbaseConfigUtils.KEY_HBASE_CLIENT_KERBEROS_PRINCIPAL, clientPrincipal);
+<abbr title=" 135         UserGroupInformation userGroupInformation = HbaseConfigUtils.loginAndReturnUGI(conf, clientPrincipal, clientKeytabFile);"> 135         UserGroupInformation userGroupInformation = HbaseConfigUtils.loginAndReturnUGI(conf, clientPrinci🔵</abbr>
+ 136         org.apache.hadoop.conf.Configuration finalConf = conf;
+ 137         conn = userGroupInformation.doAs(new PrivilegedAction&lt;Connection&gt;() {
+ 138             @Override
+ 139             public Connection run() {
+ 140                 try {
+ 141                     ScheduledChore authChore = AuthUtil.getAuthChore(finalConf);
+ 142                     if (authChore != null) {
+ 143                         choreService = new ChoreService(&quot;hbaseKerberosSink&quot;);
+ 144                         choreService.scheduleChore(authChore);
+ 145                     }
+ 146                     return ConnectionFactory.createConnection(finalConf);
+ 147                 } catch (IOException e) {
+ 148                     LOG.error(&quot;Get connection fail with config:{}&quot;, finalConf);
+ 149                     throw new RuntimeException(e);
+ 150                 }
+ 151             }
+ 152         });
+ 153     }
+ 154 
+ 155     @Override
+ 156     public void writeRecord(Tuple2 tuple2) {
+ 157         Tuple2&lt;Boolean, Row&gt; tupleTrans = tuple2;
+ 158         Row row = tupleTrans.f1;
+ 159         dealInsert(row);
+ 160     }
+ 161 
+ 162     protected void dealInsert(Row record) {
+ 163         Put put = getPutByRow(record);
+ 164         if (put == null || put.isEmpty()) {
+ 165             outDirtyRecords.inc();
+ 166             return;
+ 167         }
+ 168 
+ 169         try {
+ 170             table.put(put);
+ 171         } catch (Exception e) {
+ 172             if (outDirtyRecords.getCount() % DIRTY_PRINT_FREQUENCY == 0 || LOG.isDebugEnabled()) {
+ 173                 LOG.error(&quot;record insert failed ..{}&quot;, record.toString());
+ 174                 LOG.error(&quot;&quot;, e);
+ 175             }
+ 176             outDirtyRecords.inc();
+ 177         }
+ 178 
+ 179         if (outRecords.getCount() % ROW_PRINT_FREQUENCY == 0) {
+ 180             LOG.info(record.toString());
+ 181         }
+ 182         outRecords.inc();
+ 183     }
+ 184 
+ 185     private Put getPutByRow(Row record) {
+ 186         String rowKey = buildRowKey(record);
+ 187         if (StringUtils.isEmpty(rowKey)) {
+ 188             return null;
+ 189         }
+ 190         Put put = new Put(rowKey.getBytes());
+ 191         for (int i = 0; i &lt; record.getArity(); ++i) {
+ 192             Object fieldVal = record.getField(i);
+ 193             byte[] val = null;
+ 194             if (fieldVal != null) {
+ 195                 val = fieldVal.toString().getBytes();
+ 196             }
+ 197             byte[] cf = families[i].getBytes();
+ 198             byte[] qualifier = qualifiers[i].getBytes();
+ 199             put.addColumn(cf, qualifier, val);
+ 200         }
+ 201         return put;
+ 202     }
+ 203 
+ 204     private String buildRowKey(Row record) {
+ 205         String rowKeyValues = getRowKeyValues(record);
+ 206         // all rowkey not null
+ 207         if (StringUtils.isBlank(rowKeyValues)) {
+ 208             LOG.error(&quot;row key value must not null,record is ..{}&quot;, record);
+ 209             outDirtyRecords.inc();
+ 210             return &quot;&quot;;
+ 211         }
+ 212         return rowKeyValues;
+ 213     }
+ 214 
+ 215     private String getRowKeyValues(Row record) {
+ 216         Map&lt;String, Object&gt; row = rowConvertMap(record);
+ 217         RowKeyBuilder rowKeyBuilder = new RowKeyBuilder();
+ 218         rowKeyBuilder.init(rowkey);
+ 219         return rowKeyBuilder.getRowKey(row);
+ 220     }
+ 221 
+ 222     private Map&lt;String, Object&gt; rowConvertMap(Row record){
+ 223         Map&lt;String, Object&gt; rowValue = Maps.newHashMap();
+ 224         for(int i = 0; i &lt; columnNames.length; i++){
+ 225             rowValue.put(columnNames[i], record.getField(i));
+ 226         }
+ 227         return rowValue;
+ 228     }
+ 229 
+ 230     @Override
+ 231     public void close() throws IOException {
+ 232         if (conn != null) {
+ 233             conn.close();
+ 234             conn = null;
+ 235         }
+ 236     }
+ 237 
+ 238     private HbaseOutputFormat() {
+ 239     }
+ 240 
+ 241     public static HbaseOutputFormatBuilder buildHbaseOutputFormat() {
+ 242         return new HbaseOutputFormatBuilder();
+ 243     }
+ 244 
+ 245     public static class HbaseOutputFormatBuilder {
+ 246         private HbaseOutputFormat format;
+ 247 
+ 248         private HbaseOutputFormatBuilder() {
+ 249             format = new HbaseOutputFormat();
+ 250         }
+ 251 
+ 252         public HbaseOutputFormatBuilder setHost(String host) {
+ 253             format.host = host;
+ 254             return this;
+ 255         }
+ 256 
+ 257         public HbaseOutputFormatBuilder setZkParent(String parent) {
+ 258             format.zkParent = parent;
+ 259             return this;
+ 260         }
+ 261 
+ 262         public HbaseOutputFormatBuilder setTable(String tableName) {
+ 263             format.tableName = tableName;
+ 264             return this;
+ 265         }
+ 266 
+ 267         public HbaseOutputFormatBuilder setRowkey(String rowkey) {
+ 268             format.rowkey = rowkey;
+ 269             return this;
+ 270         }
+ 271 
+ 272         public HbaseOutputFormatBuilder setColumnNames(String[] columnNames) {
+ 273             format.columnNames = columnNames;
+ 274             return this;
+ 275         }
+ 276 
+ 277         public HbaseOutputFormatBuilder setColumnTypes(String[] columnTypes) {
+ 278             format.columnTypes = columnTypes;
+ 279             return this;
+ 280         }
+ 281 
+ 282         public HbaseOutputFormatBuilder setColumnNameFamily(Map&lt;String, String&gt; columnNameFamily) {
+ 283             format.columnNameFamily = columnNameFamily;
+ 284             return this;
+ 285         }
+ 286 
+ 287         public HbaseOutputFormatBuilder setKerberosAuthEnable(boolean kerberosAuthEnable) {
+ 288             format.kerberosAuthEnable = kerberosAuthEnable;
+ 289             return this;
+ 290         }
+ 291 
+ 292         public HbaseOutputFormatBuilder setRegionserverKeytabFile(String regionserverKeytabFile) {
+ 293             format.regionserverKeytabFile = regionserverKeytabFile;
+ 294             return this;
+ 295         }
+ 296 
+ 297         public HbaseOutputFormatBuilder setRegionserverPrincipal(String regionserverPrincipal) {
+ 298             format.regionserverPrincipal = regionserverPrincipal;
+ 299             return this;
+ 300         }
+ 301 
+ 302         public HbaseOutputFormatBuilder setSecurityKrb5Conf(String securityKrb5Conf) {
+ 303             format.securityKrb5Conf = securityKrb5Conf;
+ 304             return this;
+ 305         }
+ 306 
+ 307         public HbaseOutputFormatBuilder setZookeeperSaslClient(String zookeeperSaslClient) {
+ 308             format.zookeeperSaslClient = zookeeperSaslClient;
+ 309             return this;
+ 310         }
+ 311 
+ 312         public HbaseOutputFormatBuilder setClientPrincipal(String clientPrincipal) {
+ 313             format.clientPrincipal = clientPrincipal;
+ 314             return this;
+ 315         }
+ 316 
+ 317         public HbaseOutputFormatBuilder setClientKeytabFile(String clientKeytabFile) {
+ 318             format.clientKeytabFile = clientKeytabFile;
+ 319             return this;
+ 320         }
+ 321 
+ 322         public HbaseOutputFormat finish() {
+ 323             Preconditions.checkNotNull(format.host, &quot;zookeeperQuorum should be specified&quot;);
+ 324             Preconditions.checkNotNull(format.tableName, &quot;tableName should be specified&quot;);
+ 325             Preconditions.checkNotNull(format.columnNames, &quot;columnNames should be specified&quot;);
+<abbr title=" 326             Preconditions.checkArgument(format.columnNames.length != 0, &quot;columnNames length should not be zero&quot;);"> 326             Preconditions.checkArgument(format.columnNames.length != 0, &quot;columnNames length should not be🔵</abbr>
+ 327             String[] families = new String[format.columnNames.length];
+ 328             String[] qualifiers = new String[format.columnNames.length];
+ 329             if (format.columnNameFamily != null) {
+ 330                 Set&lt;String&gt; keySet = format.columnNameFamily.keySet();
+ 331                 String[] columns = keySet.toArray(new String[keySet.size()]);
+ 332                 for (int i = 0; i &lt; columns.length; ++i) {
+ 333                     String col = columns[i];
+ 334                     String[] part = col.split(&quot;:&quot;);
+ 335                     families[i] = part[0];
+ 336                     qualifiers[i] = part[1];
+ 337                 }
+ 338             }
+ 339             format.families = families;
+ 340             format.qualifiers = qualifiers;
+ 341             return format;
+ 342         }
+ 343     }
+ 344 
+<abbr title=" 345     private void fillSyncKerberosConfig(org.apache.hadoop.conf.Configuration config, String regionserverPrincipal,"> 345     private void fillSyncKerberosConfig(org.apache.hadoop.conf.Configuration config, String regionserverP🔵</abbr>
+<abbr title=" 346                                         String zookeeperSaslClient, String securityKrb5Conf) throws IOException {"> 346                                         String zookeeperSaslClient, String securityKrb5Conf) throws IOExc🔵</abbr>
+ 347         if (StringUtils.isEmpty(regionserverPrincipal)) {
+<abbr title=" 348             throw new IllegalArgumentException(&quot;Must provide regionserverPrincipal when authentication is Kerberos&quot;);"> 348             throw new IllegalArgumentException(&quot;Must provide regionserverPrincipal when authentication is🔵</abbr>
+ 349         }
+ 350         config.set(HbaseConfigUtils.KEY_HBASE_MASTER_KERBEROS_PRINCIPAL, regionserverPrincipal);
+ 351         config.set(HbaseConfigUtils.KEY_HBASE_REGIONSERVER_KERBEROS_PRINCIPAL, regionserverPrincipal);
+ 352         config.set(HbaseConfigUtils.KEY_HBASE_SECURITY_AUTHORIZATION, &quot;true&quot;);
+ 353         config.set(HbaseConfigUtils.KEY_HBASE_SECURITY_AUTHENTICATION, &quot;kerberos&quot;);
+ 354 
+ 355 
+ 356         if (!StringUtils.isEmpty(zookeeperSaslClient)) {
+ 357             System.setProperty(HbaseConfigUtils.KEY_ZOOKEEPER_SASL_CLIENT, zookeeperSaslClient);
+ 358         }
+ 359 
+ 360         if (!StringUtils.isEmpty(securityKrb5Conf)) {
+ 361             String krb5ConfPath = System.getProperty(&quot;user.dir&quot;) + File.separator + securityKrb5Conf;
+ 362             LOG.info(&quot;krb5ConfPath:{}&quot;, krb5ConfPath);
+ 363             System.setProperty(HbaseConfigUtils.KEY_JAVA_SECURITY_KRB5_CONF, krb5ConfPath);
+ 364         }
+ 365     }
+ 366 
+ 367     @Override
+ 368     public String toString() {
+ 369         return &quot;HbaseOutputFormat kerberos{&quot; +
+ 370                 &quot;kerberosAuthEnable=&quot; + kerberosAuthEnable +
+ 371                 &quot;, regionserverKeytabFile=&#x27;&quot; + regionserverKeytabFile + &#x27;\&#x27;&#x27; +
+ 372                 &quot;, regionserverPrincipal=&#x27;&quot; + regionserverPrincipal + &#x27;\&#x27;&#x27; +
+ 373                 &quot;, securityKrb5Conf=&#x27;&quot; + securityKrb5Conf + &#x27;\&#x27;&#x27; +
+ 374                 &quot;, zookeeperSaslClient=&#x27;&quot; + zookeeperSaslClient + &#x27;\&#x27;&#x27; +
+ 375                 &quot;, clientPrincipal=&#x27;&quot; + clientPrincipal + &#x27;\&#x27;&#x27; +
+ 376                 &quot;, clientKeytabFile=&#x27;&quot; + clientKeytabFile + &#x27;\&#x27;&#x27; +
+ 377                 &#x27;}&#x27;;
+ 378     }
+ 379 }
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ </pre></td>
+                        </tr>
+                    </table>
+                </div>
+                <div id="bottom">
+                    <table style="margin:auto">
+                        <tr>
+                            <th>ours vs. base</th>
+                            <th>theirs vs. base</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1  /*
+   2   * Licensed to the Apache Software Foundation (ASF) under one
+   3   * or more contributor license agreements.  See the NOTICE file
+   4   * distributed with this work for additional information
+   5   * regarding copyright ownership.  The ASF licenses this file
+   6   * to you under the Apache License, Version 2.0 (the
+   7   * &quot;License&quot;); you may not use this file except in compliance
+   8   * with the License.  You may obtain a copy of the License at
+   9   *
+  10   *     http://www.apache.org/licenses/LICENSE-2.0
+  11   *
+  12   * Unless required by applicable law or agreed to in writing, software
+  13   * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15   * See the License for the specific language governing permissions and
+  16   * limitations under the License.
+  17   */
+  18  
+  19  
+  20  
+  21  package com.dtstack.flink.sql.sink.hbase;
+  22  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  23 -import com.dtstack.flink.sql.enums.EUpdateMode;</span>
+  24  import com.dtstack.flink.sql.outputformat.AbstractDtRichOutputFormat;
+  25  import com.google.common.collect.Maps;
+  26  import org.apache.commons.lang3.StringUtils;
+  27  import org.apache.flink.api.java.tuple.Tuple2;
+  28  import org.apache.flink.configuration.Configuration;
+  29  import org.apache.flink.types.Row;
+  30  import org.apache.flink.util.Preconditions;
+  31  import org.apache.hadoop.hbase.*;
+  32  import org.apache.hadoop.hbase.client.Connection;
+  33  import org.apache.hadoop.hbase.client.ConnectionFactory;
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  34 -import org.apache.hadoop.hbase.client.Delete;</span>
+  35  import org.apache.hadoop.hbase.client.Put;
+  36  import org.apache.hadoop.hbase.client.Table;
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  37 -import org.apache.hadoop.hbase.util.Bytes;</span>
+  38  import org.apache.hadoop.security.UserGroupInformation;
+  39  import org.slf4j.Logger;
+  40  import org.slf4j.LoggerFactory;
+  41  
+  42  import java.io.File;
+  43  import java.io.IOException;
+  44  import java.security.PrivilegedAction;
+  45  import java.util.List;
+  46  import java.util.Map;
+  47  import java.util.Set;
+  48  
+  49  /**
+  50   * @author: jingzhen@dtstack.com
+  51   * date: 2017-6-29
+  52   */
+  53  public class HbaseOutputFormat extends AbstractDtRichOutputFormat&lt;Tuple2&gt; {
+  54  
+  55      private static final Logger LOG = LoggerFactory.getLogger(HbaseOutputFormat.class);
+  56  
+  57      private String host;
+  58      private String zkParent;
+  59      private String rowkey;
+  60      private String tableName;
+  61      private String[] columnNames;
+  62      private String updateMode;
+  63      private String[] columnTypes;
+  64      private Map&lt;String, String&gt; columnNameFamily;
+  65  
+  66      private boolean kerberosAuthEnable;
+  67      private String regionserverKeytabFile;
+  68      private String regionserverPrincipal;
+  69      private String securityKrb5Conf;
+  70      private String zookeeperSaslClient;
+  71      private String clientPrincipal;
+  72      private String clientKeytabFile;
+  73  
+  74      private String[] families;
+  75      private String[] qualifiers;
+  76  
+  77      private transient org.apache.hadoop.conf.Configuration conf;
+  78      private transient Connection conn;
+  79      private transient Table table;
+  80  
+  81      private transient ChoreService choreService;
+  82  
+  83      @Override
+  84      public void configure(Configuration parameters) {
+  85          LOG.warn(&quot;---configure---&quot;);
+  86          conf = HBaseConfiguration.create();
+  87      }
+  88  
+  89      @Override
+  90      public void open(int taskNumber, int numTasks) throws IOException {
+  91          LOG.warn(&quot;---open---&quot;);
+  92          openConn();
+  93          table = conn.getTable(TableName.valueOf(tableName));
+  94          LOG.warn(&quot;---open end(get table from hbase) ---&quot;);
+  95          initMetric();
+  96      }
+  97  
+  98      private void openConn(){
+  99          try{
+ 100              if (kerberosAuthEnable) {
+ 101                  LOG.info(&quot;open kerberos conn&quot;);
+ 102                  openKerberosConn();
+ 103              } else {
+ 104                  LOG.info(&quot;open conn&quot;);
+ 105                  conf.set(HbaseConfigUtils.KEY_HBASE_ZOOKEEPER_QUORUM, host);
+ 106                  conf.set(HbaseConfigUtils.KEY_HBASE_ZOOKEEPER_ZNODE_QUORUM, zkParent);
+ 107                  conn = ConnectionFactory.createConnection(conf);
+ 108              }
+ 109          }catch (Exception e){
+ 110              throw new RuntimeException(e);
+ 111          }
+ 112  
+ 113      }
+ 114      private void openKerberosConn() throws IOException {
+
+ 115          conf.set(HbaseConfigUtils.KEY_HBASE_ZOOKEEPER_QUORUM, host);
+ 116          conf.set(HbaseConfigUtils.KEY_HBASE_ZOOKEEPER_ZNODE_QUORUM, zkParent);
+ 117  
+ 118          LOG.info(&quot;kerberos config:{}&quot;, this.toString());
+ 119          Preconditions.checkArgument(!StringUtils.isEmpty(clientPrincipal), &quot; clientPrincipal not null!&quot;);
+ 120          Preconditions.checkArgument(!StringUtils.isEmpty(clientKeytabFile), &quot; clientKeytabFile not null!&quot;);
+ 121  
+ 122          fillSyncKerberosConfig(conf, regionserverPrincipal, zookeeperSaslClient, securityKrb5Conf);
+ 123  
+ 124          clientKeytabFile = System.getProperty(&quot;user.dir&quot;) + File.separator + clientKeytabFile;
+ 125          clientPrincipal = !StringUtils.isEmpty(clientPrincipal) ? clientPrincipal : regionserverPrincipal;
+ 126  
+ 127          conf.set(HbaseConfigUtils.KEY_HBASE_CLIENT_KEYTAB_FILE, clientKeytabFile);
+ 128          conf.set(HbaseConfigUtils.KEY_HBASE_CLIENT_KERBEROS_PRINCIPAL, clientPrincipal);
+ 129  
+<abbr title=" 130          UserGroupInformation userGroupInformation = HbaseConfigUtils.loginAndReturnUGI(conf, clientPrincipal, clientKeytabFile);"> 130          UserGroupInformation userGroupInformation = HbaseConfigUtils.loginAndReturnUGI(conf, clientPrincipal, clie🔵</abbr>
+ 131          org.apache.hadoop.conf.Configuration finalConf = conf;
+ 132          conn = userGroupInformation.doAs(new PrivilegedAction&lt;Connection&gt;() {
+ 133              @Override
+ 134              public Connection run() {
+ 135                  try {
+ 136                      ScheduledChore authChore = AuthUtil.getAuthChore(finalConf);
+ 137                      if (authChore != null) {
+ 138                          choreService = new ChoreService(&quot;hbaseKerberosSink&quot;);
+ 139                          choreService.scheduleChore(authChore);
+ 140                      }
+ 141  
+ 142                      return ConnectionFactory.createConnection(finalConf);
+ 143                  } catch (IOException e) {
+ 144                      LOG.error(&quot;Get connection fail with config:{}&quot;, finalConf);
+ 145                      throw new RuntimeException(e);
+ 146                  }
+ 147              }
+ 148          });
+ 149      }
+ 150  
+ 151  
+ 152  
+ 153      @Override
+ 154      public void writeRecord(Tuple2 tuple2) {
+ 155          Tuple2&lt;Boolean, Row&gt; tupleTrans = tuple2;
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 156 -        Boolean retract = tupleTrans.f0;</span>
+ 157          Row row = tupleTrans.f1;
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 158 -        if (retract) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 159 -            dealInsert(row);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 160 -        } else if (!retract &amp;&amp; StringUtils.equalsIgnoreCase(updateMode, EUpdateMode.UPSERT.name())) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 161 -            dealDelete(row);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 162 -        }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 163 +        dealInsert(row);</span>
+ 164      }
+ 165  
+ 166      protected void dealInsert(Row record) {
+ 167          Put put = getPutByRow(record);
+ 168          if (put == null || put.isEmpty()) {
+ 169              outDirtyRecords.inc();
+ 170              return;
+ 171          }
+ 172  
+ 173          try {
+ 174              table.put(put);
+ 175          } catch (Exception e) {
+ 176              if (outDirtyRecords.getCount() % DIRTY_PRINT_FREQUENCY == 0 || LOG.isDebugEnabled()) {
+ 177                  LOG.error(&quot;record insert failed ..{}&quot;, record.toString());
+ 178                  LOG.error(&quot;&quot;, e);
+ 179              }
+ 180              outDirtyRecords.inc();
+ 181          }
+ 182  
+ 183          if (outRecords.getCount() % ROW_PRINT_FREQUENCY == 0) {
+ 184              LOG.info(record.toString());
+ 185          }
+ 186          outRecords.inc();
+ 187      }
+ 188  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 189 -    protected void dealDelete(Row record) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 190 -        String rowKey = buildRowKey(record);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 191 -        if (!StringUtils.isEmpty(rowKey)) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 192 -            Delete delete = new Delete(Bytes.toBytes(rowKey));</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 193 -            try {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 194 -                table.delete(delete);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 195 -            } catch (IOException e) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 196 -                if (outDirtyRecords.getCount() % DIRTY_PRINT_FREQUENCY == 0 || LOG.isDebugEnabled()) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 197 -                    LOG.error(&quot;record insert failed ..{}&quot;, record.toString());</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 198 -                    LOG.error(&quot;&quot;, e);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 199 -                }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 200 -                outDirtyRecords.inc();</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 201 -            }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 202 -            if (outRecords.getCount() % ROW_PRINT_FREQUENCY == 0) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 203 -                LOG.info(record.toString());</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 204 -            }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 205 -            outRecords.inc();</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 206 -        }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 207 -    }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 208 -</span>
+ 209      private Put getPutByRow(Row record) {
+ 210          String rowKey = buildRowKey(record);
+ 211          if (StringUtils.isEmpty(rowKey)) {
+ 212              return null;
+ 213          }
+ 214          Put put = new Put(rowKey.getBytes());
+ 215          for (int i = 0; i &lt; record.getArity(); ++i) {
+ 216              Object fieldVal = record.getField(i);
+ 217              if (fieldVal == null) {
+ 218                  continue;
+ 219              }
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 220 -            byte[] val = fieldVal.toString().getBytes();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 221 +            byte[] val = HbaseUtil.toByte(fieldVal);</span>
+
+
+
+ 222              byte[] cf = families[i].getBytes();
+ 223              byte[] qualifier = qualifiers[i].getBytes();
+ 224  
+ 225              put.addColumn(cf, qualifier, val);
+ 226          }
+ 227          return put;
+ 228      }
+ 229  
+ 230      private String buildRowKey(Row record) {
+ 231          String rowKeyValues = getRowKeyValues(record);
+ 232          // all rowkey not null
+ 233          if (StringUtils.isBlank(rowKeyValues)) {
+ 234              LOG.error(&quot;row key value must not null,record is ..{}&quot;, record);
+ 235              outDirtyRecords.inc();
+ 236              return &quot;&quot;;
+ 237          }
+ 238          return rowKeyValues;
+ 239      }
+ 240  
+ 241      private String getRowKeyValues(Row record) {
+ 242          Map&lt;String, Object&gt; row = rowConvertMap(record);
+ 243          RowKeyBuilder rowKeyBuilder = new RowKeyBuilder();
+ 244          rowKeyBuilder.init(rowkey);
+ 245          return rowKeyBuilder.getRowKey(row);
+ 246      }
+ 247  
+ 248      private Map&lt;String, Object&gt; rowConvertMap(Row record){
+ 249          Map&lt;String, Object&gt; rowValue = Maps.newHashMap();
+ 250          for(int i = 0; i &lt; columnNames.length; i++){
+ 251              rowValue.put(columnNames[i], record.getField(i));
+ 252          }
+ 253          return rowValue;
+ 254      }
+ 255  
+ 256      @Override
+ 257      public void close() throws IOException {
+ 258          if (conn != null) {
+ 259              conn.close();
+ 260              conn = null;
+ 261          }
+ 262      }
+ 263      private HbaseOutputFormat() {
+ 264      }
+ 265  
+ 266      public static HbaseOutputFormatBuilder buildHbaseOutputFormat() {
+ 267          return new HbaseOutputFormatBuilder();
+ 268      }
+ 269  
+ 270      public static class HbaseOutputFormatBuilder {
+ 271  
+ 272          private HbaseOutputFormat format;
+ 273  
+ 274          private HbaseOutputFormatBuilder() {
+ 275              format = new HbaseOutputFormat();
+ 276          }
+ 277  
+ 278          public HbaseOutputFormatBuilder setHost(String host) {
+ 279              format.host = host;
+ 280              return this;
+ 281          }
+ 282  
+ 283          public HbaseOutputFormatBuilder setZkParent(String parent) {
+ 284              format.zkParent = parent;
+ 285              return this;
+ 286          }
+ 287  
+ 288  
+ 289          public HbaseOutputFormatBuilder setTable(String tableName) {
+ 290              format.tableName = tableName;
+ 291              return this;
+ 292          }
+ 293  
+ 294          public HbaseOutputFormatBuilder setRowkey(String rowkey) {
+ 295              format.rowkey = rowkey;
+ 296              return this;
+ 297          }
+ 298  
+ 299          public HbaseOutputFormatBuilder setColumnNames(String[] columnNames) {
+ 300              format.columnNames = columnNames;
+ 301              return this;
+ 302          }
+ 303  
+ 304          public HbaseOutputFormatBuilder setColumnTypes(String[] columnTypes) {
+ 305              format.columnTypes = columnTypes;
+ 306              return this;
+ 307          }
+ 308  
+ 309          public HbaseOutputFormatBuilder setColumnNameFamily(Map&lt;String, String&gt; columnNameFamily) {
+ 310              format.columnNameFamily = columnNameFamily;
+ 311              return this;
+ 312          }
+ 313  
+ 314          public HbaseOutputFormatBuilder setKerberosAuthEnable(boolean kerberosAuthEnable) {
+ 315              format.kerberosAuthEnable = kerberosAuthEnable;
+ 316              return this;
+ 317          }
+ 318  
+ 319          public HbaseOutputFormatBuilder setRegionserverKeytabFile(String regionserverKeytabFile) {
+ 320              format.regionserverKeytabFile = regionserverKeytabFile;
+ 321              return this;
+ 322          }
+ 323  
+ 324          public HbaseOutputFormatBuilder setRegionserverPrincipal(String regionserverPrincipal) {
+ 325              format.regionserverPrincipal = regionserverPrincipal;
+ 326              return this;
+ 327          }
+ 328  
+ 329          public HbaseOutputFormatBuilder setSecurityKrb5Conf(String securityKrb5Conf) {
+ 330              format.securityKrb5Conf = securityKrb5Conf;
+ 331              return this;
+ 332          }
+ 333  
+ 334          public HbaseOutputFormatBuilder setZookeeperSaslClient(String zookeeperSaslClient) {
+ 335              format.zookeeperSaslClient = zookeeperSaslClient;
+ 336              return this;
+ 337          }
+ 338  
+ 339          public HbaseOutputFormatBuilder setClientPrincipal(String clientPrincipal) {
+ 340              format.clientPrincipal = clientPrincipal;
+ 341              return this;
+ 342          }
+ 343  
+ 344          public HbaseOutputFormatBuilder setClientKeytabFile(String clientKeytabFile) {
+ 345              format.clientKeytabFile = clientKeytabFile;
+ 346              return this;
+ 347          }
+ 348  
+ 349  
+ 350          public HbaseOutputFormat finish() {
+ 351              Preconditions.checkNotNull(format.host, &quot;zookeeperQuorum should be specified&quot;);
+ 352              Preconditions.checkNotNull(format.tableName, &quot;tableName should be specified&quot;);
+ 353              Preconditions.checkNotNull(format.columnNames, &quot;columnNames should be specified&quot;);
+ 354              Preconditions.checkArgument(format.columnNames.length != 0, &quot;columnNames length should not be zero&quot;);
+ 355  
+ 356              String[] families = new String[format.columnNames.length];
+ 357              String[] qualifiers = new String[format.columnNames.length];
+ 358  
+ 359              if (format.columnNameFamily != null) {
+ 360                  Set&lt;String&gt; keySet = format.columnNameFamily.keySet();
+ 361                  String[] columns = keySet.toArray(new String[keySet.size()]);
+ 362                  for (int i = 0; i &lt; columns.length; ++i) {
+ 363                      String col = columns[i];
+ 364                      String[] part = col.split(&quot;:&quot;);
+ 365                      families[i] = part[0];
+ 366                      qualifiers[i] = part[1];
+ 367                  }
+ 368              }
+ 369              format.families = families;
+ 370              format.qualifiers = qualifiers;
+ 371  
+ 372              return format;
+ 373          }
+ 374  
+ 375      }
+ 376  
+ 377      private void fillSyncKerberosConfig(org.apache.hadoop.conf.Configuration config, String regionserverPrincipal,
+ 378                                          String zookeeperSaslClient, String securityKrb5Conf) throws IOException {
+ 379          if (StringUtils.isEmpty(regionserverPrincipal)) {
+<abbr title=" 380              throw new IllegalArgumentException(&quot;Must provide regionserverPrincipal when authentication is Kerberos&quot;);"> 380              throw new IllegalArgumentException(&quot;Must provide regionserverPrincipal when authentication is Kerberos🔵</abbr>
+ 381          }
+ 382          config.set(HbaseConfigUtils.KEY_HBASE_MASTER_KERBEROS_PRINCIPAL, regionserverPrincipal);
+ 383          config.set(HbaseConfigUtils.KEY_HBASE_REGIONSERVER_KERBEROS_PRINCIPAL, regionserverPrincipal);
+ 384          config.set(HbaseConfigUtils.KEY_HBASE_SECURITY_AUTHORIZATION, &quot;true&quot;);
+ 385          config.set(HbaseConfigUtils.KEY_HBASE_SECURITY_AUTHENTICATION, &quot;kerberos&quot;);
+ 386  
+ 387  
+ 388          if (!StringUtils.isEmpty(zookeeperSaslClient)) {
+ 389              System.setProperty(HbaseConfigUtils.KEY_ZOOKEEPER_SASL_CLIENT, zookeeperSaslClient);
+ 390          }
+ 391  
+ 392          if (!StringUtils.isEmpty(securityKrb5Conf)) {
+ 393              String krb5ConfPath = System.getProperty(&quot;user.dir&quot;) + File.separator + securityKrb5Conf;
+ 394              LOG.info(&quot;krb5ConfPath:{}&quot;, krb5ConfPath);
+ 395              System.setProperty(HbaseConfigUtils.KEY_JAVA_SECURITY_KRB5_CONF, krb5ConfPath);
+ 396          }
+ 397      }
+ 398  
+ 399      @Override
+ 400      public String toString() {
+ 401          return &quot;HbaseOutputFormat kerberos{&quot; +
+ 402                  &quot;kerberosAuthEnable=&quot; + kerberosAuthEnable +
+ 403                  &quot;, regionserverKeytabFile=&#x27;&quot; + regionserverKeytabFile + &#x27;\&#x27;&#x27; +
+ 404                  &quot;, regionserverPrincipal=&#x27;&quot; + regionserverPrincipal + &#x27;\&#x27;&#x27; +
+ 405                  &quot;, securityKrb5Conf=&#x27;&quot; + securityKrb5Conf + &#x27;\&#x27;&#x27; +
+ 406                  &quot;, zookeeperSaslClient=&#x27;&quot; + zookeeperSaslClient + &#x27;\&#x27;&#x27; +
+ 407                  &quot;, clientPrincipal=&#x27;&quot; + clientPrincipal + &#x27;\&#x27;&#x27; +
+ 408                  &quot;, clientKeytabFile=&#x27;&quot; + clientKeytabFile + &#x27;\&#x27;&#x27; +
+ 409                  &#x27;}&#x27;;
+ 410      }
+ 411  
+ 412  }</pre></td>
+                            <td><pre>   1  /*
+   2   * Licensed to the Apache Software Foundation (ASF) under one
+   3   * or more contributor license agreements.  See the NOTICE file
+   4   * distributed with this work for additional information
+   5   * regarding copyright ownership.  The ASF licenses this file
+   6   * to you under the Apache License, Version 2.0 (the
+   7   * &quot;License&quot;); you may not use this file except in compliance
+   8   * with the License.  You may obtain a copy of the License at
+   9   *
+  10   *     http://www.apache.org/licenses/LICENSE-2.0
+  11   *
+  12   * Unless required by applicable law or agreed to in writing, software
+  13   * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15   * See the License for the specific language governing permissions and
+  16   * limitations under the License.
+  17   */
+  18  
+  19  
+  20  
+  21  package com.dtstack.flink.sql.sink.hbase;
+  22  
+  23  import com.dtstack.flink.sql.enums.EUpdateMode;
+  24  import com.dtstack.flink.sql.outputformat.AbstractDtRichOutputFormat;
+  25  import com.google.common.collect.Maps;
+  26  import org.apache.commons.lang3.StringUtils;
+  27  import org.apache.flink.api.java.tuple.Tuple2;
+  28  import org.apache.flink.configuration.Configuration;
+  29  import org.apache.flink.types.Row;
+  30  import org.apache.flink.util.Preconditions;
+  31  import org.apache.hadoop.hbase.*;
+  32  import org.apache.hadoop.hbase.client.Connection;
+  33  import org.apache.hadoop.hbase.client.ConnectionFactory;
+  34  import org.apache.hadoop.hbase.client.Delete;
+  35  import org.apache.hadoop.hbase.client.Put;
+  36  import org.apache.hadoop.hbase.client.Table;
+  37  import org.apache.hadoop.hbase.util.Bytes;
+  38  import org.apache.hadoop.security.UserGroupInformation;
+  39  import org.slf4j.Logger;
+  40  import org.slf4j.LoggerFactory;
+  41  
+  42  import java.io.File;
+  43  import java.io.IOException;
+  44  import java.security.PrivilegedAction;
+  45  import java.util.List;
+  46  import java.util.Map;
+  47  import java.util.Set;
+  48  
+  49  /**
+  50   * @author: jingzhen@dtstack.com
+  51   * date: 2017-6-29
+  52   */
+  53  public class HbaseOutputFormat extends AbstractDtRichOutputFormat&lt;Tuple2&gt; {
+  54  
+  55      private static final Logger LOG = LoggerFactory.getLogger(HbaseOutputFormat.class);
+  56  
+  57      private String host;
+  58      private String zkParent;
+  59      private String rowkey;
+  60      private String tableName;
+  61      private String[] columnNames;
+  62      private String updateMode;
+  63      private String[] columnTypes;
+  64      private Map&lt;String, String&gt; columnNameFamily;
+  65  
+  66      private boolean kerberosAuthEnable;
+  67      private String regionserverKeytabFile;
+  68      private String regionserverPrincipal;
+  69      private String securityKrb5Conf;
+  70      private String zookeeperSaslClient;
+  71      private String clientPrincipal;
+  72      private String clientKeytabFile;
+  73  
+  74      private String[] families;
+  75      private String[] qualifiers;
+  76  
+  77      private transient org.apache.hadoop.conf.Configuration conf;
+  78      private transient Connection conn;
+  79      private transient Table table;
+  80  
+  81      private transient ChoreService choreService;
+  82  
+  83      @Override
+  84      public void configure(Configuration parameters) {
+  85          LOG.warn(&quot;---configure---&quot;);
+  86          conf = HBaseConfiguration.create();
+  87      }
+  88  
+  89      @Override
+  90      public void open(int taskNumber, int numTasks) throws IOException {
+  91          LOG.warn(&quot;---open---&quot;);
+  92          openConn();
+  93          table = conn.getTable(TableName.valueOf(tableName));
+  94          LOG.warn(&quot;---open end(get table from hbase) ---&quot;);
+  95          initMetric();
+  96      }
+  97  
+  98      private void openConn(){
+  99          try{
+ 100              if (kerberosAuthEnable) {
+ 101                  LOG.info(&quot;open kerberos conn&quot;);
+ 102                  openKerberosConn();
+ 103              } else {
+ 104                  LOG.info(&quot;open conn&quot;);
+ 105                  conf.set(HbaseConfigUtils.KEY_HBASE_ZOOKEEPER_QUORUM, host);
+ 106                  conf.set(HbaseConfigUtils.KEY_HBASE_ZOOKEEPER_ZNODE_QUORUM, zkParent);
+ 107                  conn = ConnectionFactory.createConnection(conf);
+ 108              }
+ 109          }catch (Exception e){
+ 110              throw new RuntimeException(e);
+ 111          }
+ 112  
+ 113      }
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 114 -    private void openKerberosConn() throws IOException {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 115 +    private void openKerberosConn() throws Exception {</span>
+ 116          conf.set(HbaseConfigUtils.KEY_HBASE_ZOOKEEPER_QUORUM, host);
+ 117          conf.set(HbaseConfigUtils.KEY_HBASE_ZOOKEEPER_ZNODE_QUORUM, zkParent);
+ 118  
+ 119          LOG.info(&quot;kerberos config:{}&quot;, this.toString());
+ 120          Preconditions.checkArgument(!StringUtils.isEmpty(clientPrincipal), &quot; clientPrincipal not null!&quot;);
+ 121          Preconditions.checkArgument(!StringUtils.isEmpty(clientKeytabFile), &quot; clientKeytabFile not null!&quot;);
+ 122  
+ 123          fillSyncKerberosConfig(conf, regionserverPrincipal, zookeeperSaslClient, securityKrb5Conf);
+ 124  
+ 125          clientKeytabFile = System.getProperty(&quot;user.dir&quot;) + File.separator + clientKeytabFile;
+ 126          clientPrincipal = !StringUtils.isEmpty(clientPrincipal) ? clientPrincipal : regionserverPrincipal;
+ 127  
+ 128          conf.set(HbaseConfigUtils.KEY_HBASE_CLIENT_KEYTAB_FILE, clientKeytabFile);
+ 129          conf.set(HbaseConfigUtils.KEY_HBASE_CLIENT_KERBEROS_PRINCIPAL, clientPrincipal);
+ 130  
+<abbr title=" 131          UserGroupInformation userGroupInformation = HbaseConfigUtils.loginAndReturnUGI(conf, clientPrincipal, clientKeytabFile);"> 131          UserGroupInformation userGroupInformation = HbaseConfigUtils.loginAndReturnUGI(conf, clientPrincipal, clie🔵</abbr>
+ 132          org.apache.hadoop.conf.Configuration finalConf = conf;
+ 133          conn = userGroupInformation.doAs(new PrivilegedAction&lt;Connection&gt;() {
+ 134              @Override
+ 135              public Connection run() {
+ 136                  try {
+ 137                      ScheduledChore authChore = AuthUtil.getAuthChore(finalConf);
+ 138                      if (authChore != null) {
+ 139                          choreService = new ChoreService(&quot;hbaseKerberosSink&quot;);
+ 140                          choreService.scheduleChore(authChore);
+ 141                      }
+ 142  
+ 143                      return ConnectionFactory.createConnection(finalConf);
+ 144                  } catch (IOException e) {
+ 145                      LOG.error(&quot;Get connection fail with config:{}&quot;, finalConf);
+ 146                      throw new RuntimeException(e);
+ 147                  }
+ 148              }
+ 149          });
+ 150      }
+ 151  
+ 152  
+ 153  
+ 154      @Override
+ 155      public void writeRecord(Tuple2 tuple2) {
+ 156          Tuple2&lt;Boolean, Row&gt; tupleTrans = tuple2;
+ 157          Boolean retract = tupleTrans.f0;
+ 158          Row row = tupleTrans.f1;
+ 159          if (retract) {
+ 160              dealInsert(row);
+ 161          } else if (!retract &amp;&amp; StringUtils.equalsIgnoreCase(updateMode, EUpdateMode.UPSERT.name())) {
+ 162              dealDelete(row);
+ 163          }
+
+ 164      }
+ 165  
+ 166      protected void dealInsert(Row record) {
+ 167          Put put = getPutByRow(record);
+ 168          if (put == null || put.isEmpty()) {
+ 169              outDirtyRecords.inc();
+ 170              return;
+ 171          }
+ 172  
+ 173          try {
+ 174              table.put(put);
+ 175          } catch (Exception e) {
+ 176              if (outDirtyRecords.getCount() % DIRTY_PRINT_FREQUENCY == 0 || LOG.isDebugEnabled()) {
+ 177                  LOG.error(&quot;record insert failed ..{}&quot;, record.toString());
+ 178                  LOG.error(&quot;&quot;, e);
+ 179              }
+ 180              outDirtyRecords.inc();
+ 181          }
+ 182  
+ 183          if (outRecords.getCount() % ROW_PRINT_FREQUENCY == 0) {
+ 184              LOG.info(record.toString());
+ 185          }
+ 186          outRecords.inc();
+ 187      }
+ 188  
+ 189      protected void dealDelete(Row record) {
+ 190          String rowKey = buildRowKey(record);
+ 191          if (!StringUtils.isEmpty(rowKey)) {
+ 192              Delete delete = new Delete(Bytes.toBytes(rowKey));
+ 193              try {
+ 194                  table.delete(delete);
+ 195              } catch (IOException e) {
+ 196                  if (outDirtyRecords.getCount() % DIRTY_PRINT_FREQUENCY == 0 || LOG.isDebugEnabled()) {
+ 197                      LOG.error(&quot;record insert failed ..{}&quot;, record.toString());
+ 198                      LOG.error(&quot;&quot;, e);
+ 199                  }
+ 200                  outDirtyRecords.inc();
+ 201              }
+ 202              if (outRecords.getCount() % ROW_PRINT_FREQUENCY == 0) {
+ 203                  LOG.info(record.toString());
+ 204              }
+ 205              outRecords.inc();
+ 206          }
+ 207      }
+ 208  
+ 209      private Put getPutByRow(Row record) {
+ 210          String rowKey = buildRowKey(record);
+ 211          if (StringUtils.isEmpty(rowKey)) {
+ 212              return null;
+ 213          }
+ 214          Put put = new Put(rowKey.getBytes());
+ 215          for (int i = 0; i &lt; record.getArity(); ++i) {
+ 216              Object fieldVal = record.getField(i);
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 217 -            if (fieldVal == null) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 218 -                continue;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 219 -            }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 220 -            byte[] val = fieldVal.toString().getBytes();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 221 +            byte[] val = null;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 222 +            if (fieldVal != null) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 223 +                val = fieldVal.toString().getBytes();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 224 +            }</span>
+ 225              byte[] cf = families[i].getBytes();
+ 226              byte[] qualifier = qualifiers[i].getBytes();
+ 227  
+ 228              put.addColumn(cf, qualifier, val);
+ 229          }
+ 230          return put;
+ 231      }
+ 232  
+ 233      private String buildRowKey(Row record) {
+ 234          String rowKeyValues = getRowKeyValues(record);
+ 235          // all rowkey not null
+ 236          if (StringUtils.isBlank(rowKeyValues)) {
+ 237              LOG.error(&quot;row key value must not null,record is ..{}&quot;, record);
+ 238              outDirtyRecords.inc();
+ 239              return &quot;&quot;;
+ 240          }
+ 241          return rowKeyValues;
+ 242      }
+ 243  
+ 244      private String getRowKeyValues(Row record) {
+ 245          Map&lt;String, Object&gt; row = rowConvertMap(record);
+ 246          RowKeyBuilder rowKeyBuilder = new RowKeyBuilder();
+ 247          rowKeyBuilder.init(rowkey);
+ 248          return rowKeyBuilder.getRowKey(row);
+ 249      }
+ 250  
+ 251      private Map&lt;String, Object&gt; rowConvertMap(Row record){
+ 252          Map&lt;String, Object&gt; rowValue = Maps.newHashMap();
+ 253          for(int i = 0; i &lt; columnNames.length; i++){
+ 254              rowValue.put(columnNames[i], record.getField(i));
+ 255          }
+ 256          return rowValue;
+ 257      }
+ 258  
+ 259      @Override
+ 260      public void close() throws IOException {
+ 261          if (conn != null) {
+ 262              conn.close();
+ 263              conn = null;
+ 264          }
+ 265      }
+ 266      private HbaseOutputFormat() {
+ 267      }
+ 268  
+ 269      public static HbaseOutputFormatBuilder buildHbaseOutputFormat() {
+ 270          return new HbaseOutputFormatBuilder();
+ 271      }
+ 272  
+ 273      public static class HbaseOutputFormatBuilder {
+ 274  
+ 275          private HbaseOutputFormat format;
+ 276  
+ 277          private HbaseOutputFormatBuilder() {
+ 278              format = new HbaseOutputFormat();
+ 279          }
+ 280  
+ 281          public HbaseOutputFormatBuilder setHost(String host) {
+ 282              format.host = host;
+ 283              return this;
+ 284          }
+ 285  
+ 286          public HbaseOutputFormatBuilder setZkParent(String parent) {
+ 287              format.zkParent = parent;
+ 288              return this;
+ 289          }
+ 290  
+ 291  
+ 292          public HbaseOutputFormatBuilder setTable(String tableName) {
+ 293              format.tableName = tableName;
+ 294              return this;
+ 295          }
+ 296  
+ 297          public HbaseOutputFormatBuilder setRowkey(String rowkey) {
+ 298              format.rowkey = rowkey;
+ 299              return this;
+ 300          }
+ 301  
+ 302          public HbaseOutputFormatBuilder setColumnNames(String[] columnNames) {
+ 303              format.columnNames = columnNames;
+ 304              return this;
+ 305          }
+ 306  
+ 307          public HbaseOutputFormatBuilder setColumnTypes(String[] columnTypes) {
+ 308              format.columnTypes = columnTypes;
+ 309              return this;
+ 310          }
+ 311  
+ 312          public HbaseOutputFormatBuilder setColumnNameFamily(Map&lt;String, String&gt; columnNameFamily) {
+ 313              format.columnNameFamily = columnNameFamily;
+ 314              return this;
+ 315          }
+ 316  
+ 317          public HbaseOutputFormatBuilder setKerberosAuthEnable(boolean kerberosAuthEnable) {
+ 318              format.kerberosAuthEnable = kerberosAuthEnable;
+ 319              return this;
+ 320          }
+ 321  
+ 322          public HbaseOutputFormatBuilder setRegionserverKeytabFile(String regionserverKeytabFile) {
+ 323              format.regionserverKeytabFile = regionserverKeytabFile;
+ 324              return this;
+ 325          }
+ 326  
+ 327          public HbaseOutputFormatBuilder setRegionserverPrincipal(String regionserverPrincipal) {
+ 328              format.regionserverPrincipal = regionserverPrincipal;
+ 329              return this;
+ 330          }
+ 331  
+ 332          public HbaseOutputFormatBuilder setSecurityKrb5Conf(String securityKrb5Conf) {
+ 333              format.securityKrb5Conf = securityKrb5Conf;
+ 334              return this;
+ 335          }
+ 336  
+ 337          public HbaseOutputFormatBuilder setZookeeperSaslClient(String zookeeperSaslClient) {
+ 338              format.zookeeperSaslClient = zookeeperSaslClient;
+ 339              return this;
+ 340          }
+ 341  
+ 342          public HbaseOutputFormatBuilder setClientPrincipal(String clientPrincipal) {
+ 343              format.clientPrincipal = clientPrincipal;
+ 344              return this;
+ 345          }
+ 346  
+ 347          public HbaseOutputFormatBuilder setClientKeytabFile(String clientKeytabFile) {
+ 348              format.clientKeytabFile = clientKeytabFile;
+ 349              return this;
+ 350          }
+ 351  
+ 352  
+ 353          public HbaseOutputFormat finish() {
+ 354              Preconditions.checkNotNull(format.host, &quot;zookeeperQuorum should be specified&quot;);
+ 355              Preconditions.checkNotNull(format.tableName, &quot;tableName should be specified&quot;);
+ 356              Preconditions.checkNotNull(format.columnNames, &quot;columnNames should be specified&quot;);
+ 357              Preconditions.checkArgument(format.columnNames.length != 0, &quot;columnNames length should not be zero&quot;);
+ 358  
+ 359              String[] families = new String[format.columnNames.length];
+ 360              String[] qualifiers = new String[format.columnNames.length];
+ 361  
+ 362              if (format.columnNameFamily != null) {
+ 363                  Set&lt;String&gt; keySet = format.columnNameFamily.keySet();
+ 364                  String[] columns = keySet.toArray(new String[keySet.size()]);
+ 365                  for (int i = 0; i &lt; columns.length; ++i) {
+ 366                      String col = columns[i];
+ 367                      String[] part = col.split(&quot;:&quot;);
+ 368                      families[i] = part[0];
+ 369                      qualifiers[i] = part[1];
+ 370                  }
+ 371              }
+ 372              format.families = families;
+ 373              format.qualifiers = qualifiers;
+ 374  
+ 375              return format;
+ 376          }
+ 377  
+ 378      }
+ 379  
+ 380      private void fillSyncKerberosConfig(org.apache.hadoop.conf.Configuration config, String regionserverPrincipal,
+ 381                                          String zookeeperSaslClient, String securityKrb5Conf) throws IOException {
+ 382          if (StringUtils.isEmpty(regionserverPrincipal)) {
+<abbr title=" 383              throw new IllegalArgumentException(&quot;Must provide regionserverPrincipal when authentication is Kerberos&quot;);"> 383              throw new IllegalArgumentException(&quot;Must provide regionserverPrincipal when authentication is Kerberos🔵</abbr>
+ 384          }
+ 385          config.set(HbaseConfigUtils.KEY_HBASE_MASTER_KERBEROS_PRINCIPAL, regionserverPrincipal);
+ 386          config.set(HbaseConfigUtils.KEY_HBASE_REGIONSERVER_KERBEROS_PRINCIPAL, regionserverPrincipal);
+ 387          config.set(HbaseConfigUtils.KEY_HBASE_SECURITY_AUTHORIZATION, &quot;true&quot;);
+ 388          config.set(HbaseConfigUtils.KEY_HBASE_SECURITY_AUTHENTICATION, &quot;kerberos&quot;);
+ 389  
+ 390  
+ 391          if (!StringUtils.isEmpty(zookeeperSaslClient)) {
+ 392              System.setProperty(HbaseConfigUtils.KEY_ZOOKEEPER_SASL_CLIENT, zookeeperSaslClient);
+ 393          }
+ 394  
+ 395          if (!StringUtils.isEmpty(securityKrb5Conf)) {
+ 396              String krb5ConfPath = System.getProperty(&quot;user.dir&quot;) + File.separator + securityKrb5Conf;
+ 397              LOG.info(&quot;krb5ConfPath:{}&quot;, krb5ConfPath);
+ 398              System.setProperty(HbaseConfigUtils.KEY_JAVA_SECURITY_KRB5_CONF, krb5ConfPath);
+ 399          }
+ 400      }
+ 401  
+ 402      @Override
+ 403      public String toString() {
+ 404          return &quot;HbaseOutputFormat kerberos{&quot; +
+ 405                  &quot;kerberosAuthEnable=&quot; + kerberosAuthEnable +
+ 406                  &quot;, regionserverKeytabFile=&#x27;&quot; + regionserverKeytabFile + &#x27;\&#x27;&#x27; +
+ 407                  &quot;, regionserverPrincipal=&#x27;&quot; + regionserverPrincipal + &#x27;\&#x27;&#x27; +
+ 408                  &quot;, securityKrb5Conf=&#x27;&quot; + securityKrb5Conf + &#x27;\&#x27;&#x27; +
+ 409                  &quot;, zookeeperSaslClient=&#x27;&quot; + zookeeperSaslClient + &#x27;\&#x27;&#x27; +
+ 410                  &quot;, clientPrincipal=&#x27;&quot; + clientPrincipal + &#x27;\&#x27;&#x27; +
+ 411                  &quot;, clientKeytabFile=&#x27;&quot; + clientKeytabFile + &#x27;\&#x27;&#x27; +
+ 412                  &#x27;}&#x27;;
+ 413      }
+ 414  
+ 415  }</pre></td>
+                        </tr>
+                    </table>
+                </div>
+              </body>
+            </html>
+            

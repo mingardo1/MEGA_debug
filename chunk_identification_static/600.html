@@ -1,0 +1,1734 @@
+<!DOCTYPE html>
+    <html lang="en">
+              <head>
+                <meta charset="utf-8">
+                <title>600</title>
+                    <style>
+                        #top {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        #bottom {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        abbr {
+                          /* Here is the delay */
+                          transition-delay:0s;
+                        }
+                    </style>
+              </head>
+              <body>
+                <span style="height: 4vh">
+                    600
+                    <a href="599.html">prev</a>
+                    <a href="601.html">next</a>
+                    <a href="600_chunks.html">chunks</a>
+                    <a href="index.html">index</a>
+                    DTStack/flinkStreamSQL_b44a86dc90b7fbefeec65e6c5a467a259b41ec59_kudu/kudu-sink/src/main/java/com/dtstack/flink/sql/sink/kudu/KuduOutputFormat.java
+                    <textarea rows=1 onclick='navigator.clipboard.writeText(this.value)'>cd C:\studies\se\mega\git-analyzer-plus\notebooks\debug
+del /Q *
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;b44a86dc90b7fbefeec65e6c5a467a259b41ec59:kudu/kudu-sink/src/main/java/com/dtstack/flink/sql/sink/kudu/KuduOutputFormat.java&quot; &gt; committed.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;b44a86dc90b7fbefeec65e6c5a467a259b41ec59^1:kudu/kudu-sink/src/main/java/com/dtstack/flink/sql/sink/kudu/KuduOutputFormat.java&quot; &gt; ours.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;b44a86dc90b7fbefeec65e6c5a467a259b41ec59^2:kudu/kudu-sink/src/main/java/com/dtstack/flink/sql/sink/kudu/KuduOutputFormat.java&quot; &gt; theirs.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;1a973cf785a926fcd45c51fa474acc2ae880f8cb:kudu/kudu-sink/src/main/java/com/dtstack/flink/sql/sink/kudu/KuduOutputFormat.java&quot; &gt; base.java
+copy ours.java 1ours.java
+copy ours.java 2ours.java
+copy theirs.java 1theirs.java
+copy theirs.java 2theirs.java
+copy base.java 1base.java
+copy base.java 2base.java
+&quot;C:\Program Files\Java\jdk1.8.0_241\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\jFSTMerge\build\libs\jFSTMerge-all.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\jfstmerge.java --show-base
+&quot;C:\Program Files\Eclipse Adoptium\jdk-17.0.11.9-hotspot\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\spork\target\spork-0.5.0-SNAPSHOT.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\spork.java
+del /Q 1*.java
+del /Q 2*.java
+del /Q jfstmerge.java.merge
+</textarea>
+                    {strict: [[b], [j]], subset: [[b], [j]]}
+                </span>
+                <div id="top">
+
+                    <table>
+                        <tr>
+                            <th>line based (standard git)</th>
+                            <th>jfstmerge</th>
+                            <th>spork</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1 /*
+   2  * Licensed to the Apache Software Foundation (ASF) under one
+   3  * or more contributor license agreements.  See the NOTICE file
+   4  * distributed with this work for additional information
+   5  * regarding copyright ownership.  The ASF licenses this file
+   6  * to you under the Apache License, Version 2.0 (the
+   7  * &quot;License&quot;); you may not use this file except in compliance
+   8  * with the License.  You may obtain a copy of the License at
+   9  *
+  10  *     http://www.apache.org/licenses/LICENSE-2.0
+  11  *
+  12  * Unless required by applicable law or agreed to in writing, software
+  13  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15  * See the License for the specific language governing permissions and
+  16  * limitations under the License.
+  17  */
+  18 
+  19 package com.dtstack.flink.sql.sink.kudu;
+  20 
+  21 import com.dtstack.flink.sql.outputformat.AbstractDtRichOutputFormat;
+  22 import org.apache.flink.api.common.typeinfo.TypeInformation;
+  23 import org.apache.flink.api.java.tuple.Tuple2;
+  24 import org.apache.flink.configuration.Configuration;
+  25 import org.apache.flink.types.Row;
+  26 
+  27 import com.dtstack.flink.sql.outputformat.DtRichOutputFormat;
+  28 import org.apache.kudu.client.AsyncKuduClient;
+  29 import org.apache.kudu.client.AsyncKuduSession;
+  30 import org.apache.kudu.client.KuduClient;
+  31 import org.apache.kudu.client.KuduException;
+  32 import org.apache.kudu.client.KuduTable;
+  33 import org.apache.kudu.client.Operation;
+  34 import org.apache.kudu.client.PartialRow;
+  35 import org.slf4j.Logger;
+  36 import org.slf4j.LoggerFactory;
+  37 
+  38 import java.io.IOException;
+  39 import java.math.BigDecimal;
+  40 import java.sql.Timestamp;
+  41 import java.util.Date;
+  42 
+  43 /**
+  44  *  @author  gituser
+  45  *  @modify  xiuzhu
+  46  */
+  47 public class KuduOutputFormat extends AbstractDtRichOutputFormat&lt;Tuple2&gt; {
+  48 
+  49     private static final long serialVersionUID = 1L;
+  50 
+  51     private static final Logger LOG = LoggerFactory.getLogger(KuduOutputFormat.class);
+  52 
+  53     public enum WriteMode {
+  54         // insert
+  55         INSERT,
+  56         // update
+  57         UPDATE,
+  58         // update or insert
+  59         UPSERT
+  60     }
+  61 
+  62     private String kuduMasters;
+  63 
+  64     private String tableName;
+  65 
+  66     private WriteMode writeMode;
+  67 
+  68     protected String[] fieldNames;
+  69 
+  70     TypeInformation&lt;?&gt;[] fieldTypes;
+  71 
+  72     private AsyncKuduClient client;
+  73 
+  74     private KuduTable table;
+  75 
+  76     private Integer workerCount;
+  77 
+  78     private Integer defaultOperationTimeoutMs;
+  79 
+  80     private Integer defaultSocketReadTimeoutMs;
+  81 
+  82 
+  83     private KuduOutputFormat() {
+  84     }
+  85 
+  86     @Override
+  87     public void configure(Configuration parameters) {
+  88 
+  89     }
+  90 
+  91     @Override
+  92     public void open(int taskNumber, int numTasks) throws IOException {
+  93         establishConnection();
+  94         initMetric();
+  95     }
+  96 
+  97 
+  98     private void establishConnection() throws KuduException {
+<abbr title="  99         AsyncKuduClient.AsyncKuduClientBuilder asyncKuduClientBuilder = new AsyncKuduClient.AsyncKuduClientBuilder(kuduMasters);">  99         AsyncKuduClient.AsyncKuduClientBuilder asyncKuduClientBuilder = new AsyncKuduClient.AsyncKuduClie🔵</abbr>
+ 100         if (null != workerCount) {
+ 101             asyncKuduClientBuilder.workerCount(workerCount);
+ 102         }
+ 103         if (null != defaultSocketReadTimeoutMs) {
+ 104             asyncKuduClientBuilder.workerCount(defaultSocketReadTimeoutMs);
+ 105         }
+ 106 
+ 107         if (null != defaultOperationTimeoutMs) {
+ 108             asyncKuduClientBuilder.workerCount(defaultOperationTimeoutMs);
+ 109         }
+ 110         client = asyncKuduClientBuilder.build();
+ 111         KuduClient syncClient = client.syncClient();
+ 112 
+ 113         if (syncClient.tableExists(tableName)) {
+ 114             table = syncClient.openTable(tableName);
+ 115         }
+ 116     }
+ 117 
+ 118     @Override
+ 119     public void writeRecord(Tuple2 record) throws IOException {
+ 120         Tuple2&lt;Boolean, Row&gt; tupleTrans = record;
+ 121         Boolean retract = tupleTrans.getField(0);
+ 122         if (!retract) {
+ 123             return;
+ 124         }
+ 125         Row row = tupleTrans.getField(1);
+ 126         if (row.getArity() != fieldNames.length) {
+ 127             if(outDirtyRecords.getCount() % DIRTY_PRINT_FREQUENCY == 0) {
+ 128 &lt;&lt;&lt;&lt;&lt;&lt;&lt; GitAnalyzerPlus_ours
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 129                 LOG.error(&quot;record insert failed ..{}&quot;, row.toString());</span>
+ 130 ||||||| GitAnalyzerPlus_base
+ 131 &lt;&lt;&lt;&lt;&lt;&lt;&lt; OURS
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 132                 LOG.error(&quot;record insert failed:{}&quot;, row.toString());</span>
+ 133 =======
+ 134 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 135                 LOG.error(&quot;record insert failed:{}&quot;, row.toString());</span>
+ 136 &gt;&gt;&gt;&gt;&gt;&gt;&gt; GitAnalyzerPlus_theirs
+ 137                 LOG.error(&quot;cause by row.getArity() != fieldNames.length&quot;);
+ 138             }
+ 139             outDirtyRecords.inc();
+ 140             return;
+ 141         }
+ 142         Operation operation = toOperation(writeMode, row);
+ 143         AsyncKuduSession session = client.newSession();
+ 144 
+ 145         try {
+ 146             if (outRecords.getCount() % ROW_PRINT_FREQUENCY == 0) {
+ 147                 LOG.info(&quot;Receive data : {}&quot;, row);
+ 148             }
+ 149 
+ 150             session.apply(operation);
+ 151             session.close();
+ 152             outRecords.inc();
+ 153         } catch (KuduException e) {
+ 154             if(outDirtyRecords.getCount() % DIRTY_PRINT_FREQUENCY == 0){
+<abbr title=" 155                 LOG.error(&quot;record insert failed, total dirty record:{} current row:{}&quot;, outDirtyRecords.getCount(), row.toString());"> 155                 LOG.error(&quot;record insert failed, total dirty record:{} current row:{}&quot;, outDirtyRecords.g🔵</abbr>
+ 156                 LOG.error(&quot;&quot;, e);
+ 157             }
+ 158             outDirtyRecords.inc();
+ 159         }
+ 160     }
+ 161 
+ 162     @Override
+ 163     public void close() {
+ 164         if (null != client) {
+ 165             try {
+ 166                 client.close();
+ 167             } catch (Exception e) {
+ 168                 throw new IllegalArgumentException(&quot;[closeKudu]:&quot; + e.getMessage());
+ 169             }
+ 170         }
+ 171     }
+ 172 
+ 173     public static KuduOutputFormatBuilder buildKuduOutputFormat() {
+ 174         return new KuduOutputFormatBuilder();
+ 175     }
+ 176 
+ 177     public static class KuduOutputFormatBuilder {
+ 178         private final KuduOutputFormat kuduOutputFormat;
+ 179 
+ 180         protected KuduOutputFormatBuilder() {
+ 181             this.kuduOutputFormat = new KuduOutputFormat();
+ 182         }
+ 183 
+ 184         public KuduOutputFormatBuilder setKuduMasters(String kuduMasters) {
+ 185             kuduOutputFormat.kuduMasters = kuduMasters;
+ 186             return this;
+ 187         }
+ 188 
+ 189         public KuduOutputFormatBuilder setTableName(String tableName) {
+ 190             kuduOutputFormat.tableName = tableName;
+ 191             return this;
+ 192         }
+ 193 
+ 194 
+ 195         public KuduOutputFormatBuilder setFieldNames(String[] fieldNames) {
+ 196             kuduOutputFormat.fieldNames = fieldNames;
+ 197             return this;
+ 198         }
+ 199 
+ 200         public KuduOutputFormatBuilder setFieldTypes(TypeInformation&lt;?&gt;[] fieldTypes) {
+ 201             kuduOutputFormat.fieldTypes = fieldTypes;
+ 202             return this;
+ 203         }
+ 204 
+ 205         public KuduOutputFormatBuilder setWriteMode(WriteMode writeMode) {
+ 206             if (null == writeMode) {
+ 207                 kuduOutputFormat.writeMode = WriteMode.UPSERT;
+ 208             }
+ 209             kuduOutputFormat.writeMode = writeMode;
+ 210             return this;
+ 211         }
+ 212 
+ 213         public KuduOutputFormatBuilder setWorkerCount(Integer workerCount) {
+ 214             kuduOutputFormat.workerCount = workerCount;
+ 215             return this;
+ 216         }
+ 217 
+ 218         public KuduOutputFormatBuilder setDefaultOperationTimeoutMs(Integer defaultOperationTimeoutMs) {
+ 219             kuduOutputFormat.defaultOperationTimeoutMs = defaultOperationTimeoutMs;
+ 220             return this;
+ 221         }
+ 222 
+<abbr title=" 223         public KuduOutputFormatBuilder setDefaultSocketReadTimeoutMs(Integer defaultSocketReadTimeoutMs) {"> 223         public KuduOutputFormatBuilder setDefaultSocketReadTimeoutMs(Integer defaultSocketReadTimeoutMs) 🔵</abbr>
+ 224             kuduOutputFormat.defaultSocketReadTimeoutMs = defaultSocketReadTimeoutMs;
+ 225             return this;
+ 226         }
+ 227 
+ 228 
+ 229         public KuduOutputFormat finish() {
+ 230             if (kuduOutputFormat.kuduMasters == null) {
+ 231                 throw new IllegalArgumentException(&quot;No kuduMasters supplied.&quot;);
+ 232             }
+ 233 
+ 234             if (kuduOutputFormat.tableName == null) {
+ 235                 throw new IllegalArgumentException(&quot;No tablename supplied.&quot;);
+ 236             }
+ 237 
+ 238             return kuduOutputFormat;
+ 239         }
+ 240     }
+ 241 
+ 242     private Operation toOperation(WriteMode writeMode, Row row) {
+ 243         if (null == table) {
+ 244             throw new IllegalArgumentException(&quot;Table Open Failed , please check table exists&quot;);
+ 245         }
+ 246         Operation operation = toOperation(writeMode);
+ 247         PartialRow partialRow = operation.getRow();
+ 248 
+ 249         for (int index = 0; index &lt; row.getArity(); index++) {
+ 250             //解决kudu中全小写字段找不到的bug
+ 251             String fieldName = fieldNames[index].toLowerCase();
+ 252             if (row.getField(index) == null) {
+ 253                 partialRow.setNull(fieldName);
+ 254             } else {
+ 255                 if (fieldTypes[index].getTypeClass() == String.class) {
+ 256                     partialRow.addString(fieldName, (String) row.getField(index));
+ 257                     continue;
+ 258                 }
+ 259                 if (fieldTypes[index].getTypeClass() == Float.class) {
+ 260                     partialRow.addFloat(fieldName, (Float) row.getField(index));
+ 261                     continue;
+ 262                 }
+ 263                 if (fieldTypes[index].getTypeClass() == Byte.class) {
+ 264                     partialRow.addByte(fieldName, (Byte) row.getField(index));
+ 265                     continue;
+ 266                 }
+ 267 
+ 268                 if (fieldTypes[index].getTypeClass() == Short.class) {
+ 269                     partialRow.addShort(fieldName, (Short) row.getField(index));
+ 270                     continue;
+ 271                 }
+ 272 
+ 273                 if (fieldTypes[index].getTypeClass() == Integer.class) {
+ 274                     partialRow.addInt(fieldName, (Integer) row.getField(index));
+ 275                     continue;
+ 276                 }
+ 277 
+ 278                 if (fieldTypes[index].getTypeClass() == Long.class) {
+ 279                     partialRow.addLong(fieldName, (Long) row.getField(index));
+ 280                     continue;
+ 281                 }
+ 282 
+ 283                 if (fieldTypes[index].getTypeClass() == Double.class) {
+ 284                     partialRow.addDouble(fieldName, (Double) row.getField(index));
+ 285                     continue;
+ 286                 }
+ 287 
+ 288                 if (fieldTypes[index].getTypeClass() == BigDecimal.class) {
+ 289                     partialRow.addDecimal(fieldName, (BigDecimal) row.getField(index));
+ 290                     continue;
+ 291                 }
+ 292                 if (fieldTypes[index].getTypeClass() == Boolean.class) {
+ 293                     partialRow.addBoolean(fieldName, (Boolean) row.getField(index));
+ 294                     continue;
+ 295                 }
+ 296 
+ 297                 if (fieldTypes[index].getTypeClass() == Date.class) {
+<abbr title=" 298                     partialRow.addTimestamp(fieldName, new Timestamp(((Date) row.getField(index)).getTime()));"> 298                     partialRow.addTimestamp(fieldName, new Timestamp(((Date) row.getField(index)).getTime🔵</abbr>
+ 299                     continue;
+ 300                 }
+ 301 
+ 302                 if (fieldTypes[index].getTypeClass() == Timestamp.class) {
+ 303                     partialRow.addTimestamp(fieldName, (Timestamp) row.getField(index));
+ 304                     continue;
+ 305                 }
+ 306 
+ 307                 if (fieldTypes[index].getTypeClass() == byte[].class) {
+ 308                     partialRow.addBinary(fieldName, (byte[]) row.getField(index));
+ 309                     continue;
+ 310                 }
+ 311                 throw new IllegalArgumentException(&quot;Illegal var type: &quot; + fieldTypes[index]);
+ 312             }
+ 313         }
+ 314         return operation;
+ 315 
+ 316     }
+ 317 
+ 318     private Operation toOperation(WriteMode writeMode) {
+ 319         switch (writeMode) {
+ 320             case INSERT:
+ 321                 return table.newInsert();
+ 322             case UPDATE:
+ 323                 return table.newUpdate();
+ 324             case UPSERT:
+ 325                 return table.newUpsert();
+ 326             default:
+ 327                 return table.newUpsert();
+ 328         }
+ 329     }
+ 330 
+ 331 }</pre></td>
+                            <td><pre>   1 /*
+   2  * Licensed to the Apache Software Foundation (ASF) under one
+   3  * or more contributor license agreements.  See the NOTICE file
+   4  * distributed with this work for additional information
+   5  * regarding copyright ownership.  The ASF licenses this file
+   6  * to you under the Apache License, Version 2.0 (the
+   7  * &quot;License&quot;); you may not use this file except in compliance
+   8  * with the License.  You may obtain a copy of the License at
+   9  *
+  10  *     http://www.apache.org/licenses/LICENSE-2.0
+  11  *
+  12  * Unless required by applicable law or agreed to in writing, software
+  13  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15  * See the License for the specific language governing permissions and
+  16  * limitations under the License.
+  17  */
+  18 
+  19 package com.dtstack.flink.sql.sink.kudu;
+  20 
+  21 import com.dtstack.flink.sql.outputformat.AbstractDtRichOutputFormat;
+  22 import org.apache.flink.api.common.typeinfo.TypeInformation;
+  23 import org.apache.flink.api.java.tuple.Tuple2;
+  24 import org.apache.flink.configuration.Configuration;
+  25 import org.apache.flink.types.Row;
+  26 import org.apache.kudu.client.AsyncKuduClient;
+  27 import org.apache.kudu.client.AsyncKuduSession;
+  28 import org.apache.kudu.client.KuduClient;
+  29 import org.apache.kudu.client.KuduException;
+  30 import org.apache.kudu.client.KuduTable;
+  31 import org.apache.kudu.client.Operation;
+  32 import org.apache.kudu.client.PartialRow;
+  33 import org.slf4j.Logger;
+  34 import org.slf4j.LoggerFactory;
+  35 
+  36 import java.io.IOException;
+  37 import java.math.BigDecimal;
+  38 import java.sql.Timestamp;
+  39 import java.util.Date;
+  40 
+  41 /**
+  42  *  @author  gituser
+  43  *  @modify  xiuzhu
+  44  */
+  45 public class KuduOutputFormat
+  46 &lt;&lt;&lt;&lt;&lt;&lt;&lt; MINE
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  47 extends AbstractDtRichOutputFormat&lt;Tuple2&gt;</span>
+  48 ||||||| BASE
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  49 extends DtRichOutputFormat</span>
+  50 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  51 extends DtRichOutputFormat&lt;Tuple2&gt;</span>
+  52 &gt;&gt;&gt;&gt;&gt;&gt;&gt; YOURS
+  53  {
+  54 
+  55     private static final long serialVersionUID = 1L;
+  56 
+  57     private static final Logger LOG = LoggerFactory.getLogger(KuduOutputFormat.class);
+  58 
+  59     public enum WriteMode {
+  60         // insert
+  61         INSERT,
+  62         // update
+  63         UPDATE,
+  64         // update or insert
+  65         UPSERT
+  66     }
+  67 
+  68     private String kuduMasters;
+  69 
+  70     private String tableName;
+  71 
+  72     private WriteMode writeMode;
+  73 
+  74     protected String[] fieldNames;
+  75 
+  76     TypeInformation&lt;?&gt;[] fieldTypes;
+  77 
+  78     private AsyncKuduClient client;
+  79 
+  80     private KuduTable table;
+  81 
+  82     private Integer workerCount;
+  83 
+  84     private Integer defaultOperationTimeoutMs;
+  85 
+  86     private Integer defaultSocketReadTimeoutMs;
+  87 
+  88 
+  89     private KuduOutputFormat() {
+  90     }
+  91 
+  92     @Override
+  93     public void configure(Configuration parameters) {
+  94 
+  95     }
+  96 
+  97     @Override
+  98     public void open(int taskNumber, int numTasks) throws IOException {
+  99         establishConnection();
+ 100         initMetric();
+ 101     }
+ 102 
+ 103 
+ 104     private void establishConnection() throws KuduException {
+<abbr title=" 105         AsyncKuduClient.AsyncKuduClientBuilder asyncKuduClientBuilder = new AsyncKuduClient.AsyncKuduClientBuilder(kuduMasters);"> 105         AsyncKuduClient.AsyncKuduClientBuilder asyncKuduClientBuilder = new AsyncKuduClient.AsyncKuduClie🔵</abbr>
+ 106         if (null != workerCount) {
+ 107             asyncKuduClientBuilder.workerCount(workerCount);
+ 108         }
+ 109         if (null != defaultSocketReadTimeoutMs) {
+ 110             asyncKuduClientBuilder.workerCount(defaultSocketReadTimeoutMs);
+ 111         }
+ 112 
+ 113         if (null != defaultOperationTimeoutMs) {
+ 114             asyncKuduClientBuilder.workerCount(defaultOperationTimeoutMs);
+ 115         }
+ 116         client = asyncKuduClientBuilder.build();
+ 117         KuduClient syncClient = client.syncClient();
+ 118 
+ 119         if (syncClient.tableExists(tableName)) {
+ 120             table = syncClient.openTable(tableName);
+ 121         }
+ 122     }
+ 123 
+ 124     @Override
+ 125     public void writeRecord(Tuple2 record) throws IOException {
+ 126         Tuple2&lt;Boolean, Row&gt; tupleTrans = record;
+ 127         Boolean retract = tupleTrans.getField(0);
+ 128         if (!retract) {
+ 129             return;
+ 130         }
+ 131         Row row = tupleTrans.getField(1);
+ 132         if (row.getArity() != fieldNames.length) {
+ 133             if(outDirtyRecords.getCount() % DIRTY_PRINT_FREQUENCY == 0) {
+ 134                 LOG.error(&quot;record insert failed ..{}&quot;, row.toString());
+ 135                 LOG.error(&quot;cause by row.getArity() != fieldNames.length&quot;);
+ 136             }
+ 137             outDirtyRecords.inc();
+ 138             return;
+ 139         }
+ 140         Operation operation = toOperation(writeMode, row);
+ 141         AsyncKuduSession session = client.newSession();
+ 142 
+ 143         try {
+ 144             if (outRecords.getCount() % ROW_PRINT_FREQUENCY == 0) {
+ 145                 LOG.info(&quot;Receive data : {}&quot;, row);
+ 146             }
+ 147 
+ 148             session.apply(operation);
+ 149             session.close();
+ 150             outRecords.inc();
+ 151         } catch (KuduException e) {
+ 152             if(outDirtyRecords.getCount() % DIRTY_PRINT_FREQUENCY == 0){
+<abbr title=" 153                 LOG.error(&quot;record insert failed, total dirty record:{} current row:{}&quot;, outDirtyRecords.getCount(), row.toString());"> 153                 LOG.error(&quot;record insert failed, total dirty record:{} current row:{}&quot;, outDirtyRecords.g🔵</abbr>
+ 154                 LOG.error(&quot;&quot;, e);
+ 155             }
+ 156             outDirtyRecords.inc();
+ 157         }
+ 158     }
+ 159 
+ 160     @Override
+ 161     public void close() {
+ 162         if (null != client) {
+ 163             try {
+ 164                 client.close();
+ 165             } catch (Exception e) {
+ 166                 throw new IllegalArgumentException(&quot;[closeKudu]:&quot; + e.getMessage());
+ 167             }
+ 168         }
+ 169     }
+ 170 
+ 171     public static KuduOutputFormatBuilder buildKuduOutputFormat() {
+ 172         return new KuduOutputFormatBuilder();
+ 173     }
+ 174 
+ 175     public static class KuduOutputFormatBuilder {
+ 176         private final KuduOutputFormat kuduOutputFormat;
+ 177 
+ 178         protected KuduOutputFormatBuilder() {
+ 179             this.kuduOutputFormat = new KuduOutputFormat();
+ 180         }
+ 181 
+ 182         public KuduOutputFormatBuilder setKuduMasters(String kuduMasters) {
+ 183             kuduOutputFormat.kuduMasters = kuduMasters;
+ 184             return this;
+ 185         }
+ 186 
+ 187         public KuduOutputFormatBuilder setTableName(String tableName) {
+ 188             kuduOutputFormat.tableName = tableName;
+ 189             return this;
+ 190         }
+ 191 
+ 192 
+ 193         public KuduOutputFormatBuilder setFieldNames(String[] fieldNames) {
+ 194             kuduOutputFormat.fieldNames = fieldNames;
+ 195             return this;
+ 196         }
+ 197 
+ 198         public KuduOutputFormatBuilder setFieldTypes(TypeInformation&lt;?&gt;[] fieldTypes) {
+ 199             kuduOutputFormat.fieldTypes = fieldTypes;
+ 200             return this;
+ 201         }
+ 202 
+ 203         public KuduOutputFormatBuilder setWriteMode(WriteMode writeMode) {
+ 204             if (null == writeMode) {
+ 205                 kuduOutputFormat.writeMode = WriteMode.UPSERT;
+ 206             }
+ 207             kuduOutputFormat.writeMode = writeMode;
+ 208             return this;
+ 209         }
+ 210 
+ 211         public KuduOutputFormatBuilder setWorkerCount(Integer workerCount) {
+ 212             kuduOutputFormat.workerCount = workerCount;
+ 213             return this;
+ 214         }
+ 215 
+ 216         public KuduOutputFormatBuilder setDefaultOperationTimeoutMs(Integer defaultOperationTimeoutMs) {
+ 217             kuduOutputFormat.defaultOperationTimeoutMs = defaultOperationTimeoutMs;
+ 218             return this;
+ 219         }
+ 220 
+<abbr title=" 221         public KuduOutputFormatBuilder setDefaultSocketReadTimeoutMs(Integer defaultSocketReadTimeoutMs) {"> 221         public KuduOutputFormatBuilder setDefaultSocketReadTimeoutMs(Integer defaultSocketReadTimeoutMs) 🔵</abbr>
+ 222             kuduOutputFormat.defaultSocketReadTimeoutMs = defaultSocketReadTimeoutMs;
+ 223             return this;
+ 224         }
+ 225 
+ 226 
+ 227         public KuduOutputFormat finish() {
+ 228             if (kuduOutputFormat.kuduMasters == null) {
+ 229                 throw new IllegalArgumentException(&quot;No kuduMasters supplied.&quot;);
+ 230             }
+ 231 
+ 232             if (kuduOutputFormat.tableName == null) {
+ 233                 throw new IllegalArgumentException(&quot;No tablename supplied.&quot;);
+ 234             }
+ 235 
+ 236             return kuduOutputFormat;
+ 237         }
+ 238     }
+ 239 
+ 240     private Operation toOperation(WriteMode writeMode, Row row) {
+ 241         if (null == table) {
+ 242             throw new IllegalArgumentException(&quot;Table Open Failed , please check table exists&quot;);
+ 243         }
+ 244         Operation operation = toOperation(writeMode);
+ 245         PartialRow partialRow = operation.getRow();
+ 246 
+ 247         for (int index = 0; index &lt; row.getArity(); index++) {
+ 248             //解决kudu中全小写字段找不到的bug
+ 249             String fieldName = fieldNames[index].toLowerCase();
+ 250             if (row.getField(index) == null) {
+ 251                 partialRow.setNull(fieldName);
+ 252             } else {
+ 253                 if (fieldTypes[index].getTypeClass() == String.class) {
+ 254                     partialRow.addString(fieldName, (String) row.getField(index));
+ 255                     continue;
+ 256                 }
+ 257                 if (fieldTypes[index].getTypeClass() == Float.class) {
+ 258                     partialRow.addFloat(fieldName, (Float) row.getField(index));
+ 259                     continue;
+ 260                 }
+ 261                 if (fieldTypes[index].getTypeClass() == Byte.class) {
+ 262                     partialRow.addByte(fieldName, (Byte) row.getField(index));
+ 263                     continue;
+ 264                 }
+ 265 
+ 266                 if (fieldTypes[index].getTypeClass() == Short.class) {
+ 267                     partialRow.addShort(fieldName, (Short) row.getField(index));
+ 268                     continue;
+ 269                 }
+ 270 
+ 271                 if (fieldTypes[index].getTypeClass() == Integer.class) {
+ 272                     partialRow.addInt(fieldName, (Integer) row.getField(index));
+ 273                     continue;
+ 274                 }
+ 275 
+ 276                 if (fieldTypes[index].getTypeClass() == Long.class) {
+ 277                     partialRow.addLong(fieldName, (Long) row.getField(index));
+ 278                     continue;
+ 279                 }
+ 280 
+ 281                 if (fieldTypes[index].getTypeClass() == Double.class) {
+ 282                     partialRow.addDouble(fieldName, (Double) row.getField(index));
+ 283                     continue;
+ 284                 }
+ 285 
+ 286                 if (fieldTypes[index].getTypeClass() == BigDecimal.class) {
+ 287                     partialRow.addDecimal(fieldName, (BigDecimal) row.getField(index));
+ 288                     continue;
+ 289                 }
+ 290                 if (fieldTypes[index].getTypeClass() == Boolean.class) {
+ 291                     partialRow.addBoolean(fieldName, (Boolean) row.getField(index));
+ 292                     continue;
+ 293                 }
+ 294 
+ 295                 if (fieldTypes[index].getTypeClass() == Date.class) {
+<abbr title=" 296                     partialRow.addTimestamp(fieldName, new Timestamp(((Date) row.getField(index)).getTime()));"> 296                     partialRow.addTimestamp(fieldName, new Timestamp(((Date) row.getField(index)).getTime🔵</abbr>
+ 297                     continue;
+ 298                 }
+ 299 
+ 300                 if (fieldTypes[index].getTypeClass() == Timestamp.class) {
+ 301                     partialRow.addTimestamp(fieldName, (Timestamp) row.getField(index));
+ 302                     continue;
+ 303                 }
+ 304 
+ 305                 if (fieldTypes[index].getTypeClass() == byte[].class) {
+ 306                     partialRow.addBinary(fieldName, (byte[]) row.getField(index));
+ 307                     continue;
+ 308                 }
+ 309                 throw new IllegalArgumentException(&quot;Illegal var type: &quot; + fieldTypes[index]);
+ 310             }
+ 311         }
+ 312         return operation;
+ 313 
+ 314     }
+ 315 
+ 316     private Operation toOperation(WriteMode writeMode) {
+ 317         switch (writeMode) {
+ 318             case INSERT:
+ 319                 return table.newInsert();
+ 320             case UPDATE:
+ 321                 return table.newUpdate();
+ 322             case UPSERT:
+ 323                 return table.newUpsert();
+ 324             default:
+ 325                 return table.newUpsert();
+ 326         }
+ 327     }
+ 328 
+ 329 }
+ </pre></td>
+                            <td><pre>   1 /*
+   2  * Licensed to the Apache Software Foundation (ASF) under one
+   3  * or more contributor license agreements.  See the NOTICE file
+   4  * distributed with this work for additional information
+   5  * regarding copyright ownership.  The ASF licenses this file
+   6  * to you under the Apache License, Version 2.0 (the
+   7  * &quot;License&quot;); you may not use this file except in compliance
+   8  * with the License.  You may obtain a copy of the License at
+   9  *
+  10  *     http://www.apache.org/licenses/LICENSE-2.0
+  11  *
+  12  * Unless required by applicable law or agreed to in writing, software
+  13  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15  * See the License for the specific language governing permissions and
+  16  * limitations under the License.
+  17  */
+  18 package com.dtstack.flink.sql.sink.kudu;
+  19 
+  20 import com.dtstack.flink.sql.outputformat.AbstractDtRichOutputFormat;
+  21 import java.io.IOException;
+  22 import java.math.BigDecimal;
+  23 import java.sql.Timestamp;
+  24 import java.util.Date;
+  25 import org.apache.flink.api.common.typeinfo.TypeInformation;
+  26 import org.apache.flink.api.java.tuple.Tuple2;
+  27 import org.apache.flink.configuration.Configuration;
+  28 import org.apache.flink.types.Row;
+  29 import org.apache.kudu.client.AsyncKuduClient;
+  30 import org.apache.kudu.client.AsyncKuduSession;
+  31 import org.apache.kudu.client.KuduClient;
+  32 import org.apache.kudu.client.KuduException;
+  33 import org.apache.kudu.client.KuduTable;
+  34 import org.apache.kudu.client.Operation;
+  35 import org.apache.kudu.client.PartialRow;
+  36 import org.slf4j.Logger;
+  37 import org.slf4j.LoggerFactory;
+  38 
+  39 
+  40 /**
+  41  *
+  42  *
+  43  * @author gituser
+  44  * @unknown xiuzhu
+  45  */
+  46 public class KuduOutputFormat extends AbstractDtRichOutputFormat&lt;Tuple2&gt; {
+  47     private static final long serialVersionUID = 1L;
+  48 
+  49     private static final Logger LOG = LoggerFactory.getLogger(KuduOutputFormat.class);
+  50 
+  51     public enum WriteMode {
+  52 
+  53         // insert
+  54         INSERT,
+  55         // update
+  56         UPDATE,
+  57         // update or insert
+  58         UPSERT;}
+  59 
+  60     private String kuduMasters;
+  61 
+  62     private String tableName;
+  63 
+  64     private WriteMode writeMode;
+  65 
+  66     protected String[] fieldNames;
+  67 
+  68     TypeInformation&lt;?&gt;[] fieldTypes;
+  69 
+  70     private AsyncKuduClient client;
+  71 
+  72     private KuduTable table;
+  73 
+  74     private Integer workerCount;
+  75 
+  76     private Integer defaultOperationTimeoutMs;
+  77 
+  78     private Integer defaultSocketReadTimeoutMs;
+  79 
+  80     private KuduOutputFormat() {
+  81     }
+  82 
+  83     @Override
+  84     public void configure(Configuration parameters) {
+  85 
+  86     }
+  87 
+  88     @Override
+  89     public void open(int taskNumber, int numTasks) throws IOException {
+  90         establishConnection();
+  91         initMetric();
+  92     }
+  93 
+  94     private void establishConnection() throws KuduException {
+<abbr title="  95         AsyncKuduClient.AsyncKuduClientBuilder asyncKuduClientBuilder = new AsyncKuduClient.AsyncKuduClientBuilder(kuduMasters);">  95         AsyncKuduClient.AsyncKuduClientBuilder asyncKuduClientBuilder = new AsyncKuduClient.AsyncKuduClie🔵</abbr>
+  96         if (null != workerCount) {
+  97             asyncKuduClientBuilder.workerCount(workerCount);
+  98         }
+  99         if (null != defaultSocketReadTimeoutMs) {
+ 100             asyncKuduClientBuilder.workerCount(defaultSocketReadTimeoutMs);
+ 101         }
+ 102         if (null != defaultOperationTimeoutMs) {
+ 103             asyncKuduClientBuilder.workerCount(defaultOperationTimeoutMs);
+ 104         }
+ 105         client = asyncKuduClientBuilder.build();
+ 106         KuduClient syncClient = client.syncClient();
+ 107         if (syncClient.tableExists(tableName)) {
+ 108             table = syncClient.openTable(tableName);
+ 109         }
+ 110     }
+ 111 
+ 112     @Override
+ 113     public void writeRecord(Tuple2 record) throws IOException {
+ 114         Tuple2&lt;Boolean, Row&gt; tupleTrans = record;
+ 115         Boolean retract = tupleTrans.getField(0);
+ 116         if (!retract) {
+ 117             return;
+ 118         }
+ 119         Row row = tupleTrans.getField(1);
+ 120         if (row.getArity() != fieldNames.length) {
+ 121             if ((outDirtyRecords.getCount() % DIRTY_PRINT_FREQUENCY) == 0) {
+ 122                 LOG.error(&quot;record insert failed ..{}&quot;, row.toString());
+ 123                 LOG.error(&quot;cause by row.getArity() != fieldNames.length&quot;);
+ 124             }
+ 125             outDirtyRecords.inc();
+ 126             return;
+ 127         }
+ 128         Operation operation = toOperation(writeMode, row);
+ 129         AsyncKuduSession session = client.newSession();
+ 130         try {
+ 131             if ((outRecords.getCount() % ROW_PRINT_FREQUENCY) == 0) {
+ 132                 LOG.info(&quot;Receive data : {}&quot;, row);
+ 133             }
+ 134             session.apply(operation);
+ 135             session.close();
+ 136             outRecords.inc();
+ 137         } catch (KuduException e) {
+ 138             if ((outDirtyRecords.getCount() % DIRTY_PRINT_FREQUENCY) == 0) {
+<abbr title=" 139                 LOG.error(&quot;record insert failed, total dirty record:{} current row:{}&quot;, outDirtyRecords.getCount(), row.toString());"> 139                 LOG.error(&quot;record insert failed, total dirty record:{} current row:{}&quot;, outDirtyRecords.g🔵</abbr>
+ 140                 LOG.error(&quot;&quot;, e);
+ 141             }
+ 142             outDirtyRecords.inc();
+ 143         }
+ 144     }
+ 145 
+ 146     @Override
+ 147     public void close() {
+ 148         if (null != client) {
+ 149             try {
+ 150                 client.close();
+ 151             } catch (java.lang.Exception e) {
+ 152                 throw new IllegalArgumentException(&quot;[closeKudu]:&quot; + e.getMessage());
+ 153             }
+ 154         }
+ 155     }
+ 156 
+ 157     public static KuduOutputFormatBuilder buildKuduOutputFormat() {
+ 158         return new KuduOutputFormatBuilder();
+ 159     }
+ 160 
+ 161     public static class KuduOutputFormatBuilder {
+ 162         private final KuduOutputFormat kuduOutputFormat;
+ 163 
+ 164         protected KuduOutputFormatBuilder() {
+ 165             this.kuduOutputFormat = new KuduOutputFormat();
+ 166         }
+ 167 
+ 168         public KuduOutputFormatBuilder setKuduMasters(String kuduMasters) {
+ 169             kuduOutputFormat.kuduMasters = kuduMasters;
+ 170             return this;
+ 171         }
+ 172 
+ 173         public KuduOutputFormatBuilder setTableName(String tableName) {
+ 174             kuduOutputFormat.tableName = tableName;
+ 175             return this;
+ 176         }
+ 177 
+ 178         public KuduOutputFormatBuilder setFieldNames(String[] fieldNames) {
+ 179             kuduOutputFormat.fieldNames = fieldNames;
+ 180             return this;
+ 181         }
+ 182 
+ 183         public KuduOutputFormatBuilder setFieldTypes(TypeInformation&lt;?&gt;[] fieldTypes) {
+ 184             kuduOutputFormat.fieldTypes = fieldTypes;
+ 185             return this;
+ 186         }
+ 187 
+ 188         public KuduOutputFormatBuilder setWriteMode(WriteMode writeMode) {
+ 189             if (null == writeMode) {
+ 190                 kuduOutputFormat.writeMode = WriteMode.UPSERT;
+ 191             }
+ 192             kuduOutputFormat.writeMode = writeMode;
+ 193             return this;
+ 194         }
+ 195 
+ 196         public KuduOutputFormatBuilder setWorkerCount(Integer workerCount) {
+ 197             kuduOutputFormat.workerCount = workerCount;
+ 198             return this;
+ 199         }
+ 200 
+ 201         public KuduOutputFormatBuilder setDefaultOperationTimeoutMs(Integer defaultOperationTimeoutMs) {
+ 202             kuduOutputFormat.defaultOperationTimeoutMs = defaultOperationTimeoutMs;
+ 203             return this;
+ 204         }
+ 205 
+<abbr title=" 206         public KuduOutputFormatBuilder setDefaultSocketReadTimeoutMs(Integer defaultSocketReadTimeoutMs) {"> 206         public KuduOutputFormatBuilder setDefaultSocketReadTimeoutMs(Integer defaultSocketReadTimeoutMs) 🔵</abbr>
+ 207             kuduOutputFormat.defaultSocketReadTimeoutMs = defaultSocketReadTimeoutMs;
+ 208             return this;
+ 209         }
+ 210 
+ 211         public KuduOutputFormat finish() {
+ 212             if (kuduOutputFormat.kuduMasters == null) {
+ 213                 throw new IllegalArgumentException(&quot;No kuduMasters supplied.&quot;);
+ 214             }
+ 215             if (kuduOutputFormat.tableName == null) {
+ 216                 throw new IllegalArgumentException(&quot;No tablename supplied.&quot;);
+ 217             }
+ 218             return kuduOutputFormat;
+ 219         }
+ 220     }
+ 221 
+ 222     private Operation toOperation(WriteMode writeMode, Row row) {
+ 223         if (null == table) {
+ 224             throw new IllegalArgumentException(&quot;Table Open Failed , please check table exists&quot;);
+ 225         }
+ 226         Operation operation = toOperation(writeMode);
+ 227         PartialRow partialRow = operation.getRow();
+ 228         for (int index = 0; index &lt; row.getArity(); index++) {
+ 229             // 解决kudu中全小写字段找不到的bug
+ 230             String fieldName = fieldNames[index].toLowerCase();
+ 231             if (row.getField(index) == null) {
+ 232                 partialRow.setNull(fieldName);
+ 233             } else {
+ 234                 if (fieldTypes[index].getTypeClass() == java.lang.String.class) {
+ 235                     partialRow.addString(fieldName, ((String) (row.getField(index))));
+ 236                     continue;
+ 237                 }
+ 238                 if (fieldTypes[index].getTypeClass() == java.lang.Float.class) {
+ 239                     partialRow.addFloat(fieldName, ((Float) (row.getField(index))));
+ 240                     continue;
+ 241                 }
+ 242                 if (fieldTypes[index].getTypeClass() == java.lang.Byte.class) {
+ 243                     partialRow.addByte(fieldName, ((Byte) (row.getField(index))));
+ 244                     continue;
+ 245                 }
+ 246                 if (fieldTypes[index].getTypeClass() == java.lang.Short.class) {
+ 247                     partialRow.addShort(fieldName, ((Short) (row.getField(index))));
+ 248                     continue;
+ 249                 }
+ 250                 if (fieldTypes[index].getTypeClass() == java.lang.Integer.class) {
+ 251                     partialRow.addInt(fieldName, ((Integer) (row.getField(index))));
+ 252                     continue;
+ 253                 }
+ 254                 if (fieldTypes[index].getTypeClass() == java.lang.Long.class) {
+ 255                     partialRow.addLong(fieldName, ((Long) (row.getField(index))));
+ 256                     continue;
+ 257                 }
+ 258                 if (fieldTypes[index].getTypeClass() == java.lang.Double.class) {
+ 259                     partialRow.addDouble(fieldName, ((Double) (row.getField(index))));
+ 260                     continue;
+ 261                 }
+ 262                 if (fieldTypes[index].getTypeClass() == BigDecimal.class) {
+ 263                     partialRow.addDecimal(fieldName, ((BigDecimal) (row.getField(index))));
+ 264                     continue;
+ 265                 }
+ 266                 if (fieldTypes[index].getTypeClass() == java.lang.Boolean.class) {
+ 267                     partialRow.addBoolean(fieldName, ((Boolean) (row.getField(index))));
+ 268                     continue;
+ 269                 }
+ 270                 if (fieldTypes[index].getTypeClass() == Date.class) {
+<abbr title=" 271                     partialRow.addTimestamp(fieldName, new Timestamp(((Date) (row.getField(index))).getTime()));"> 271                     partialRow.addTimestamp(fieldName, new Timestamp(((Date) (row.getField(index))).getTi🔵</abbr>
+ 272                     continue;
+ 273                 }
+ 274                 if (fieldTypes[index].getTypeClass() == Timestamp.class) {
+ 275                     partialRow.addTimestamp(fieldName, ((Timestamp) (row.getField(index))));
+ 276                     continue;
+ 277                 }
+ 278                 if (fieldTypes[index].getTypeClass() == byte[].class) {
+ 279                     partialRow.addBinary(fieldName, ((byte[]) (row.getField(index))));
+ 280                     continue;
+ 281                 }
+ 282                 throw new IllegalArgumentException(&quot;Illegal var type: &quot; + fieldTypes[index]);
+ 283             }
+ 284         }
+ 285         return operation;
+ 286     }
+ 287 
+ 288     private Operation toOperation(WriteMode writeMode) {
+ 289         switch (writeMode) {
+ 290             case INSERT :
+ 291                 return table.newInsert();
+ 292             case UPDATE :
+ 293                 return table.newUpdate();
+ 294             case UPSERT :
+ 295                 return table.newUpsert();
+ 296             default :
+ 297                 return table.newUpsert();
+ 298         }
+ 299     }
+ 300 }
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ </pre></td>
+                        </tr>
+                    </table>
+                </div>
+                <div id="bottom">
+                    <table style="margin:auto">
+                        <tr>
+                            <th>ours vs. base</th>
+                            <th>theirs vs. base</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1  /*
+   2   * Licensed to the Apache Software Foundation (ASF) under one
+   3   * or more contributor license agreements.  See the NOTICE file
+   4   * distributed with this work for additional information
+   5   * regarding copyright ownership.  The ASF licenses this file
+   6   * to you under the Apache License, Version 2.0 (the
+   7   * &quot;License&quot;); you may not use this file except in compliance
+   8   * with the License.  You may obtain a copy of the License at
+   9   *
+  10   *     http://www.apache.org/licenses/LICENSE-2.0
+  11   *
+  12   * Unless required by applicable law or agreed to in writing, software
+  13   * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15   * See the License for the specific language governing permissions and
+  16   * limitations under the License.
+  17   */
+  18  
+  19  package com.dtstack.flink.sql.sink.kudu;
+  20  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  21 -import com.dtstack.flink.sql.outputformat.DtRichOutputFormat;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  22 +import com.dtstack.flink.sql.outputformat.AbstractDtRichOutputFormat;</span>
+  23  import org.apache.flink.api.common.typeinfo.TypeInformation;
+  24  import org.apache.flink.api.java.tuple.Tuple2;
+  25  import org.apache.flink.configuration.Configuration;
+  26  import org.apache.flink.types.Row;
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  27 -import org.apache.kudu.client.*;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  28 +import org.apache.kudu.client.AsyncKuduClient;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  29 +import org.apache.kudu.client.AsyncKuduSession;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  30 +import org.apache.kudu.client.KuduClient;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  31 +import org.apache.kudu.client.KuduException;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  32 +import org.apache.kudu.client.KuduTable;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  33 +import org.apache.kudu.client.Operation;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  34 +import org.apache.kudu.client.PartialRow;</span>
+
+
+  35  import org.slf4j.Logger;
+  36  import org.slf4j.LoggerFactory;
+  37  
+  38  import java.io.IOException;
+  39  import java.math.BigDecimal;
+  40  import java.sql.Timestamp;
+  41  import java.util.Date;
+  42  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  43 -public class KuduOutputFormat extends DtRichOutputFormat {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  44 +/**</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  45 + *  @author  gituser</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  46 + *  @modify  xiuzhu</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  47 + */</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  48 +public class KuduOutputFormat extends AbstractDtRichOutputFormat&lt;Tuple2&gt; {</span>
+  49  
+  50      private static final long serialVersionUID = 1L;
+  51  
+  52      private static final Logger LOG = LoggerFactory.getLogger(KuduOutputFormat.class);
+  53  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  54 -    public enum WriteMode {INSERT, UPDATE, UPSERT}</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  55 +    public enum WriteMode {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  56 +        // insert</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  57 +        INSERT,</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  58 +        // update</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  59 +        UPDATE,</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  60 +        // update or insert</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  61 +        UPSERT</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  62 +    }</span>
+  63  
+  64      private String kuduMasters;
+  65  
+  66      private String tableName;
+  67  
+  68      private WriteMode writeMode;
+  69  
+  70      protected String[] fieldNames;
+  71  
+  72      TypeInformation&lt;?&gt;[] fieldTypes;
+  73  
+  74      private AsyncKuduClient client;
+  75  
+  76      private KuduTable table;
+  77  
+  78      private Integer workerCount;
+  79  
+  80      private Integer defaultOperationTimeoutMs;
+  81  
+  82      private Integer defaultSocketReadTimeoutMs;
+  83  
+  84  
+  85      private KuduOutputFormat() {
+  86      }
+  87  
+  88      @Override
+  89      public void configure(Configuration parameters) {
+  90  
+  91      }
+  92  
+  93      @Override
+  94      public void open(int taskNumber, int numTasks) throws IOException {
+  95          establishConnection();
+  96          initMetric();
+  97      }
+  98  
+  99  
+ 100      private void establishConnection() throws KuduException {
+<abbr title=" 101          AsyncKuduClient.AsyncKuduClientBuilder asyncKuduClientBuilder = new AsyncKuduClient.AsyncKuduClientBuilder(kuduMasters);"> 101          AsyncKuduClient.AsyncKuduClientBuilder asyncKuduClientBuilder = new AsyncKuduClient.AsyncKuduClientBuilder🔵</abbr>
+ 102          if (null != workerCount) {
+ 103              asyncKuduClientBuilder.workerCount(workerCount);
+ 104          }
+ 105          if (null != defaultSocketReadTimeoutMs) {
+ 106              asyncKuduClientBuilder.workerCount(defaultSocketReadTimeoutMs);
+ 107          }
+ 108  
+ 109          if (null != defaultOperationTimeoutMs) {
+ 110              asyncKuduClientBuilder.workerCount(defaultOperationTimeoutMs);
+ 111          }
+ 112          client = asyncKuduClientBuilder.build();
+ 113          KuduClient syncClient = client.syncClient();
+ 114  
+ 115          if (syncClient.tableExists(tableName)) {
+ 116              table = syncClient.openTable(tableName);
+ 117          }
+ 118      }
+ 119  
+ 120      @Override
+ 121      public void writeRecord(Tuple2 record) throws IOException {
+ 122          Tuple2&lt;Boolean, Row&gt; tupleTrans = record;
+ 123          Boolean retract = tupleTrans.getField(0);
+ 124          if (!retract) {
+ 125              return;
+ 126          }
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 127 -</span>
+ 128          Row row = tupleTrans.getField(1);
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 129 -</span>
+ 130          if (row.getArity() != fieldNames.length) {
+ 131              if(outDirtyRecords.getCount() % DIRTY_PRINT_FREQUENCY == 0) {
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 132 -                LOG.error(&quot;record insert failed:{}&quot;, row.toString());</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 133 +                LOG.error(&quot;record insert failed ..{}&quot;, row.toString());</span>
+ 134                  LOG.error(&quot;cause by row.getArity() != fieldNames.length&quot;);
+ 135              }
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 136 -</span>
+ 137              outDirtyRecords.inc();
+ 138              return;
+ 139          }
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 140 -</span>
+ 141          Operation operation = toOperation(writeMode, row);
+ 142          AsyncKuduSession session = client.newSession();
+ 143  
+ 144          try {
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 145 -</span>
+ 146              if (outRecords.getCount() % ROW_PRINT_FREQUENCY == 0) {
+ 147                  LOG.info(&quot;Receive data : {}&quot;, row);
+ 148              }
+ 149  
+ 150              session.apply(operation);
+ 151              session.close();
+ 152              outRecords.inc();
+ 153          } catch (KuduException e) {
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 154 -</span>
+ 155              if(outDirtyRecords.getCount() % DIRTY_PRINT_FREQUENCY == 0){
+<abbr title=" 156                  LOG.error(&quot;record insert failed, total dirty record:{} current row:{}&quot;, outDirtyRecords.getCount(), row.toString());"> 156                  LOG.error(&quot;record insert failed, total dirty record:{} current row:{}&quot;, outDirtyRecords.getCount()🔵</abbr>
+ 157                  LOG.error(&quot;&quot;, e);
+ 158              }
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 159 -</span>
+ 160              outDirtyRecords.inc();
+ 161          }
+ 162      }
+ 163  
+ 164      @Override
+ 165      public void close() {
+ 166          if (null != client) {
+ 167              try {
+ 168                  client.close();
+ 169              } catch (Exception e) {
+ 170                  throw new IllegalArgumentException(&quot;[closeKudu]:&quot; + e.getMessage());
+ 171              }
+ 172          }
+ 173      }
+ 174  
+ 175      public static KuduOutputFormatBuilder buildKuduOutputFormat() {
+ 176          return new KuduOutputFormatBuilder();
+ 177      }
+ 178  
+ 179      public static class KuduOutputFormatBuilder {
+ 180          private final KuduOutputFormat kuduOutputFormat;
+ 181  
+ 182          protected KuduOutputFormatBuilder() {
+ 183              this.kuduOutputFormat = new KuduOutputFormat();
+ 184          }
+ 185  
+ 186          public KuduOutputFormatBuilder setKuduMasters(String kuduMasters) {
+ 187              kuduOutputFormat.kuduMasters = kuduMasters;
+ 188              return this;
+ 189          }
+ 190  
+ 191          public KuduOutputFormatBuilder setTableName(String tableName) {
+ 192              kuduOutputFormat.tableName = tableName;
+ 193              return this;
+ 194          }
+ 195  
+ 196  
+ 197          public KuduOutputFormatBuilder setFieldNames(String[] fieldNames) {
+ 198              kuduOutputFormat.fieldNames = fieldNames;
+ 199              return this;
+ 200          }
+ 201  
+ 202          public KuduOutputFormatBuilder setFieldTypes(TypeInformation&lt;?&gt;[] fieldTypes) {
+ 203              kuduOutputFormat.fieldTypes = fieldTypes;
+ 204              return this;
+ 205          }
+ 206  
+ 207          public KuduOutputFormatBuilder setWriteMode(WriteMode writeMode) {
+ 208              if (null == writeMode) {
+ 209                  kuduOutputFormat.writeMode = WriteMode.UPSERT;
+ 210              }
+ 211              kuduOutputFormat.writeMode = writeMode;
+ 212              return this;
+ 213          }
+ 214  
+ 215          public KuduOutputFormatBuilder setWorkerCount(Integer workerCount) {
+ 216              kuduOutputFormat.workerCount = workerCount;
+ 217              return this;
+ 218          }
+ 219  
+ 220          public KuduOutputFormatBuilder setDefaultOperationTimeoutMs(Integer defaultOperationTimeoutMs) {
+ 221              kuduOutputFormat.defaultOperationTimeoutMs = defaultOperationTimeoutMs;
+ 222              return this;
+ 223          }
+ 224  
+ 225          public KuduOutputFormatBuilder setDefaultSocketReadTimeoutMs(Integer defaultSocketReadTimeoutMs) {
+ 226              kuduOutputFormat.defaultSocketReadTimeoutMs = defaultSocketReadTimeoutMs;
+ 227              return this;
+ 228          }
+ 229  
+ 230  
+ 231          public KuduOutputFormat finish() {
+ 232              if (kuduOutputFormat.kuduMasters == null) {
+ 233                  throw new IllegalArgumentException(&quot;No kuduMasters supplied.&quot;);
+ 234              }
+ 235  
+ 236              if (kuduOutputFormat.tableName == null) {
+ 237                  throw new IllegalArgumentException(&quot;No tablename supplied.&quot;);
+ 238              }
+ 239  
+ 240              return kuduOutputFormat;
+ 241          }
+ 242      }
+ 243  
+ 244      private Operation toOperation(WriteMode writeMode, Row row) {
+ 245          if (null == table) {
+ 246              throw new IllegalArgumentException(&quot;Table Open Failed , please check table exists&quot;);
+ 247          }
+ 248          Operation operation = toOperation(writeMode);
+ 249          PartialRow partialRow = operation.getRow();
+ 250  
+ 251          for (int index = 0; index &lt; row.getArity(); index++) {
+ 252              //解决kudu中全小写字段找不到的bug
+ 253              String fieldName = fieldNames[index].toLowerCase();
+ 254              if (row.getField(index) == null) {
+ 255                  partialRow.setNull(fieldName);
+ 256              } else {
+ 257                  if (fieldTypes[index].getTypeClass() == String.class) {
+ 258                      partialRow.addString(fieldName, (String) row.getField(index));
+ 259                      continue;
+ 260                  }
+ 261                  if (fieldTypes[index].getTypeClass() == Float.class) {
+ 262                      partialRow.addFloat(fieldName, (Float) row.getField(index));
+ 263                      continue;
+ 264                  }
+ 265                  if (fieldTypes[index].getTypeClass() == Byte.class) {
+ 266                      partialRow.addByte(fieldName, (Byte) row.getField(index));
+ 267                      continue;
+ 268                  }
+ 269  
+ 270                  if (fieldTypes[index].getTypeClass() == Short.class) {
+ 271                      partialRow.addShort(fieldName, (Short) row.getField(index));
+ 272                      continue;
+ 273                  }
+ 274  
+ 275                  if (fieldTypes[index].getTypeClass() == Integer.class) {
+ 276                      partialRow.addInt(fieldName, (Integer) row.getField(index));
+ 277                      continue;
+ 278                  }
+ 279  
+ 280                  if (fieldTypes[index].getTypeClass() == Long.class) {
+ 281                      partialRow.addLong(fieldName, (Long) row.getField(index));
+ 282                      continue;
+ 283                  }
+ 284  
+ 285                  if (fieldTypes[index].getTypeClass() == Double.class) {
+ 286                      partialRow.addDouble(fieldName, (Double) row.getField(index));
+ 287                      continue;
+ 288                  }
+ 289  
+ 290                  if (fieldTypes[index].getTypeClass() == BigDecimal.class) {
+ 291                      partialRow.addDecimal(fieldName, (BigDecimal) row.getField(index));
+ 292                      continue;
+ 293                  }
+ 294                  if (fieldTypes[index].getTypeClass() == Boolean.class) {
+ 295                      partialRow.addBoolean(fieldName, (Boolean) row.getField(index));
+ 296                      continue;
+ 297                  }
+ 298  
+ 299                  if (fieldTypes[index].getTypeClass() == Date.class) {
+ 300                      partialRow.addTimestamp(fieldName, new Timestamp(((Date) row.getField(index)).getTime()));
+ 301                      continue;
+ 302                  }
+ 303  
+ 304                  if (fieldTypes[index].getTypeClass() == Timestamp.class) {
+ 305                      partialRow.addTimestamp(fieldName, (Timestamp) row.getField(index));
+ 306                      continue;
+ 307                  }
+ 308  
+ 309                  if (fieldTypes[index].getTypeClass() == byte[].class) {
+ 310                      partialRow.addBinary(fieldName, (byte[]) row.getField(index));
+ 311                      continue;
+ 312                  }
+ 313                  throw new IllegalArgumentException(&quot;Illegal var type: &quot; + fieldTypes[index]);
+ 314              }
+ 315          }
+ 316          return operation;
+ 317  
+ 318      }
+ 319  
+ 320      private Operation toOperation(WriteMode writeMode) {
+ 321          switch (writeMode) {
+ 322              case INSERT:
+ 323                  return table.newInsert();
+ 324              case UPDATE:
+ 325                  return table.newUpdate();
+ 326              case UPSERT:
+ 327                  return table.newUpsert();
+ 328              default:
+ 329                  return table.newUpsert();
+ 330          }
+ 331      }
+ 332  
+ 333  }</pre></td>
+                            <td><pre>   1  /*
+   2   * Licensed to the Apache Software Foundation (ASF) under one
+   3   * or more contributor license agreements.  See the NOTICE file
+   4   * distributed with this work for additional information
+   5   * regarding copyright ownership.  The ASF licenses this file
+   6   * to you under the Apache License, Version 2.0 (the
+   7   * &quot;License&quot;); you may not use this file except in compliance
+   8   * with the License.  You may obtain a copy of the License at
+   9   *
+  10   *     http://www.apache.org/licenses/LICENSE-2.0
+  11   *
+  12   * Unless required by applicable law or agreed to in writing, software
+  13   * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15   * See the License for the specific language governing permissions and
+  16   * limitations under the License.
+  17   */
+  18  
+  19  package com.dtstack.flink.sql.sink.kudu;
+  20  
+  21  import com.dtstack.flink.sql.outputformat.DtRichOutputFormat;
+
+  22  import org.apache.flink.api.common.typeinfo.TypeInformation;
+  23  import org.apache.flink.api.java.tuple.Tuple2;
+  24  import org.apache.flink.configuration.Configuration;
+  25  import org.apache.flink.types.Row;
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  26 -import org.apache.kudu.client.*;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  27 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  28 +import com.dtstack.flink.sql.outputformat.DtRichOutputFormat;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  29 +import org.apache.kudu.client.AsyncKuduClient;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  30 +import org.apache.kudu.client.AsyncKuduSession;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  31 +import org.apache.kudu.client.KuduClient;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  32 +import org.apache.kudu.client.KuduException;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  33 +import org.apache.kudu.client.KuduTable;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  34 +import org.apache.kudu.client.Operation;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  35 +import org.apache.kudu.client.PartialRow;</span>
+  36  import org.slf4j.Logger;
+  37  import org.slf4j.LoggerFactory;
+  38  
+  39  import java.io.IOException;
+  40  import java.math.BigDecimal;
+  41  import java.sql.Timestamp;
+  42  import java.util.Date;
+  43  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  44 -public class KuduOutputFormat extends DtRichOutputFormat {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  45 +/**</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  46 + *  @author  gituser</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  47 + *  @modify  xiuzhu</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  48 + */</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  49 +public class KuduOutputFormat extends DtRichOutputFormat&lt;Tuple2&gt; {</span>
+  50  
+  51      private static final long serialVersionUID = 1L;
+  52  
+  53      private static final Logger LOG = LoggerFactory.getLogger(KuduOutputFormat.class);
+  54  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  55 -    public enum WriteMode {INSERT, UPDATE, UPSERT}</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  56 +    public enum WriteMode {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  57 +        // insert</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  58 +        INSERT,</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  59 +        // update</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  60 +        UPDATE,</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  61 +        // update or insert</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  62 +        UPSERT</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  63 +    }</span>
+  64  
+  65      private String kuduMasters;
+  66  
+  67      private String tableName;
+  68  
+  69      private WriteMode writeMode;
+  70  
+  71      protected String[] fieldNames;
+  72  
+  73      TypeInformation&lt;?&gt;[] fieldTypes;
+  74  
+  75      private AsyncKuduClient client;
+  76  
+  77      private KuduTable table;
+  78  
+  79      private Integer workerCount;
+  80  
+  81      private Integer defaultOperationTimeoutMs;
+  82  
+  83      private Integer defaultSocketReadTimeoutMs;
+  84  
+  85  
+  86      private KuduOutputFormat() {
+  87      }
+  88  
+  89      @Override
+  90      public void configure(Configuration parameters) {
+  91  
+  92      }
+  93  
+  94      @Override
+  95      public void open(int taskNumber, int numTasks) throws IOException {
+  96          establishConnection();
+  97          initMetric();
+  98      }
+  99  
+ 100  
+ 101      private void establishConnection() throws KuduException {
+<abbr title=" 102          AsyncKuduClient.AsyncKuduClientBuilder asyncKuduClientBuilder = new AsyncKuduClient.AsyncKuduClientBuilder(kuduMasters);"> 102          AsyncKuduClient.AsyncKuduClientBuilder asyncKuduClientBuilder = new AsyncKuduClient.AsyncKuduClientBuilder🔵</abbr>
+ 103          if (null != workerCount) {
+ 104              asyncKuduClientBuilder.workerCount(workerCount);
+ 105          }
+ 106          if (null != defaultSocketReadTimeoutMs) {
+ 107              asyncKuduClientBuilder.workerCount(defaultSocketReadTimeoutMs);
+ 108          }
+ 109  
+ 110          if (null != defaultOperationTimeoutMs) {
+ 111              asyncKuduClientBuilder.workerCount(defaultOperationTimeoutMs);
+ 112          }
+ 113          client = asyncKuduClientBuilder.build();
+ 114          KuduClient syncClient = client.syncClient();
+ 115  
+ 116          if (syncClient.tableExists(tableName)) {
+ 117              table = syncClient.openTable(tableName);
+ 118          }
+ 119      }
+ 120  
+ 121      @Override
+ 122      public void writeRecord(Tuple2 record) throws IOException {
+ 123          Tuple2&lt;Boolean, Row&gt; tupleTrans = record;
+ 124          Boolean retract = tupleTrans.getField(0);
+ 125          if (!retract) {
+ 126              return;
+ 127          }
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 128 -</span>
+ 129          Row row = tupleTrans.getField(1);
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 130 -</span>
+ 131          if (row.getArity() != fieldNames.length) {
+ 132              if(outDirtyRecords.getCount() % DIRTY_PRINT_FREQUENCY == 0) {
+ 133                  LOG.error(&quot;record insert failed:{}&quot;, row.toString());
+
+ 134                  LOG.error(&quot;cause by row.getArity() != fieldNames.length&quot;);
+ 135              }
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 136 -</span>
+ 137              outDirtyRecords.inc();
+ 138              return;
+ 139          }
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 140 -</span>
+ 141          Operation operation = toOperation(writeMode, row);
+ 142          AsyncKuduSession session = client.newSession();
+ 143  
+ 144          try {
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 145 -</span>
+ 146              if (outRecords.getCount() % ROW_PRINT_FREQUENCY == 0) {
+ 147                  LOG.info(&quot;Receive data : {}&quot;, row);
+ 148              }
+ 149  
+ 150              session.apply(operation);
+ 151              session.close();
+ 152              outRecords.inc();
+ 153          } catch (KuduException e) {
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 154 -</span>
+ 155              if(outDirtyRecords.getCount() % DIRTY_PRINT_FREQUENCY == 0){
+<abbr title=" 156                  LOG.error(&quot;record insert failed, total dirty record:{} current row:{}&quot;, outDirtyRecords.getCount(), row.toString());"> 156                  LOG.error(&quot;record insert failed, total dirty record:{} current row:{}&quot;, outDirtyRecords.getCount()🔵</abbr>
+ 157                  LOG.error(&quot;&quot;, e);
+ 158              }
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 159 -</span>
+ 160              outDirtyRecords.inc();
+ 161          }
+ 162      }
+ 163  
+ 164      @Override
+ 165      public void close() {
+ 166          if (null != client) {
+ 167              try {
+ 168                  client.close();
+ 169              } catch (Exception e) {
+ 170                  throw new IllegalArgumentException(&quot;[closeKudu]:&quot; + e.getMessage());
+ 171              }
+ 172          }
+ 173      }
+ 174  
+ 175      public static KuduOutputFormatBuilder buildKuduOutputFormat() {
+ 176          return new KuduOutputFormatBuilder();
+ 177      }
+ 178  
+ 179      public static class KuduOutputFormatBuilder {
+ 180          private final KuduOutputFormat kuduOutputFormat;
+ 181  
+ 182          protected KuduOutputFormatBuilder() {
+ 183              this.kuduOutputFormat = new KuduOutputFormat();
+ 184          }
+ 185  
+ 186          public KuduOutputFormatBuilder setKuduMasters(String kuduMasters) {
+ 187              kuduOutputFormat.kuduMasters = kuduMasters;
+ 188              return this;
+ 189          }
+ 190  
+ 191          public KuduOutputFormatBuilder setTableName(String tableName) {
+ 192              kuduOutputFormat.tableName = tableName;
+ 193              return this;
+ 194          }
+ 195  
+ 196  
+ 197          public KuduOutputFormatBuilder setFieldNames(String[] fieldNames) {
+ 198              kuduOutputFormat.fieldNames = fieldNames;
+ 199              return this;
+ 200          }
+ 201  
+ 202          public KuduOutputFormatBuilder setFieldTypes(TypeInformation&lt;?&gt;[] fieldTypes) {
+ 203              kuduOutputFormat.fieldTypes = fieldTypes;
+ 204              return this;
+ 205          }
+ 206  
+ 207          public KuduOutputFormatBuilder setWriteMode(WriteMode writeMode) {
+ 208              if (null == writeMode) {
+ 209                  kuduOutputFormat.writeMode = WriteMode.UPSERT;
+ 210              }
+ 211              kuduOutputFormat.writeMode = writeMode;
+ 212              return this;
+ 213          }
+ 214  
+ 215          public KuduOutputFormatBuilder setWorkerCount(Integer workerCount) {
+ 216              kuduOutputFormat.workerCount = workerCount;
+ 217              return this;
+ 218          }
+ 219  
+ 220          public KuduOutputFormatBuilder setDefaultOperationTimeoutMs(Integer defaultOperationTimeoutMs) {
+ 221              kuduOutputFormat.defaultOperationTimeoutMs = defaultOperationTimeoutMs;
+ 222              return this;
+ 223          }
+ 224  
+ 225          public KuduOutputFormatBuilder setDefaultSocketReadTimeoutMs(Integer defaultSocketReadTimeoutMs) {
+ 226              kuduOutputFormat.defaultSocketReadTimeoutMs = defaultSocketReadTimeoutMs;
+ 227              return this;
+ 228          }
+ 229  
+ 230  
+ 231          public KuduOutputFormat finish() {
+ 232              if (kuduOutputFormat.kuduMasters == null) {
+ 233                  throw new IllegalArgumentException(&quot;No kuduMasters supplied.&quot;);
+ 234              }
+ 235  
+ 236              if (kuduOutputFormat.tableName == null) {
+ 237                  throw new IllegalArgumentException(&quot;No tablename supplied.&quot;);
+ 238              }
+ 239  
+ 240              return kuduOutputFormat;
+ 241          }
+ 242      }
+ 243  
+ 244      private Operation toOperation(WriteMode writeMode, Row row) {
+ 245          if (null == table) {
+ 246              throw new IllegalArgumentException(&quot;Table Open Failed , please check table exists&quot;);
+ 247          }
+ 248          Operation operation = toOperation(writeMode);
+ 249          PartialRow partialRow = operation.getRow();
+ 250  
+ 251          for (int index = 0; index &lt; row.getArity(); index++) {
+ 252              //解决kudu中全小写字段找不到的bug
+ 253              String fieldName = fieldNames[index].toLowerCase();
+ 254              if (row.getField(index) == null) {
+ 255                  partialRow.setNull(fieldName);
+ 256              } else {
+ 257                  if (fieldTypes[index].getTypeClass() == String.class) {
+ 258                      partialRow.addString(fieldName, (String) row.getField(index));
+ 259                      continue;
+ 260                  }
+ 261                  if (fieldTypes[index].getTypeClass() == Float.class) {
+ 262                      partialRow.addFloat(fieldName, (Float) row.getField(index));
+ 263                      continue;
+ 264                  }
+ 265                  if (fieldTypes[index].getTypeClass() == Byte.class) {
+ 266                      partialRow.addByte(fieldName, (Byte) row.getField(index));
+ 267                      continue;
+ 268                  }
+ 269  
+ 270                  if (fieldTypes[index].getTypeClass() == Short.class) {
+ 271                      partialRow.addShort(fieldName, (Short) row.getField(index));
+ 272                      continue;
+ 273                  }
+ 274  
+ 275                  if (fieldTypes[index].getTypeClass() == Integer.class) {
+ 276                      partialRow.addInt(fieldName, (Integer) row.getField(index));
+ 277                      continue;
+ 278                  }
+ 279  
+ 280                  if (fieldTypes[index].getTypeClass() == Long.class) {
+ 281                      partialRow.addLong(fieldName, (Long) row.getField(index));
+ 282                      continue;
+ 283                  }
+ 284  
+ 285                  if (fieldTypes[index].getTypeClass() == Double.class) {
+ 286                      partialRow.addDouble(fieldName, (Double) row.getField(index));
+ 287                      continue;
+ 288                  }
+ 289  
+ 290                  if (fieldTypes[index].getTypeClass() == BigDecimal.class) {
+ 291                      partialRow.addDecimal(fieldName, (BigDecimal) row.getField(index));
+ 292                      continue;
+ 293                  }
+ 294                  if (fieldTypes[index].getTypeClass() == Boolean.class) {
+ 295                      partialRow.addBoolean(fieldName, (Boolean) row.getField(index));
+ 296                      continue;
+ 297                  }
+ 298  
+ 299                  if (fieldTypes[index].getTypeClass() == Date.class) {
+ 300                      partialRow.addTimestamp(fieldName, new Timestamp(((Date) row.getField(index)).getTime()));
+ 301                      continue;
+ 302                  }
+ 303  
+ 304                  if (fieldTypes[index].getTypeClass() == Timestamp.class) {
+ 305                      partialRow.addTimestamp(fieldName, (Timestamp) row.getField(index));
+ 306                      continue;
+ 307                  }
+ 308  
+ 309                  if (fieldTypes[index].getTypeClass() == byte[].class) {
+ 310                      partialRow.addBinary(fieldName, (byte[]) row.getField(index));
+ 311                      continue;
+ 312                  }
+ 313                  throw new IllegalArgumentException(&quot;Illegal var type: &quot; + fieldTypes[index]);
+ 314              }
+ 315          }
+ 316          return operation;
+ 317  
+ 318      }
+ 319  
+ 320      private Operation toOperation(WriteMode writeMode) {
+ 321          switch (writeMode) {
+ 322              case INSERT:
+ 323                  return table.newInsert();
+ 324              case UPDATE:
+ 325                  return table.newUpdate();
+ 326              case UPSERT:
+ 327                  return table.newUpsert();
+ 328              default:
+ 329                  return table.newUpsert();
+ 330          }
+ 331      }
+ 332  
+ 333  }</pre></td>
+                        </tr>
+                    </table>
+                </div>
+              </body>
+            </html>
+            

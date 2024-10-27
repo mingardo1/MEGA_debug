@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+    <html lang="en">
+              <head>
+                <meta charset="utf-8">
+                <title>4</title>
+                    <style>
+                        #top {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        #bottom {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        abbr {
+                          /* Here is the delay */
+                          transition-delay:0s;
+                        }
+                    </style>
+              </head>
+              <body>
+                <span style="height: 4vh">
+                    4
+                    <a href="3.html">prev</a>
+                    <a href="5.html">next</a>
+                    <a href="4_chunks.html">chunks</a>
+                    <a href="index.html">index</a>
+                    AriaLyy/Aria_202e6645300cc1a327e9c972c3f61f099631169e_Aria/src/main/java/com/arialyy/aria/core/download/group/FtpDirDownloadUtil.java
+                    <textarea rows=1 onclick='navigator.clipboard.writeText(this.value)'>cd C:\studies\se\mega\git-analyzer-plus\notebooks\debug
+del /Q *
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\AriaLyy\Aria show &quot;202e6645300cc1a327e9c972c3f61f099631169e:Aria/src/main/java/com/arialyy/aria/core/download/group/FtpDirDownloadUtil.java&quot; &gt; committed.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\AriaLyy\Aria show &quot;202e6645300cc1a327e9c972c3f61f099631169e^1:Aria/src/main/java/com/arialyy/aria/core/download/group/FtpDirDownloadUtil.java&quot; &gt; ours.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\AriaLyy\Aria show &quot;202e6645300cc1a327e9c972c3f61f099631169e^2:Aria/src/main/java/com/arialyy/aria/core/download/group/FtpDirDownloadUtil.java&quot; &gt; theirs.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\AriaLyy\Aria show &quot;a5fc5d0bcfacb42139b088f746beb7394c90a8c0:Aria/src/main/java/com/arialyy/aria/core/download/group/FtpDirDownloadUtil.java&quot; &gt; base.java
+copy ours.java 1ours.java
+copy ours.java 2ours.java
+copy theirs.java 1theirs.java
+copy theirs.java 2theirs.java
+copy base.java 1base.java
+copy base.java 2base.java
+&quot;C:\Program Files\Java\jdk1.8.0_241\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\jFSTMerge\build\libs\jFSTMerge-all.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\jfstmerge.java --show-base
+&quot;C:\Program Files\Eclipse Adoptium\jdk-17.0.11.9-hotspot\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\spork\target\spork-0.5.0-SNAPSHOT.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\spork.java
+del /Q 1*.java
+del /Q 2*.java
+del /Q jfstmerge.java.merge
+</textarea>
+                    {strict: [[bj]], subset: [[bj]]}
+                </span>
+                <div id="top">
+
+                    <table>
+                        <tr>
+                            <th>line based (standard git)</th>
+                            <th>jfstmerge</th>
+                            <th>spork</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1 /*
+   2  * Copyright (C) 2016 AriaLyy(https://github.com/AriaLyy/Aria)
+   3  *
+   4  * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+   5  * you may not use this file except in compliance with the License.
+   6  * You may obtain a copy of the License at
+   7  *
+   8  *      http://www.apache.org/licenses/LICENSE-2.0
+   9  *
+  10  * Unless required by applicable law or agreed to in writing, software
+  11  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  12  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  13  * See the License for the specific language governing permissions and
+  14  * limitations under the License.
+  15  */
+  16 package com.arialyy.aria.core.download.group;
+  17 
+  18 import android.net.Uri;
+  19 import android.text.TextUtils;
+  20 import com.arialyy.aria.core.FtpUrlEntity;
+  21 import com.arialyy.aria.core.common.CompleteInfo;
+  22 import com.arialyy.aria.core.common.OnFileInfoCallback;
+  23 import com.arialyy.aria.core.download.DGTaskWrapper;
+  24 import com.arialyy.aria.core.download.DTaskWrapper;
+  25 import com.arialyy.aria.core.inf.AbsEntity;
+  26 import com.arialyy.aria.core.inf.IEntity;
+  27 import com.arialyy.aria.exception.BaseException;
+  28 import java.util.concurrent.locks.Condition;
+  29 import java.util.concurrent.locks.ReentrantLock;
+  30 
+  31 /**
+  32  * Created by Aria.Lao on 2017/7/27.
+  33  * ftp文件夹下载工具
+  34  */
+  35 public class FtpDirDownloadUtil extends AbsGroupUtil {
+  36   private String TAG = &quot;FtpDirDownloadUtil&quot;;
+  37   private ReentrantLock LOCK = new ReentrantLock();
+  38   private Condition condition = LOCK.newCondition();
+  39 
+  40   public FtpDirDownloadUtil(IDGroupListener listener, DGTaskWrapper taskEntity) {
+  41     super(listener, taskEntity);
+  42   }
+  43 
+  44   @Override int getTaskType() {
+  45     return FTP_DIR;
+  46   }
+  47 
+  48 &lt;&lt;&lt;&lt;&lt;&lt;&lt; GitAnalyzerPlus_ours
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  49   @Override protected void onPreStart() {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  50     super.onPreStart();</span>
+  51 ||||||| GitAnalyzerPlus_base
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  52   @Override protected void onStart() {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  53     super.onStart();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  54     if (mGTWrapper.getEntity().getFileSize() &gt; 1) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  55       startDownload();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  56     } else {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  57 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  58       FtpDirInfoThread infoThread = new FtpDirInfoThread(mGTWrapper, new OnFileInfoCallback() {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  59         @Override public void onComplete(String url, CompleteInfo info) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  60           if (info.code &gt;= 200 &amp;&amp; info.code &lt; 300) {</span>
+  61 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  62   @Override protected boolean onStart() {</span>
+  63 &gt;&gt;&gt;&gt;&gt;&gt;&gt; GitAnalyzerPlus_theirs
+  64     if (mGTWrapper.getEntity().getFileSize() &gt; 1) {
+  65       startDownload(true);
+  66     } else {
+  67       FtpDirInfoThread infoThread = new FtpDirInfoThread(mGTWrapper, new OnFileInfoCallback() {
+  68         @Override public void onComplete(String url, CompleteInfo info) {
+  69           if (info.code &gt;= 200 &amp;&amp; info.code &lt; 300) {
+  70             startDownload(false);
+  71           }
+  72         }
+  73 
+  74         @Override public void onFail(AbsEntity entity, BaseException e, boolean needRetry) {
+  75           mListener.onFail(needRetry, e);
+  76         }
+  77       });
+  78       new Thread(infoThread).start();
+  79       try {
+  80         LOCK.lock();
+  81         condition.await();
+  82       } catch (InterruptedException e) {
+  83         e.printStackTrace();
+  84       } finally {
+  85         LOCK.unlock();
+  86       }
+  87     }
+  88     return true;
+  89   }
+  90 
+  91   /**
+  92    * @param needCloneInfo 第一次下载，信息已经在{@link FtpDirInfoThread}中clone了
+  93    */
+  94   private void startDownload(boolean needCloneInfo) {
+  95     try {
+  96       LOCK.lock();
+  97       condition.signalAll();
+  98     } finally {
+  99       LOCK.unlock();
+ 100     }
+ 101     initState();
+ 102     for (DTaskWrapper wrapper : mGTWrapper.getSubTaskWrapper()) {
+ 103       if (needCloneInfo) {
+ 104         cloneInfo(wrapper);
+ 105       }
+ 106       if (wrapper.getState() != IEntity.STATE_COMPLETE) {
+ 107         createAndStartSubLoader(wrapper);
+ 108       }
+ 109     }
+ 110   }
+ 111 
+ 112   private void cloneInfo(DTaskWrapper subWrapper) {
+ 113     FtpUrlEntity urlEntity = mGTWrapper.asFtp().getUrlEntity().clone();
+ 114     Uri uri = Uri.parse(subWrapper.getEntity().getUrl());
+ 115     String remotePath = uri.getPath();
+ 116     urlEntity.remotePath = TextUtils.isEmpty(remotePath) ? &quot;/&quot; : remotePath;
+ 117 
+ 118     subWrapper.asFtp().setUrlEntity(urlEntity);
+ 119     subWrapper.asFtp().setCharSet(mGTWrapper.asFtp().getCharSet());
+ 120     subWrapper.asFtp().setProxy(mGTWrapper.asFtp().getProxy());
+ 121   }
+ 122 }</pre></td>
+                            <td><pre>   1 /*
+   2  * Copyright (C) 2016 AriaLyy(https://github.com/AriaLyy/Aria)
+   3  *
+   4  * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+   5  * you may not use this file except in compliance with the License.
+   6  * You may obtain a copy of the License at
+   7  *
+   8  *      http://www.apache.org/licenses/LICENSE-2.0
+   9  *
+  10  * Unless required by applicable law or agreed to in writing, software
+  11  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  12  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  13  * See the License for the specific language governing permissions and
+  14  * limitations under the License.
+  15  */
+  16 package com.arialyy.aria.core.download.group;
+  17 
+  18 import android.net.Uri;
+  19 import android.text.TextUtils;
+  20 import com.arialyy.aria.core.FtpUrlEntity;
+  21 import com.arialyy.aria.core.common.CompleteInfo;
+  22 import com.arialyy.aria.core.common.OnFileInfoCallback;
+  23 import com.arialyy.aria.core.download.DGTaskWrapper;
+  24 import com.arialyy.aria.core.download.DTaskWrapper;
+  25 import com.arialyy.aria.core.inf.AbsEntity;
+  26 import com.arialyy.aria.core.inf.IEntity;
+  27 import com.arialyy.aria.exception.BaseException;
+  28 import java.util.concurrent.locks.Condition;
+  29 import java.util.concurrent.locks.ReentrantLock;
+  30 
+  31 /**
+  32  * Created by Aria.Lao on 2017/7/27.
+  33  * ftp文件夹下载工具
+  34  */
+  35 public class FtpDirDownloadUtil extends AbsGroupUtil {
+  36   private String TAG = &quot;FtpDirDownloadUtil&quot;;
+  37   private ReentrantLock LOCK = new ReentrantLock();
+  38   private Condition condition = LOCK.newCondition();
+  39 
+  40   public FtpDirDownloadUtil(IDGroupListener listener, DGTaskWrapper taskEntity) {
+  41     super(listener, taskEntity);
+  42   }
+  43 
+  44   @Override int getTaskType() {
+  45     return FTP_DIR;
+  46   }
+  47 
+  48 &lt;&lt;&lt;&lt;&lt;&lt;&lt; MINE
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  49 @Override protected void onPreStart() {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  50     super.onPreStart();</span>
+  51 ||||||| BASE
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  52 @Override protected void onStart() {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  53     super.onStart();</span>
+  54 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  55 @Override protected boolean onStart() {</span>
+  56 &gt;&gt;&gt;&gt;&gt;&gt;&gt; YOURS
+  57     if (mGTWrapper.getEntity().getFileSize() &gt; 1) {
+  58       startDownload(true);
+  59     } else {
+  60       FtpDirInfoThread infoThread = new FtpDirInfoThread(mGTWrapper, new OnFileInfoCallback() {
+  61         @Override public void onComplete(String url, CompleteInfo info) {
+  62           if (info.code &gt;= 200 &amp;&amp; info.code &lt; 300) {
+  63             startDownload(false);
+  64           }
+  65         }
+  66 
+  67         @Override public void onFail(AbsEntity entity, BaseException e, boolean needRetry) {
+  68           mListener.onFail(needRetry, e);
+  69         }
+  70       });
+  71       new Thread(infoThread).start();
+  72       try {
+  73         LOCK.lock();
+  74         condition.await();
+  75       } catch (InterruptedException e) {
+  76         e.printStackTrace();
+  77       } finally {
+  78         LOCK.unlock();
+  79       }
+  80     }
+  81     return true;
+  82   }
+  83 
+  84   /**
+  85    * @param needCloneInfo 第一次下载，信息已经在{@link FtpDirInfoThread}中clone了
+  86    */
+  87   private void startDownload(boolean needCloneInfo) {
+  88     try {
+  89       LOCK.lock();
+  90       condition.signalAll();
+  91     } finally {
+  92       LOCK.unlock();
+  93     }
+  94     initState();
+  95     for (DTaskWrapper wrapper : mGTWrapper.getSubTaskWrapper()) {
+  96       if (needCloneInfo) {
+  97         cloneInfo(wrapper);
+  98       }
+  99       if (wrapper.getState() != IEntity.STATE_COMPLETE) {
+ 100         createAndStartSubLoader(wrapper);
+ 101       }
+ 102     }
+ 103   }
+ 104 
+ 105   private void cloneInfo(DTaskWrapper subWrapper) {
+ 106     FtpUrlEntity urlEntity = mGTWrapper.asFtp().getUrlEntity().clone();
+ 107     Uri uri = Uri.parse(subWrapper.getEntity().getUrl());
+ 108     String remotePath = uri.getPath();
+ 109     urlEntity.remotePath = TextUtils.isEmpty(remotePath) ? &quot;/&quot; : remotePath;
+ 110 
+ 111     subWrapper.asFtp().setUrlEntity(urlEntity);
+ 112     subWrapper.asFtp().setCharSet(mGTWrapper.asFtp().getCharSet());
+ 113     subWrapper.asFtp().setProxy(mGTWrapper.asFtp().getProxy());
+ 114   }
+ 115 }
+ 
+ 
+ 
+ 
+ 
+ </pre></td>
+                            <td><pre>   1 /*
+   2  * Copyright (C) 2016 AriaLyy(https://github.com/AriaLyy/Aria)
+   3  *
+   4  * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+   5  * you may not use this file except in compliance with the License.
+   6  * You may obtain a copy of the License at
+   7  *
+   8  *      http://www.apache.org/licenses/LICENSE-2.0
+   9  *
+  10  * Unless required by applicable law or agreed to in writing, software
+  11  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  12  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  13  * See the License for the specific language governing permissions and
+  14  * limitations under the License.
+  15  */
+  16 package com.arialyy.aria.core.download.group;
+  17 
+  18 import android.net.Uri;
+  19 import android.text.TextUtils;
+  20 import com.arialyy.aria.core.FtpUrlEntity;
+  21 import com.arialyy.aria.core.common.CompleteInfo;
+  22 import com.arialyy.aria.core.common.OnFileInfoCallback;
+  23 import com.arialyy.aria.core.download.DGTaskWrapper;
+  24 import com.arialyy.aria.core.download.DTaskWrapper;
+  25 import com.arialyy.aria.core.inf.AbsEntity;
+  26 import com.arialyy.aria.core.inf.IEntity;
+  27 import com.arialyy.aria.exception.BaseException;
+  28 import java.util.concurrent.locks.Condition;
+  29 import java.util.concurrent.locks.ReentrantLock;
+  30 
+  31 
+  32 /**
+  33  * Created by Aria.Lao on 2017/7/27.
+  34  * ftp文件夹下载工具
+  35  */
+  36 public class FtpDirDownloadUtil extends AbsGroupUtil {
+  37   private String TAG = &quot;FtpDirDownloadUtil&quot;;
+  38 
+  39   private ReentrantLock LOCK = new ReentrantLock();
+  40 
+  41   private Condition condition = LOCK.newCondition();
+  42 
+  43   public FtpDirDownloadUtil(IDGroupListener listener, DGTaskWrapper taskEntity) {
+  44     super(listener, taskEntity);
+  45   }
+  46 
+  47   @Override int getTaskType() {
+  48     return FTP_DIR;
+  49   }
+  50 
+  51   @Override
+  52   protected boolean onPreStart() {
+  53     if (mGTWrapper.getEntity().getFileSize() &gt; 1) {
+  54       startDownload(true);
+  55     } else {
+  56       FtpDirInfoThread infoThread = new FtpDirInfoThread(mGTWrapper, new OnFileInfoCallback() {
+  57         @Override
+  58         public void onComplete(String url, CompleteInfo info) {
+  59           if ((info.code &gt;= 200) &amp;&amp; (info.code &lt; 300)) {
+  60             startDownload(false);
+  61           }
+  62         }
+  63 
+  64         @Override public void onFail(AbsEntity entity, BaseException e, boolean needRetry) {
+  65           mListener.onFail(needRetry, e);
+  66         }
+  67       });
+  68       new Thread(infoThread).start();
+  69       try {
+  70         LOCK.lock();
+  71         condition.await();
+  72       } catch (java.lang.InterruptedException e) {
+  73         e.printStackTrace();
+  74       } finally {
+  75         LOCK.unlock();
+  76       }
+  77     }
+  78     return true;
+  79   }
+  80 
+  81   /**
+  82    * @param needCloneInfo 第一次下载，信息已经在{@link FtpDirInfoThread}中clone了
+  83    */
+  84   private void startDownload(boolean needCloneInfo) {
+  85     try {
+  86       LOCK.lock();
+  87       condition.signalAll();
+  88     } finally {
+  89       LOCK.unlock();
+  90     }
+  91     initState();
+  92     for (DTaskWrapper wrapper : mGTWrapper.getSubTaskWrapper()) {
+  93       if (needCloneInfo) {
+  94         cloneInfo(wrapper);
+  95       }
+  96       if (wrapper.getState() != IEntity.STATE_COMPLETE) {
+  97         createAndStartSubLoader(wrapper);
+  98       }
+  99     }
+ 100   }
+ 101 
+ 102   private void cloneInfo(DTaskWrapper subWrapper) {
+ 103     FtpUrlEntity urlEntity = mGTWrapper.asFtp().getUrlEntity().clone();
+ 104     Uri uri = Uri.parse(subWrapper.getEntity().getUrl());
+ 105     String remotePath = uri.getPath();
+ 106     urlEntity.remotePath = TextUtils.isEmpty(remotePath) ? &quot;/&quot; : remotePath;
+ 107 
+ 108     subWrapper.asFtp().setUrlEntity(urlEntity);
+ 109     subWrapper.asFtp().setCharSet(mGTWrapper.asFtp().getCharSet());
+ 110     subWrapper.asFtp().setProxy(mGTWrapper.asFtp().getProxy());
+ 111   }
+ 112 }
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ </pre></td>
+                        </tr>
+                    </table>
+                </div>
+                <div id="bottom">
+                    <table style="margin:auto">
+                        <tr>
+                            <th>ours vs. base</th>
+                            <th>theirs vs. base</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1  /*
+   2   * Copyright (C) 2016 AriaLyy(https://github.com/AriaLyy/Aria)
+   3   *
+   4   * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+   5   * you may not use this file except in compliance with the License.
+   6   * You may obtain a copy of the License at
+   7   *
+   8   *      http://www.apache.org/licenses/LICENSE-2.0
+   9   *
+  10   * Unless required by applicable law or agreed to in writing, software
+  11   * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  12   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  13   * See the License for the specific language governing permissions and
+  14   * limitations under the License.
+  15   */
+  16  package com.arialyy.aria.core.download.group;
+  17  
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  18 +import android.net.Uri;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  19 +import android.text.TextUtils;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  20 +import com.arialyy.aria.core.FtpUrlEntity;</span>
+  21  import com.arialyy.aria.core.common.CompleteInfo;
+  22  import com.arialyy.aria.core.common.OnFileInfoCallback;
+  23  import com.arialyy.aria.core.download.DGTaskWrapper;
+  24  import com.arialyy.aria.core.download.DTaskWrapper;
+  25  import com.arialyy.aria.core.inf.AbsEntity;
+  26  import com.arialyy.aria.core.inf.IEntity;
+  27  import com.arialyy.aria.exception.BaseException;
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  28 +import java.util.concurrent.locks.Condition;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  29 +import java.util.concurrent.locks.ReentrantLock;</span>
+  30  
+  31  /**
+  32   * Created by Aria.Lao on 2017/7/27.
+  33   * ftp文件夹下载工具
+  34   */
+  35  public class FtpDirDownloadUtil extends AbsGroupUtil {
+  36    private String TAG = &quot;FtpDirDownloadUtil&quot;;
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  37 +  private ReentrantLock LOCK = new ReentrantLock();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  38 +  private Condition condition = LOCK.newCondition();</span>
+  39  
+  40    public FtpDirDownloadUtil(IDGroupListener listener, DGTaskWrapper taskEntity) {
+  41      super(listener, taskEntity);
+  42    }
+  43  
+  44    @Override int getTaskType() {
+  45      return FTP_DIR;
+  46    }
+  47  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  48 -  @Override protected void onStart() {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  49 -    super.onStart();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  50 +  @Override protected void onPreStart() {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  51 +    super.onPreStart();</span>
+  52      if (mGTWrapper.getEntity().getFileSize() &gt; 1) {
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  53 -      startDownload();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  54 +      startDownload(true);</span>
+  55      } else {
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  56 -</span>
+  57        FtpDirInfoThread infoThread = new FtpDirInfoThread(mGTWrapper, new OnFileInfoCallback() {
+  58          @Override public void onComplete(String url, CompleteInfo info) {
+  59            if (info.code &gt;= 200 &amp;&amp; info.code &lt; 300) {
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  60 -            startDownload();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  61 +            startDownload(false);</span>
+  62            }
+  63          }
+  64  
+  65          @Override public void onFail(AbsEntity entity, BaseException e, boolean needRetry) {
+  66            mListener.onFail(needRetry, e);
+  67          }
+  68        });
+  69        new Thread(infoThread).start();
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  70 +      try {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  71 +        LOCK.lock();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  72 +        condition.await();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  73 +      } catch (InterruptedException e) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  74 +        e.printStackTrace();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  75 +      } finally {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  76 +        LOCK.unlock();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  77 +      }</span>
+  78      }
+
+  79    }
+  80  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  81 -  private void startDownload() {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  82 +  /**</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  83 +   * @param needCloneInfo 第一次下载，信息已经在{@link FtpDirInfoThread}中clone了</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  84 +   */</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  85 +  private void startDownload(boolean needCloneInfo) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  86 +    try {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  87 +      LOCK.lock();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  88 +      condition.signalAll();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  89 +    } finally {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  90 +      LOCK.unlock();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  91 +    }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  92 +    initState();</span>
+  93      for (DTaskWrapper wrapper : mGTWrapper.getSubTaskWrapper()) {
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  94 +      if (needCloneInfo) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  95 +        cloneInfo(wrapper);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  96 +      }</span>
+  97        if (wrapper.getState() != IEntity.STATE_COMPLETE) {
+  98          createAndStartSubLoader(wrapper);
+  99        }
+ 100      }
+ 101    }
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 102 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 103 +  private void cloneInfo(DTaskWrapper subWrapper) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 104 +    FtpUrlEntity urlEntity = mGTWrapper.asFtp().getUrlEntity().clone();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 105 +    Uri uri = Uri.parse(subWrapper.getEntity().getUrl());</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 106 +    String remotePath = uri.getPath();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 107 +    urlEntity.remotePath = TextUtils.isEmpty(remotePath) ? &quot;/&quot; : remotePath;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 108 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 109 +    subWrapper.asFtp().setUrlEntity(urlEntity);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 110 +    subWrapper.asFtp().setCharSet(mGTWrapper.asFtp().getCharSet());</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 111 +    subWrapper.asFtp().setProxy(mGTWrapper.asFtp().getProxy());</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 112 +  }</span>
+ 113  }</pre></td>
+                            <td><pre>   1  /*
+   2   * Copyright (C) 2016 AriaLyy(https://github.com/AriaLyy/Aria)
+   3   *
+   4   * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+   5   * you may not use this file except in compliance with the License.
+   6   * You may obtain a copy of the License at
+   7   *
+   8   *      http://www.apache.org/licenses/LICENSE-2.0
+   9   *
+  10   * Unless required by applicable law or agreed to in writing, software
+  11   * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  12   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  13   * See the License for the specific language governing permissions and
+  14   * limitations under the License.
+  15   */
+  16  package com.arialyy.aria.core.download.group;
+  17  
+
+
+
+  18  import com.arialyy.aria.core.common.CompleteInfo;
+  19  import com.arialyy.aria.core.common.OnFileInfoCallback;
+  20  import com.arialyy.aria.core.download.DGTaskWrapper;
+  21  import com.arialyy.aria.core.download.DTaskWrapper;
+  22  import com.arialyy.aria.core.inf.AbsEntity;
+  23  import com.arialyy.aria.core.inf.IEntity;
+  24  import com.arialyy.aria.exception.BaseException;
+
+
+  25  
+  26  /**
+  27   * Created by Aria.Lao on 2017/7/27.
+  28   * ftp文件夹下载工具
+  29   */
+  30  public class FtpDirDownloadUtil extends AbsGroupUtil {
+  31    private String TAG = &quot;FtpDirDownloadUtil&quot;;
+
+
+  32  
+  33    public FtpDirDownloadUtil(IDGroupListener listener, DGTaskWrapper taskEntity) {
+  34      super(listener, taskEntity);
+  35    }
+  36  
+  37    @Override int getTaskType() {
+  38      return FTP_DIR;
+  39    }
+  40  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  41 -  @Override protected void onStart() {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  42 -    super.onStart();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  43 +  @Override protected boolean onStart() {</span>
+
+  44      if (mGTWrapper.getEntity().getFileSize() &gt; 1) {
+  45        startDownload();
+
+  46      } else {
+  47  
+  48        FtpDirInfoThread infoThread = new FtpDirInfoThread(mGTWrapper, new OnFileInfoCallback() {
+  49          @Override public void onComplete(String url, CompleteInfo info) {
+  50            if (info.code &gt;= 200 &amp;&amp; info.code &lt; 300) {
+  51              startDownload();
+
+  52            }
+  53          }
+  54  
+  55          @Override public void onFail(AbsEntity entity, BaseException e, boolean needRetry) {
+  56            mListener.onFail(needRetry, e);
+  57          }
+  58        });
+  59        new Thread(infoThread).start();
+
+
+
+
+
+
+
+
+  60      }
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  61 +    return true;</span>
+  62    }
+  63  
+  64    private void startDownload() {
+
+
+
+
+
+
+
+
+
+
+
+  65      for (DTaskWrapper wrapper : mGTWrapper.getSubTaskWrapper()) {
+
+
+
+  66        if (wrapper.getState() != IEntity.STATE_COMPLETE) {
+  67          createAndStartSubLoader(wrapper);
+  68        }
+  69      }
+  70    }
+
+
+
+
+
+
+
+
+
+
+
+  71  }</pre></td>
+                        </tr>
+                    </table>
+                </div>
+              </body>
+            </html>
+            

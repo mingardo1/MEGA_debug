@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+    <html lang="en">
+              <head>
+                <meta charset="utf-8">
+                <title>408</title>
+                    <style>
+                        #top {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        #bottom {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        abbr {
+                          /* Here is the delay */
+                          transition-delay:0s;
+                        }
+                    </style>
+              </head>
+              <body>
+                <span style="height: 4vh">
+                    408
+                    <a href="407.html">prev</a>
+                    <a href="409.html">next</a>
+                    <a href="408_chunks.html">chunks</a>
+                    <a href="index.html">index</a>
+                    DTStack/flinkStreamSQL_45197a2af7c416e80e46ea42301b7e5e07851983_hbase/hbase-side/hbase-side-core/src/main/java/com/dtstack/flink/sql/side/hbase/RowKeyBuilder.java
+                    <textarea rows=1 onclick='navigator.clipboard.writeText(this.value)'>cd C:\studies\se\mega\git-analyzer-plus\notebooks\debug
+del /Q *
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;45197a2af7c416e80e46ea42301b7e5e07851983:hbase/hbase-side/hbase-side-core/src/main/java/com/dtstack/flink/sql/side/hbase/RowKeyBuilder.java&quot; &gt; committed.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;45197a2af7c416e80e46ea42301b7e5e07851983^1:hbase/hbase-side/hbase-side-core/src/main/java/com/dtstack/flink/sql/side/hbase/RowKeyBuilder.java&quot; &gt; ours.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;45197a2af7c416e80e46ea42301b7e5e07851983^2:hbase/hbase-side/hbase-side-core/src/main/java/com/dtstack/flink/sql/side/hbase/RowKeyBuilder.java&quot; &gt; theirs.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;ac65b81d92c5ca181418e082a929a905acadac60:hbase/hbase-side/hbase-side-core/src/main/java/com/dtstack/flink/sql/side/hbase/RowKeyBuilder.java&quot; &gt; base.java
+copy ours.java 1ours.java
+copy ours.java 2ours.java
+copy theirs.java 1theirs.java
+copy theirs.java 2theirs.java
+copy base.java 1base.java
+copy base.java 2base.java
+&quot;C:\Program Files\Java\jdk1.8.0_241\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\jFSTMerge\build\libs\jFSTMerge-all.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\jfstmerge.java --show-base
+&quot;C:\Program Files\Eclipse Adoptium\jdk-17.0.11.9-hotspot\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\spork\target\spork-0.5.0-SNAPSHOT.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\spork.java
+del /Q 1*.java
+del /Q 2*.java
+del /Q jfstmerge.java.merge
+</textarea>
+                    {strict: [[b]], subset: [[b]]}
+                </span>
+                <div id="top">
+
+                    <table>
+                        <tr>
+                            <th>line based (standard git)</th>
+                            <th>jfstmerge</th>
+                            <th>spork</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1 /*
+   2  * Licensed to the Apache Software Foundation (ASF) under one
+   3  * or more contributor license agreements.  See the NOTICE file
+   4  * distributed with this work for additional information
+   5  * regarding copyright ownership.  The ASF licenses this file
+   6  * to you under the Apache License, Version 2.0 (the
+   7  * &quot;License&quot;); you may not use this file except in compliance
+   8  * with the License.  You may obtain a copy of the License at
+   9  *
+  10  *     http://www.apache.org/licenses/LICENSE-2.0
+  11  *
+  12  * Unless required by applicable law or agreed to in writing, software
+  13  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15  * See the License for the specific language governing permissions and
+  16  * limitations under the License.
+  17  */
+  18 
+  19  
+  20 
+  21 package com.dtstack.flink.sql.side.hbase;
+  22 
+  23 import com.dtstack.flink.sql.side.hbase.enums.EReplaceType;
+  24 import com.dtstack.flink.sql.util.MD5Utils;
+  25 import com.google.common.collect.Lists;
+  26 import org.apache.commons.collections.CollectionUtils;
+  27 
+  28 import java.io.Serializable;
+  29 import java.util.List;
+  30 import java.util.Map;
+  31 import java.util.regex.Matcher;
+  32 import java.util.regex.Pattern;
+  33 
+  34 /**
+  35  * rowkey rule
+  36  * Date: 2018/8/23
+  37  * Company: www.dtstack.com
+  38  * @author xuchao
+  39  */
+  40 
+  41 public class RowKeyBuilder implements Serializable{
+  42 
+  43     private static final long serialVersionUID = 2058635242857937717L;
+  44 
+  45     private static Pattern Md5Operator = Pattern.compile(&quot;(?i)^md5\\(\\s*(.*)\\s*\\)$&quot;);
+  46 
+  47     private List&lt;ReplaceInfo&gt; operatorChain = Lists.newArrayList();
+  48 
+  49     public void init(String rowKeyTempl){
+  50     	operatorChain.addAll(makeFormula(rowKeyTempl));
+  51     }
+  52 
+  53     /**
+  54      *
+  55      * @param refData
+  56      * @return
+  57      */
+  58     public String getRowKey(Map&lt;String, Object&gt; refData){
+  59     	return buildStr(operatorChain, refData);
+  60     }
+  61 
+  62 
+  63 
+  64     private String buildStr(List&lt;ReplaceInfo&gt; fieldList, Map&lt;String, Object&gt; refData){
+  65         if(CollectionUtils.isEmpty(fieldList)){
+  66             return &quot;&quot;;
+  67         }
+  68         StringBuffer sb = new StringBuffer(&quot;&quot;);
+  69         for(ReplaceInfo replaceInfo : fieldList){
+  70 
+  71             if(replaceInfo.getType() == EReplaceType.CONSTANT){
+  72                 sb.append(replaceInfo.getParam());
+  73                 continue;
+  74             }
+  75 
+  76             if(replaceInfo.getType() == EReplaceType.FUNC){
+  77                 sb.append(MD5Utils.getMD5String(buildStr(replaceInfo.getSubReplaceInfos(), refData)));
+  78                 continue;
+  79             }
+  80             String replaceName = replaceInfo.getParam();
+  81             if(!refData.containsKey(replaceName)){
+<abbr title="  82                 throw new RuntimeException(String.format(&quot;build rowKey with field %s which value not found.&quot;, replaceName));">  82                 throw new RuntimeException(String.format(&quot;build rowKey with field %s which value not foun🔵</abbr>
+  83             }
+  84 
+  85             sb.append(refData.get(replaceName));
+  86         }
+  87 
+  88         return sb.toString();
+  89     }
+  90 
+  91     public static String[] splitIgnoreQuotaBrackets(String str, String delimiter){
+  92         String splitPatternStr = delimiter + &quot;(?![^()]*+\\))(?![^{}]*+})(?![^\\[\\]]*+\\])&quot;;
+  93         return str.split(splitPatternStr);
+  94     }
+  95 
+  96     /**
+  97      *
+  98      * @param field
+  99      * @return
+ 100      */
+ 101     public ReplaceInfo getReplaceInfo(String field){
+ 102 
+ 103         field = field.trim();
+ 104         if(field.length() &lt;= 2){
+ 105             throw new RuntimeException(field + &quot; \n&quot; +
+ 106                     &quot;Format defined exceptions&quot;);
+ 107         }
+ 108 
+ 109         //判断是不是常量==&gt;&#x27;&#x27;包裹的标识
+ 110         if(field.startsWith(&quot;&#x27;&quot;) &amp;&amp; field.endsWith(&quot;&#x27;&quot;)){
+ 111             ReplaceInfo replaceInfo = new ReplaceInfo(EReplaceType.CONSTANT);
+ 112             field = field.substring(1, field.length() - 1);
+ 113             replaceInfo.setParam(field);
+ 114             return replaceInfo;
+ 115         }
+ 116 
+ 117         ReplaceInfo replaceInfo = new ReplaceInfo(EReplaceType.PARAM);
+ 118         replaceInfo.setParam(field);
+ 119         return replaceInfo;
+ 120     }
+ 121 
+ 122     private List&lt;ReplaceInfo&gt; makeFormula(String formula){
+ 123 &lt;&lt;&lt;&lt;&lt;&lt;&lt; GitAnalyzerPlus_ours
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 124         if(formula == null || formula.length() &lt;= 0){</span>
+ 125 ||||||| GitAnalyzerPlus_base
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 126         if(formula == null || formula.length() &lt;= 0){</span>
+ 127 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 128         if (formula == null || formula.length() &lt;= 0) {</span>
+ 129 &gt;&gt;&gt;&gt;&gt;&gt;&gt; GitAnalyzerPlus_theirs
+ 130             return Lists.newArrayList();
+ 131         }
+ 132 
+ 133         List&lt;ReplaceInfo&gt; result = Lists.newArrayList();
+ 134         for(String meta: splitIgnoreQuotaBrackets(formula, &quot;\\+&quot;)){
+ 135             Matcher matcher = Md5Operator.matcher(meta.trim());
+ 136             if(matcher.find()){
+ 137                 ReplaceInfo replaceInfo = new ReplaceInfo(EReplaceType.FUNC);
+ 138                 replaceInfo.setSubReplaceInfos(makeFormula(matcher.group(1)));
+ 139                 result.add(replaceInfo);
+ 140             } else {
+ 141                 result.add(getReplaceInfo(meta));
+ 142             }
+ 143         }
+ 144         return result;
+ 145     }
+ 146 }</pre></td>
+                            <td><pre>   1 /*
+   2  * Licensed to the Apache Software Foundation (ASF) under one
+   3  * or more contributor license agreements.  See the NOTICE file
+   4  * distributed with this work for additional information
+   5  * regarding copyright ownership.  The ASF licenses this file
+   6  * to you under the Apache License, Version 2.0 (the
+   7  * &quot;License&quot;); you may not use this file except in compliance
+   8  * with the License.  You may obtain a copy of the License at
+   9  *
+  10  *     http://www.apache.org/licenses/LICENSE-2.0
+  11  *
+  12  * Unless required by applicable law or agreed to in writing, software
+  13  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15  * See the License for the specific language governing permissions and
+  16  * limitations under the License.
+  17  */
+  18 
+  19 
+  20 
+  21 package com.dtstack.flink.sql.side.hbase;
+  22 
+  23 import com.dtstack.flink.sql.side.hbase.enums.EReplaceType;
+  24 import com.dtstack.flink.sql.util.MD5Utils;
+  25 import com.google.common.collect.Lists;
+  26 import org.apache.commons.collections.CollectionUtils;
+  27 
+  28 import java.io.Serializable;
+  29 import java.util.List;
+  30 import java.util.Map;
+  31 import java.util.regex.Matcher;
+  32 import java.util.regex.Pattern;
+  33 
+  34 /**
+  35  * rowkey rule
+  36  * Date: 2018/8/23
+  37  * Company: www.dtstack.com
+  38  * @author xuchao
+  39  */
+  40 
+  41 public class RowKeyBuilder implements Serializable{
+  42 
+  43     private static final long serialVersionUID = 2058635242857937717L;
+  44 
+  45     private static Pattern Md5Operator = Pattern.compile(&quot;(?i)^md5\\(\\s*(.*)\\s*\\)$&quot;);
+  46 
+  47     private List&lt;ReplaceInfo&gt; operatorChain = Lists.newArrayList();
+  48 
+  49     public void init(String rowKeyTempl){
+  50     	operatorChain.addAll(makeFormula(rowKeyTempl));
+  51     }
+  52 
+  53     /**
+  54      *
+  55      * @param refData
+  56      * @return
+  57      */
+  58     public String getRowKey(Map&lt;String, Object&gt; refData){
+  59     	return buildStr(operatorChain, refData);
+  60     }
+  61 
+  62 
+  63 
+  64     private String buildStr(List&lt;ReplaceInfo&gt; fieldList, Map&lt;String, Object&gt; refData){
+  65         if(CollectionUtils.isEmpty(fieldList)){
+  66             return &quot;&quot;;
+  67         }
+  68         StringBuffer sb = new StringBuffer(&quot;&quot;);
+  69         for(ReplaceInfo replaceInfo : fieldList){
+  70 
+  71             if(replaceInfo.getType() == EReplaceType.CONSTANT){
+  72                 sb.append(replaceInfo.getParam());
+  73                 continue;
+  74             }
+  75 
+  76             if(replaceInfo.getType() == EReplaceType.FUNC){
+  77                 sb.append(MD5Utils.getMD5String(buildStr(replaceInfo.getSubReplaceInfos(), refData)));
+  78                 continue;
+  79             }
+  80             String replaceName = replaceInfo.getParam();
+  81             if(!refData.containsKey(replaceName)){
+<abbr title="  82                 throw new RuntimeException(String.format(&quot;build rowKey with field %s which value not found.&quot;, replaceName));">  82                 throw new RuntimeException(String.format(&quot;build rowKey with field %s which value not foun🔵</abbr>
+  83             }
+  84 
+  85             sb.append(refData.get(replaceName));
+  86         }
+  87 
+  88         return sb.toString();
+  89     }
+  90 
+  91     public static String[] splitIgnoreQuotaBrackets(String str, String delimiter){
+  92         String splitPatternStr = delimiter + &quot;(?![^()]*+\\))(?![^{}]*+})(?![^\\[\\]]*+\\])&quot;;
+  93         return str.split(splitPatternStr);
+  94     }
+  95 
+  96     /**
+  97      *
+  98      * @param field
+  99      * @return
+ 100      */
+ 101     public ReplaceInfo getReplaceInfo(String field){
+ 102 
+ 103         field = field.trim();
+ 104         if(field.length() &lt;= 2){
+ 105             throw new RuntimeException(field + &quot; \n&quot; +
+ 106                     &quot;Format defined exceptions&quot;);
+ 107         }
+ 108 
+ 109         //判断是不是常量==&gt;&#x27;&#x27;包裹的标识
+ 110         if(field.startsWith(&quot;&#x27;&quot;) &amp;&amp; field.endsWith(&quot;&#x27;&quot;)){
+ 111             ReplaceInfo replaceInfo = new ReplaceInfo(EReplaceType.CONSTANT);
+ 112             field = field.substring(1, field.length() - 1);
+ 113             replaceInfo.setParam(field);
+ 114             return replaceInfo;
+ 115         }
+ 116 
+ 117         ReplaceInfo replaceInfo = new ReplaceInfo(EReplaceType.PARAM);
+ 118         replaceInfo.setParam(field);
+ 119         return replaceInfo;
+ 120     }
+ 121 
+ 122     private List&lt;ReplaceInfo&gt; makeFormula(String formula){
+ 123         if(formula == null || formula.length() &lt;= 0){
+ 124             return Lists.newArrayList();
+ 125         }
+ 126         List&lt;ReplaceInfo&gt; result = Lists.newArrayList();
+ 127         for(String meta: splitIgnoreQuotaBrackets(formula, &quot;\\+&quot;)){
+ 128             Matcher matcher = Md5Operator.matcher(meta.trim());
+ 129             if(matcher.find()){
+ 130                 ReplaceInfo replaceInfo = new ReplaceInfo(EReplaceType.FUNC);
+ 131                 replaceInfo.setSubReplaceInfos(makeFormula(matcher.group(1)));
+ 132                 result.add(replaceInfo);
+ 133             } else {
+ 134                 result.add(getReplaceInfo(meta));
+ 135             }
+ 136         }
+ 137         return result;
+ 138     }
+ 139 }
+ 
+ 
+ 
+ 
+ 
+ </pre></td>
+                            <td><pre>   1 /*
+   2  * Licensed to the Apache Software Foundation (ASF) under one
+   3  * or more contributor license agreements.  See the NOTICE file
+   4  * distributed with this work for additional information
+   5  * regarding copyright ownership.  The ASF licenses this file
+   6  * to you under the Apache License, Version 2.0 (the
+   7  * &quot;License&quot;); you may not use this file except in compliance
+   8  * with the License.  You may obtain a copy of the License at
+   9  *
+  10  *     http://www.apache.org/licenses/LICENSE-2.0
+  11  *
+  12  * Unless required by applicable law or agreed to in writing, software
+  13  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15  * See the License for the specific language governing permissions and
+  16  * limitations under the License.
+  17  */
+  18 package com.dtstack.flink.sql.side.hbase;
+  19 
+  20 import com.dtstack.flink.sql.side.hbase.enums.EReplaceType;
+  21 import com.dtstack.flink.sql.util.MD5Utils;
+  22 import com.google.common.collect.Lists;
+  23 import java.io.Serializable;
+  24 import java.util.List;
+  25 import java.util.Map;
+  26 import java.util.regex.Matcher;
+  27 import java.util.regex.Pattern;
+  28 import org.apache.commons.collections.CollectionUtils;
+  29 
+  30 
+  31 /**
+  32  * rowkey rule
+  33  * Date: 2018/8/23
+  34  * Company: www.dtstack.com
+  35  * @author xuchao
+  36  */
+  37 public class RowKeyBuilder implements Serializable {
+  38     private static final long serialVersionUID = 2058635242857937717L;
+  39 
+  40     private static Pattern Md5Operator = Pattern.compile(&quot;(?i)^md5\\(\\s*(.*)\\s*\\)$&quot;);
+  41 
+  42     private List&lt;ReplaceInfo&gt; operatorChain = Lists.newArrayList();
+  43 
+  44     public void init(String rowKeyTempl){
+  45     	operatorChain.addAll(makeFormula(rowKeyTempl));
+  46     }
+  47 
+  48     /**
+  49      *
+  50      * @param refData
+  51      * @return
+  52      */
+  53     public String getRowKey(Map&lt;String, Object&gt; refData){
+  54     	return buildStr(operatorChain, refData);
+  55     }
+  56 
+  57     private String buildStr(List&lt;ReplaceInfo&gt; fieldList, Map&lt;String, Object&gt; refData){
+  58         if(CollectionUtils.isEmpty(fieldList)){
+  59             return &quot;&quot;;
+  60         }
+  61         StringBuffer sb = new StringBuffer(&quot;&quot;);
+  62         for(ReplaceInfo replaceInfo : fieldList){
+  63 
+  64             if(replaceInfo.getType() == EReplaceType.CONSTANT){
+  65                 sb.append(replaceInfo.getParam());
+  66                 continue;
+  67             }
+  68 
+  69             if(replaceInfo.getType() == EReplaceType.FUNC){
+  70                 sb.append(MD5Utils.getMD5String(buildStr(replaceInfo.getSubReplaceInfos(), refData)));
+  71                 continue;
+  72             }
+  73             String replaceName = replaceInfo.getParam();
+  74             if(!refData.containsKey(replaceName)){
+<abbr title="  75                 throw new RuntimeException(String.format(&quot;build rowKey with field %s which value not found.&quot;, replaceName));">  75                 throw new RuntimeException(String.format(&quot;build rowKey with field %s which value not foun🔵</abbr>
+  76             }
+  77 
+  78             sb.append(refData.get(replaceName));
+  79         }
+  80 
+  81         return sb.toString();
+  82     }
+  83 
+  84     public static String[] splitIgnoreQuotaBrackets(String str, String delimiter){
+  85         String splitPatternStr = delimiter + &quot;(?![^()]*+\\))(?![^{}]*+})(?![^\\[\\]]*+\\])&quot;;
+  86         return str.split(splitPatternStr);
+  87     }
+  88 
+  89     /**
+  90      *
+  91      * @param field
+  92      * @return
+  93      */
+  94     public ReplaceInfo getReplaceInfo(String field){
+  95 
+  96         field = field.trim();
+  97         if(field.length() &lt;= 2){
+  98             throw new RuntimeException(field + &quot; \n&quot; +
+  99                     &quot;Format defined exceptions&quot;);
+ 100         }
+ 101 
+ 102         //判断是不是常量==&gt;&#x27;&#x27;包裹的标识
+ 103         if(field.startsWith(&quot;&#x27;&quot;) &amp;&amp; field.endsWith(&quot;&#x27;&quot;)){
+ 104             ReplaceInfo replaceInfo = new ReplaceInfo(EReplaceType.CONSTANT);
+ 105             field = field.substring(1, field.length() - 1);
+ 106             replaceInfo.setParam(field);
+ 107             return replaceInfo;
+ 108         }
+ 109 
+ 110         ReplaceInfo replaceInfo = new ReplaceInfo(EReplaceType.PARAM);
+ 111         replaceInfo.setParam(field);
+ 112         return replaceInfo;
+ 113     }
+ 114 
+ 115     private List&lt;ReplaceInfo&gt; makeFormula(String formula) {
+ 116         if ((formula == null) || (formula.length() &lt;= 0)) {
+ 117             return Lists.newArrayList();
+ 118         }
+ 119         List&lt;ReplaceInfo&gt; result = Lists.newArrayList();
+ 120         for (String meta : splitIgnoreQuotaBrackets(formula, &quot;\\+&quot;)) {
+ 121             Matcher matcher = Md5Operator.matcher(meta.trim());
+ 122             if (matcher.find()) {
+ 123                 ReplaceInfo replaceInfo = new ReplaceInfo(EReplaceType.FUNC);
+ 124                 replaceInfo.setSubReplaceInfos(makeFormula(matcher.group(1)));
+ 125                 result.add(replaceInfo);
+ 126             } else {
+ 127                 result.add(getReplaceInfo(meta));
+ 128             }
+ 129         }
+ 130         return result;
+ 131     }
+ 132 }
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ </pre></td>
+                        </tr>
+                    </table>
+                </div>
+                <div id="bottom">
+                    <table style="margin:auto">
+                        <tr>
+                            <th>ours vs. base</th>
+                            <th>theirs vs. base</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1  /*
+   2   * Licensed to the Apache Software Foundation (ASF) under one
+   3   * or more contributor license agreements.  See the NOTICE file
+   4   * distributed with this work for additional information
+   5   * regarding copyright ownership.  The ASF licenses this file
+   6   * to you under the Apache License, Version 2.0 (the
+   7   * &quot;License&quot;); you may not use this file except in compliance
+   8   * with the License.  You may obtain a copy of the License at
+   9   *
+  10   *     http://www.apache.org/licenses/LICENSE-2.0
+  11   *
+  12   * Unless required by applicable law or agreed to in writing, software
+  13   * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15   * See the License for the specific language governing permissions and
+  16   * limitations under the License.
+  17   */
+  18  
+  19  
+  20  
+  21  package com.dtstack.flink.sql.side.hbase;
+  22  
+  23  import com.dtstack.flink.sql.side.hbase.enums.EReplaceType;
+  24  import com.dtstack.flink.sql.util.MD5Utils;
+  25  import com.google.common.collect.Lists;
+  26  import org.apache.commons.collections.CollectionUtils;
+  27  
+  28  import java.io.Serializable;
+  29  import java.util.List;
+  30  import java.util.Map;
+  31  import java.util.regex.Matcher;
+  32  import java.util.regex.Pattern;
+  33  
+  34  /**
+  35   * rowkey rule
+  36   * Date: 2018/8/23
+  37   * Company: www.dtstack.com
+  38   * @author xuchao
+  39   */
+  40  
+  41  public class RowKeyBuilder implements Serializable{
+  42  
+  43      private static final long serialVersionUID = 2058635242857937717L;
+  44  
+  45      private static Pattern Md5Operator = Pattern.compile(&quot;(?i)^md5\\(\\s*(.*)\\s*\\)$&quot;);
+  46  
+  47      private List&lt;ReplaceInfo&gt; operatorChain = Lists.newArrayList();
+  48  
+  49      public void init(String rowKeyTempl){
+  50      	operatorChain.addAll(makeFormula(rowKeyTempl));
+  51      }
+  52  
+  53      /**
+  54       *
+  55       * @param refData
+  56       * @return
+  57       */
+  58      public String getRowKey(Map&lt;String, Object&gt; refData){
+  59      	return buildStr(operatorChain, refData);
+  60      }
+  61  
+  62  
+  63  
+  64      private String buildStr(List&lt;ReplaceInfo&gt; fieldList, Map&lt;String, Object&gt; refData){
+  65          if(CollectionUtils.isEmpty(fieldList)){
+  66              return &quot;&quot;;
+  67          }
+  68          StringBuffer sb = new StringBuffer(&quot;&quot;);
+  69          for(ReplaceInfo replaceInfo : fieldList){
+  70  
+  71              if(replaceInfo.getType() == EReplaceType.CONSTANT){
+  72                  sb.append(replaceInfo.getParam());
+  73                  continue;
+  74              }
+  75  
+  76              if(replaceInfo.getType() == EReplaceType.FUNC){
+  77                  sb.append(MD5Utils.getMD5String(buildStr(replaceInfo.getSubReplaceInfos(), refData)));
+  78                  continue;
+  79              }
+  80              String replaceName = replaceInfo.getParam();
+  81              if(!refData.containsKey(replaceName)){
+<abbr title="  82                  throw new RuntimeException(String.format(&quot;build rowKey with field %s which value not found.&quot;, replaceName));">  82                  throw new RuntimeException(String.format(&quot;build rowKey with field %s which value not found.&quot;, repl🔵</abbr>
+  83              }
+  84  
+  85              sb.append(refData.get(replaceName));
+  86          }
+  87  
+  88          return sb.toString();
+  89      }
+  90  
+  91      public static String[] splitIgnoreQuotaBrackets(String str, String delimiter){
+  92          String splitPatternStr = delimiter + &quot;(?![^()]*+\\))(?![^{}]*+})(?![^\\[\\]]*+\\])&quot;;
+  93          return str.split(splitPatternStr);
+  94      }
+  95  
+  96      /**
+  97       *
+  98       * @param field
+  99       * @return
+ 100       */
+ 101      public ReplaceInfo getReplaceInfo(String field){
+ 102  
+ 103          field = field.trim();
+ 104          if(field.length() &lt;= 2){
+ 105              throw new RuntimeException(field + &quot; \n&quot; +
+ 106                      &quot;Format defined exceptions&quot;);
+ 107          }
+ 108  
+ 109          //判断是不是常量==&gt;&#x27;&#x27;包裹的标识
+ 110          if(field.startsWith(&quot;&#x27;&quot;) &amp;&amp; field.endsWith(&quot;&#x27;&quot;)){
+ 111              ReplaceInfo replaceInfo = new ReplaceInfo(EReplaceType.CONSTANT);
+ 112              field = field.substring(1, field.length() - 1);
+ 113              replaceInfo.setParam(field);
+ 114              return replaceInfo;
+ 115          }
+ 116  
+ 117          ReplaceInfo replaceInfo = new ReplaceInfo(EReplaceType.PARAM);
+ 118          replaceInfo.setParam(field);
+ 119          return replaceInfo;
+ 120      }
+ 121  
+ 122      private List&lt;ReplaceInfo&gt; makeFormula(String formula){
+ 123          if(formula == null || formula.length() &lt;= 0){
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 124 -            Lists.newArrayList();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 125 +            return Lists.newArrayList();</span>
+
+ 126          }
+
+ 127          List&lt;ReplaceInfo&gt; result = Lists.newArrayList();
+ 128          for(String meta: splitIgnoreQuotaBrackets(formula, &quot;\\+&quot;)){
+ 129              Matcher matcher = Md5Operator.matcher(meta.trim());
+ 130              if(matcher.find()){
+ 131                  ReplaceInfo replaceInfo = new ReplaceInfo(EReplaceType.FUNC);
+ 132                  replaceInfo.setSubReplaceInfos(makeFormula(matcher.group(1)));
+ 133                  result.add(replaceInfo);
+ 134              } else {
+ 135                  result.add(getReplaceInfo(meta));
+ 136              }
+ 137          }
+ 138          return result;
+ 139      }
+ 140  }</pre></td>
+                            <td><pre>   1  /*
+   2   * Licensed to the Apache Software Foundation (ASF) under one
+   3   * or more contributor license agreements.  See the NOTICE file
+   4   * distributed with this work for additional information
+   5   * regarding copyright ownership.  The ASF licenses this file
+   6   * to you under the Apache License, Version 2.0 (the
+   7   * &quot;License&quot;); you may not use this file except in compliance
+   8   * with the License.  You may obtain a copy of the License at
+   9   *
+  10   *     http://www.apache.org/licenses/LICENSE-2.0
+  11   *
+  12   * Unless required by applicable law or agreed to in writing, software
+  13   * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15   * See the License for the specific language governing permissions and
+  16   * limitations under the License.
+  17   */
+  18  
+  19  
+  20  
+  21  package com.dtstack.flink.sql.side.hbase;
+  22  
+  23  import com.dtstack.flink.sql.side.hbase.enums.EReplaceType;
+  24  import com.dtstack.flink.sql.util.MD5Utils;
+  25  import com.google.common.collect.Lists;
+  26  import org.apache.commons.collections.CollectionUtils;
+  27  
+  28  import java.io.Serializable;
+  29  import java.util.List;
+  30  import java.util.Map;
+  31  import java.util.regex.Matcher;
+  32  import java.util.regex.Pattern;
+  33  
+  34  /**
+  35   * rowkey rule
+  36   * Date: 2018/8/23
+  37   * Company: www.dtstack.com
+  38   * @author xuchao
+  39   */
+  40  
+  41  public class RowKeyBuilder implements Serializable{
+  42  
+  43      private static final long serialVersionUID = 2058635242857937717L;
+  44  
+  45      private static Pattern Md5Operator = Pattern.compile(&quot;(?i)^md5\\(\\s*(.*)\\s*\\)$&quot;);
+  46  
+  47      private List&lt;ReplaceInfo&gt; operatorChain = Lists.newArrayList();
+  48  
+  49      public void init(String rowKeyTempl){
+  50      	operatorChain.addAll(makeFormula(rowKeyTempl));
+  51      }
+  52  
+  53      /**
+  54       *
+  55       * @param refData
+  56       * @return
+  57       */
+  58      public String getRowKey(Map&lt;String, Object&gt; refData){
+  59      	return buildStr(operatorChain, refData);
+  60      }
+  61  
+  62  
+  63  
+  64      private String buildStr(List&lt;ReplaceInfo&gt; fieldList, Map&lt;String, Object&gt; refData){
+  65          if(CollectionUtils.isEmpty(fieldList)){
+  66              return &quot;&quot;;
+  67          }
+  68          StringBuffer sb = new StringBuffer(&quot;&quot;);
+  69          for(ReplaceInfo replaceInfo : fieldList){
+  70  
+  71              if(replaceInfo.getType() == EReplaceType.CONSTANT){
+  72                  sb.append(replaceInfo.getParam());
+  73                  continue;
+  74              }
+  75  
+  76              if(replaceInfo.getType() == EReplaceType.FUNC){
+  77                  sb.append(MD5Utils.getMD5String(buildStr(replaceInfo.getSubReplaceInfos(), refData)));
+  78                  continue;
+  79              }
+  80              String replaceName = replaceInfo.getParam();
+  81              if(!refData.containsKey(replaceName)){
+<abbr title="  82                  throw new RuntimeException(String.format(&quot;build rowKey with field %s which value not found.&quot;, replaceName));">  82                  throw new RuntimeException(String.format(&quot;build rowKey with field %s which value not found.&quot;, repl🔵</abbr>
+  83              }
+  84  
+  85              sb.append(refData.get(replaceName));
+  86          }
+  87  
+  88          return sb.toString();
+  89      }
+  90  
+  91      public static String[] splitIgnoreQuotaBrackets(String str, String delimiter){
+  92          String splitPatternStr = delimiter + &quot;(?![^()]*+\\))(?![^{}]*+})(?![^\\[\\]]*+\\])&quot;;
+  93          return str.split(splitPatternStr);
+  94      }
+  95  
+  96      /**
+  97       *
+  98       * @param field
+  99       * @return
+ 100       */
+ 101      public ReplaceInfo getReplaceInfo(String field){
+ 102  
+ 103          field = field.trim();
+ 104          if(field.length() &lt;= 2){
+ 105              throw new RuntimeException(field + &quot; \n&quot; +
+ 106                      &quot;Format defined exceptions&quot;);
+ 107          }
+ 108  
+ 109          //判断是不是常量==&gt;&#x27;&#x27;包裹的标识
+ 110          if(field.startsWith(&quot;&#x27;&quot;) &amp;&amp; field.endsWith(&quot;&#x27;&quot;)){
+ 111              ReplaceInfo replaceInfo = new ReplaceInfo(EReplaceType.CONSTANT);
+ 112              field = field.substring(1, field.length() - 1);
+ 113              replaceInfo.setParam(field);
+ 114              return replaceInfo;
+ 115          }
+ 116  
+ 117          ReplaceInfo replaceInfo = new ReplaceInfo(EReplaceType.PARAM);
+ 118          replaceInfo.setParam(field);
+ 119          return replaceInfo;
+ 120      }
+ 121  
+ 122      private List&lt;ReplaceInfo&gt; makeFormula(String formula){
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 123 -        if(formula == null || formula.length() &lt;= 0){</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 124 -            Lists.newArrayList();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 125 +        if (formula == null || formula.length() &lt;= 0) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 126 +            return Lists.newArrayList();</span>
+ 127          }
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 128 +</span>
+ 129          List&lt;ReplaceInfo&gt; result = Lists.newArrayList();
+ 130          for(String meta: splitIgnoreQuotaBrackets(formula, &quot;\\+&quot;)){
+ 131              Matcher matcher = Md5Operator.matcher(meta.trim());
+ 132              if(matcher.find()){
+ 133                  ReplaceInfo replaceInfo = new ReplaceInfo(EReplaceType.FUNC);
+ 134                  replaceInfo.setSubReplaceInfos(makeFormula(matcher.group(1)));
+ 135                  result.add(replaceInfo);
+ 136              } else {
+ 137                  result.add(getReplaceInfo(meta));
+ 138              }
+ 139          }
+ 140          return result;
+ 141      }
+ 142  }</pre></td>
+                        </tr>
+                    </table>
+                </div>
+              </body>
+            </html>
+            

@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+    <html lang="en">
+              <head>
+                <meta charset="utf-8">
+                <title>535</title>
+                    <style>
+                        #top {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        #bottom {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        abbr {
+                          /* Here is the delay */
+                          transition-delay:0s;
+                        }
+                    </style>
+              </head>
+              <body>
+                <span style="height: 4vh">
+                    535
+                    <a href="534.html">prev</a>
+                    <a href="536.html">next</a>
+                    <a href="535_chunks.html">chunks</a>
+                    <a href="index.html">index</a>
+                    DTStack/flinkStreamSQL_b43aec0679d705647015fd4416ad6dc326ea7890_core/src/main/java/com/dtstack/flink/sql/side/SidePredicatesParser.java
+                    <textarea rows=1 onclick='navigator.clipboard.writeText(this.value)'>cd C:\studies\se\mega\git-analyzer-plus\notebooks\debug
+del /Q *
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;b43aec0679d705647015fd4416ad6dc326ea7890:core/src/main/java/com/dtstack/flink/sql/side/SidePredicatesParser.java&quot; &gt; committed.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;b43aec0679d705647015fd4416ad6dc326ea7890^1:core/src/main/java/com/dtstack/flink/sql/side/SidePredicatesParser.java&quot; &gt; ours.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;b43aec0679d705647015fd4416ad6dc326ea7890^2:core/src/main/java/com/dtstack/flink/sql/side/SidePredicatesParser.java&quot; &gt; theirs.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;6159bb9bb9904f950c489b50fb7dcbe399c3d327:core/src/main/java/com/dtstack/flink/sql/side/SidePredicatesParser.java&quot; &gt; base.java
+copy ours.java 1ours.java
+copy ours.java 2ours.java
+copy theirs.java 1theirs.java
+copy theirs.java 2theirs.java
+copy base.java 1base.java
+copy base.java 2base.java
+&quot;C:\Program Files\Java\jdk1.8.0_241\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\jFSTMerge\build\libs\jFSTMerge-all.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\jfstmerge.java --show-base
+&quot;C:\Program Files\Eclipse Adoptium\jdk-17.0.11.9-hotspot\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\spork\target\spork-0.5.0-SNAPSHOT.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\spork.java
+del /Q 1*.java
+del /Q 2*.java
+del /Q jfstmerge.java.merge
+</textarea>
+                    {strict: [[bj]], subset: [[bj]]}
+                </span>
+                <div id="top">
+
+                    <table>
+                        <tr>
+                            <th>line based (standard git)</th>
+                            <th>jfstmerge</th>
+                            <th>spork</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1 /*
+   2  * Licensed to the Apache Software Foundation (ASF) under one
+   3  * or more contributor license agreements.  See the NOTICE file
+   4  * distributed with this work for additional information
+   5  * regarding copyright ownership.  The ASF licenses this file
+   6  * to you under the Apache License, Version 2.0 (the
+   7  * &quot;License&quot;); you may not use this file except in compliance
+   8  * with the License.  You may obtain a copy of the License at
+   9  *
+  10  *     http://www.apache.org/licenses/LICENSE-2.0
+  11  *
+  12  * Unless required by applicable law or agreed to in writing, software
+  13  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15  * See the License for the specific language governing permissions and
+  16  * limitations under the License.
+  17  */
+  18 
+  19 package com.dtstack.flink.sql.side;
+  20 
+  21 import com.dtstack.flink.sql.parser.FlinkPlanner;
+  22 import com.google.common.collect.Lists;
+  23 import com.google.common.collect.Maps;
+  24 import org.apache.calcite.sql.SqlBasicCall;
+  25 import org.apache.calcite.sql.SqlIdentifier;
+  26 import org.apache.calcite.sql.SqlInsert;
+  27 import org.apache.calcite.sql.SqlJoin;
+  28 import org.apache.calcite.sql.SqlKind;
+  29 import org.apache.calcite.sql.SqlNode;
+  30 import org.apache.calcite.sql.SqlOperator;
+  31 import org.apache.calcite.sql.SqlSelect;
+  32 import org.apache.calcite.sql.parser.SqlParseException;
+  33 import org.apache.flink.table.calcite.FlinkPlannerImpl;
+  34 
+  35 import java.util.List;
+  36 import java.util.Map;
+  37 
+  38 import static org.apache.calcite.sql.SqlKind.*;
+  39 
+  40 /**
+  41  *
+  42  *  将同级谓词信息填充到维表
+  43  * Date: 2019/12/11
+  44  * Company: www.dtstack.com
+  45  * @author maqi
+  46  */
+  47 public class SidePredicatesParser {
+  48 &lt;&lt;&lt;&lt;&lt;&lt;&lt; GitAnalyzerPlus_ours
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"><abbr title="  49     public void fillPredicatesForSideTable(String exeSql, Map&lt;String, SideTableInfo&gt; sideTableMap) throws SqlParseException {">  49     public void fillPredicatesForSideTable(String exeSql, Map&lt;String, SideTableInfo&gt; sideTableMap) throws🔵</abbr></span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  50         FlinkPlannerImpl flinkPlanner = FlinkPlanner.getFlinkPlanner();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  51         SqlNode sqlNode = flinkPlanner.parse(exeSql);</span>
+  52 ||||||| GitAnalyzerPlus_base
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  53 public class SidePredicatesParser {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"><abbr title="  54     public void fillPredicatesForSideTable(String exeSql, Map&lt;String, SideTableInfo&gt; sideTableMap) throws SqlParseException {">  54     public void fillPredicatesForSideTable(String exeSql, Map&lt;String, SideTableInfo&gt; sideTableMap) throws🔵</abbr></span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  55         SqlParser sqlParser = SqlParser.create(exeSql, CalciteConfig.MYSQL_LEX_CONFIG);</span>
+  56 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"><abbr title="  57     public void fillPredicatesForSideTable(String exeSql, Map&lt;String, AbstractSideTableInfo&gt; sideTableMap) throws SqlParseException {">  57     public void fillPredicatesForSideTable(String exeSql, Map&lt;String, AbstractSideTableInfo&gt; sideTableMap🔵</abbr></span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  58         SqlParser sqlParser = SqlParser.create(exeSql, CalciteConfig.MYSQL_LEX_CONFIG);</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  59         SqlNode sqlNode = sqlParser.parseStmt();</span>
+  60 &gt;&gt;&gt;&gt;&gt;&gt;&gt; GitAnalyzerPlus_theirs
+  61         parseSql(sqlNode, sideTableMap, Maps.newHashMap());
+  62     }
+  63 
+  64     /**
+  65      *  将谓词信息填充到维表属性
+  66      * @param sqlNode
+  67      * @param sideTableMap
+  68      * @param tabMapping  谓词属性中别名对应的真实维表名称
+  69      */
+<abbr title="  70     private void parseSql(SqlNode sqlNode, Map&lt;String, AbstractSideTableInfo&gt; sideTableMap, Map&lt;String, String&gt; tabMapping) {">  70     private void parseSql(SqlNode sqlNode, Map&lt;String, AbstractSideTableInfo&gt; sideTableMap, Map&lt;String, S🔵</abbr>
+  71         SqlKind sqlKind = sqlNode.getKind();
+  72         switch (sqlKind) {
+  73             case INSERT:
+  74                 SqlNode sqlSource = ((SqlInsert) sqlNode).getSource();
+  75                 parseSql(sqlSource, sideTableMap, tabMapping);
+  76                 break;
+  77             case SELECT:
+  78                 SqlNode fromNode = ((SqlSelect) sqlNode).getFrom();
+  79                 SqlNode whereNode = ((SqlSelect) sqlNode).getWhere();
+  80 
+  81                 if (fromNode.getKind() != IDENTIFIER) {
+  82                     parseSql(fromNode, sideTableMap, tabMapping);
+  83                 }
+  84                 //  带or的不解析
+  85                 if (null != whereNode &amp;&amp; whereNode.getKind() != OR) {
+  86                     List&lt;PredicateInfo&gt; predicateInfoList = Lists.newArrayList();
+  87                     extractPredicateInfo(whereNode, predicateInfoList);
+  88                     fillToSideTableInfo(sideTableMap, tabMapping, predicateInfoList);
+  89                 }
+  90                 break;
+  91             case JOIN:
+  92                 SqlNode leftNode = ((SqlJoin) sqlNode).getLeft();
+  93                 SqlNode rightNode = ((SqlJoin) sqlNode).getRight();
+  94                 parseSql(leftNode, sideTableMap, tabMapping);
+  95                 parseSql(rightNode, sideTableMap, tabMapping);
+  96                 break;
+  97             case AS:
+  98                 SqlNode info = ((SqlBasicCall) sqlNode).getOperands()[0];
+  99                 SqlNode alias = ((SqlBasicCall) sqlNode).getOperands()[1];
+ 100                 if (info.getKind() == IDENTIFIER) {
+ 101                     tabMapping.put(alias.toString(), info.toString());
+ 102                 } else {
+ 103                     // 为子查询创建一个同级map
+ 104                     parseSql(info, sideTableMap, Maps.newHashMap());
+ 105                 }
+ 106                 break;
+ 107             case UNION:
+ 108                 SqlNode unionLeft = ((SqlBasicCall) sqlNode).getOperands()[0];
+ 109                 SqlNode unionRight = ((SqlBasicCall) sqlNode).getOperands()[1];
+ 110                 parseSql(unionLeft, sideTableMap, tabMapping);
+ 111                 parseSql(unionRight, sideTableMap, tabMapping);
+ 112                 break;
+ 113             default:
+ 114                 break;
+ 115         }
+ 116     }
+ 117 
+<abbr title=" 118     private void fillToSideTableInfo(Map&lt;String, AbstractSideTableInfo&gt; sideTableMap, Map&lt;String, String&gt; tabMapping, List&lt;PredicateInfo&gt; predicateInfoList) {"> 118     private void fillToSideTableInfo(Map&lt;String, AbstractSideTableInfo&gt; sideTableMap, Map&lt;String, String&gt;🔵</abbr>
+<abbr title=" 119         predicateInfoList.stream().filter(info -&gt; sideTableMap.containsKey(tabMapping.getOrDefault(info.getOwnerTable(), info.getOwnerTable())))"> 119         predicateInfoList.stream().filter(info -&gt; sideTableMap.containsKey(tabMapping.getOrDefault(info.g🔵</abbr>
+<abbr title=" 120                 .map(info -&gt; sideTableMap.get(tabMapping.getOrDefault(info.getOwnerTable(), info.getOwnerTable())).getPredicateInfoes().add(info))"> 120                 .map(info -&gt; sideTableMap.get(tabMapping.getOrDefault(info.getOwnerTable(), info.getOwner🔵</abbr>
+ 121                 .count();
+ 122     }
+ 123 
+ 124 
+ 125     private void extractPredicateInfo(SqlNode whereNode, List&lt;PredicateInfo&gt; predicatesInfoList) {
+ 126         SqlKind sqlKind = whereNode.getKind();
+ 127         if (sqlKind == SqlKind.AND &amp;&amp; ((SqlBasicCall) whereNode).getOperandList().size() == 2) {
+ 128             extractPredicateInfo(((SqlBasicCall) whereNode).getOperands()[0], predicatesInfoList);
+ 129             extractPredicateInfo(((SqlBasicCall) whereNode).getOperands()[1], predicatesInfoList);
+ 130         } else {
+ 131             SqlOperator operator = ((SqlBasicCall) whereNode).getOperator();
+ 132             String operatorName = operator.getName();
+ 133             SqlKind operatorKind = operator.getKind();
+ 134 
+ 135             if (operatorKind == SqlKind.IS_NOT_NULL || operatorKind == SqlKind.IS_NULL) {
+<abbr title=" 136                 fillPredicateInfoToList((SqlBasicCall) whereNode, predicatesInfoList, operatorName, operatorKind, 0, 0);"> 136                 fillPredicateInfoToList((SqlBasicCall) whereNode, predicatesInfoList, operatorName, opera🔵</abbr>
+ 137                 return;
+ 138             }
+ 139 
+ 140             // 跳过函数
+ 141             if ((((SqlBasicCall) whereNode).getOperands()[0] instanceof SqlIdentifier)
+<abbr title=" 142                     &amp;&amp; (((SqlBasicCall) whereNode).getOperands()[1].getKind() != SqlKind.OTHER_FUNCTION)) {"> 142                     &amp;&amp; (((SqlBasicCall) whereNode).getOperands()[1].getKind() != SqlKind.OTHER_FUNCTION))🔵</abbr>
+<abbr title=" 143                 fillPredicateInfoToList((SqlBasicCall) whereNode, predicatesInfoList, operatorName, operatorKind, 0, 1);"> 143                 fillPredicateInfoToList((SqlBasicCall) whereNode, predicatesInfoList, operatorName, opera🔵</abbr>
+ 144             } else if ((((SqlBasicCall) whereNode).getOperands()[1] instanceof SqlIdentifier)
+<abbr title=" 145                     &amp;&amp; (((SqlBasicCall) whereNode).getOperands()[0].getKind() != SqlKind.OTHER_FUNCTION)) {"> 145                     &amp;&amp; (((SqlBasicCall) whereNode).getOperands()[0].getKind() != SqlKind.OTHER_FUNCTION))🔵</abbr>
+<abbr title=" 146                 fillPredicateInfoToList((SqlBasicCall) whereNode, predicatesInfoList, operatorName, operatorKind, 1, 0);"> 146                 fillPredicateInfoToList((SqlBasicCall) whereNode, predicatesInfoList, operatorName, opera🔵</abbr>
+ 147             }
+ 148         }
+ 149     }
+ 150 
+<abbr title=" 151     private void fillPredicateInfoToList(SqlBasicCall whereNode, List&lt;PredicateInfo&gt; predicatesInfoList, String operatorName, SqlKind operatorKind,"> 151     private void fillPredicateInfoToList(SqlBasicCall whereNode, List&lt;PredicateInfo&gt; predicatesInfoList, 🔵</abbr>
+ 152                                          int fieldIndex, int conditionIndex) {
+ 153         SqlIdentifier fieldFullPath = (SqlIdentifier) whereNode.getOperands()[fieldIndex];
+ 154         if (fieldFullPath.names.size() == 2) {
+ 155             String ownerTable = fieldFullPath.names.get(0);
+ 156             String fieldName = fieldFullPath.names.get(1);
+<abbr title=" 157             String content = (operatorKind == SqlKind.BETWEEN) ? whereNode.getOperands()[conditionIndex].toString() + &quot; AND &quot; +"> 157             String content = (operatorKind == SqlKind.BETWEEN) ? whereNode.getOperands()[conditionIndex].🔵</abbr>
+<abbr title=" 158                     whereNode.getOperands()[2].toString() : whereNode.getOperands()[conditionIndex].toString();"> 158                     whereNode.getOperands()[2].toString() : whereNode.getOperands()[conditionIndex].toStr🔵</abbr>
+ 159 
+<abbr title=" 160             PredicateInfo predicateInfo = PredicateInfo.builder().setOperatorName(operatorName).setOperatorKind(operatorKind.toString())"> 160             PredicateInfo predicateInfo = PredicateInfo.builder().setOperatorName(operatorName).setOperat🔵</abbr>
+ 161                     .setOwnerTable(ownerTable).setFieldName(fieldName).setCondition(content).build();
+ 162             predicatesInfoList.add(predicateInfo);
+ 163         }
+ 164     }
+ 165 
+ 166 }</pre></td>
+                            <td><pre>   1 /*
+   2  * Licensed to the Apache Software Foundation (ASF) under one
+   3  * or more contributor license agreements.  See the NOTICE file
+   4  * distributed with this work for additional information
+   5  * regarding copyright ownership.  The ASF licenses this file
+   6  * to you under the Apache License, Version 2.0 (the
+   7  * &quot;License&quot;); you may not use this file except in compliance
+   8  * with the License.  You may obtain a copy of the License at
+   9  *
+  10  *     http://www.apache.org/licenses/LICENSE-2.0
+  11  *
+  12  * Unless required by applicable law or agreed to in writing, software
+  13  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15  * See the License for the specific language governing permissions and
+  16  * limitations under the License.
+  17  */
+  18 
+  19 package com.dtstack.flink.sql.side;
+  20 
+  21 import com.dtstack.flink.sql.parser.FlinkPlanner;
+  22 import com.google.common.collect.Lists;
+  23 import com.google.common.collect.Maps;
+  24 import org.apache.calcite.sql.SqlBasicCall;
+  25 import org.apache.calcite.sql.SqlIdentifier;
+  26 import org.apache.calcite.sql.SqlInsert;
+  27 import org.apache.calcite.sql.SqlJoin;
+  28 import org.apache.calcite.sql.SqlKind;
+  29 import org.apache.calcite.sql.SqlNode;
+  30 import org.apache.calcite.sql.SqlOperator;
+  31 import org.apache.calcite.sql.SqlSelect;
+  32 import org.apache.calcite.sql.parser.SqlParseException;
+  33 import org.apache.flink.table.calcite.FlinkPlannerImpl;
+  34 
+  35 import java.util.List;
+  36 import java.util.Map;
+  37 
+  38 import static org.apache.calcite.sql.SqlKind.*;
+  39 
+  40 /**
+  41  *
+  42  *  将同级谓词信息填充到维表
+  43  * Date: 2019/12/11
+  44  * Company: www.dtstack.com
+  45  * @author maqi
+  46  */
+  47 public class SidePredicatesParser {
+  48 &lt;&lt;&lt;&lt;&lt;&lt;&lt; MINE
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"><abbr title="  49 public void fillPredicatesForSideTable(String exeSql, Map&lt;String, SideTableInfo&gt; sideTableMap) throws SqlParseException {">  49 public void fillPredicatesForSideTable(String exeSql, Map&lt;String, SideTableInfo&gt; sideTableMap) throws Sql🔵</abbr></span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  50         FlinkPlannerImpl flinkPlanner = FlinkPlanner.getFlinkPlanner();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  51         SqlNode sqlNode = flinkPlanner.parse(exeSql);</span>
+  52 ||||||| BASE
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"><abbr title="  53 public void fillPredicatesForSideTable(String exeSql, Map&lt;String, SideTableInfo&gt; sideTableMap) throws SqlParseException {">  53 public void fillPredicatesForSideTable(String exeSql, Map&lt;String, SideTableInfo&gt; sideTableMap) throws Sql🔵</abbr></span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  54         SqlParser sqlParser = SqlParser.create(exeSql, CalciteConfig.MYSQL_LEX_CONFIG);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  55         SqlNode sqlNode = sqlParser.parseStmt();</span>
+  56 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"><abbr title="  57 public void fillPredicatesForSideTable(String exeSql, Map&lt;String, AbstractSideTableInfo&gt; sideTableMap) throws SqlParseException {">  57 public void fillPredicatesForSideTable(String exeSql, Map&lt;String, AbstractSideTableInfo&gt; sideTableMap) th🔵</abbr></span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  58         SqlParser sqlParser = SqlParser.create(exeSql, CalciteConfig.MYSQL_LEX_CONFIG);</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  59         SqlNode sqlNode = sqlParser.parseStmt();</span>
+  60 &gt;&gt;&gt;&gt;&gt;&gt;&gt; YOURS
+  61         parseSql(sqlNode, sideTableMap, Maps.newHashMap());
+  62     }
+  63 
+  64     /**
+  65      *  将谓词信息填充到维表属性
+  66      * @param sqlNode
+  67      * @param sideTableMap
+  68      * @param tabMapping  谓词属性中别名对应的真实维表名称
+  69      */
+<abbr title="  70     private void parseSql(SqlNode sqlNode, Map&lt;String, AbstractSideTableInfo&gt; sideTableMap, Map&lt;String, String&gt; tabMapping) {">  70     private void parseSql(SqlNode sqlNode, Map&lt;String, AbstractSideTableInfo&gt; sideTableMap, Map&lt;String, S🔵</abbr>
+  71         SqlKind sqlKind = sqlNode.getKind();
+  72         switch (sqlKind) {
+  73             case INSERT:
+  74                 SqlNode sqlSource = ((SqlInsert) sqlNode).getSource();
+  75                 parseSql(sqlSource, sideTableMap, tabMapping);
+  76                 break;
+  77             case SELECT:
+  78                 SqlNode fromNode = ((SqlSelect) sqlNode).getFrom();
+  79                 SqlNode whereNode = ((SqlSelect) sqlNode).getWhere();
+  80 
+  81                 if (fromNode.getKind() != IDENTIFIER) {
+  82                     parseSql(fromNode, sideTableMap, tabMapping);
+  83                 }
+  84                 //  带or的不解析
+  85                 if (null != whereNode &amp;&amp; whereNode.getKind() != OR) {
+  86                     List&lt;PredicateInfo&gt; predicateInfoList = Lists.newArrayList();
+  87                     extractPredicateInfo(whereNode, predicateInfoList);
+  88                     fillToSideTableInfo(sideTableMap, tabMapping, predicateInfoList);
+  89                 }
+  90                 break;
+  91             case JOIN:
+  92                 SqlNode leftNode = ((SqlJoin) sqlNode).getLeft();
+  93                 SqlNode rightNode = ((SqlJoin) sqlNode).getRight();
+  94                 parseSql(leftNode, sideTableMap, tabMapping);
+  95                 parseSql(rightNode, sideTableMap, tabMapping);
+  96                 break;
+  97             case AS:
+  98                 SqlNode info = ((SqlBasicCall) sqlNode).getOperands()[0];
+  99                 SqlNode alias = ((SqlBasicCall) sqlNode).getOperands()[1];
+ 100                 if (info.getKind() == IDENTIFIER) {
+ 101                     tabMapping.put(alias.toString(), info.toString());
+ 102                 } else {
+ 103                     // 为子查询创建一个同级map
+ 104                     parseSql(info, sideTableMap, Maps.newHashMap());
+ 105                 }
+ 106                 break;
+ 107             case UNION:
+ 108                 SqlNode unionLeft = ((SqlBasicCall) sqlNode).getOperands()[0];
+ 109                 SqlNode unionRight = ((SqlBasicCall) sqlNode).getOperands()[1];
+ 110                 parseSql(unionLeft, sideTableMap, tabMapping);
+ 111                 parseSql(unionRight, sideTableMap, tabMapping);
+ 112                 break;
+ 113             default:
+ 114                 break;
+ 115         }
+ 116     }
+ 117 
+<abbr title=" 118     private void fillToSideTableInfo(Map&lt;String, AbstractSideTableInfo&gt; sideTableMap, Map&lt;String, String&gt; tabMapping, List&lt;PredicateInfo&gt; predicateInfoList) {"> 118     private void fillToSideTableInfo(Map&lt;String, AbstractSideTableInfo&gt; sideTableMap, Map&lt;String, String&gt;🔵</abbr>
+<abbr title=" 119         predicateInfoList.stream().filter(info -&gt; sideTableMap.containsKey(tabMapping.getOrDefault(info.getOwnerTable(), info.getOwnerTable())))"> 119         predicateInfoList.stream().filter(info -&gt; sideTableMap.containsKey(tabMapping.getOrDefault(info.g🔵</abbr>
+<abbr title=" 120                 .map(info -&gt; sideTableMap.get(tabMapping.getOrDefault(info.getOwnerTable(), info.getOwnerTable())).getPredicateInfoes().add(info))"> 120                 .map(info -&gt; sideTableMap.get(tabMapping.getOrDefault(info.getOwnerTable(), info.getOwner🔵</abbr>
+ 121                 .count();
+ 122     }
+ 123 
+ 124 
+ 125     private void extractPredicateInfo(SqlNode whereNode, List&lt;PredicateInfo&gt; predicatesInfoList) {
+ 126         SqlKind sqlKind = whereNode.getKind();
+ 127         if (sqlKind == SqlKind.AND &amp;&amp; ((SqlBasicCall) whereNode).getOperandList().size() == 2) {
+ 128             extractPredicateInfo(((SqlBasicCall) whereNode).getOperands()[0], predicatesInfoList);
+ 129             extractPredicateInfo(((SqlBasicCall) whereNode).getOperands()[1], predicatesInfoList);
+ 130         } else {
+ 131             SqlOperator operator = ((SqlBasicCall) whereNode).getOperator();
+ 132             String operatorName = operator.getName();
+ 133             SqlKind operatorKind = operator.getKind();
+ 134 
+ 135             if (operatorKind == SqlKind.IS_NOT_NULL || operatorKind == SqlKind.IS_NULL) {
+<abbr title=" 136                 fillPredicateInfoToList((SqlBasicCall) whereNode, predicatesInfoList, operatorName, operatorKind, 0, 0);"> 136                 fillPredicateInfoToList((SqlBasicCall) whereNode, predicatesInfoList, operatorName, opera🔵</abbr>
+ 137                 return;
+ 138             }
+ 139 
+ 140             // 跳过函数
+ 141             if ((((SqlBasicCall) whereNode).getOperands()[0] instanceof SqlIdentifier)
+<abbr title=" 142                     &amp;&amp; (((SqlBasicCall) whereNode).getOperands()[1].getKind() != SqlKind.OTHER_FUNCTION)) {"> 142                     &amp;&amp; (((SqlBasicCall) whereNode).getOperands()[1].getKind() != SqlKind.OTHER_FUNCTION))🔵</abbr>
+<abbr title=" 143                 fillPredicateInfoToList((SqlBasicCall) whereNode, predicatesInfoList, operatorName, operatorKind, 0, 1);"> 143                 fillPredicateInfoToList((SqlBasicCall) whereNode, predicatesInfoList, operatorName, opera🔵</abbr>
+ 144             } else if ((((SqlBasicCall) whereNode).getOperands()[1] instanceof SqlIdentifier)
+<abbr title=" 145                     &amp;&amp; (((SqlBasicCall) whereNode).getOperands()[0].getKind() != SqlKind.OTHER_FUNCTION)) {"> 145                     &amp;&amp; (((SqlBasicCall) whereNode).getOperands()[0].getKind() != SqlKind.OTHER_FUNCTION))🔵</abbr>
+<abbr title=" 146                 fillPredicateInfoToList((SqlBasicCall) whereNode, predicatesInfoList, operatorName, operatorKind, 1, 0);"> 146                 fillPredicateInfoToList((SqlBasicCall) whereNode, predicatesInfoList, operatorName, opera🔵</abbr>
+ 147             }
+ 148         }
+ 149     }
+ 150 
+<abbr title=" 151     private void fillPredicateInfoToList(SqlBasicCall whereNode, List&lt;PredicateInfo&gt; predicatesInfoList, String operatorName, SqlKind operatorKind,"> 151     private void fillPredicateInfoToList(SqlBasicCall whereNode, List&lt;PredicateInfo&gt; predicatesInfoList, 🔵</abbr>
+ 152                                          int fieldIndex, int conditionIndex) {
+ 153         SqlIdentifier fieldFullPath = (SqlIdentifier) whereNode.getOperands()[fieldIndex];
+ 154         if (fieldFullPath.names.size() == 2) {
+ 155             String ownerTable = fieldFullPath.names.get(0);
+ 156             String fieldName = fieldFullPath.names.get(1);
+<abbr title=" 157             String content = (operatorKind == SqlKind.BETWEEN) ? whereNode.getOperands()[conditionIndex].toString() + &quot; AND &quot; +"> 157             String content = (operatorKind == SqlKind.BETWEEN) ? whereNode.getOperands()[conditionIndex].🔵</abbr>
+<abbr title=" 158                     whereNode.getOperands()[2].toString() : whereNode.getOperands()[conditionIndex].toString();"> 158                     whereNode.getOperands()[2].toString() : whereNode.getOperands()[conditionIndex].toStr🔵</abbr>
+ 159 
+<abbr title=" 160             PredicateInfo predicateInfo = PredicateInfo.builder().setOperatorName(operatorName).setOperatorKind(operatorKind.toString())"> 160             PredicateInfo predicateInfo = PredicateInfo.builder().setOperatorName(operatorName).setOperat🔵</abbr>
+ 161                     .setOwnerTable(ownerTable).setFieldName(fieldName).setCondition(content).build();
+ 162             predicatesInfoList.add(predicateInfo);
+ 163         }
+ 164     }
+ 165 
+ 166 }</pre></td>
+                            <td><pre>   1 /*
+   2  * Licensed to the Apache Software Foundation (ASF) under one
+   3  * or more contributor license agreements.  See the NOTICE file
+   4  * distributed with this work for additional information
+   5  * regarding copyright ownership.  The ASF licenses this file
+   6  * to you under the Apache License, Version 2.0 (the
+   7  * &quot;License&quot;); you may not use this file except in compliance
+   8  * with the License.  You may obtain a copy of the License at
+   9  *
+  10  *     http://www.apache.org/licenses/LICENSE-2.0
+  11  *
+  12  * Unless required by applicable law or agreed to in writing, software
+  13  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15  * See the License for the specific language governing permissions and
+  16  * limitations under the License.
+  17  */
+  18 package com.dtstack.flink.sql.side;
+  19 
+  20 import com.dtstack.flink.sql.parser.FlinkPlanner;
+  21 import com.google.common.collect.Lists;
+  22 import com.google.common.collect.Maps;
+  23 import java.util.List;
+  24 import java.util.Map;
+  25 import org.apache.calcite.sql.SqlBasicCall;
+  26 import org.apache.calcite.sql.SqlIdentifier;
+  27 import org.apache.calcite.sql.SqlInsert;
+  28 import org.apache.calcite.sql.SqlJoin;
+  29 import org.apache.calcite.sql.SqlKind;
+  30 import org.apache.calcite.sql.SqlNode;
+  31 import org.apache.calcite.sql.SqlOperator;
+  32 import org.apache.calcite.sql.SqlSelect;
+  33 import org.apache.calcite.sql.parser.SqlParseException;
+  34 import org.apache.flink.table.calcite.FlinkPlannerImpl;
+  35 import static org.apache.calcite.sql.SqlKind.*;
+  36 
+  37 
+  38 /**
+  39  *
+  40  *  将同级谓词信息填充到维表
+  41  * Date: 2019/12/11
+  42  * Company: www.dtstack.com
+  43  * @author maqi
+  44  */
+  45 public class SidePredicatesParser {
+<abbr title="  46     public void fillPredicatesForSideTable(String exeSql, Map&lt;String, AbstractSideTableInfo&gt; sideTableMap) throws SqlParseException {">  46     public void fillPredicatesForSideTable(String exeSql, Map&lt;String, AbstractSideTableInfo&gt; sideTableMap🔵</abbr>
+  47         FlinkPlannerImpl flinkPlanner = FlinkPlanner.getFlinkPlanner();
+  48         SqlNode sqlNode = flinkPlanner.parse(exeSql);
+  49         parseSql(sqlNode, sideTableMap, Maps.newHashMap());
+  50     }
+  51 
+  52     /**
+  53      *  将谓词信息填充到维表属性
+  54      * @param sqlNode
+  55      * @param sideTableMap
+  56      * @param tabMapping  谓词属性中别名对应的真实维表名称
+  57      */
+<abbr title="  58     private void parseSql(SqlNode sqlNode, Map&lt;String, AbstractSideTableInfo&gt; sideTableMap, Map&lt;String, String&gt; tabMapping) {">  58     private void parseSql(SqlNode sqlNode, Map&lt;String, AbstractSideTableInfo&gt; sideTableMap, Map&lt;String, S🔵</abbr>
+  59         SqlKind sqlKind = sqlNode.getKind();
+  60         switch (sqlKind) {
+  61             case INSERT :
+  62                 SqlNode sqlSource = ((SqlInsert) (sqlNode)).getSource();
+  63                 parseSql(sqlSource, sideTableMap, tabMapping);
+  64                 break;
+  65             case SELECT :
+  66                 SqlNode fromNode = ((SqlSelect) (sqlNode)).getFrom();
+  67                 SqlNode whereNode = ((SqlSelect) (sqlNode)).getWhere();
+  68                 if (fromNode.getKind() != IDENTIFIER) {
+  69                     parseSql(fromNode, sideTableMap, tabMapping);
+  70                 }
+  71                 //  带or的不解析
+  72                 if ((null != whereNode) &amp;&amp; (whereNode.getKind() != OR)) {
+  73                     List&lt;PredicateInfo&gt; predicateInfoList = Lists.newArrayList();
+  74                     extractPredicateInfo(whereNode, predicateInfoList);
+  75                     fillToSideTableInfo(sideTableMap, tabMapping, predicateInfoList);
+  76                 }
+  77                 break;
+  78             case JOIN :
+  79                 SqlNode leftNode = ((SqlJoin) (sqlNode)).getLeft();
+  80                 SqlNode rightNode = ((SqlJoin) (sqlNode)).getRight();
+  81                 parseSql(leftNode, sideTableMap, tabMapping);
+  82                 parseSql(rightNode, sideTableMap, tabMapping);
+  83                 break;
+  84             case AS :
+  85                 SqlNode info = ((SqlBasicCall) (sqlNode)).getOperands()[0];
+  86                 SqlNode alias = ((SqlBasicCall) (sqlNode)).getOperands()[1];
+  87                 if (info.getKind() == IDENTIFIER) {
+  88                     tabMapping.put(alias.toString(), info.toString());
+  89                 } else {
+  90                     // 为子查询创建一个同级map
+  91                     parseSql(info, sideTableMap, Maps.newHashMap());
+  92                 }
+  93                 break;
+  94             case UNION :
+  95                 SqlNode unionLeft = ((SqlBasicCall) (sqlNode)).getOperands()[0];
+  96                 SqlNode unionRight = ((SqlBasicCall) (sqlNode)).getOperands()[1];
+  97                 parseSql(unionLeft, sideTableMap, tabMapping);
+  98                 parseSql(unionRight, sideTableMap, tabMapping);
+  99                 break;
+ 100             default :
+ 101                 break;
+ 102         }
+ 103     }
+ 104 
+<abbr title=" 105     private void fillToSideTableInfo(Map&lt;String, AbstractSideTableInfo&gt; sideTableMap, Map&lt;String, String&gt; tabMapping, List&lt;PredicateInfo&gt; predicateInfoList) {"> 105     private void fillToSideTableInfo(Map&lt;String, AbstractSideTableInfo&gt; sideTableMap, Map&lt;String, String&gt;🔵</abbr>
+<abbr title=" 106         predicateInfoList.stream().filter(( info) -&gt; sideTableMap.containsKey(tabMapping.getOrDefault(info.getOwnerTable(), info.getOwnerTable()))).map(( info) -&gt; sideTableMap.get(tabMapping.getOrDefault(info.getOwnerTable(), info.getOwnerTable())).getPredicateInfoes().add(info)).count();"> 106         predicateInfoList.stream().filter(( info) -&gt; sideTableMap.containsKey(tabMapping.getOrDefault(inf🔵</abbr>
+ 107     }
+ 108 
+ 109     private void extractPredicateInfo(SqlNode whereNode, List&lt;PredicateInfo&gt; predicatesInfoList) {
+ 110         SqlKind sqlKind = whereNode.getKind();
+ 111         if (sqlKind == SqlKind.AND &amp;&amp; ((SqlBasicCall) whereNode).getOperandList().size() == 2) {
+ 112             extractPredicateInfo(((SqlBasicCall) whereNode).getOperands()[0], predicatesInfoList);
+ 113             extractPredicateInfo(((SqlBasicCall) whereNode).getOperands()[1], predicatesInfoList);
+ 114         } else {
+ 115             SqlOperator operator = ((SqlBasicCall) whereNode).getOperator();
+ 116             String operatorName = operator.getName();
+ 117             SqlKind operatorKind = operator.getKind();
+ 118 
+ 119             if (operatorKind == SqlKind.IS_NOT_NULL || operatorKind == SqlKind.IS_NULL) {
+<abbr title=" 120                 fillPredicateInfoToList((SqlBasicCall) whereNode, predicatesInfoList, operatorName, operatorKind, 0, 0);"> 120                 fillPredicateInfoToList((SqlBasicCall) whereNode, predicatesInfoList, operatorName, opera🔵</abbr>
+ 121                 return;
+ 122             }
+ 123 
+ 124             // 跳过函数
+ 125             if ((((SqlBasicCall) whereNode).getOperands()[0] instanceof SqlIdentifier)
+<abbr title=" 126                     &amp;&amp; (((SqlBasicCall) whereNode).getOperands()[1].getKind() != SqlKind.OTHER_FUNCTION)) {"> 126                     &amp;&amp; (((SqlBasicCall) whereNode).getOperands()[1].getKind() != SqlKind.OTHER_FUNCTION))🔵</abbr>
+<abbr title=" 127                 fillPredicateInfoToList((SqlBasicCall) whereNode, predicatesInfoList, operatorName, operatorKind, 0, 1);"> 127                 fillPredicateInfoToList((SqlBasicCall) whereNode, predicatesInfoList, operatorName, opera🔵</abbr>
+ 128             } else if ((((SqlBasicCall) whereNode).getOperands()[1] instanceof SqlIdentifier)
+<abbr title=" 129                     &amp;&amp; (((SqlBasicCall) whereNode).getOperands()[0].getKind() != SqlKind.OTHER_FUNCTION)) {"> 129                     &amp;&amp; (((SqlBasicCall) whereNode).getOperands()[0].getKind() != SqlKind.OTHER_FUNCTION))🔵</abbr>
+<abbr title=" 130                 fillPredicateInfoToList((SqlBasicCall) whereNode, predicatesInfoList, operatorName, operatorKind, 1, 0);"> 130                 fillPredicateInfoToList((SqlBasicCall) whereNode, predicatesInfoList, operatorName, opera🔵</abbr>
+ 131             }
+ 132         }
+ 133     }
+ 134 
+<abbr title=" 135     private void fillPredicateInfoToList(SqlBasicCall whereNode, List&lt;PredicateInfo&gt; predicatesInfoList, String operatorName, SqlKind operatorKind,"> 135     private void fillPredicateInfoToList(SqlBasicCall whereNode, List&lt;PredicateInfo&gt; predicatesInfoList, 🔵</abbr>
+ 136                                          int fieldIndex, int conditionIndex) {
+ 137         SqlIdentifier fieldFullPath = (SqlIdentifier) whereNode.getOperands()[fieldIndex];
+ 138         if (fieldFullPath.names.size() == 2) {
+ 139             String ownerTable = fieldFullPath.names.get(0);
+ 140             String fieldName = fieldFullPath.names.get(1);
+<abbr title=" 141             String content = (operatorKind == SqlKind.BETWEEN) ? whereNode.getOperands()[conditionIndex].toString() + &quot; AND &quot; +"> 141             String content = (operatorKind == SqlKind.BETWEEN) ? whereNode.getOperands()[conditionIndex].🔵</abbr>
+<abbr title=" 142                     whereNode.getOperands()[2].toString() : whereNode.getOperands()[conditionIndex].toString();"> 142                     whereNode.getOperands()[2].toString() : whereNode.getOperands()[conditionIndex].toStr🔵</abbr>
+ 143 
+<abbr title=" 144             PredicateInfo predicateInfo = PredicateInfo.builder().setOperatorName(operatorName).setOperatorKind(operatorKind.toString())"> 144             PredicateInfo predicateInfo = PredicateInfo.builder().setOperatorName(operatorName).setOperat🔵</abbr>
+ 145                     .setOwnerTable(ownerTable).setFieldName(fieldName).setCondition(content).build();
+ 146             predicatesInfoList.add(predicateInfo);
+ 147         }
+ 148     }
+ 149 }
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ </pre></td>
+                        </tr>
+                    </table>
+                </div>
+                <div id="bottom">
+                    <table style="margin:auto">
+                        <tr>
+                            <th>ours vs. base</th>
+                            <th>theirs vs. base</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1  /*
+   2   * Licensed to the Apache Software Foundation (ASF) under one
+   3   * or more contributor license agreements.  See the NOTICE file
+   4   * distributed with this work for additional information
+   5   * regarding copyright ownership.  The ASF licenses this file
+   6   * to you under the Apache License, Version 2.0 (the
+   7   * &quot;License&quot;); you may not use this file except in compliance
+   8   * with the License.  You may obtain a copy of the License at
+   9   *
+  10   *     http://www.apache.org/licenses/LICENSE-2.0
+  11   *
+  12   * Unless required by applicable law or agreed to in writing, software
+  13   * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15   * See the License for the specific language governing permissions and
+  16   * limitations under the License.
+  17   */
+  18  
+  19  package com.dtstack.flink.sql.side;
+  20  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  21 -import com.dtstack.flink.sql.config.CalciteConfig;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  22 +import com.dtstack.flink.sql.parser.FlinkPlanner;</span>
+  23  import com.google.common.collect.Lists;
+  24  import com.google.common.collect.Maps;
+  25  import org.apache.calcite.sql.SqlBasicCall;
+  26  import org.apache.calcite.sql.SqlIdentifier;
+  27  import org.apache.calcite.sql.SqlInsert;
+  28  import org.apache.calcite.sql.SqlJoin;
+  29  import org.apache.calcite.sql.SqlKind;
+  30  import org.apache.calcite.sql.SqlNode;
+  31  import org.apache.calcite.sql.SqlOperator;
+  32  import org.apache.calcite.sql.SqlSelect;
+  33  import org.apache.calcite.sql.parser.SqlParseException;
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  34 -import org.apache.calcite.sql.parser.SqlParser;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  35 +import org.apache.flink.table.calcite.FlinkPlannerImpl;</span>
+  36  
+  37  import java.util.List;
+  38  import java.util.Map;
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  39 -import java.util.stream.Collectors;</span>
+  40  
+  41  import static org.apache.calcite.sql.SqlKind.*;
+  42  
+  43  /**
+  44   *
+  45   *  将同级谓词信息填充到维表
+  46   * Date: 2019/12/11
+  47   * Company: www.dtstack.com
+  48   * @author maqi
+  49   */
+  50  public class SidePredicatesParser {
+<abbr title="  51      public void fillPredicatesForSideTable(String exeSql, Map&lt;String, SideTableInfo&gt; sideTableMap) throws SqlParseException {">  51      public void fillPredicatesForSideTable(String exeSql, Map&lt;String, SideTableInfo&gt; sideTableMap) throws SqlParse🔵</abbr>
+
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  52 -        SqlParser sqlParser = SqlParser.create(exeSql, CalciteConfig.MYSQL_LEX_CONFIG);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  53 -        SqlNode sqlNode = sqlParser.parseStmt();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  54 +        FlinkPlannerImpl flinkPlanner = FlinkPlanner.getFlinkPlanner();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  55 +        SqlNode sqlNode = flinkPlanner.parse(exeSql);</span>
+  56          parseSql(sqlNode, sideTableMap, Maps.newHashMap());
+  57      }
+  58  
+  59      /**
+  60       *  将谓词信息填充到维表属性
+  61       * @param sqlNode
+  62       * @param sideTableMap
+  63       * @param tabMapping  谓词属性中别名对应的真实维表名称
+  64       */
+<abbr title="  65      private void parseSql(SqlNode sqlNode, Map&lt;String, SideTableInfo&gt; sideTableMap, Map&lt;String, String&gt; tabMapping) {">  65      private void parseSql(SqlNode sqlNode, Map&lt;String, SideTableInfo&gt; sideTableMap, Map&lt;String, String&gt; tabMapping🔵</abbr>
+
+  66          SqlKind sqlKind = sqlNode.getKind();
+  67          switch (sqlKind) {
+  68              case INSERT:
+  69                  SqlNode sqlSource = ((SqlInsert) sqlNode).getSource();
+  70                  parseSql(sqlSource, sideTableMap, tabMapping);
+  71                  break;
+  72              case SELECT:
+  73                  SqlNode fromNode = ((SqlSelect) sqlNode).getFrom();
+  74                  SqlNode whereNode = ((SqlSelect) sqlNode).getWhere();
+  75  
+  76                  if (fromNode.getKind() != IDENTIFIER) {
+  77                      parseSql(fromNode, sideTableMap, tabMapping);
+  78                  }
+  79                  //  带or的不解析
+  80                  if (null != whereNode &amp;&amp; whereNode.getKind() != OR) {
+  81                      List&lt;PredicateInfo&gt; predicateInfoList = Lists.newArrayList();
+  82                      extractPredicateInfo(whereNode, predicateInfoList);
+  83                      fillToSideTableInfo(sideTableMap, tabMapping, predicateInfoList);
+  84                  }
+  85                  break;
+  86              case JOIN:
+  87                  SqlNode leftNode = ((SqlJoin) sqlNode).getLeft();
+  88                  SqlNode rightNode = ((SqlJoin) sqlNode).getRight();
+  89                  parseSql(leftNode, sideTableMap, tabMapping);
+  90                  parseSql(rightNode, sideTableMap, tabMapping);
+  91                  break;
+  92              case AS:
+  93                  SqlNode info = ((SqlBasicCall) sqlNode).getOperands()[0];
+  94                  SqlNode alias = ((SqlBasicCall) sqlNode).getOperands()[1];
+  95                  if (info.getKind() == IDENTIFIER) {
+  96                      tabMapping.put(alias.toString(), info.toString());
+  97                  } else {
+  98                      // 为子查询创建一个同级map
+  99                      parseSql(info, sideTableMap, Maps.newHashMap());
+ 100                  }
+ 101                  break;
+ 102              case UNION:
+ 103                  SqlNode unionLeft = ((SqlBasicCall) sqlNode).getOperands()[0];
+ 104                  SqlNode unionRight = ((SqlBasicCall) sqlNode).getOperands()[1];
+ 105                  parseSql(unionLeft, sideTableMap, tabMapping);
+ 106                  parseSql(unionRight, sideTableMap, tabMapping);
+ 107                  break;
+
+
+ 108          }
+ 109      }
+ 110  
+<abbr title=" 111      private void fillToSideTableInfo(Map&lt;String, SideTableInfo&gt; sideTableMap, Map&lt;String, String&gt; tabMapping, List&lt;PredicateInfo&gt; predicateInfoList) {"> 111      private void fillToSideTableInfo(Map&lt;String, SideTableInfo&gt; sideTableMap, Map&lt;String, String&gt; tabMapping, List🔵</abbr>
+
+<abbr title=" 112          predicateInfoList.stream().filter(info -&gt; sideTableMap.containsKey(tabMapping.getOrDefault(info.getOwnerTable(), info.getOwnerTable())))"> 112          predicateInfoList.stream().filter(info -&gt; sideTableMap.containsKey(tabMapping.getOrDefault(info.getOwnerTa🔵</abbr>
+<abbr title=" 113                  .map(info -&gt; sideTableMap.get(tabMapping.getOrDefault(info.getOwnerTable(), info.getOwnerTable())).getPredicateInfoes().add(info))"> 113                  .map(info -&gt; sideTableMap.get(tabMapping.getOrDefault(info.getOwnerTable(), info.getOwnerTable()))🔵</abbr>
+ 114                  .count();
+ 115      }
+ 116  
+ 117  
+ 118      private void extractPredicateInfo(SqlNode whereNode, List&lt;PredicateInfo&gt; predicatesInfoList) {
+ 119          SqlKind sqlKind = whereNode.getKind();
+ 120          if (sqlKind == SqlKind.AND &amp;&amp; ((SqlBasicCall) whereNode).getOperandList().size() == 2) {
+ 121              extractPredicateInfo(((SqlBasicCall) whereNode).getOperands()[0], predicatesInfoList);
+ 122              extractPredicateInfo(((SqlBasicCall) whereNode).getOperands()[1], predicatesInfoList);
+ 123          } else {
+ 124              SqlOperator operator = ((SqlBasicCall) whereNode).getOperator();
+ 125              String operatorName = operator.getName();
+ 126              SqlKind operatorKind = operator.getKind();
+ 127  
+ 128              if (operatorKind == SqlKind.IS_NOT_NULL || operatorKind == SqlKind.IS_NULL) {
+<abbr title=" 129                  fillPredicateInfoToList((SqlBasicCall) whereNode, predicatesInfoList, operatorName, operatorKind, 0, 0);"> 129                  fillPredicateInfoToList((SqlBasicCall) whereNode, predicatesInfoList, operatorName, operatorKind, 🔵</abbr>
+ 130                  return;
+ 131              }
+ 132  
+ 133              // 跳过函数
+ 134              if ((((SqlBasicCall) whereNode).getOperands()[0] instanceof SqlIdentifier)
+ 135                      &amp;&amp; (((SqlBasicCall) whereNode).getOperands()[1].getKind() != SqlKind.OTHER_FUNCTION)) {
+<abbr title=" 136                  fillPredicateInfoToList((SqlBasicCall) whereNode, predicatesInfoList, operatorName, operatorKind, 0, 1);"> 136                  fillPredicateInfoToList((SqlBasicCall) whereNode, predicatesInfoList, operatorName, operatorKind, 🔵</abbr>
+ 137              } else if ((((SqlBasicCall) whereNode).getOperands()[1] instanceof SqlIdentifier)
+ 138                      &amp;&amp; (((SqlBasicCall) whereNode).getOperands()[0].getKind() != SqlKind.OTHER_FUNCTION)) {
+<abbr title=" 139                  fillPredicateInfoToList((SqlBasicCall) whereNode, predicatesInfoList, operatorName, operatorKind, 1, 0);"> 139                  fillPredicateInfoToList((SqlBasicCall) whereNode, predicatesInfoList, operatorName, operatorKind, 🔵</abbr>
+ 140              }
+ 141          }
+ 142      }
+ 143  
+<abbr title=" 144      private void fillPredicateInfoToList(SqlBasicCall whereNode, List&lt;PredicateInfo&gt; predicatesInfoList, String operatorName, SqlKind operatorKind,"> 144      private void fillPredicateInfoToList(SqlBasicCall whereNode, List&lt;PredicateInfo&gt; predicatesInfoList, String op🔵</abbr>
+ 145                                           int fieldIndex, int conditionIndex) {
+ 146          SqlIdentifier fieldFullPath = (SqlIdentifier) whereNode.getOperands()[fieldIndex];
+ 147          if (fieldFullPath.names.size() == 2) {
+ 148              String ownerTable = fieldFullPath.names.get(0);
+ 149              String fieldName = fieldFullPath.names.get(1);
+<abbr title=" 150              String content = (operatorKind == SqlKind.BETWEEN) ? whereNode.getOperands()[conditionIndex].toString() + &quot; AND &quot; +"> 150              String content = (operatorKind == SqlKind.BETWEEN) ? whereNode.getOperands()[conditionIndex].toString(🔵</abbr>
+ 151                      whereNode.getOperands()[2].toString() : whereNode.getOperands()[conditionIndex].toString();
+ 152  
+<abbr title=" 153              PredicateInfo predicateInfo = PredicateInfo.builder().setOperatorName(operatorName).setOperatorKind(operatorKind.toString())"> 153              PredicateInfo predicateInfo = PredicateInfo.builder().setOperatorName(operatorName).setOperatorKind(op🔵</abbr>
+ 154                      .setOwnerTable(ownerTable).setFieldName(fieldName).setCondition(content).build();
+ 155              predicatesInfoList.add(predicateInfo);
+ 156          }
+ 157      }
+ 158  
+ 159  }</pre></td>
+                            <td><pre>   1  /*
+   2   * Licensed to the Apache Software Foundation (ASF) under one
+   3   * or more contributor license agreements.  See the NOTICE file
+   4   * distributed with this work for additional information
+   5   * regarding copyright ownership.  The ASF licenses this file
+   6   * to you under the Apache License, Version 2.0 (the
+   7   * &quot;License&quot;); you may not use this file except in compliance
+   8   * with the License.  You may obtain a copy of the License at
+   9   *
+  10   *     http://www.apache.org/licenses/LICENSE-2.0
+  11   *
+  12   * Unless required by applicable law or agreed to in writing, software
+  13   * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15   * See the License for the specific language governing permissions and
+  16   * limitations under the License.
+  17   */
+  18  
+  19  package com.dtstack.flink.sql.side;
+  20  
+  21  import com.dtstack.flink.sql.config.CalciteConfig;
+
+  22  import com.google.common.collect.Lists;
+  23  import com.google.common.collect.Maps;
+  24  import org.apache.calcite.sql.SqlBasicCall;
+  25  import org.apache.calcite.sql.SqlIdentifier;
+  26  import org.apache.calcite.sql.SqlInsert;
+  27  import org.apache.calcite.sql.SqlJoin;
+  28  import org.apache.calcite.sql.SqlKind;
+  29  import org.apache.calcite.sql.SqlNode;
+  30  import org.apache.calcite.sql.SqlOperator;
+  31  import org.apache.calcite.sql.SqlSelect;
+  32  import org.apache.calcite.sql.parser.SqlParseException;
+  33  import org.apache.calcite.sql.parser.SqlParser;
+
+  34  
+  35  import java.util.List;
+  36  import java.util.Map;
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  37 -import java.util.stream.Collectors;</span>
+  38  
+  39  import static org.apache.calcite.sql.SqlKind.*;
+  40  
+  41  /**
+  42   *
+  43   *  将同级谓词信息填充到维表
+  44   * Date: 2019/12/11
+  45   * Company: www.dtstack.com
+  46   * @author maqi
+  47   */
+  48  public class SidePredicatesParser {
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"><abbr title="  49 -    public void fillPredicatesForSideTable(String exeSql, Map&lt;String, SideTableInfo&gt; sideTableMap) throws SqlParseException {">  49 -    public void fillPredicatesForSideTable(String exeSql, Map&lt;String, SideTableInfo&gt; sideTableMap) throws SqlParse🔵</abbr></span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"><abbr title="  50 +    public void fillPredicatesForSideTable(String exeSql, Map&lt;String, AbstractSideTableInfo&gt; sideTableMap) throws SqlParseException {">  50 +    public void fillPredicatesForSideTable(String exeSql, Map&lt;String, AbstractSideTableInfo&gt; sideTableMap) throws 🔵</abbr></span>
+  51          SqlParser sqlParser = SqlParser.create(exeSql, CalciteConfig.MYSQL_LEX_CONFIG);
+  52          SqlNode sqlNode = sqlParser.parseStmt();
+
+
+  53          parseSql(sqlNode, sideTableMap, Maps.newHashMap());
+  54      }
+  55  
+  56      /**
+  57       *  将谓词信息填充到维表属性
+  58       * @param sqlNode
+  59       * @param sideTableMap
+  60       * @param tabMapping  谓词属性中别名对应的真实维表名称
+  61       */
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"><abbr title="  62 -    private void parseSql(SqlNode sqlNode, Map&lt;String, SideTableInfo&gt; sideTableMap, Map&lt;String, String&gt; tabMapping) {">  62 -    private void parseSql(SqlNode sqlNode, Map&lt;String, SideTableInfo&gt; sideTableMap, Map&lt;String, String&gt; tabMapping🔵</abbr></span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"><abbr title="  63 +    private void parseSql(SqlNode sqlNode, Map&lt;String, AbstractSideTableInfo&gt; sideTableMap, Map&lt;String, String&gt; tabMapping) {">  63 +    private void parseSql(SqlNode sqlNode, Map&lt;String, AbstractSideTableInfo&gt; sideTableMap, Map&lt;String, String&gt; ta🔵</abbr></span>
+  64          SqlKind sqlKind = sqlNode.getKind();
+  65          switch (sqlKind) {
+  66              case INSERT:
+  67                  SqlNode sqlSource = ((SqlInsert) sqlNode).getSource();
+  68                  parseSql(sqlSource, sideTableMap, tabMapping);
+  69                  break;
+  70              case SELECT:
+  71                  SqlNode fromNode = ((SqlSelect) sqlNode).getFrom();
+  72                  SqlNode whereNode = ((SqlSelect) sqlNode).getWhere();
+  73  
+  74                  if (fromNode.getKind() != IDENTIFIER) {
+  75                      parseSql(fromNode, sideTableMap, tabMapping);
+  76                  }
+  77                  //  带or的不解析
+  78                  if (null != whereNode &amp;&amp; whereNode.getKind() != OR) {
+  79                      List&lt;PredicateInfo&gt; predicateInfoList = Lists.newArrayList();
+  80                      extractPredicateInfo(whereNode, predicateInfoList);
+  81                      fillToSideTableInfo(sideTableMap, tabMapping, predicateInfoList);
+  82                  }
+  83                  break;
+  84              case JOIN:
+  85                  SqlNode leftNode = ((SqlJoin) sqlNode).getLeft();
+  86                  SqlNode rightNode = ((SqlJoin) sqlNode).getRight();
+  87                  parseSql(leftNode, sideTableMap, tabMapping);
+  88                  parseSql(rightNode, sideTableMap, tabMapping);
+  89                  break;
+  90              case AS:
+  91                  SqlNode info = ((SqlBasicCall) sqlNode).getOperands()[0];
+  92                  SqlNode alias = ((SqlBasicCall) sqlNode).getOperands()[1];
+  93                  if (info.getKind() == IDENTIFIER) {
+  94                      tabMapping.put(alias.toString(), info.toString());
+  95                  } else {
+  96                      // 为子查询创建一个同级map
+  97                      parseSql(info, sideTableMap, Maps.newHashMap());
+  98                  }
+  99                  break;
+ 100              case UNION:
+ 101                  SqlNode unionLeft = ((SqlBasicCall) sqlNode).getOperands()[0];
+ 102                  SqlNode unionRight = ((SqlBasicCall) sqlNode).getOperands()[1];
+ 103                  parseSql(unionLeft, sideTableMap, tabMapping);
+ 104                  parseSql(unionRight, sideTableMap, tabMapping);
+ 105                  break;
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 106 +            default:</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 107 +                break;</span>
+ 108          }
+ 109      }
+ 110  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"><abbr title=" 111 -    private void fillToSideTableInfo(Map&lt;String, SideTableInfo&gt; sideTableMap, Map&lt;String, String&gt; tabMapping, List&lt;PredicateInfo&gt; predicateInfoList) {"> 111 -    private void fillToSideTableInfo(Map&lt;String, SideTableInfo&gt; sideTableMap, Map&lt;String, String&gt; tabMapping, List🔵</abbr></span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"><abbr title=" 112 +    private void fillToSideTableInfo(Map&lt;String, AbstractSideTableInfo&gt; sideTableMap, Map&lt;String, String&gt; tabMapping, List&lt;PredicateInfo&gt; predicateInfoList) {"> 112 +    private void fillToSideTableInfo(Map&lt;String, AbstractSideTableInfo&gt; sideTableMap, Map&lt;String, String&gt; tabMappi🔵</abbr></span>
+<abbr title=" 113          predicateInfoList.stream().filter(info -&gt; sideTableMap.containsKey(tabMapping.getOrDefault(info.getOwnerTable(), info.getOwnerTable())))"> 113          predicateInfoList.stream().filter(info -&gt; sideTableMap.containsKey(tabMapping.getOrDefault(info.getOwnerTa🔵</abbr>
+<abbr title=" 114                  .map(info -&gt; sideTableMap.get(tabMapping.getOrDefault(info.getOwnerTable(), info.getOwnerTable())).getPredicateInfoes().add(info))"> 114                  .map(info -&gt; sideTableMap.get(tabMapping.getOrDefault(info.getOwnerTable(), info.getOwnerTable()))🔵</abbr>
+ 115                  .count();
+ 116      }
+ 117  
+ 118  
+ 119      private void extractPredicateInfo(SqlNode whereNode, List&lt;PredicateInfo&gt; predicatesInfoList) {
+ 120          SqlKind sqlKind = whereNode.getKind();
+ 121          if (sqlKind == SqlKind.AND &amp;&amp; ((SqlBasicCall) whereNode).getOperandList().size() == 2) {
+ 122              extractPredicateInfo(((SqlBasicCall) whereNode).getOperands()[0], predicatesInfoList);
+ 123              extractPredicateInfo(((SqlBasicCall) whereNode).getOperands()[1], predicatesInfoList);
+ 124          } else {
+ 125              SqlOperator operator = ((SqlBasicCall) whereNode).getOperator();
+ 126              String operatorName = operator.getName();
+ 127              SqlKind operatorKind = operator.getKind();
+ 128  
+ 129              if (operatorKind == SqlKind.IS_NOT_NULL || operatorKind == SqlKind.IS_NULL) {
+<abbr title=" 130                  fillPredicateInfoToList((SqlBasicCall) whereNode, predicatesInfoList, operatorName, operatorKind, 0, 0);"> 130                  fillPredicateInfoToList((SqlBasicCall) whereNode, predicatesInfoList, operatorName, operatorKind, 🔵</abbr>
+ 131                  return;
+ 132              }
+ 133  
+ 134              // 跳过函数
+ 135              if ((((SqlBasicCall) whereNode).getOperands()[0] instanceof SqlIdentifier)
+ 136                      &amp;&amp; (((SqlBasicCall) whereNode).getOperands()[1].getKind() != SqlKind.OTHER_FUNCTION)) {
+<abbr title=" 137                  fillPredicateInfoToList((SqlBasicCall) whereNode, predicatesInfoList, operatorName, operatorKind, 0, 1);"> 137                  fillPredicateInfoToList((SqlBasicCall) whereNode, predicatesInfoList, operatorName, operatorKind, 🔵</abbr>
+ 138              } else if ((((SqlBasicCall) whereNode).getOperands()[1] instanceof SqlIdentifier)
+ 139                      &amp;&amp; (((SqlBasicCall) whereNode).getOperands()[0].getKind() != SqlKind.OTHER_FUNCTION)) {
+<abbr title=" 140                  fillPredicateInfoToList((SqlBasicCall) whereNode, predicatesInfoList, operatorName, operatorKind, 1, 0);"> 140                  fillPredicateInfoToList((SqlBasicCall) whereNode, predicatesInfoList, operatorName, operatorKind, 🔵</abbr>
+ 141              }
+ 142          }
+ 143      }
+ 144  
+<abbr title=" 145      private void fillPredicateInfoToList(SqlBasicCall whereNode, List&lt;PredicateInfo&gt; predicatesInfoList, String operatorName, SqlKind operatorKind,"> 145      private void fillPredicateInfoToList(SqlBasicCall whereNode, List&lt;PredicateInfo&gt; predicatesInfoList, String op🔵</abbr>
+ 146                                           int fieldIndex, int conditionIndex) {
+ 147          SqlIdentifier fieldFullPath = (SqlIdentifier) whereNode.getOperands()[fieldIndex];
+ 148          if (fieldFullPath.names.size() == 2) {
+ 149              String ownerTable = fieldFullPath.names.get(0);
+ 150              String fieldName = fieldFullPath.names.get(1);
+<abbr title=" 151              String content = (operatorKind == SqlKind.BETWEEN) ? whereNode.getOperands()[conditionIndex].toString() + &quot; AND &quot; +"> 151              String content = (operatorKind == SqlKind.BETWEEN) ? whereNode.getOperands()[conditionIndex].toString(🔵</abbr>
+ 152                      whereNode.getOperands()[2].toString() : whereNode.getOperands()[conditionIndex].toString();
+ 153  
+<abbr title=" 154              PredicateInfo predicateInfo = PredicateInfo.builder().setOperatorName(operatorName).setOperatorKind(operatorKind.toString())"> 154              PredicateInfo predicateInfo = PredicateInfo.builder().setOperatorName(operatorName).setOperatorKind(op🔵</abbr>
+ 155                      .setOwnerTable(ownerTable).setFieldName(fieldName).setCondition(content).build();
+ 156              predicatesInfoList.add(predicateInfo);
+ 157          }
+ 158      }
+ 159  
+ 160  }</pre></td>
+                        </tr>
+                    </table>
+                </div>
+              </body>
+            </html>
+            

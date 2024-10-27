@@ -1,0 +1,1367 @@
+<!DOCTYPE html>
+    <html lang="en">
+              <head>
+                <meta charset="utf-8">
+                <title>361</title>
+                    <style>
+                        #top {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        #bottom {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        abbr {
+                          /* Here is the delay */
+                          transition-delay:0s;
+                        }
+                    </style>
+              </head>
+              <body>
+                <span style="height: 4vh">
+                    361
+                    <a href="360.html">prev</a>
+                    <a href="362.html">next</a>
+                    <a href="361_chunks.html">chunks</a>
+                    <a href="index.html">index</a>
+                    DTStack/flinkStreamSQL_cb738ac7e8a750f2f23ff9baa658b3dea48c5264_rdb/rdb-side/src/main/java/com/dtstack/flink/sql/side/rdb/all/AbstractRdbAllReqRow.java
+                    <textarea rows=1 onclick='navigator.clipboard.writeText(this.value)'>cd C:\studies\se\mega\git-analyzer-plus\notebooks\debug
+del /Q *
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;cb738ac7e8a750f2f23ff9baa658b3dea48c5264:rdb/rdb-side/src/main/java/com/dtstack/flink/sql/side/rdb/all/AbstractRdbAllReqRow.java&quot; &gt; committed.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;cb738ac7e8a750f2f23ff9baa658b3dea48c5264^1:rdb/rdb-side/src/main/java/com/dtstack/flink/sql/side/rdb/all/AbstractRdbAllReqRow.java&quot; &gt; ours.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;cb738ac7e8a750f2f23ff9baa658b3dea48c5264^2:rdb/rdb-side/src/main/java/com/dtstack/flink/sql/side/rdb/all/AbstractRdbAllReqRow.java&quot; &gt; theirs.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;828062ef514a8028632086b1c19ef248140da519:rdb/rdb-side/src/main/java/com/dtstack/flink/sql/side/rdb/all/AbstractRdbAllReqRow.java&quot; &gt; base.java
+copy ours.java 1ours.java
+copy ours.java 2ours.java
+copy theirs.java 1theirs.java
+copy theirs.java 2theirs.java
+copy base.java 1base.java
+copy base.java 2base.java
+&quot;C:\Program Files\Java\jdk1.8.0_241\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\jFSTMerge\build\libs\jFSTMerge-all.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\jfstmerge.java --show-base
+&quot;C:\Program Files\Eclipse Adoptium\jdk-17.0.11.9-hotspot\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\spork\target\spork-0.5.0-SNAPSHOT.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\spork.java
+del /Q 1*.java
+del /Q 2*.java
+del /Q jfstmerge.java.merge
+</textarea>
+                    {strict: [[b]], subset: [[b]]}
+                </span>
+                <div id="top">
+
+                    <table>
+                        <tr>
+                            <th>line based (standard git)</th>
+                            <th>jfstmerge</th>
+                            <th>spork</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1 /*
+   2  * Licensed to the Apache Software Foundation (ASF) under one
+   3  * or more contributor license agreements.  See the NOTICE file
+   4  * distributed with this work for additional information
+   5  * regarding copyright ownership.  The ASF licenses this file
+   6  * to you under the Apache License, Version 2.0 (the
+   7  * &quot;License&quot;); you may not use this file except in compliance
+   8  * with the License.  You may obtain a copy of the License at
+   9  *
+  10  *     http://www.apache.org/licenses/LICENSE-2.0
+  11  *
+  12  * Unless required by applicable law or agreed to in writing, software
+  13  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15  * See the License for the specific language governing permissions and
+  16  * limitations under the License.
+  17  */
+  18 
+  19 package com.dtstack.flink.sql.side.rdb.all;
+  20 
+  21 import org.apache.flink.api.common.typeinfo.TypeInformation;
+  22 import org.apache.flink.configuration.Configuration;
+  23 import org.apache.flink.table.runtime.types.CRow;
+  24 import org.apache.flink.table.typeutils.TimeIndicatorTypeInfo;
+  25 import org.apache.flink.types.Row;
+  26 import org.apache.flink.util.Collector;
+  27 
+  28 
+  29 import com.dtstack.flink.sql.side.BaseAllReqRow;
+  30 import com.dtstack.flink.sql.side.BaseSideInfo;
+  31 import com.dtstack.flink.sql.side.rdb.table.RdbSideTableInfo;
+  32 import com.dtstack.flink.sql.side.rdb.util.SwitchUtil;
+  33 import com.google.common.collect.Lists;
+  34 import com.google.common.collect.Maps;
+  35 import org.apache.calcite.sql.JoinType;
+  36 import org.apache.commons.collections.CollectionUtils;
+  37 import org.apache.commons.lang3.StringUtils;
+  38 import org.slf4j.Logger;
+  39 import org.slf4j.LoggerFactory;
+  40 
+  41 import java.sql.Connection;
+  42 import java.sql.ResultSet;
+  43 import java.sql.SQLException;
+  44 import java.sql.Statement;
+  45 import java.sql.Timestamp;
+  46 &lt;&lt;&lt;&lt;&lt;&lt;&lt; GitAnalyzerPlus_ours
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  47 import java.util.*;</span>
+  48 ||||||| GitAnalyzerPlus_base
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  49 import java.util.ArrayList;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  50 import java.util.Calendar;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  51 import java.util.List;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  52 import java.util.Map;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  53 import java.util.concurrent.atomic.AtomicReference;</span>
+  54 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  55 import java.util.ArrayList;</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  56 import java.util.List;</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  57 import java.util.Map;</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  58 import java.util.Objects;</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  59 import java.util.Calendar;</span>
+  60 &gt;&gt;&gt;&gt;&gt;&gt;&gt; GitAnalyzerPlus_theirs
+  61 import java.util.concurrent.atomic.AtomicReference;
+  62 import java.util.stream.Collectors;
+  63 
+  64 /**
+  65  * side operator with cache for all(period reload)
+  66  * Date: 2018/11/26
+  67  * Company: www.dtstack.com
+  68  *
+  69  * @author maqi
+  70  */
+  71 
+  72 public abstract class AbstractRdbAllReqRow extends BaseAllReqRow {
+  73 
+  74     private static final long serialVersionUID = 2098635140857937718L;
+  75 
+  76     private static final Logger LOG = LoggerFactory.getLogger(AbstractRdbAllReqRow.class);
+  77 
+  78     private static final int CONN_RETRY_NUM = 3;
+  79 
+  80     private static final int DEFAULT_FETCH_SIZE = 1000;
+  81 
+  82     private AtomicReference&lt;Map&lt;String, List&lt;Map&lt;String, Object&gt;&gt;&gt;&gt; cacheRef = new AtomicReference&lt;&gt;();
+  83 
+  84     public AbstractRdbAllReqRow(BaseSideInfo sideInfo) {
+  85         super(sideInfo);
+  86     }
+  87 
+  88     @Override
+  89     public void open(Configuration parameters) throws Exception {
+  90         super.open(parameters);
+  91         RdbSideTableInfo tableInfo = (RdbSideTableInfo) sideInfo.getSideTableInfo();
+  92         LOG.info(&quot;rdb dim table config info: {} &quot;, tableInfo.toString());
+  93     }
+  94 
+  95     @Override
+  96     protected void initCache() throws SQLException {
+  97         Map&lt;String, List&lt;Map&lt;String, Object&gt;&gt;&gt; newCache = Maps.newConcurrentMap();
+  98         cacheRef.set(newCache);
+  99         loadData(newCache);
+ 100     }
+ 101 
+ 102     @Override
+ 103     protected void reloadCache() {
+ 104         //reload cacheRef and replace to old cacheRef
+ 105         Map&lt;String, List&lt;Map&lt;String, Object&gt;&gt;&gt; newCache = Maps.newConcurrentMap();
+ 106         try {
+ 107             loadData(newCache);
+ 108         } catch (SQLException e) {
+ 109             throw new RuntimeException(e);
+ 110         }
+ 111         cacheRef.set(newCache);
+ 112         LOG.info(&quot;----- rdb all cacheRef reload end:{}&quot;, Calendar.getInstance());
+ 113     }
+ 114 
+ 115     @Override
+ 116     public void flatMap(CRow value, Collector&lt;CRow&gt; out) throws Exception {
+ 117         List&lt;Integer&gt; equalValIndex = sideInfo.getEqualValIndex();
+ 118         ArrayList&lt;Object&gt; inputParams = equalValIndex.stream()
+ 119                 .map(value.row()::getField)
+ 120                 .filter(Objects::nonNull)
+ 121                 .collect(Collectors.toCollection(ArrayList::new));
+ 122 
+ 123         if (inputParams.size() != equalValIndex.size() &amp;&amp; sideInfo.getJoinType() == JoinType.LEFT) {
+ 124             out.collect(new CRow(fillData(value.row(), null), value.change()));
+ 125             return;
+ 126         }
+ 127 
+ 128         String cacheKey = inputParams.stream()
+ 129                 .map(Object::toString)
+ 130                 .collect(Collectors.joining(&quot;_&quot;));
+ 131 
+ 132         List&lt;Map&lt;String, Object&gt;&gt; cacheList = cacheRef.get().get(cacheKey);
+ 133         if (CollectionUtils.isEmpty(cacheList) &amp;&amp; sideInfo.getJoinType() == JoinType.LEFT) {
+ 134             out.collect(new CRow(fillData(value.row(), null), value.change()));
+ 135             return;
+ 136         }
+ 137 
+ 138         if (CollectionUtils.isEmpty(cacheList)) {
+ 139             return;
+ 140         }
+ 141 
+ 142         cacheList.forEach(one -&gt; out.collect(new CRow(fillData(value.row(), one), value.change())));
+ 143     }
+ 144 
+ 145     @Override
+ 146     public Row fillData(Row input, Object sideInput) {
+ 147         Map&lt;String, Object&gt; cacheInfo = (Map&lt;String, Object&gt;) sideInput;
+ 148         Row row = new Row(sideInfo.getOutFieldInfoList().size());
+ 149 
+ 150         for (Map.Entry&lt;Integer, Integer&gt; entry : sideInfo.getInFieldIndex().entrySet()) {
+ 151             // origin value
+ 152             Object obj = input.getField(entry.getValue());
+<abbr title=" 153             obj = dealTimeAttributeType(sideInfo.getRowTypeInfo().getTypeAt(entry.getValue()).getClass(), obj);"> 153             obj = dealTimeAttributeType(sideInfo.getRowTypeInfo().getTypeAt(entry.getValue()).getClass(),🔵</abbr>
+ 154             row.setField(entry.getKey(), obj);
+ 155         }
+ 156 
+ 157         for (Map.Entry&lt;Integer, String&gt; entry : sideInfo.getSideFieldNameIndex().entrySet()) {
+ 158             if (cacheInfo == null) {
+ 159                 row.setField(entry.getKey(), null);
+ 160             } else {
+ 161                 row.setField(entry.getKey(), cacheInfo.get(entry.getValue()));
+ 162             }
+ 163 
+ 164         }
+ 165         return row;
+ 166     }
+ 167 
+ 168     /**
+ 169      * covert flink time attribute.Type information for indicating event or processing time.
+ 170      * However, it behaves like a regular SQL timestamp but is serialized as Long.
+ 171      *
+ 172      * @param entry
+ 173      * @param obj
+ 174      * @return
+ 175      */
+ 176     protected Object dealTimeAttributeType(Class&lt;? extends TypeInformation&gt; entry, Object obj) {
+ 177         boolean isTimeIndicatorTypeInfo = TimeIndicatorTypeInfo.class.isAssignableFrom(entry);
+ 178         if (obj instanceof Timestamp &amp;&amp; isTimeIndicatorTypeInfo) {
+ 179             //去除上一层OutputRowtimeProcessFunction 调用时区导致的影响
+ 180             obj = ((Timestamp) obj).getTime() + (long)LOCAL_TZ.getOffset(((Timestamp) obj).getTime());
+ 181         }
+ 182         return obj;
+ 183     }
+ 184 
+ 185     private void loadData(Map&lt;String, List&lt;Map&lt;String, Object&gt;&gt;&gt; tmpCache) throws SQLException {
+ 186         RdbSideTableInfo tableInfo = (RdbSideTableInfo) sideInfo.getSideTableInfo();
+ 187         Connection connection = null;
+ 188 
+ 189         try {
+ 190             for (int i = 0; i &lt; CONN_RETRY_NUM; i++) {
+ 191                 try {
+<abbr title=" 192                     connection = getConn(tableInfo.getUrl(), tableInfo.getUserName(), tableInfo.getPassword());"> 192                     connection = getConn(tableInfo.getUrl(), tableInfo.getUserName(), tableInfo.getPasswo🔵</abbr>
+ 193                     break;
+ 194                 } catch (Exception e) {
+ 195                     if (i == CONN_RETRY_NUM - 1) {
+ 196                         throw new RuntimeException(&quot;&quot;, e);
+ 197                     }
+ 198                     try {
+<abbr title=" 199                         String connInfo = &quot;url:&quot; + tableInfo.getUrl() + &quot;;userName:&quot; + tableInfo.getUserName() + &quot;,pwd:&quot; + tableInfo.getPassword();"> 199                         String connInfo = &quot;url:&quot; + tableInfo.getUrl() + &quot;;userName:&quot; + tableInfo.getUserN🔵</abbr>
+ 200                         LOG.warn(&quot;get conn fail, wait for 5 sec and try again, connInfo:&quot; + connInfo);
+ 201                         Thread.sleep(5 * 1000);
+ 202                     } catch (InterruptedException e1) {
+ 203                         LOG.error(&quot;&quot;, e1);
+ 204                     }
+ 205                 }
+ 206             }
+ 207             queryAndFillData(tmpCache, connection);
+ 208         } catch (Exception e) {
+ 209             LOG.error(&quot;&quot;, e);
+ 210             throw new SQLException(e);
+ 211         } finally {
+ 212             if (connection != null) {
+ 213                 connection.close();
+ 214             }
+ 215         }
+ 216     }
+ 217 
+<abbr title=" 218     private void queryAndFillData(Map&lt;String, List&lt;Map&lt;String, Object&gt;&gt;&gt; tmpCache, Connection connection) throws SQLException {"> 218     private void queryAndFillData(Map&lt;String, List&lt;Map&lt;String, Object&gt;&gt;&gt; tmpCache, Connection connection)🔵</abbr>
+ 219         //load data from table
+ 220         String sql = sideInfo.getSqlCondition();
+ 221         Statement statement = connection.createStatement();
+ 222         statement.setFetchSize(getFetchSize());
+ 223         ResultSet resultSet = statement.executeQuery(sql);
+ 224 
+ 225         String[] sideFieldNames = StringUtils.split(sideInfo.getSideSelectFields(), &quot;,&quot;);
+ 226         String[] fields = sideInfo.getSideTableInfo().getFieldTypes();
+ 227         while (resultSet.next()) {
+ 228             Map&lt;String, Object&gt; oneRow = Maps.newHashMap();
+ 229             for (String fieldName : sideFieldNames) {
+ 230                 Object object = resultSet.getObject(fieldName.trim());
+ 231                 int fieldIndex = sideInfo.getSideTableInfo().getFieldList().indexOf(fieldName.trim());
+ 232                 object = SwitchUtil.getTarget(object, fields[fieldIndex]);
+ 233                 oneRow.put(fieldName.trim(), object);
+ 234             }
+ 235 
+ 236             String cacheKey = sideInfo.getEqualFieldList().stream()
+ 237                     .map(oneRow::get)
+ 238                     .map(Object::toString)
+ 239                     .collect(Collectors.joining(&quot;_&quot;));
+ 240 
+ 241             tmpCache.computeIfAbsent(cacheKey, key -&gt; Lists.newArrayList())
+ 242                     .add(oneRow);
+ 243         }
+ 244     }
+ 245 
+ 246     public int getFetchSize() {
+ 247         return DEFAULT_FETCH_SIZE;
+ 248     }
+ 249 
+ 250     /**
+ 251      * get jdbc connection
+ 252      *
+ 253      * @param dbURL
+ 254      * @param userName
+ 255      * @param password
+ 256      * @return
+ 257      */
+ 258     public abstract Connection getConn(String dbURL, String userName, String password);
+ 259 
+ 260 }</pre></td>
+                            <td><pre>   1 /*
+   2  * Licensed to the Apache Software Foundation (ASF) under one
+   3  * or more contributor license agreements.  See the NOTICE file
+   4  * distributed with this work for additional information
+   5  * regarding copyright ownership.  The ASF licenses this file
+   6  * to you under the Apache License, Version 2.0 (the
+   7  * &quot;License&quot;); you may not use this file except in compliance
+   8  * with the License.  You may obtain a copy of the License at
+   9  *
+  10  *     http://www.apache.org/licenses/LICENSE-2.0
+  11  *
+  12  * Unless required by applicable law or agreed to in writing, software
+  13  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15  * See the License for the specific language governing permissions and
+  16  * limitations under the License.
+  17  */
+  18 
+  19 package com.dtstack.flink.sql.side.rdb.all;
+  20 
+  21 import org.apache.flink.api.common.typeinfo.TypeInformation;
+  22 import org.apache.flink.configuration.Configuration;
+  23 import org.apache.flink.table.runtime.types.CRow;
+  24 import org.apache.flink.table.typeutils.TimeIndicatorTypeInfo;
+  25 import org.apache.flink.types.Row;
+  26 import org.apache.flink.util.Collector;
+  27 
+  28 
+  29 import com.dtstack.flink.sql.side.BaseAllReqRow;
+  30 import com.dtstack.flink.sql.side.BaseSideInfo;
+  31 import com.dtstack.flink.sql.side.rdb.table.RdbSideTableInfo;
+  32 import com.dtstack.flink.sql.side.rdb.util.SwitchUtil;
+  33 import com.google.common.collect.Lists;
+  34 import com.google.common.collect.Maps;
+  35 import org.apache.calcite.sql.JoinType;
+  36 import org.apache.commons.collections.CollectionUtils;
+  37 import org.apache.commons.lang3.StringUtils;
+  38 import org.slf4j.Logger;
+  39 import org.slf4j.LoggerFactory;
+  40 
+  41 import java.sql.Connection;
+  42 import java.sql.ResultSet;
+  43 import java.sql.SQLException;
+  44 import java.sql.Statement;
+  45 import java.sql.Timestamp;
+  46 import java.util.*;
+  47 import java.util.Objects;
+  48 import java.util.concurrent.atomic.AtomicReference;
+  49 import java.util.stream.Collectors;
+  50 
+  51 /**
+  52  * side operator with cache for all(period reload)
+  53  * Date: 2018/11/26
+  54  * Company: www.dtstack.com
+  55  *
+  56  * @author maqi
+  57  */
+  58 
+  59 public abstract class AbstractRdbAllReqRow extends BaseAllReqRow {
+  60 
+  61     private static final long serialVersionUID = 2098635140857937718L;
+  62 
+  63     private static final Logger LOG = LoggerFactory.getLogger(AbstractRdbAllReqRow.class);
+  64 
+  65     private static final int CONN_RETRY_NUM = 3;
+  66 
+  67     private static final int DEFAULT_FETCH_SIZE = 1000;
+  68 
+  69     private AtomicReference&lt;Map&lt;String, List&lt;Map&lt;String, Object&gt;&gt;&gt;&gt; cacheRef = new AtomicReference&lt;&gt;();
+  70 
+  71     public AbstractRdbAllReqRow(BaseSideInfo sideInfo) {
+  72         super(sideInfo);
+  73     }
+  74 
+  75     @Override
+  76     public void open(Configuration parameters) throws Exception {
+  77         super.open(parameters);
+  78         RdbSideTableInfo tableInfo = (RdbSideTableInfo) sideInfo.getSideTableInfo();
+  79         LOG.info(&quot;rdb dim table config info: {} &quot;, tableInfo.toString());
+  80     }
+  81 
+  82     @Override
+  83     protected void initCache() throws SQLException {
+  84         Map&lt;String, List&lt;Map&lt;String, Object&gt;&gt;&gt; newCache = Maps.newConcurrentMap();
+  85         cacheRef.set(newCache);
+  86         loadData(newCache);
+  87     }
+  88 
+  89     @Override
+  90     protected void reloadCache() {
+  91         //reload cacheRef and replace to old cacheRef
+  92         Map&lt;String, List&lt;Map&lt;String, Object&gt;&gt;&gt; newCache = Maps.newConcurrentMap();
+  93         try {
+  94             loadData(newCache);
+  95         } catch (SQLException e) {
+  96             throw new RuntimeException(e);
+  97         }
+  98         cacheRef.set(newCache);
+  99         LOG.info(&quot;----- rdb all cacheRef reload end:{}&quot;, Calendar.getInstance());
+ 100     }
+ 101 
+ 102     @Override
+ 103     public void flatMap(CRow value, Collector&lt;CRow&gt; out) throws Exception {
+ 104         List&lt;Integer&gt; equalValIndex = sideInfo.getEqualValIndex();
+ 105         ArrayList&lt;Object&gt; inputParams = equalValIndex.stream()
+ 106                 .map(value.row()::getField)
+ 107                 .filter(Objects::nonNull)
+ 108                 .collect(Collectors.toCollection(ArrayList::new));
+ 109 
+ 110         if (inputParams.size() != equalValIndex.size() &amp;&amp; sideInfo.getJoinType() == JoinType.LEFT) {
+ 111             out.collect(new CRow(fillData(value.row(), null), value.change()));
+ 112             return;
+ 113         }
+ 114 
+ 115         String cacheKey = inputParams.stream()
+ 116                 .map(Object::toString)
+ 117                 .collect(Collectors.joining(&quot;_&quot;));
+ 118 
+ 119         List&lt;Map&lt;String, Object&gt;&gt; cacheList = cacheRef.get().get(cacheKey);
+ 120         if (CollectionUtils.isEmpty(cacheList) &amp;&amp; sideInfo.getJoinType() == JoinType.LEFT) {
+ 121             out.collect(new CRow(fillData(value.row(), null), value.change()));
+ 122             return;
+ 123         }
+ 124 
+ 125         if (CollectionUtils.isEmpty(cacheList)) {
+ 126             return;
+ 127         }
+ 128 
+ 129         cacheList.forEach(one -&gt; out.collect(new CRow(fillData(value.row(), one), value.change())));
+ 130     }
+ 131 
+ 132     @Override
+ 133     public Row fillData(Row input, Object sideInput) {
+ 134         Map&lt;String, Object&gt; cacheInfo = (Map&lt;String, Object&gt;) sideInput;
+ 135         Row row = new Row(sideInfo.getOutFieldInfoList().size());
+ 136 
+ 137         for (Map.Entry&lt;Integer, Integer&gt; entry : sideInfo.getInFieldIndex().entrySet()) {
+ 138             // origin value
+ 139             Object obj = input.getField(entry.getValue());
+<abbr title=" 140             obj = dealTimeAttributeType(sideInfo.getRowTypeInfo().getTypeAt(entry.getValue()).getClass(), obj);"> 140             obj = dealTimeAttributeType(sideInfo.getRowTypeInfo().getTypeAt(entry.getValue()).getClass(),🔵</abbr>
+ 141             row.setField(entry.getKey(), obj);
+ 142         }
+ 143 
+ 144         for (Map.Entry&lt;Integer, String&gt; entry : sideInfo.getSideFieldNameIndex().entrySet()) {
+ 145             if (cacheInfo == null) {
+ 146                 row.setField(entry.getKey(), null);
+ 147             } else {
+ 148                 row.setField(entry.getKey(), cacheInfo.get(entry.getValue()));
+ 149             }
+ 150 
+ 151         }
+ 152         return row;
+ 153     }
+ 154 
+ 155     /**
+ 156      * covert flink time attribute.Type information for indicating event or processing time.
+ 157      * However, it behaves like a regular SQL timestamp but is serialized as Long.
+ 158      *
+ 159      * @param entry
+ 160      * @param obj
+ 161      * @return
+ 162      */
+ 163     protected Object dealTimeAttributeType(Class&lt;? extends TypeInformation&gt; entry, Object obj) {
+ 164         boolean isTimeIndicatorTypeInfo = TimeIndicatorTypeInfo.class.isAssignableFrom(entry);
+ 165         if (obj instanceof Timestamp &amp;&amp; isTimeIndicatorTypeInfo) {
+ 166             //去除上一层OutputRowtimeProcessFunction 调用时区导致的影响
+ 167             obj = ((Timestamp) obj).getTime() + (long)LOCAL_TZ.getOffset(((Timestamp) obj).getTime());
+ 168         }
+ 169         return obj;
+ 170     }
+ 171 
+ 172     private void loadData(Map&lt;String, List&lt;Map&lt;String, Object&gt;&gt;&gt; tmpCache) throws SQLException {
+ 173         RdbSideTableInfo tableInfo = (RdbSideTableInfo) sideInfo.getSideTableInfo();
+ 174         Connection connection = null;
+ 175 
+ 176         try {
+ 177             for (int i = 0; i &lt; CONN_RETRY_NUM; i++) {
+ 178                 try {
+<abbr title=" 179                     connection = getConn(tableInfo.getUrl(), tableInfo.getUserName(), tableInfo.getPassword());"> 179                     connection = getConn(tableInfo.getUrl(), tableInfo.getUserName(), tableInfo.getPasswo🔵</abbr>
+ 180                     break;
+ 181                 } catch (Exception e) {
+ 182                     if (i == CONN_RETRY_NUM - 1) {
+ 183                         throw new RuntimeException(&quot;&quot;, e);
+ 184                     }
+ 185                     try {
+<abbr title=" 186                         String connInfo = &quot;url:&quot; + tableInfo.getUrl() + &quot;;userName:&quot; + tableInfo.getUserName() + &quot;,pwd:&quot; + tableInfo.getPassword();"> 186                         String connInfo = &quot;url:&quot; + tableInfo.getUrl() + &quot;;userName:&quot; + tableInfo.getUserN🔵</abbr>
+ 187                         LOG.warn(&quot;get conn fail, wait for 5 sec and try again, connInfo:&quot; + connInfo);
+ 188                         Thread.sleep(5 * 1000);
+ 189                     } catch (InterruptedException e1) {
+ 190                         LOG.error(&quot;&quot;, e1);
+ 191                     }
+ 192                 }
+ 193             }
+ 194             queryAndFillData(tmpCache, connection);
+ 195         } catch (Exception e) {
+ 196             LOG.error(&quot;&quot;, e);
+ 197             throw new SQLException(e);
+ 198         } finally {
+ 199             if (connection != null) {
+ 200                 connection.close();
+ 201             }
+ 202         }
+ 203     }
+ 204 
+<abbr title=" 205     private void queryAndFillData(Map&lt;String, List&lt;Map&lt;String, Object&gt;&gt;&gt; tmpCache, Connection connection) throws SQLException {"> 205     private void queryAndFillData(Map&lt;String, List&lt;Map&lt;String, Object&gt;&gt;&gt; tmpCache, Connection connection)🔵</abbr>
+ 206         //load data from table
+ 207         String sql = sideInfo.getSqlCondition();
+ 208         Statement statement = connection.createStatement();
+ 209         statement.setFetchSize(getFetchSize());
+ 210         ResultSet resultSet = statement.executeQuery(sql);
+ 211 
+ 212         String[] sideFieldNames = StringUtils.split(sideInfo.getSideSelectFields(), &quot;,&quot;);
+ 213         String[] fields = sideInfo.getSideTableInfo().getFieldTypes();
+ 214         while (resultSet.next()) {
+ 215             Map&lt;String, Object&gt; oneRow = Maps.newHashMap();
+ 216             for (String fieldName : sideFieldNames) {
+ 217                 Object object = resultSet.getObject(fieldName.trim());
+ 218                 int fieldIndex = sideInfo.getSideTableInfo().getFieldList().indexOf(fieldName.trim());
+ 219                 object = SwitchUtil.getTarget(object, fields[fieldIndex]);
+ 220                 oneRow.put(fieldName.trim(), object);
+ 221             }
+ 222 
+ 223             String cacheKey = sideInfo.getEqualFieldList().stream()
+ 224                     .map(oneRow::get)
+ 225                     .map(Object::toString)
+ 226                     .collect(Collectors.joining(&quot;_&quot;));
+ 227 
+ 228             tmpCache.computeIfAbsent(cacheKey, key -&gt; Lists.newArrayList())
+ 229                     .add(oneRow);
+ 230         }
+ 231     }
+ 232 
+ 233     public int getFetchSize() {
+ 234         return DEFAULT_FETCH_SIZE;
+ 235     }
+ 236 
+ 237     /**
+ 238      * get jdbc connection
+ 239      *
+ 240      * @param dbURL
+ 241      * @param userName
+ 242      * @param password
+ 243      * @return
+ 244      */
+ 245     public abstract Connection getConn(String dbURL, String userName, String password);
+ 246 
+ 247 }
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ </pre></td>
+                            <td><pre>   1 /*
+   2  * Licensed to the Apache Software Foundation (ASF) under one
+   3  * or more contributor license agreements.  See the NOTICE file
+   4  * distributed with this work for additional information
+   5  * regarding copyright ownership.  The ASF licenses this file
+   6  * to you under the Apache License, Version 2.0 (the
+   7  * &quot;License&quot;); you may not use this file except in compliance
+   8  * with the License.  You may obtain a copy of the License at
+   9  *
+  10  *     http://www.apache.org/licenses/LICENSE-2.0
+  11  *
+  12  * Unless required by applicable law or agreed to in writing, software
+  13  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15  * See the License for the specific language governing permissions and
+  16  * limitations under the License.
+  17  */
+  18 package com.dtstack.flink.sql.side.rdb.all;
+  19 
+  20 import com.dtstack.flink.sql.side.BaseAllReqRow;
+  21 import com.dtstack.flink.sql.side.BaseSideInfo;
+  22 import com.dtstack.flink.sql.side.rdb.table.RdbSideTableInfo;
+  23 import com.dtstack.flink.sql.side.rdb.util.SwitchUtil;
+  24 import com.google.common.collect.Lists;
+  25 import com.google.common.collect.Maps;
+  26 import java.sql.Connection;
+  27 import java.sql.ResultSet;
+  28 import java.sql.SQLException;
+  29 import java.sql.Statement;
+  30 import java.sql.Timestamp;
+  31 import java.util.*;
+  32 import java.util.Objects;
+  33 import java.util.concurrent.atomic.AtomicReference;
+  34 import java.util.stream.Collectors;
+  35 import org.apache.calcite.sql.JoinType;
+  36 import org.apache.commons.collections.CollectionUtils;
+  37 import org.apache.commons.lang3.StringUtils;
+  38 import org.apache.flink.api.common.typeinfo.TypeInformation;
+  39 import org.apache.flink.configuration.Configuration;
+  40 import org.apache.flink.table.runtime.types.CRow;
+  41 import org.apache.flink.table.typeutils.TimeIndicatorTypeInfo;
+  42 import org.apache.flink.types.Row;
+  43 import org.apache.flink.util.Collector;
+  44 import org.slf4j.Logger;
+  45 import org.slf4j.LoggerFactory;
+  46 
+  47 
+  48 /**
+  49  * side operator with cache for all(period reload)
+  50  * Date: 2018/11/26
+  51  * Company: www.dtstack.com
+  52  *
+  53  * @author maqi
+  54  */
+  55 public abstract class AbstractRdbAllReqRow extends BaseAllReqRow {
+  56     private static final long serialVersionUID = 2098635140857937718L;
+  57 
+  58     private static final Logger LOG = LoggerFactory.getLogger(AbstractRdbAllReqRow.class);
+  59 
+  60     private static final int CONN_RETRY_NUM = 3;
+  61 
+  62     private static final int DEFAULT_FETCH_SIZE = 1000;
+  63 
+  64     private AtomicReference&lt;Map&lt;String, List&lt;Map&lt;String, Object&gt;&gt;&gt;&gt; cacheRef = new AtomicReference&lt;&gt;();
+  65 
+  66     public AbstractRdbAllReqRow(BaseSideInfo sideInfo) {
+  67         super(sideInfo);
+  68     }
+  69 
+  70     @Override
+  71     public void open(Configuration parameters) throws Exception {
+  72         super.open(parameters);
+  73         RdbSideTableInfo tableInfo = ((RdbSideTableInfo) (sideInfo.getSideTableInfo()));
+  74         LOG.info(&quot;rdb dim table config info: {} &quot;, tableInfo.toString());
+  75     }
+  76 
+  77     @Override
+  78     protected void initCache() throws SQLException {
+  79         Map&lt;String, List&lt;Map&lt;String, Object&gt;&gt;&gt; newCache = Maps.newConcurrentMap();
+  80         cacheRef.set(newCache);
+  81         loadData(newCache);
+  82     }
+  83 
+  84     @Override
+  85     protected void reloadCache() {
+  86         // reload cacheRef and replace to old cacheRef
+  87         Map&lt;String, List&lt;Map&lt;String, Object&gt;&gt;&gt; newCache = Maps.newConcurrentMap();
+  88         try {
+  89             loadData(newCache);
+  90         } catch (SQLException e) {
+  91             throw new RuntimeException(e);
+  92         }
+  93         cacheRef.set(newCache);
+  94         LOG.info(&quot;----- rdb all cacheRef reload end:{}&quot;, Calendar.getInstance());
+  95     }
+  96 
+  97     @Override
+  98     public void flatMap(CRow value, Collector&lt;CRow&gt; out) throws Exception {
+  99         List&lt;Integer&gt; equalValIndex = sideInfo.getEqualValIndex();
+<abbr title=" 100         ArrayList&lt;Object&gt; inputParams = equalValIndex.stream().map(value.row()::getField).filter(Objects::nonNull).collect(Collectors.toCollection(ArrayList::new));"> 100         ArrayList&lt;Object&gt; inputParams = equalValIndex.stream().map(value.row()::getField).filter(Objects:🔵</abbr>
+ 101         if ((inputParams.size() != equalValIndex.size()) &amp;&amp; (sideInfo.getJoinType() == JoinType.LEFT)) {
+ 102             out.collect(new CRow(fillData(value.row(), null), value.change()));
+ 103             return;
+ 104         }
+ 105         String cacheKey = inputParams.stream().map(Object::toString).collect(Collectors.joining(&quot;_&quot;));
+ 106         List&lt;Map&lt;String, Object&gt;&gt; cacheList = cacheRef.get().get(cacheKey);
+ 107         if (CollectionUtils.isEmpty(cacheList) &amp;&amp; (sideInfo.getJoinType() == JoinType.LEFT)) {
+ 108             out.collect(new CRow(fillData(value.row(), null), value.change()));
+ 109             return;
+ 110         }
+ 111         if (CollectionUtils.isEmpty(cacheList)) {
+ 112             return;
+ 113         }
+ 114         cacheList.forEach(( one) -&gt; out.collect(new CRow(fillData(value.row(), one), value.change())));
+ 115     }
+ 116 
+ 117     @Override
+ 118     public Row fillData(Row input, Object sideInput) {
+ 119         Map&lt;String, Object&gt; cacheInfo = ((Map&lt;String, Object&gt;) (sideInput));
+ 120         Row row = new Row(sideInfo.getOutFieldInfoList().size());
+ 121         for (Map.Entry&lt;Integer, Integer&gt; entry : sideInfo.getInFieldIndex().entrySet()) {
+ 122             // origin value
+ 123             Object obj = input.getField(entry.getValue());
+<abbr title=" 124             obj = dealTimeAttributeType(sideInfo.getRowTypeInfo().getTypeAt(entry.getValue()).getClass(), obj);"> 124             obj = dealTimeAttributeType(sideInfo.getRowTypeInfo().getTypeAt(entry.getValue()).getClass(),🔵</abbr>
+ 125             row.setField(entry.getKey(), obj);
+ 126         }
+ 127         for (Map.Entry&lt;Integer, String&gt; entry : sideInfo.getSideFieldNameIndex().entrySet()) {
+ 128             if (cacheInfo == null) {
+ 129                 row.setField(entry.getKey(), null);
+ 130             } else {
+ 131                 row.setField(entry.getKey(), cacheInfo.get(entry.getValue()));
+ 132             }
+ 133         }
+ 134         return row;
+ 135     }
+ 136 
+ 137     /**
+ 138      * covert flink time attribute.Type information for indicating event or processing time.
+ 139      * However, it behaves like a regular SQL timestamp but is serialized as Long.
+ 140      *
+ 141      * @param entry
+ 142      * @param obj
+ 143      * @return
+ 144      */
+ 145     protected Object dealTimeAttributeType(Class&lt;? extends TypeInformation&gt; entry, Object obj) {
+ 146         boolean isTimeIndicatorTypeInfo = TimeIndicatorTypeInfo.class.isAssignableFrom(entry);
+ 147         if ((obj instanceof Timestamp) &amp;&amp; isTimeIndicatorTypeInfo) {
+ 148             //去除上一层OutputRowtimeProcessFunction 调用时区导致的影响
+<abbr title=" 149             obj = ((Timestamp) (obj)).getTime() + ((long) (LOCAL_TZ.getOffset(((Timestamp) (obj)).getTime())));"> 149             obj = ((Timestamp) (obj)).getTime() + ((long) (LOCAL_TZ.getOffset(((Timestamp) (obj)).getTime🔵</abbr>
+ 150         }
+ 151         return obj;
+ 152     }
+ 153 
+ 154     private void loadData(Map&lt;String, List&lt;Map&lt;String, Object&gt;&gt;&gt; tmpCache) throws SQLException {
+ 155         RdbSideTableInfo tableInfo = ((RdbSideTableInfo) (sideInfo.getSideTableInfo()));
+ 156         Connection connection = null;
+ 157         try {
+ 158             for (int i = 0; i &lt; CONN_RETRY_NUM; i++) {
+ 159                 try {
+<abbr title=" 160                     connection = getConn(tableInfo.getUrl(), tableInfo.getUserName(), tableInfo.getPassword());"> 160                     connection = getConn(tableInfo.getUrl(), tableInfo.getUserName(), tableInfo.getPasswo🔵</abbr>
+ 161                     break;
+ 162                 } catch (java.lang.Exception e) {
+ 163                     if (i == (CONN_RETRY_NUM - 1)) {
+ 164                         throw new RuntimeException(&quot;&quot;, e);
+ 165                     }
+ 166                     try {
+<abbr title=" 167                         String connInfo = ((((&quot;url:&quot; + tableInfo.getUrl()) + &quot;;userName:&quot;) + tableInfo.getUserName()) + &quot;,pwd:&quot;) + tableInfo.getPassword();"> 167                         String connInfo = ((((&quot;url:&quot; + tableInfo.getUrl()) + &quot;;userName:&quot;) + tableInfo.ge🔵</abbr>
+ 168                         LOG.warn(&quot;get conn fail, wait for 5 sec and try again, connInfo:&quot; + connInfo);
+ 169                         Thread.sleep(5 * 1000);
+ 170                     } catch (java.lang.InterruptedException e1) {
+ 171                         LOG.error(&quot;&quot;, e1);
+ 172                     }
+ 173                 }
+ 174             }
+ 175             queryAndFillData(tmpCache, connection);
+ 176         } catch (java.lang.Exception e) {
+ 177             LOG.error(&quot;&quot;, e);
+ 178             throw new SQLException(e);
+ 179         } finally {
+ 180             if (connection != null) {
+ 181                 connection.close();
+ 182             }
+ 183         }
+ 184     }
+ 185 
+<abbr title=" 186     private void queryAndFillData(Map&lt;String, List&lt;Map&lt;String, Object&gt;&gt;&gt; tmpCache, Connection connection) throws SQLException {"> 186     private void queryAndFillData(Map&lt;String, List&lt;Map&lt;String, Object&gt;&gt;&gt; tmpCache, Connection connection)🔵</abbr>
+ 187         //load data from table
+ 188         String sql = sideInfo.getSqlCondition();
+ 189         Statement statement = connection.createStatement();
+ 190         statement.setFetchSize(getFetchSize());
+ 191         ResultSet resultSet = statement.executeQuery(sql);
+ 192         String[] sideFieldNames = StringUtils.split(sideInfo.getSideSelectFields(), &quot;,&quot;);
+ 193         String[] fields = sideInfo.getSideTableInfo().getFieldTypes();
+ 194         while (resultSet.next()) {
+ 195             Map&lt;String, Object&gt; oneRow = Maps.newHashMap();
+ 196             for (String fieldName : sideFieldNames) {
+ 197                 Object object = resultSet.getObject(fieldName.trim());
+ 198                 int fieldIndex = sideInfo.getSideTableInfo().getFieldList().indexOf(fieldName.trim());
+ 199                 object = SwitchUtil.getTarget(object, fields[fieldIndex]);
+ 200                 oneRow.put(fieldName.trim(), object);
+ 201             }
+<abbr title=" 202             String cacheKey = sideInfo.getEqualFieldList().stream().map(oneRow::get).map(Object::toString).collect(Collectors.joining(&quot;_&quot;));"> 202             String cacheKey = sideInfo.getEqualFieldList().stream().map(oneRow::get).map(Object::toString🔵</abbr>
+ 203             tmpCache.computeIfAbsent(cacheKey, ( key) -&gt; Lists.newArrayList()).add(oneRow);
+ 204         }
+ 205     }
+ 206 
+ 207     public int getFetchSize() {
+ 208         return DEFAULT_FETCH_SIZE;
+ 209     }
+ 210 
+ 211     /**
+ 212      * get jdbc connection
+ 213      *
+ 214      * @param dbURL
+ 215      * @param userName
+ 216      * @param password
+ 217      * @return
+ 218      */
+ 219     public abstract Connection getConn(String dbURL, String userName, String password);
+ 220 }
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ </pre></td>
+                        </tr>
+                    </table>
+                </div>
+                <div id="bottom">
+                    <table style="margin:auto">
+                        <tr>
+                            <th>ours vs. base</th>
+                            <th>theirs vs. base</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1  /*
+   2   * Licensed to the Apache Software Foundation (ASF) under one
+   3   * or more contributor license agreements.  See the NOTICE file
+   4   * distributed with this work for additional information
+   5   * regarding copyright ownership.  The ASF licenses this file
+   6   * to you under the Apache License, Version 2.0 (the
+   7   * &quot;License&quot;); you may not use this file except in compliance
+   8   * with the License.  You may obtain a copy of the License at
+   9   *
+  10   *     http://www.apache.org/licenses/LICENSE-2.0
+  11   *
+  12   * Unless required by applicable law or agreed to in writing, software
+  13   * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15   * See the License for the specific language governing permissions and
+  16   * limitations under the License.
+  17   */
+  18  
+  19  package com.dtstack.flink.sql.side.rdb.all;
+  20  
+  21  import org.apache.flink.api.common.typeinfo.TypeInformation;
+  22  import org.apache.flink.configuration.Configuration;
+  23  import org.apache.flink.table.runtime.types.CRow;
+  24  import org.apache.flink.table.typeutils.TimeIndicatorTypeInfo;
+  25  import org.apache.flink.types.Row;
+  26  import org.apache.flink.util.Collector;
+  27  
+  28  
+  29  import com.dtstack.flink.sql.side.BaseAllReqRow;
+  30  import com.dtstack.flink.sql.side.BaseSideInfo;
+  31  import com.dtstack.flink.sql.side.rdb.table.RdbSideTableInfo;
+  32  import com.dtstack.flink.sql.side.rdb.util.SwitchUtil;
+  33  import com.google.common.collect.Lists;
+  34  import com.google.common.collect.Maps;
+  35  import org.apache.calcite.sql.JoinType;
+  36  import org.apache.commons.collections.CollectionUtils;
+  37  import org.apache.commons.lang3.StringUtils;
+  38  import org.slf4j.Logger;
+  39  import org.slf4j.LoggerFactory;
+  40  
+  41  import java.sql.Connection;
+  42  import java.sql.ResultSet;
+  43  import java.sql.SQLException;
+  44  import java.sql.Statement;
+  45  import java.sql.Timestamp;
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  46 -import java.util.ArrayList;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  47 -import java.util.Calendar;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  48 -import java.util.List;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  49 -import java.util.Map;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  50 +import java.util.*;</span>
+
+  51  import java.util.concurrent.atomic.AtomicReference;
+  52  import java.util.stream.Collectors;
+  53  
+  54  /**
+  55   * side operator with cache for all(period reload)
+  56   * Date: 2018/11/26
+  57   * Company: www.dtstack.com
+  58   *
+  59   * @author maqi
+  60   */
+  61  
+  62  public abstract class AbstractRdbAllReqRow extends BaseAllReqRow {
+  63  
+  64      private static final long serialVersionUID = 2098635140857937718L;
+  65  
+  66      private static final Logger LOG = LoggerFactory.getLogger(AbstractRdbAllReqRow.class);
+  67  
+  68      private static final int CONN_RETRY_NUM = 3;
+  69  
+  70      private static final int DEFAULT_FETCH_SIZE = 1000;
+  71  
+  72      private AtomicReference&lt;Map&lt;String, List&lt;Map&lt;String, Object&gt;&gt;&gt;&gt; cacheRef = new AtomicReference&lt;&gt;();
+  73  
+  74      public AbstractRdbAllReqRow(BaseSideInfo sideInfo) {
+  75          super(sideInfo);
+  76      }
+  77  
+  78      @Override
+  79      public void open(Configuration parameters) throws Exception {
+  80          super.open(parameters);
+  81          RdbSideTableInfo tableInfo = (RdbSideTableInfo) sideInfo.getSideTableInfo();
+  82          LOG.info(&quot;rdb dim table config info: {} &quot;, tableInfo.toString());
+  83      }
+  84  
+  85      @Override
+  86      protected void initCache() throws SQLException {
+  87          Map&lt;String, List&lt;Map&lt;String, Object&gt;&gt;&gt; newCache = Maps.newConcurrentMap();
+  88          cacheRef.set(newCache);
+  89          loadData(newCache);
+  90      }
+  91  
+  92      @Override
+  93      protected void reloadCache() {
+  94          //reload cacheRef and replace to old cacheRef
+  95          Map&lt;String, List&lt;Map&lt;String, Object&gt;&gt;&gt; newCache = Maps.newConcurrentMap();
+  96          cacheRef.set(newCache);
+  97          try {
+  98              loadData(newCache);
+  99          } catch (SQLException e) {
+ 100              throw new RuntimeException(e);
+ 101          }
+ 102          cacheRef.set(newCache);
+ 103          LOG.info(&quot;----- rdb all cacheRef reload end:{}&quot;, Calendar.getInstance());
+ 104      }
+ 105  
+ 106      @Override
+ 107      public void flatMap(CRow value, Collector&lt;CRow&gt; out) throws Exception {
+ 108          List&lt;Integer&gt; equalValIndex = sideInfo.getEqualValIndex();
+ 109          ArrayList&lt;Object&gt; inputParams = equalValIndex.stream()
+ 110                  .map(value.row()::getField)
+ 111                  .filter(object -&gt; null != object)
+
+ 112                  .collect(Collectors.toCollection(ArrayList::new));
+ 113  
+ 114          if (inputParams.size() != equalValIndex.size() &amp;&amp; sideInfo.getJoinType() == JoinType.LEFT) {
+ 115              out.collect(new CRow(fillData(value.row(), null), value.change()));
+ 116              return;
+ 117          }
+ 118  
+ 119          String cacheKey = inputParams.stream()
+ 120                  .map(Object::toString)
+ 121                  .collect(Collectors.joining(&quot;_&quot;));
+ 122  
+ 123          List&lt;Map&lt;String, Object&gt;&gt; cacheList = cacheRef.get().get(cacheKey);
+ 124          if (CollectionUtils.isEmpty(cacheList) &amp;&amp; sideInfo.getJoinType() == JoinType.LEFT) {
+ 125              out.collect(new CRow(fillData(value.row(), null), value.change()));
+ 126          } else if (!CollectionUtils.isEmpty(cacheList)) {
+ 127              cacheList.forEach(one -&gt; out.collect(new CRow(fillData(value.row(), one), value.change())));
+ 128          }
+
+
+
+
+
+
+
+
+ 129      }
+ 130  
+ 131      @Override
+ 132      public Row fillData(Row input, Object sideInput) {
+ 133          Map&lt;String, Object&gt; cacheInfo = (Map&lt;String, Object&gt;) sideInput;
+ 134          Row row = new Row(sideInfo.getOutFieldInfoList().size());
+ 135  
+ 136          for (Map.Entry&lt;Integer, Integer&gt; entry : sideInfo.getInFieldIndex().entrySet()) {
+ 137              // origin value
+ 138              Object obj = input.getField(entry.getValue());
+ 139              obj = dealTimeAttributeType(sideInfo.getRowTypeInfo().getTypeAt(entry.getValue()).getClass(), obj);
+ 140              row.setField(entry.getKey(), obj);
+ 141          }
+ 142  
+ 143          for (Map.Entry&lt;Integer, String&gt; entry : sideInfo.getSideFieldNameIndex().entrySet()) {
+ 144              if (cacheInfo == null) {
+ 145                  row.setField(entry.getKey(), null);
+ 146              } else {
+ 147                  row.setField(entry.getKey(), cacheInfo.get(entry.getValue()));
+ 148              }
+ 149  
+ 150          }
+ 151          return row;
+ 152      }
+ 153  
+ 154      /**
+ 155       * covert flink time attribute.Type information for indicating event or processing time.
+ 156       * However, it behaves like a regular SQL timestamp but is serialized as Long.
+ 157       *
+ 158       * @param entry
+ 159       * @param obj
+ 160       * @return
+ 161       */
+ 162      protected Object dealTimeAttributeType(Class&lt;? extends TypeInformation&gt; entry, Object obj) {
+ 163          boolean isTimeIndicatorTypeInfo = TimeIndicatorTypeInfo.class.isAssignableFrom(entry);
+ 164          if (obj instanceof Timestamp &amp;&amp; isTimeIndicatorTypeInfo) {
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 165 -            obj = ((Timestamp) obj).getTime();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 166 +            //去除上一层OutputRowtimeProcessFunction 调用时区导致的影响</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 167 +            obj = ((Timestamp) obj).getTime() + (long)LOCAL_TZ.getOffset(((Timestamp) obj).getTime());</span>
+ 168          }
+ 169          return obj;
+ 170      }
+ 171  
+ 172      private void loadData(Map&lt;String, List&lt;Map&lt;String, Object&gt;&gt;&gt; tmpCache) throws SQLException {
+ 173          RdbSideTableInfo tableInfo = (RdbSideTableInfo) sideInfo.getSideTableInfo();
+ 174          Connection connection = null;
+ 175  
+ 176          try {
+ 177              for (int i = 0; i &lt; CONN_RETRY_NUM; i++) {
+ 178                  try {
+ 179                      connection = getConn(tableInfo.getUrl(), tableInfo.getUserName(), tableInfo.getPassword());
+ 180                      break;
+ 181                  } catch (Exception e) {
+ 182                      if (i == CONN_RETRY_NUM - 1) {
+ 183                          throw new RuntimeException(&quot;&quot;, e);
+ 184                      }
+ 185                      try {
+<abbr title=" 186                          String connInfo = &quot;url:&quot; + tableInfo.getUrl() + &quot;;userName:&quot; + tableInfo.getUserName() + &quot;,pwd:&quot; + tableInfo.getPassword();"> 186                          String connInfo = &quot;url:&quot; + tableInfo.getUrl() + &quot;;userName:&quot; + tableInfo.getUserName() + &quot;🔵</abbr>
+ 187                          LOG.warn(&quot;get conn fail, wait for 5 sec and try again, connInfo:&quot; + connInfo);
+ 188                          Thread.sleep(5 * 1000);
+ 189                      } catch (InterruptedException e1) {
+ 190                          LOG.error(&quot;&quot;, e1);
+ 191                      }
+ 192                  }
+ 193              }
+ 194              queryAndFillData(tmpCache, connection);
+ 195          } catch (Exception e) {
+ 196              LOG.error(&quot;&quot;, e);
+ 197              throw new SQLException(e);
+ 198          } finally {
+ 199              if (connection != null) {
+ 200                  connection.close();
+ 201              }
+ 202          }
+ 203      }
+ 204  
+<abbr title=" 205      private void queryAndFillData(Map&lt;String, List&lt;Map&lt;String, Object&gt;&gt;&gt; tmpCache, Connection connection) throws SQLException {"> 205      private void queryAndFillData(Map&lt;String, List&lt;Map&lt;String, Object&gt;&gt;&gt; tmpCache, Connection connection) throws S🔵</abbr>
+ 206          //load data from table
+ 207          String sql = sideInfo.getSqlCondition();
+ 208          Statement statement = connection.createStatement();
+ 209          statement.setFetchSize(getFetchSize());
+ 210          ResultSet resultSet = statement.executeQuery(sql);
+ 211  
+ 212          String[] sideFieldNames = StringUtils.split(sideInfo.getSideSelectFields(), &quot;,&quot;);
+ 213          String[] fields = sideInfo.getSideTableInfo().getFieldTypes();
+ 214          while (resultSet.next()) {
+ 215              Map&lt;String, Object&gt; oneRow = Maps.newHashMap();
+ 216              for (String fieldName : sideFieldNames) {
+ 217                  Object object = resultSet.getObject(fieldName.trim());
+ 218                  int fieldIndex = sideInfo.getSideTableInfo().getFieldList().indexOf(fieldName.trim());
+ 219                  object = SwitchUtil.getTarget(object, fields[fieldIndex]);
+ 220                  oneRow.put(fieldName.trim(), object);
+ 221              }
+ 222  
+ 223              String cacheKey = sideInfo.getEqualFieldList().stream()
+ 224                      .map(equalField -&gt; oneRow.get(equalField))
+
+ 225                      .map(Object::toString)
+ 226                      .collect(Collectors.joining(&quot;_&quot;));
+ 227  
+ 228              tmpCache.computeIfAbsent(cacheKey, key -&gt; Lists.newArrayList())
+ 229                      .add(oneRow);
+ 230          }
+ 231      }
+ 232  
+ 233      public int getFetchSize() {
+ 234          return DEFAULT_FETCH_SIZE;
+ 235      }
+ 236  
+ 237      /**
+ 238       * get jdbc connection
+ 239       *
+ 240       * @param dbURL
+ 241       * @param userName
+ 242       * @param password
+ 243       * @return
+ 244       */
+ 245      public abstract Connection getConn(String dbURL, String userName, String password);
+ 246  
+ 247  }</pre></td>
+                            <td><pre>   1  /*
+   2   * Licensed to the Apache Software Foundation (ASF) under one
+   3   * or more contributor license agreements.  See the NOTICE file
+   4   * distributed with this work for additional information
+   5   * regarding copyright ownership.  The ASF licenses this file
+   6   * to you under the Apache License, Version 2.0 (the
+   7   * &quot;License&quot;); you may not use this file except in compliance
+   8   * with the License.  You may obtain a copy of the License at
+   9   *
+  10   *     http://www.apache.org/licenses/LICENSE-2.0
+  11   *
+  12   * Unless required by applicable law or agreed to in writing, software
+  13   * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15   * See the License for the specific language governing permissions and
+  16   * limitations under the License.
+  17   */
+  18  
+  19  package com.dtstack.flink.sql.side.rdb.all;
+  20  
+  21  import org.apache.flink.api.common.typeinfo.TypeInformation;
+  22  import org.apache.flink.configuration.Configuration;
+  23  import org.apache.flink.table.runtime.types.CRow;
+  24  import org.apache.flink.table.typeutils.TimeIndicatorTypeInfo;
+  25  import org.apache.flink.types.Row;
+  26  import org.apache.flink.util.Collector;
+  27  
+  28  
+  29  import com.dtstack.flink.sql.side.BaseAllReqRow;
+  30  import com.dtstack.flink.sql.side.BaseSideInfo;
+  31  import com.dtstack.flink.sql.side.rdb.table.RdbSideTableInfo;
+  32  import com.dtstack.flink.sql.side.rdb.util.SwitchUtil;
+  33  import com.google.common.collect.Lists;
+  34  import com.google.common.collect.Maps;
+  35  import org.apache.calcite.sql.JoinType;
+  36  import org.apache.commons.collections.CollectionUtils;
+  37  import org.apache.commons.lang3.StringUtils;
+  38  import org.slf4j.Logger;
+  39  import org.slf4j.LoggerFactory;
+  40  
+  41  import java.sql.Connection;
+  42  import java.sql.ResultSet;
+  43  import java.sql.SQLException;
+  44  import java.sql.Statement;
+  45  import java.sql.Timestamp;
+  46  import java.util.ArrayList;
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  47 -import java.util.Calendar;</span>
+  48  import java.util.List;
+  49  import java.util.Map;
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  50 +import java.util.Objects;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  51 +import java.util.Calendar;</span>
+  52  import java.util.concurrent.atomic.AtomicReference;
+  53  import java.util.stream.Collectors;
+  54  
+  55  /**
+  56   * side operator with cache for all(period reload)
+  57   * Date: 2018/11/26
+  58   * Company: www.dtstack.com
+  59   *
+  60   * @author maqi
+  61   */
+  62  
+  63  public abstract class AbstractRdbAllReqRow extends BaseAllReqRow {
+  64  
+  65      private static final long serialVersionUID = 2098635140857937718L;
+  66  
+  67      private static final Logger LOG = LoggerFactory.getLogger(AbstractRdbAllReqRow.class);
+  68  
+  69      private static final int CONN_RETRY_NUM = 3;
+  70  
+  71      private static final int DEFAULT_FETCH_SIZE = 1000;
+  72  
+  73      private AtomicReference&lt;Map&lt;String, List&lt;Map&lt;String, Object&gt;&gt;&gt;&gt; cacheRef = new AtomicReference&lt;&gt;();
+  74  
+  75      public AbstractRdbAllReqRow(BaseSideInfo sideInfo) {
+  76          super(sideInfo);
+  77      }
+  78  
+  79      @Override
+  80      public void open(Configuration parameters) throws Exception {
+  81          super.open(parameters);
+  82          RdbSideTableInfo tableInfo = (RdbSideTableInfo) sideInfo.getSideTableInfo();
+  83          LOG.info(&quot;rdb dim table config info: {} &quot;, tableInfo.toString());
+  84      }
+  85  
+  86      @Override
+  87      protected void initCache() throws SQLException {
+  88          Map&lt;String, List&lt;Map&lt;String, Object&gt;&gt;&gt; newCache = Maps.newConcurrentMap();
+  89          cacheRef.set(newCache);
+  90          loadData(newCache);
+  91      }
+  92  
+  93      @Override
+  94      protected void reloadCache() {
+  95          //reload cacheRef and replace to old cacheRef
+  96          Map&lt;String, List&lt;Map&lt;String, Object&gt;&gt;&gt; newCache = Maps.newConcurrentMap();
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  97 -        cacheRef.set(newCache);</span>
+  98          try {
+  99              loadData(newCache);
+ 100          } catch (SQLException e) {
+ 101              throw new RuntimeException(e);
+ 102          }
+ 103          cacheRef.set(newCache);
+ 104          LOG.info(&quot;----- rdb all cacheRef reload end:{}&quot;, Calendar.getInstance());
+ 105      }
+ 106  
+ 107      @Override
+ 108      public void flatMap(CRow value, Collector&lt;CRow&gt; out) throws Exception {
+ 109          List&lt;Integer&gt; equalValIndex = sideInfo.getEqualValIndex();
+ 110          ArrayList&lt;Object&gt; inputParams = equalValIndex.stream()
+ 111                  .map(value.row()::getField)
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 112 -                .filter(object -&gt; null != object)</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 113 +                .filter(Objects::nonNull)</span>
+ 114                  .collect(Collectors.toCollection(ArrayList::new));
+ 115  
+ 116          if (inputParams.size() != equalValIndex.size() &amp;&amp; sideInfo.getJoinType() == JoinType.LEFT) {
+ 117              out.collect(new CRow(fillData(value.row(), null), value.change()));
+ 118              return;
+ 119          }
+ 120  
+ 121          String cacheKey = inputParams.stream()
+ 122                  .map(Object::toString)
+ 123                  .collect(Collectors.joining(&quot;_&quot;));
+ 124  
+ 125          List&lt;Map&lt;String, Object&gt;&gt; cacheList = cacheRef.get().get(cacheKey);
+ 126          if (CollectionUtils.isEmpty(cacheList) &amp;&amp; sideInfo.getJoinType() == JoinType.LEFT) {
+ 127              out.collect(new CRow(fillData(value.row(), null), value.change()));
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 128 -        } else if (!CollectionUtils.isEmpty(cacheList)) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 129 -            cacheList.forEach(one -&gt; out.collect(new CRow(fillData(value.row(), one), value.change())));</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 130 -        }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 131 +            return;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 132 +        }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 133 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 134 +        if (CollectionUtils.isEmpty(cacheList)) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 135 +            return;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 136 +        }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 137 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 138 +        cacheList.forEach(one -&gt; out.collect(new CRow(fillData(value.row(), one), value.change())));</span>
+ 139      }
+ 140  
+ 141      @Override
+ 142      public Row fillData(Row input, Object sideInput) {
+ 143          Map&lt;String, Object&gt; cacheInfo = (Map&lt;String, Object&gt;) sideInput;
+ 144          Row row = new Row(sideInfo.getOutFieldInfoList().size());
+ 145  
+ 146          for (Map.Entry&lt;Integer, Integer&gt; entry : sideInfo.getInFieldIndex().entrySet()) {
+ 147              // origin value
+ 148              Object obj = input.getField(entry.getValue());
+ 149              obj = dealTimeAttributeType(sideInfo.getRowTypeInfo().getTypeAt(entry.getValue()).getClass(), obj);
+ 150              row.setField(entry.getKey(), obj);
+ 151          }
+ 152  
+ 153          for (Map.Entry&lt;Integer, String&gt; entry : sideInfo.getSideFieldNameIndex().entrySet()) {
+ 154              if (cacheInfo == null) {
+ 155                  row.setField(entry.getKey(), null);
+ 156              } else {
+ 157                  row.setField(entry.getKey(), cacheInfo.get(entry.getValue()));
+ 158              }
+ 159  
+ 160          }
+ 161          return row;
+ 162      }
+ 163  
+ 164      /**
+ 165       * covert flink time attribute.Type information for indicating event or processing time.
+ 166       * However, it behaves like a regular SQL timestamp but is serialized as Long.
+ 167       *
+ 168       * @param entry
+ 169       * @param obj
+ 170       * @return
+ 171       */
+ 172      protected Object dealTimeAttributeType(Class&lt;? extends TypeInformation&gt; entry, Object obj) {
+ 173          boolean isTimeIndicatorTypeInfo = TimeIndicatorTypeInfo.class.isAssignableFrom(entry);
+ 174          if (obj instanceof Timestamp &amp;&amp; isTimeIndicatorTypeInfo) {
+ 175              obj = ((Timestamp) obj).getTime();
+
+
+ 176          }
+ 177          return obj;
+ 178      }
+ 179  
+ 180      private void loadData(Map&lt;String, List&lt;Map&lt;String, Object&gt;&gt;&gt; tmpCache) throws SQLException {
+ 181          RdbSideTableInfo tableInfo = (RdbSideTableInfo) sideInfo.getSideTableInfo();
+ 182          Connection connection = null;
+ 183  
+ 184          try {
+ 185              for (int i = 0; i &lt; CONN_RETRY_NUM; i++) {
+ 186                  try {
+ 187                      connection = getConn(tableInfo.getUrl(), tableInfo.getUserName(), tableInfo.getPassword());
+ 188                      break;
+ 189                  } catch (Exception e) {
+ 190                      if (i == CONN_RETRY_NUM - 1) {
+ 191                          throw new RuntimeException(&quot;&quot;, e);
+ 192                      }
+ 193                      try {
+<abbr title=" 194                          String connInfo = &quot;url:&quot; + tableInfo.getUrl() + &quot;;userName:&quot; + tableInfo.getUserName() + &quot;,pwd:&quot; + tableInfo.getPassword();"> 194                          String connInfo = &quot;url:&quot; + tableInfo.getUrl() + &quot;;userName:&quot; + tableInfo.getUserName() + &quot;🔵</abbr>
+ 195                          LOG.warn(&quot;get conn fail, wait for 5 sec and try again, connInfo:&quot; + connInfo);
+ 196                          Thread.sleep(5 * 1000);
+ 197                      } catch (InterruptedException e1) {
+ 198                          LOG.error(&quot;&quot;, e1);
+ 199                      }
+ 200                  }
+ 201              }
+ 202              queryAndFillData(tmpCache, connection);
+ 203          } catch (Exception e) {
+ 204              LOG.error(&quot;&quot;, e);
+ 205              throw new SQLException(e);
+ 206          } finally {
+ 207              if (connection != null) {
+ 208                  connection.close();
+ 209              }
+ 210          }
+ 211      }
+ 212  
+<abbr title=" 213      private void queryAndFillData(Map&lt;String, List&lt;Map&lt;String, Object&gt;&gt;&gt; tmpCache, Connection connection) throws SQLException {"> 213      private void queryAndFillData(Map&lt;String, List&lt;Map&lt;String, Object&gt;&gt;&gt; tmpCache, Connection connection) throws S🔵</abbr>
+ 214          //load data from table
+ 215          String sql = sideInfo.getSqlCondition();
+ 216          Statement statement = connection.createStatement();
+ 217          statement.setFetchSize(getFetchSize());
+ 218          ResultSet resultSet = statement.executeQuery(sql);
+ 219  
+ 220          String[] sideFieldNames = StringUtils.split(sideInfo.getSideSelectFields(), &quot;,&quot;);
+ 221          String[] fields = sideInfo.getSideTableInfo().getFieldTypes();
+ 222          while (resultSet.next()) {
+ 223              Map&lt;String, Object&gt; oneRow = Maps.newHashMap();
+ 224              for (String fieldName : sideFieldNames) {
+ 225                  Object object = resultSet.getObject(fieldName.trim());
+ 226                  int fieldIndex = sideInfo.getSideTableInfo().getFieldList().indexOf(fieldName.trim());
+ 227                  object = SwitchUtil.getTarget(object, fields[fieldIndex]);
+ 228                  oneRow.put(fieldName.trim(), object);
+ 229              }
+ 230  
+ 231              String cacheKey = sideInfo.getEqualFieldList().stream()
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 232 -                    .map(equalField -&gt; oneRow.get(equalField))</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 233 +                    .map(oneRow::get)</span>
+ 234                      .map(Object::toString)
+ 235                      .collect(Collectors.joining(&quot;_&quot;));
+ 236  
+ 237              tmpCache.computeIfAbsent(cacheKey, key -&gt; Lists.newArrayList())
+ 238                      .add(oneRow);
+ 239          }
+ 240      }
+ 241  
+ 242      public int getFetchSize() {
+ 243          return DEFAULT_FETCH_SIZE;
+ 244      }
+ 245  
+ 246      /**
+ 247       * get jdbc connection
+ 248       *
+ 249       * @param dbURL
+ 250       * @param userName
+ 251       * @param password
+ 252       * @return
+ 253       */
+ 254      public abstract Connection getConn(String dbURL, String userName, String password);
+ 255  
+ 256  }</pre></td>
+                        </tr>
+                    </table>
+                </div>
+              </body>
+            </html>
+            

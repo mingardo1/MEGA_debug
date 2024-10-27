@@ -1,0 +1,2886 @@
+<!DOCTYPE html>
+    <html lang="en">
+              <head>
+                <meta charset="utf-8">
+                <title>164</title>
+                    <style>
+                        #top {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        #bottom {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        abbr {
+                          /* Here is the delay */
+                          transition-delay:0s;
+                        }
+                    </style>
+              </head>
+              <body>
+                <span style="height: 4vh">
+                    164
+                    <a href="163.html">prev</a>
+                    <a href="165.html">next</a>
+                    <a href="164_chunks.html">chunks</a>
+                    <a href="index.html">index</a>
+                    Automattic/simplenote-android_ab7c958e9d3786b400e83c479d0730410fc1a329_Simplenote/src/main/java/com/automattic/simplenote/TagsListFragment.java
+                    <textarea rows=1 onclick='navigator.clipboard.writeText(this.value)'>cd C:\studies\se\mega\git-analyzer-plus\notebooks\debug
+del /Q *
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\Automattic\simplenote-android show &quot;ab7c958e9d3786b400e83c479d0730410fc1a329:Simplenote/src/main/java/com/automattic/simplenote/TagsListFragment.java&quot; &gt; committed.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\Automattic\simplenote-android show &quot;ab7c958e9d3786b400e83c479d0730410fc1a329^1:Simplenote/src/main/java/com/automattic/simplenote/TagsListFragment.java&quot; &gt; ours.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\Automattic\simplenote-android show &quot;ab7c958e9d3786b400e83c479d0730410fc1a329^2:Simplenote/src/main/java/com/automattic/simplenote/TagsListFragment.java&quot; &gt; theirs.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\Automattic\simplenote-android show &quot;6c40b18e337b7bc99d0b281abedd4897061d7531:Simplenote/src/main/java/com/automattic/simplenote/TagsListFragment.java&quot; &gt; base.java
+copy ours.java 1ours.java
+copy ours.java 2ours.java
+copy theirs.java 1theirs.java
+copy theirs.java 2theirs.java
+copy base.java 1base.java
+copy base.java 2base.java
+&quot;C:\Program Files\Java\jdk1.8.0_241\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\jFSTMerge\build\libs\jFSTMerge-all.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\jfstmerge.java --show-base
+&quot;C:\Program Files\Eclipse Adoptium\jdk-17.0.11.9-hotspot\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\spork\target\spork-0.5.0-SNAPSHOT.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\spork.java
+del /Q 1*.java
+del /Q 2*.java
+del /Q jfstmerge.java.merge
+</textarea>
+                    {strict: [[b], [j], [j], [j]], subset: [[bj]]}
+                </span>
+                <div id="top">
+
+                    <table>
+                        <tr>
+                            <th>line based (standard git)</th>
+                            <th>jfstmerge</th>
+                            <th>spork</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1 package com.automattic.simplenote;
+   2 
+   3 import android.app.Fragment;
+   4 import android.content.Context;
+   5 import android.content.DialogInterface;
+   6 import android.database.Cursor;
+   7 import android.os.AsyncTask;
+   8 import android.os.Bundle;
+   9 import android.support.annotation.NonNull;
+  10 import android.support.v7.app.AlertDialog;
+  11 import android.support.v7.widget.DividerItemDecoration;
+  12 import android.support.v7.widget.LinearLayoutManager;
+  13 import android.support.v7.widget.RecyclerView;
+  14 import android.view.ActionMode;
+  15 import android.view.LayoutInflater;
+  16 import android.view.Menu;
+  17 import android.view.MenuInflater;
+  18 import android.view.MenuItem;
+  19 import android.view.View;
+  20 import android.view.ViewGroup;
+  21 import android.widget.EditText;
+  22 import android.widget.ImageButton;
+  23 import android.widget.LinearLayout;
+  24 import android.widget.TextView;
+  25 
+  26 import com.automattic.simplenote.analytics.AnalyticsTracker;
+  27 import com.automattic.simplenote.models.Note;
+  28 import com.automattic.simplenote.models.Tag;
+  29 import com.automattic.simplenote.utils.BaseCursorAdapter;
+  30 import com.automattic.simplenote.utils.HtmlCompat;
+  31 import com.simperium.client.Bucket;
+  32 import com.simperium.client.BucketObjectNameInvalid;
+  33 import com.simperium.client.Query;
+  34 
+  35 import java.util.List;
+  36 
+  37 public class TagsListFragment extends Fragment implements ActionMode.Callback, Bucket.Listener&lt;Tag&gt; {
+  38 
+  39     private ActionMode mActionMode;
+  40     private Bucket&lt;Tag&gt; mTagsBucket;
+  41     private Bucket&lt;Note&gt; mNotesBucket;
+  42     private TagsAdapter mTagsAdapter;
+  43 
+  44     /**
+  45      * Mandatory empty constructor for the fragment manager to instantiate the
+  46      * fragment (e.g. upon screen orientation changes).
+  47      */
+  48     public TagsListFragment() {
+  49     }
+  50 
+  51     @Override
+<abbr title="  52     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {">  52     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceS🔵</abbr>
+  53         View view = inflater.inflate(R.layout.fragment_tags_list, container, false);
+  54 
+  55         TextView emptyTextView = view.findViewById(android.R.id.empty);
+<abbr title="  56         emptyTextView.setText(HtmlCompat.fromHtml(&quot;&lt;strong&gt;&quot; + getString(R.string.no_tags_found) + &quot;&lt;/strong&gt;&quot;));">  56         emptyTextView.setText(HtmlCompat.fromHtml(&quot;&lt;strong&gt;&quot; + getString(R.string.no_tags_found) + &quot;&lt;/str🔵</abbr>
+  57         return view;
+  58     }
+  59 
+  60     @Override
+  61     public void onActivityCreated(Bundle savedInstanceState) {
+  62         super.onActivityCreated(savedInstanceState);
+  63 
+  64         setHasOptionsMenu(true);
+  65 
+  66         Simplenote application = (Simplenote) getActivity().getApplication();
+  67         mTagsBucket = application.getTagsBucket();
+  68         mNotesBucket = application.getNotesBucket();
+  69 
+  70         RecyclerView recyclerView = getActivity().findViewById(R.id.tagList);
+  71         mTagsAdapter = new TagsAdapter();
+  72         recyclerView.setAdapter(mTagsAdapter);
+  73         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+<abbr title="  74         recyclerView.addItemDecoration(new DividerItemDecoration(recyclerView.getContext(), DividerItemDecoration.VERTICAL));">  74         recyclerView.addItemDecoration(new DividerItemDecoration(recyclerView.getContext(), DividerItemDe🔵</abbr>
+  75 
+  76         refreshTags();
+  77     }
+  78 
+  79     @Override
+  80     public void onResume() {
+  81         super.onResume();
+  82 
+  83         mNotesBucket.start();
+  84         mTagsBucket.start();
+  85 
+  86         mTagsBucket.addOnNetworkChangeListener(this);
+  87         mTagsBucket.addOnSaveObjectListener(this);
+  88         mTagsBucket.addOnDeleteObjectListener(this);
+  89     }
+  90 
+  91     @Override
+  92     public void onPause() {
+  93         super.onPause();
+  94 
+  95         mTagsBucket.removeOnNetworkChangeListener(this);
+  96         mTagsBucket.removeOnSaveObjectListener(this);
+  97         mTagsBucket.removeOnDeleteObjectListener(this);
+  98 
+  99         mNotesBucket.stop();
+ 100         mTagsBucket.stop();
+ 101     }
+ 102 
+ 103     protected void refreshTags() {
+<abbr title=" 104         Query&lt;Tag&gt; tagQuery = Tag.all(mTagsBucket).reorder().orderByKey().include(Tag.NOTE_COUNT_INDEX_NAME);"> 104         Query&lt;Tag&gt; tagQuery = Tag.all(mTagsBucket).reorder().orderByKey().include(Tag.NOTE_COUNT_INDEX_NA🔵</abbr>
+ 105         Bucket.ObjectCursor&lt;Tag&gt; cursor = tagQuery.execute();
+ 106         mTagsAdapter.swapCursor(cursor);
+ 107     }
+ 108 
+ 109     // TODO: Finish bulk editing
+ 110     @Override
+ 111     public boolean onCreateActionMode(ActionMode actionMode, Menu menu) {
+ 112         MenuInflater inflater = actionMode.getMenuInflater();
+ 113         inflater.inflate(R.menu.bulk_edit, menu);
+ 114         mActionMode = actionMode;
+ 115         return true;
+ 116     }
+ 117 
+ 118     @Override
+ 119     public boolean onPrepareActionMode(ActionMode actionMode, Menu menu) {
+ 120         return false;
+ 121     }
+ 122 
+ 123     @Override
+ 124     public boolean onActionItemClicked(ActionMode actionMode, MenuItem menuItem) {
+ 125         if (menuItem.getItemId() == R.id.menu_delete) {
+ 126             actionMode.finish(); // Action picked, so close the CAB
+ 127             return true;
+ 128         }
+ 129         return false;
+ 130     }
+ 131 
+ 132     @Override
+ 133     public void onDestroyActionMode(ActionMode actionMode) {
+ 134         mActionMode = null;
+ 135     }
+ 136 
+ 137     @Override
+ 138     public boolean onOptionsItemSelected(MenuItem item) {
+ 139 
+ 140         if (item.getItemId() == android.R.id.home) {
+ 141             if (isAdded()) {
+ 142                 getActivity().finish();
+ 143                 return true;
+ 144             }
+ 145         }
+ 146 
+ 147         return super.onOptionsItemSelected(item);
+ 148     }
+ 149 
+ 150     // Tag Bucket listeners
+ 151     @Override
+ 152     public void onDeleteObject(Bucket&lt;Tag&gt; bucket, Tag object) {
+ 153         if (isAdded()) {
+ 154             getActivity().runOnUiThread(new Runnable() {
+ 155                 @Override
+ 156                 public void run() {
+ 157                     refreshTags();
+ 158                 }
+ 159             });
+ 160         }
+ 161     }
+ 162 
+ 163     @Override
+ 164     public void onNetworkChange(Bucket&lt;Tag&gt; bucket, Bucket.ChangeType type, String key) {
+ 165         if (isAdded()) {
+ 166             getActivity().runOnUiThread(new Runnable() {
+ 167                 @Override
+ 168                 public void run() {
+ 169                     refreshTags();
+ 170                 }
+ 171             });
+ 172         }
+ 173     }
+ 174 
+ 175     @Override
+ 176     public void onSaveObject(Bucket&lt;Tag&gt; bucket, Tag object) {
+ 177         if (isAdded()) {
+ 178             getActivity().runOnUiThread(new Runnable() {
+ 179                 @Override
+ 180                 public void run() {
+ 181                     refreshTags();
+ 182                 }
+ 183             });
+ 184         }
+ 185     }
+ 186 
+ 187     @Override
+ 188     public void onBeforeUpdateObject(Bucket&lt;Tag&gt; bucket, Tag object) {
+ 189         // noop
+ 190     }
+ 191 
+ 192 &lt;&lt;&lt;&lt;&lt;&lt;&lt; GitAnalyzerPlus_ours
+ 193 ||||||| GitAnalyzerPlus_base
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 194 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 195     @Override</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 196     public boolean onItemLongClick(AdapterView&lt;?&gt; adapterView, View view, int position, long l) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 197         getListView().setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 198         getListView().setItemChecked(position, true);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 199         if (isAdded() &amp;&amp; mActionMode == null) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 200             getActivity().startActionMode(this);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 201         }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 202         //isCABDestroyed = false;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 203         return false; // so this action does not consume the event!!!</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 204     }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 205 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 206     @Override</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 207     public boolean onOptionsItemSelected(MenuItem item) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 208 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 209         if (item.getItemId() == android.R.id.home) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 210             if (isAdded()) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 211                 getActivity().finish();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 212                 return true;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 213             }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 214         }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 215 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 216         return super.onOptionsItemSelected(item);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 217     }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 218 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 219     // Tag Bucket listeners</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 220     @Override</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 221     public void onDeleteObject(Bucket&lt;Tag&gt; bucket, Tag object) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 222         if (isAdded()) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 223             getActivity().runOnUiThread(new Runnable() {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 224                 @Override</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 225                 public void run() {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 226                     refreshTags();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 227                 }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 228             });</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 229         }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 230     }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 231 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 232     @Override</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 233     public void onNetworkChange(Bucket&lt;Tag&gt; bucket, Bucket.ChangeType type, String key) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 234         if (isAdded()) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 235             getActivity().runOnUiThread(new Runnable() {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 236                 @Override</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 237                 public void run() {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 238                     refreshTags();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 239                 }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 240             });</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 241         }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 242     }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 243 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 244     @Override</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 245     public void onSaveObject(Bucket&lt;Tag&gt; bucket, Tag object) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 246         if (isAdded()) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 247             getActivity().runOnUiThread(new Runnable() {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 248                 @Override</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 249                 public void run() {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 250                     refreshTags();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 251                 }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 252             });</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 253         }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 254     }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 255 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 256     @Override</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 257     public void onBeforeUpdateObject(Bucket&lt;Tag&gt; bucket, Tag object) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 258         // noop</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 259     }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 260 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 261     private class TagsAdapter extends CursorAdapter {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 262 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 263         private Bucket.ObjectCursor&lt;Tag&gt; mCursor;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 264 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 265         public TagsAdapter(Context context, Bucket.ObjectCursor&lt;Tag&gt; c, int flags) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 266             super(context, c, flags);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 267             mCursor = c;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 268         }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 269 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 270         public void changeCursor(Bucket.ObjectCursor&lt;Tag&gt; cursor) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 271             super.changeCursor(cursor);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 272             mCursor = cursor;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 273         }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 274 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 275         @Override</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 276         public Tag getItem(int row) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 277             super.getItem(row);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 278             return mCursor.getObject();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 279         }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 280 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 281         @Override</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 282         public View getView(final int position, View convertView, ViewGroup parent) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 283             mCursor.moveToPosition(position);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 284 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 285             if (convertView == null) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 286                 convertView = getActivity().getLayoutInflater().inflate(R.layout.tags_list_row, null);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 287             }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 288             final Tag tag = mCursor.getObject();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 289             convertView.setTag(tag.getSimperiumKey());</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 290 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 291             TextView tagTitle = convertView.findViewById(R.id.tag_name);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 292             TextView tagCountTextView = convertView.findViewById(R.id.tag_count);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 293             tagTitle.setText(tag.getName());</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"><abbr title=" 294             final int tagCount = mNotesBucket.query().where(&quot;tags&quot;, Query.ComparisonType.EQUAL_TO, tag.getSimperiumKey()).count();"> 294             final int tagCount = mNotesBucket.query().where(&quot;tags&quot;, Query.ComparisonType.EQUAL_TO, tag.ge🔵</abbr></span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 295             if (tagCount &gt; 0) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 296                 tagCountTextView.setText(String.valueOf(tagCount));</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 297             } else {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 298                 tagCountTextView.setText(&quot;&quot;);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 299             }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 300 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 301             ImageButton deleteButton = convertView.findViewById(R.id.tag_trash);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 302             deleteButton.setOnClickListener(new View.OnClickListener() {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 303                 @Override</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 304                 public void onClick(View view) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 305                     if (!isAdded()) return;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 306 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 307                     if (tagCount == 0) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 308                         deleteTag(tag);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 309                     } else if (tagCount &gt; 0) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 310                         AlertDialog.Builder alert = new AlertDialog.Builder(getActivity());</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 311                         alert.setTitle(R.string.delete_tag);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 312                         alert.setMessage(getString(R.string.confirm_delete_tag));</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 313                         alert.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 314                             public void onClick(DialogInterface dialog, int whichButton) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 315                                 deleteTag(tag);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 316                             }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 317                         });</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 318                         alert.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 319                             public void onClick(DialogInterface dialog, int whichButton) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 320                                 // Do nothing, just closing the dialog</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 321                             }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 322                         });</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 323                         alert.show();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 324                     }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 325                 }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 326             });</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 327 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 328             return convertView;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 329         }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 330 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 331         private void deleteTag(Tag tag) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 332             tag.delete();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 333             new removeTagFromNotesTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, tag);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 334             AnalyticsTracker.track(</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 335                     AnalyticsTracker.Stat.TAG_MENU_DELETED,</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 336                     AnalyticsTracker.CATEGORY_TAG,</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 337                     &quot;list_trash_button&quot;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 338             );</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 339         }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 340 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 341         @Override</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 342         public View newView(Context context, Cursor cursor, ViewGroup viewGroup) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 343             return null;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 344         }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 345 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 346         @Override</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 347         public void bindView(View view, Context context, Cursor cursor) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 348 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 349         }</span>
+ 350 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 351     private class TagsAdapter extends CursorAdapter {</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 352 </span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 353         private Bucket.ObjectCursor&lt;Tag&gt; mCursor;</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 354 </span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 355         TagsAdapter(Context context, Bucket.ObjectCursor&lt;Tag&gt; c, int flags) {</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 356             super(context, c, flags);</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 357             mCursor = c;</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 358         }</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 359 </span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 360         void changeCursor(Bucket.ObjectCursor&lt;Tag&gt; cursor) {</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 361             super.changeCursor(cursor);</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 362             mCursor = cursor;</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 363         }</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 364 </span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 365         @Override</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 366         public Tag getItem(int row) {</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 367             super.getItem(row);</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 368             return mCursor.getObject();</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 369         }</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 370 </span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 371         @Override</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 372         public View getView(final int position, View convertView, ViewGroup parent) {</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 373             mCursor.moveToPosition(position);</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 374 </span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 375             if (convertView == null) {</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 376                 convertView = getActivity().getLayoutInflater().inflate(R.layout.tags_list_row, null);</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 377             }</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 378             final Tag tag = mCursor.getObject();</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 379             convertView.setTag(tag.getSimperiumKey());</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 380 </span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 381             TextView tagTitle = convertView.findViewById(R.id.tag_name);</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 382             TextView tagCountTextView = convertView.findViewById(R.id.tag_count);</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 383             tagTitle.setText(tag.getName());</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"><abbr title=" 384             final int tagCount = mNotesBucket.query().where(&quot;tags&quot;, Query.ComparisonType.EQUAL_TO, tag.getName()).count();"> 384             final int tagCount = mNotesBucket.query().where(&quot;tags&quot;, Query.ComparisonType.EQUAL_TO, tag.ge🔵</abbr></span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 385             if (tagCount &gt; 0) {</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 386                 tagCountTextView.setText(String.valueOf(tagCount));</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 387             } else {</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 388                 tagCountTextView.setText(&quot;&quot;);</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 389             }</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 390 </span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 391             ImageButton deleteButton = convertView.findViewById(R.id.tag_trash);</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 392             deleteButton.setOnClickListener(new View.OnClickListener() {</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 393                 @Override</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 394                 public void onClick(View view) {</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 395                     if (!isAdded()) return;</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 396 </span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 397                     if (tagCount == 0) {</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 398                         deleteTag(tag);</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 399                     } else if (tagCount &gt; 0) {</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 400                         AlertDialog.Builder alert = new AlertDialog.Builder(getActivity());</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 401                         alert.setTitle(R.string.delete_tag);</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 402                         alert.setMessage(getString(R.string.confirm_delete_tag));</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 403                         alert.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 404                             public void onClick(DialogInterface dialog, int whichButton) {</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 405                                 deleteTag(tag);</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 406                             }</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 407                         });</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 408                         alert.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 409                             public void onClick(DialogInterface dialog, int whichButton) {</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 410                                 // Do nothing, just closing the dialog</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 411                             }</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 412                         });</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 413                         alert.show();</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 414                     }</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 415                 }</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 416             });</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 417 </span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 418             return convertView;</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 419         }</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 420 </span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 421         private void deleteTag(Tag tag) {</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 422             tag.delete();</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 423             new removeTagFromNotesTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, tag);</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 424             AnalyticsTracker.track(</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 425                     AnalyticsTracker.Stat.TAG_MENU_DELETED,</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 426                     AnalyticsTracker.CATEGORY_TAG,</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 427                     &quot;list_trash_button&quot;</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 428             );</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 429         }</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 430 </span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 431         @Override</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 432         public View newView(Context context, Cursor cursor, ViewGroup viewGroup) {</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 433             return null;</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 434         }</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 435 </span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 436         @Override</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 437         public void bindView(View view, Context context, Cursor cursor) {</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 438 </span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 439         }</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 440     }</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 441 </span>
+ 442 &gt;&gt;&gt;&gt;&gt;&gt;&gt; GitAnalyzerPlus_theirs
+ 443     private class removeTagFromNotesTask extends AsyncTask&lt;Tag, Void, Void&gt; {
+ 444 
+ 445         @Override
+ 446         protected Void doInBackground(Tag... removedTags) {
+ 447             Tag tag = removedTags[0];
+ 448             if (tag != null) {
+ 449                 Bucket.ObjectCursor&lt;Note&gt; notesCursor = tag.findNotes(mNotesBucket);
+ 450                 while (notesCursor.moveToNext()) {
+ 451                     Note note = notesCursor.getObject();
+ 452                     List&lt;String&gt; tags = note.getTags();
+ 453                     tags.remove(tag.getName());
+ 454                     note.setTags(tags);
+ 455                     note.save();
+ 456                 }
+ 457                 notesCursor.close();
+ 458             }
+ 459             return null;
+ 460         }
+ 461     }
+ 462 
+ 463     private class TagsAdapter extends BaseCursorAdapter&lt;TagsAdapter.ViewHolder&gt; {
+ 464 
+ 465         public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+ 466 
+ 467             private TextView tagTitle;
+ 468             private TextView tagCountTextView;
+ 469             private ImageButton deleteButton;
+ 470 
+ 471             private ViewHolder(View itemView) {
+ 472                 super(itemView);
+ 473 
+ 474                 tagTitle = itemView.findViewById(R.id.tag_name);
+ 475                 tagCountTextView = itemView.findViewById(R.id.tag_count);
+ 476                 deleteButton = itemView.findViewById(R.id.tag_trash);
+ 477 
+ 478                 deleteButton.setOnClickListener(new View.OnClickListener() {
+ 479                     @Override
+ 480                     public void onClick(View view) {
+ 481                         if (!isAdded()) return;
+ 482 
+<abbr title=" 483                         final Tag tag = ((Bucket.ObjectCursor&lt;Tag&gt;)getItem(getAdapterPosition())).getObject();"> 483                         final Tag tag = ((Bucket.ObjectCursor&lt;Tag&gt;)getItem(getAdapterPosition())).getObje🔵</abbr>
+<abbr title=" 484                         final int tagCount = mNotesBucket.query().where(&quot;tags&quot;, Query.ComparisonType.EQUAL_TO, tag.getSimperiumKey()).count();"> 484                         final int tagCount = mNotesBucket.query().where(&quot;tags&quot;, Query.ComparisonType.EQUA🔵</abbr>
+ 485                         if (tagCount == 0) {
+ 486                             deleteTag(tag);
+ 487                         } else if (tagCount &gt; 0) {
+ 488                             AlertDialog.Builder alert = new AlertDialog.Builder(getActivity());
+ 489                             alert.setTitle(R.string.delete_tag);
+ 490                             alert.setMessage(getString(R.string.confirm_delete_tag));
+ 491                             alert.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+ 492                                 public void onClick(DialogInterface dialog, int whichButton) {
+ 493                                     deleteTag(tag);
+ 494                                 }
+ 495                             });
+ 496                             alert.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+ 497                                 public void onClick(DialogInterface dialog, int whichButton) {
+ 498                                     // Do nothing, just closing the dialog
+ 499                                 }
+ 500                             });
+ 501                             alert.show();
+ 502                         }
+ 503                     }
+ 504                 });
+ 505 
+ 506                 itemView.setOnClickListener(this);
+ 507             }
+ 508 
+ 509             @Override
+ 510             public void onClick(View view) {
+ 511                 if (!isAdded()) return;
+ 512 
+ 513                 final AlertDialog.Builder alert = new AlertDialog.Builder(getActivity());
+<abbr title=" 514                 LinearLayout alertView = (LinearLayout) getActivity().getLayoutInflater().inflate(R.layout.edit_tag, null);"> 514                 LinearLayout alertView = (LinearLayout) getActivity().getLayoutInflater().inflate(R.layou🔵</abbr>
+ 515 
+ 516                 final Tag tag = ((Bucket.ObjectCursor&lt;Tag&gt;)getItem(getAdapterPosition())).getObject();
+ 517 
+ 518                 final EditText tagNameEditText = alertView.findViewById(R.id.tag_name_edit);
+ 519                 tagNameEditText.setText(tag.getName());
+ 520                 tagNameEditText.setSelection(tagNameEditText.length());
+ 521                 alert.setView(alertView);
+ 522                 alert.setTitle(R.string.rename_tag);
+ 523                 alert.setPositiveButton(R.string.save, new DialogInterface.OnClickListener() {
+ 524                     public void onClick(DialogInterface dialog, int whichButton) {
+ 525                         String value = tagNameEditText.getText().toString().trim();
+ 526                         try {
+ 527                             tag.renameTo(value, mNotesBucket);
+ 528                             AnalyticsTracker.track(
+ 529                                     AnalyticsTracker.Stat.TAG_EDITOR_ACCESSED,
+ 530                                     AnalyticsTracker.CATEGORY_TAG,
+ 531                                     &quot;tag_alert_edit_box&quot;
+ 532                             );
+ 533                         } catch (BucketObjectNameInvalid e) {
+ 534                             android.util.Log.e(Simplenote.TAG, &quot;Unable to rename tag&quot;, e);
+ 535                             // TODO: show user a message that new tag name is not ok
+ 536                         }
+ 537                     }
+ 538                 });
+ 539                 alert.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+ 540                     public void onClick(DialogInterface dialog, int whichButton) {
+ 541                         // Do nothing
+ 542                     }
+ 543                 });
+ 544                 alert.show();
+ 545             }
+ 546 
+ 547             private void deleteTag(Tag tag) {
+ 548                 tag.delete();
+ 549                 new removeTagFromNotesTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, tag);
+ 550                 AnalyticsTracker.track(
+ 551                         AnalyticsTracker.Stat.TAG_MENU_DELETED,
+ 552                         AnalyticsTracker.CATEGORY_TAG,
+ 553                         &quot;list_trash_button&quot;
+ 554                 );
+ 555             }
+ 556         }
+ 557 
+ 558         private TagsAdapter() {
+ 559             super(null);
+ 560         }
+ 561 
+ 562         @NonNull
+ 563         @Override
+ 564         public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+ 565             Context context = parent.getContext();
+ 566             LayoutInflater inflater = LayoutInflater.from(context);
+ 567 
+ 568             View contactView = inflater.inflate(R.layout.tags_list_row, parent, false);
+ 569 
+ 570             return new ViewHolder(contactView);
+ 571         }
+ 572 
+ 573         @Override
+ 574         public void onBindViewHolder(@NonNull ViewHolder holder, Cursor cursor) {
+ 575             Tag tag = ((Bucket.ObjectCursor&lt;Tag&gt;)cursor).getObject();
+ 576 
+ 577             holder.tagTitle.setText(tag.getName());
+<abbr title=" 578             final int tagCount = mNotesBucket.query().where(&quot;tags&quot;, Query.ComparisonType.EQUAL_TO, tag.getSimperiumKey()).count();"> 578             final int tagCount = mNotesBucket.query().where(&quot;tags&quot;, Query.ComparisonType.EQUAL_TO, tag.ge🔵</abbr>
+ 579             if (tagCount &gt; 0) {
+ 580                 holder.tagCountTextView.setText(String.valueOf(tagCount));
+ 581             } else {
+ 582                 holder.tagCountTextView.setText(&quot;&quot;);
+ 583             }
+ 584         }
+ 585 
+ 586         @Override
+ 587         public void swapCursor(Cursor newCursor) {
+ 588             super.swapCursor(newCursor);
+ 589         }
+ 590     }
+ 591 }</pre></td>
+                            <td><pre>   1 package com.automattic.simplenote;
+   2 
+   3 import android.app.Fragment;
+   4 import android.content.Context;
+   5 import android.content.DialogInterface;
+   6 import android.database.Cursor;
+   7 import android.os.AsyncTask;
+   8 import android.os.Bundle;
+   9 import android.support.annotation.NonNull;
+  10 import android.support.v7.app.AlertDialog;
+  11 import android.support.v7.widget.DividerItemDecoration;
+  12 import android.support.v7.widget.LinearLayoutManager;
+  13 import android.support.v7.widget.RecyclerView;
+  14 import android.view.ActionMode;
+  15 import android.view.LayoutInflater;
+  16 import android.view.Menu;
+  17 import android.view.MenuInflater;
+  18 import android.view.MenuItem;
+  19 import android.view.View;
+  20 import android.view.ViewGroup;
+  21 import android.widget.EditText;
+  22 import android.widget.ImageButton;
+  23 import android.widget.LinearLayout;
+  24 import android.widget.TextView;
+  25 
+  26 import com.automattic.simplenote.analytics.AnalyticsTracker;
+  27 import com.automattic.simplenote.models.Note;
+  28 import com.automattic.simplenote.models.Tag;
+  29 import com.automattic.simplenote.utils.BaseCursorAdapter;
+  30 import com.automattic.simplenote.utils.HtmlCompat;
+  31 import com.simperium.client.Bucket;
+  32 import com.simperium.client.BucketObjectNameInvalid;
+  33 import com.simperium.client.Query;
+  34 
+  35 import java.util.List;
+  36 
+  37 public class TagsListFragment extends Fragment implements ActionMode.Callback, Bucket.Listener&lt;Tag&gt; {
+  38 
+  39     private ActionMode mActionMode;
+  40     private Bucket&lt;Tag&gt; mTagsBucket;
+  41     private Bucket&lt;Note&gt; mNotesBucket;
+  42     private TagsAdapter mTagsAdapter;
+  43 
+  44     /**
+  45      * Mandatory empty constructor for the fragment manager to instantiate the
+  46      * fragment (e.g. upon screen orientation changes).
+  47      */
+  48     public TagsListFragment() {
+  49         }
+  50 
+  51     @Override
+<abbr title="  52     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {">  52     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceS🔵</abbr>
+  53         View view = inflater.inflate(R.layout.fragment_tags_list, container, false);
+  54 
+  55         TextView emptyTextView = view.findViewById(android.R.id.empty);
+<abbr title="  56         emptyTextView.setText(HtmlCompat.fromHtml(&quot;&lt;strong&gt;&quot; + getString(R.string.no_tags_found) + &quot;&lt;/strong&gt;&quot;));">  56         emptyTextView.setText(HtmlCompat.fromHtml(&quot;&lt;strong&gt;&quot; + getString(R.string.no_tags_found) + &quot;&lt;/str🔵</abbr>
+  57         return view;
+  58     }
+  59 
+  60     @Override
+  61     public void onActivityCreated(Bundle savedInstanceState) {
+  62         super.onActivityCreated(savedInstanceState);
+  63 
+  64         setHasOptionsMenu(true);
+  65 
+  66         Simplenote application = (Simplenote) getActivity().getApplication();
+  67         mTagsBucket = application.getTagsBucket();
+  68         mNotesBucket = application.getNotesBucket();
+  69 
+  70         RecyclerView recyclerView = getActivity().findViewById(R.id.tagList);
+  71         mTagsAdapter = new TagsAdapter();
+  72         recyclerView.setAdapter(mTagsAdapter);
+  73         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+<abbr title="  74         recyclerView.addItemDecoration(new DividerItemDecoration(recyclerView.getContext(), DividerItemDecoration.VERTICAL));">  74         recyclerView.addItemDecoration(new DividerItemDecoration(recyclerView.getContext(), DividerItemDe🔵</abbr>
+  75 
+  76         refreshTags();
+  77     }
+  78 
+  79     @Override
+  80     public void onResume() {
+  81         super.onResume();
+  82 
+  83         mNotesBucket.start();
+  84         mTagsBucket.start();
+  85 
+  86         mTagsBucket.addOnNetworkChangeListener(this);
+  87         mTagsBucket.addOnSaveObjectListener(this);
+  88         mTagsBucket.addOnDeleteObjectListener(this);
+  89     }
+  90 
+  91     @Override
+  92     public void onPause() {
+  93         super.onPause();
+  94 
+  95         mTagsBucket.removeOnNetworkChangeListener(this);
+  96         mTagsBucket.removeOnSaveObjectListener(this);
+  97         mTagsBucket.removeOnDeleteObjectListener(this);
+  98 
+  99         mNotesBucket.stop();
+ 100         mTagsBucket.stop();
+ 101     }
+ 102 
+ 103     protected void refreshTags() {
+<abbr title=" 104         Query&lt;Tag&gt; tagQuery = Tag.all(mTagsBucket).reorder().orderByKey().include(Tag.NOTE_COUNT_INDEX_NAME);"> 104         Query&lt;Tag&gt; tagQuery = Tag.all(mTagsBucket).reorder().orderByKey().include(Tag.NOTE_COUNT_INDEX_NA🔵</abbr>
+ 105         Bucket.ObjectCursor&lt;Tag&gt; cursor = tagQuery.execute();
+ 106         mTagsAdapter.swapCursor(cursor);
+ 107     }
+ 108 
+ 109     // TODO: Finish bulk editing
+ 110     @Override
+ 111     public boolean onCreateActionMode(ActionMode actionMode, Menu menu) {
+ 112         MenuInflater inflater = actionMode.getMenuInflater();
+ 113         inflater.inflate(R.menu.bulk_edit, menu);
+ 114         mActionMode = actionMode;
+ 115         return true;
+ 116     }
+ 117 
+ 118     @Override
+ 119     public boolean onPrepareActionMode(ActionMode actionMode, Menu menu) {
+ 120         return false;
+ 121     }
+ 122 
+ 123     @Override
+ 124     public boolean onActionItemClicked(ActionMode actionMode, MenuItem menuItem) {
+ 125         if (menuItem.getItemId() == R.id.menu_delete) {
+ 126                 actionMode.finish(); // Action picked, so close the CAB
+ 127                 return true;
+ 128         }
+ 129         return false;
+ 130     }
+ 131 
+ 132     @Override
+ 133     public void onDestroyActionMode(ActionMode actionMode) {
+ 134         mActionMode = null;
+ 135     }
+ 136 
+ 137     @Override
+ 138     public boolean onOptionsItemSelected(MenuItem item) {
+ 139 
+ 140         if (item.getItemId() == android.R.id.home) {
+ 141             if (isAdded()) {
+ 142                 getActivity().finish();
+ 143                 return true;
+ 144             }
+ 145         }
+ 146 
+ 147         return super.onOptionsItemSelected(item);
+ 148     }
+ 149 
+ 150     // Tag Bucket listeners
+ 151     @Override
+ 152     public void onDeleteObject(Bucket&lt;Tag&gt; bucket, Tag object) {
+ 153         if (isAdded()) {
+ 154             getActivity().runOnUiThread(new Runnable() {
+ 155                 @Override
+ 156                 public void run() {
+ 157                     refreshTags();
+ 158                 }
+ 159             });
+ 160         }
+ 161     }
+ 162 
+ 163     @Override
+ 164     public void onNetworkChange(Bucket&lt;Tag&gt; bucket, Bucket.ChangeType type, String key) {
+ 165         if (isAdded()) {
+ 166             getActivity().runOnUiThread(new Runnable() {
+ 167                 @Override
+ 168                 public void run() {
+ 169                     refreshTags();
+ 170                 }
+ 171             });
+ 172         }
+ 173     }
+ 174 
+ 175     @Override
+ 176     public void onSaveObject(Bucket&lt;Tag&gt; bucket, Tag object) {
+ 177         if (isAdded()) {
+ 178             getActivity().runOnUiThread(new Runnable() {
+ 179                 @Override
+ 180                 public void run() {
+ 181                     refreshTags();
+ 182                 }
+ 183             });
+ 184         }
+ 185     }
+ 186 
+ 187     @Override
+ 188     public void onBeforeUpdateObject(Bucket&lt;Tag&gt; bucket, Tag object) {
+ 189         // noop
+ 190     }
+ 191 
+ 192     private class TagsAdapter extends BaseCursorAdapter&lt;TagsAdapter.ViewHolder&gt; {
+ 193 
+ 194         public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+ 195 
+ 196             private TextView tagTitle;
+ 197             private TextView tagCountTextView;
+ 198             private ImageButton deleteButton;
+ 199 
+ 200             private ViewHolder(View itemView) {
+ 201                 super(itemView);
+ 202 
+ 203                 tagTitle = itemView.findViewById(R.id.tag_name);
+ 204                 tagCountTextView = itemView.findViewById(R.id.tag_count);
+ 205                 deleteButton = itemView.findViewById(R.id.tag_trash);
+ 206 
+ 207                 deleteButton.setOnClickListener(new View.OnClickListener() {
+ 208                     @Override
+ 209                     public void onClick(View view) {
+ 210                         if (!isAdded()) return;
+ 211 
+<abbr title=" 212                         final Tag tag = ((Bucket.ObjectCursor&lt;Tag&gt;)getItem(getAdapterPosition())).getObject();"> 212                         final Tag tag = ((Bucket.ObjectCursor&lt;Tag&gt;)getItem(getAdapterPosition())).getObje🔵</abbr>
+<abbr title=" 213                         final int tagCount = mNotesBucket.query().where(&quot;tags&quot;, Query.ComparisonType.EQUAL_TO, tag.getSimperiumKey()).count();"> 213                         final int tagCount = mNotesBucket.query().where(&quot;tags&quot;, Query.ComparisonType.EQUA🔵</abbr>
+ 214                         if (tagCount == 0) {
+ 215                             deleteTag(tag);
+ 216                         } else if (tagCount &gt; 0) {
+ 217                             AlertDialog.Builder alert = new AlertDialog.Builder(getActivity());
+ 218                             alert.setTitle(R.string.delete_tag);
+ 219                             alert.setMessage(getString(R.string.confirm_delete_tag));
+ 220                             alert.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+ 221                                 public void onClick(DialogInterface dialog, int whichButton) {
+ 222                                     deleteTag(tag);
+ 223                                 }
+ 224                             });
+ 225                             alert.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+ 226                                 public void onClick(DialogInterface dialog, int whichButton) {
+ 227                                     // Do nothing, just closing the dialog
+ 228                                 }
+ 229                             });
+ 230                             alert.show();
+ 231                         }
+ 232                     }
+ 233                 });
+ 234 
+ 235                 itemView.setOnClickListener(this);
+ 236             }
+ 237 
+ 238             @Override
+ 239             public void onClick(View view) {
+ 240                 if (!isAdded()) return;
+ 241 
+ 242                 final AlertDialog.Builder alert = new AlertDialog.Builder(getActivity());
+<abbr title=" 243                 LinearLayout alertView = (LinearLayout) getActivity().getLayoutInflater().inflate(R.layout.edit_tag, null);"> 243                 LinearLayout alertView = (LinearLayout) getActivity().getLayoutInflater().inflate(R.layou🔵</abbr>
+ 244 
+ 245                 final Tag tag = ((Bucket.ObjectCursor&lt;Tag&gt;)getItem(getAdapterPosition())).getObject();
+ 246 
+ 247                 final EditText tagNameEditText = alertView.findViewById(R.id.tag_name_edit);
+ 248                 tagNameEditText.setText(tag.getName());
+ 249                 tagNameEditText.setSelection(tagNameEditText.length());
+ 250                 alert.setView(alertView);
+ 251                 alert.setTitle(R.string.rename_tag);
+ 252                 alert.setPositiveButton(R.string.save, new DialogInterface.OnClickListener() {
+ 253                     public void onClick(DialogInterface dialog, int whichButton) {
+ 254                         String value = tagNameEditText.getText().toString().trim();
+ 255                         try {
+ 256                             tag.renameTo(value, mNotesBucket);
+ 257                             AnalyticsTracker.track(
+ 258                                     AnalyticsTracker.Stat.TAG_EDITOR_ACCESSED,
+ 259                                     AnalyticsTracker.CATEGORY_TAG,
+ 260                                     &quot;tag_alert_edit_box&quot;
+ 261                             );
+ 262                         } catch (BucketObjectNameInvalid e) {
+ 263                             android.util.Log.e(Simplenote.TAG, &quot;Unable to rename tag&quot;, e);
+ 264                             // TODO: show user a message that new tag name is not ok
+ 265                         }
+ 266                     }
+ 267                 });
+ 268                 alert.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+ 269                     public void onClick(DialogInterface dialog, int whichButton) {
+ 270                         // Do nothing
+ 271                     }
+ 272                 });
+ 273                 alert.show();
+ 274             }
+ 275 
+ 276             private void deleteTag(Tag tag) {
+ 277                 tag.delete();
+ 278                 new removeTagFromNotesTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, tag);
+ 279                 AnalyticsTracker.track(
+ 280                         AnalyticsTracker.Stat.TAG_MENU_DELETED,
+ 281                         AnalyticsTracker.CATEGORY_TAG,
+ 282                         &quot;list_trash_button&quot;
+ 283                 );
+ 284             }
+ 285         }
+ 286 
+ 287         private TagsAdapter() {
+ 288             super(null);
+ 289         }
+ 290 
+ 291         @NonNull
+ 292         @Override
+ 293         public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+ 294             Context context = parent.getContext();
+ 295             LayoutInflater inflater = LayoutInflater.from(context);
+ 296 
+ 297             View contactView = inflater.inflate(R.layout.tags_list_row, parent, false);
+ 298 
+ 299             return new ViewHolder(contactView);
+ 300         }
+ 301 
+ 302         @Override
+ 303         public void onBindViewHolder(@NonNull ViewHolder holder, Cursor cursor) {
+ 304             Tag tag = ((Bucket.ObjectCursor&lt;Tag&gt;)cursor).getObject();
+ 305 
+ 306             holder.tagTitle.setText(tag.getName());
+<abbr title=" 307             final int tagCount = mNotesBucket.query().where(&quot;tags&quot;, Query.ComparisonType.EQUAL_TO, tag.getSimperiumKey()).count();"> 307             final int tagCount = mNotesBucket.query().where(&quot;tags&quot;, Query.ComparisonType.EQUAL_TO, tag.ge🔵</abbr>
+ 308             if (tagCount &gt; 0) {
+ 309                 holder.tagCountTextView.setText(String.valueOf(tagCount));
+ 310             } else {
+ 311                 holder.tagCountTextView.setText(&quot;&quot;);
+ 312             }
+ 313         }
+ 314 
+ 315         @Override
+ 316         public void swapCursor(Cursor newCursor) {
+ 317             super.swapCursor(newCursor);
+ 318         }
+ 319 &lt;&lt;&lt;&lt;&lt;&lt;&lt; MINE
+ 320 ||||||| BASE
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 321 public TagsAdapter(Context context, Bucket.ObjectCursor&lt;Tag&gt; c, int flags) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 322             super(context, c, flags);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 323             mCursor = c;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 324         }</span>
+ 325 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 326 TagsAdapter(Context context, Bucket.ObjectCursor&lt;Tag&gt; c, int flags) {</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 327             super(context, c, flags);</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 328             mCursor = c;</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 329         }</span>
+ 330 &gt;&gt;&gt;&gt;&gt;&gt;&gt; YOURS
+ 331 &lt;&lt;&lt;&lt;&lt;&lt;&lt; MINE
+ 332 ||||||| BASE
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 333 public void changeCursor(Bucket.ObjectCursor&lt;Tag&gt; cursor) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 334             super.changeCursor(cursor);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 335             mCursor = cursor;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 336         }</span>
+ 337 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 338 void changeCursor(Bucket.ObjectCursor&lt;Tag&gt; cursor) {</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 339             super.changeCursor(cursor);</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 340             mCursor = cursor;</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 341         }</span>
+ 342 &gt;&gt;&gt;&gt;&gt;&gt;&gt; YOURS
+ 343 &lt;&lt;&lt;&lt;&lt;&lt;&lt; MINE
+ 344 ||||||| BASE
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 345 @Override</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 346         public View getView(final int position, View convertView, ViewGroup parent) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 347             mCursor.moveToPosition(position);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 348 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 349             if (convertView == null) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 350                 convertView = getActivity().getLayoutInflater().inflate(R.layout.tags_list_row, null);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 351             }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 352             final Tag tag = mCursor.getObject();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 353             convertView.setTag(tag.getSimperiumKey());</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 354 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 355             TextView tagTitle = convertView.findViewById(R.id.tag_name);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 356             TextView tagCountTextView = convertView.findViewById(R.id.tag_count);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 357             tagTitle.setText(tag.getName());</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"><abbr title=" 358             final int tagCount = mNotesBucket.query().where(&quot;tags&quot;, Query.ComparisonType.EQUAL_TO, tag.getSimperiumKey()).count();"> 358             final int tagCount = mNotesBucket.query().where(&quot;tags&quot;, Query.ComparisonType.EQUAL_TO, tag.ge🔵</abbr></span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 359             if (tagCount &gt; 0) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 360                 tagCountTextView.setText(String.valueOf(tagCount));</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 361             } else {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 362                 tagCountTextView.setText(&quot;&quot;);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 363             }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 364 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 365             ImageButton deleteButton = convertView.findViewById(R.id.tag_trash);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 366             deleteButton.setOnClickListener(new View.OnClickListener() {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 367                 @Override</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 368                 public void onClick(View view) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 369                     if (!isAdded()) return;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 370 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 371                     if (tagCount == 0) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 372                         deleteTag(tag);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 373                     } else if (tagCount &gt; 0) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 374                         AlertDialog.Builder alert = new AlertDialog.Builder(getActivity());</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 375                         alert.setTitle(R.string.delete_tag);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 376                         alert.setMessage(getString(R.string.confirm_delete_tag));</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 377                         alert.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 378                             public void onClick(DialogInterface dialog, int whichButton) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 379                                 deleteTag(tag);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 380                             }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 381                         });</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 382                         alert.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 383                             public void onClick(DialogInterface dialog, int whichButton) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 384                                 // Do nothing, just closing the dialog</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 385                             }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 386                         });</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 387                         alert.show();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 388                     }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 389                 }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 390             });</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 391 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 392             return convertView;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 393         }</span>
+ 394 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 395 @Override</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 396         public View getView(final int position, View convertView, ViewGroup parent) {</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 397             mCursor.moveToPosition(position);</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 398 </span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 399             if (convertView == null) {</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 400                 convertView = getActivity().getLayoutInflater().inflate(R.layout.tags_list_row, null);</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 401             }</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 402             final Tag tag = mCursor.getObject();</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 403             convertView.setTag(tag.getSimperiumKey());</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 404 </span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 405             TextView tagTitle = convertView.findViewById(R.id.tag_name);</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 406             TextView tagCountTextView = convertView.findViewById(R.id.tag_count);</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 407             tagTitle.setText(tag.getName());</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"><abbr title=" 408             final int tagCount = mNotesBucket.query().where(&quot;tags&quot;, Query.ComparisonType.EQUAL_TO, tag.getName()).count();"> 408             final int tagCount = mNotesBucket.query().where(&quot;tags&quot;, Query.ComparisonType.EQUAL_TO, tag.ge🔵</abbr></span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 409             if (tagCount &gt; 0) {</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 410                 tagCountTextView.setText(String.valueOf(tagCount));</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 411             } else {</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 412                 tagCountTextView.setText(&quot;&quot;);</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 413             }</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 414 </span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 415             ImageButton deleteButton = convertView.findViewById(R.id.tag_trash);</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 416             deleteButton.setOnClickListener(new View.OnClickListener() {</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 417                 @Override</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 418                 public void onClick(View view) {</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 419                     if (!isAdded()) return;</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 420 </span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 421                     if (tagCount == 0) {</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 422                         deleteTag(tag);</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 423                     } else if (tagCount &gt; 0) {</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 424                         AlertDialog.Builder alert = new AlertDialog.Builder(getActivity());</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 425                         alert.setTitle(R.string.delete_tag);</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 426                         alert.setMessage(getString(R.string.confirm_delete_tag));</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 427                         alert.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 428                             public void onClick(DialogInterface dialog, int whichButton) {</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 429                                 deleteTag(tag);</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 430                             }</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 431                         });</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 432                         alert.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 433                             public void onClick(DialogInterface dialog, int whichButton) {</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 434                                 // Do nothing, just closing the dialog</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 435                             }</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 436                         });</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 437                         alert.show();</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 438                     }</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 439                 }</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 440             });</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 441 </span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 442             return convertView;</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 443         }</span>
+ 444 &gt;&gt;&gt;&gt;&gt;&gt;&gt; YOURS
+ 445 
+ 446     }
+ 447 
+ 448     private class removeTagFromNotesTask extends AsyncTask&lt;Tag, Void, Void&gt; {
+ 449 
+ 450         @Override
+ 451         protected Void doInBackground(Tag... removedTags) {
+ 452             Tag tag = removedTags[0];
+ 453             if (tag != null) {
+ 454                 Bucket.ObjectCursor&lt;Note&gt; notesCursor = tag.findNotes(mNotesBucket);
+ 455                 while (notesCursor.moveToNext()) {
+ 456                     Note note = notesCursor.getObject();
+ 457                     List&lt;String&gt; tags = note.getTags();
+ 458                     tags.remove(tag.getName());
+ 459                     note.setTags(tags);
+ 460                     note.save();
+ 461                 }
+ 462                 notesCursor.close();
+ 463             }
+ 464             return null;
+ 465         }
+ 466     }
+ 467 }
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ </pre></td>
+                            <td><pre>   1 package com.automattic.simplenote;
+   2 
+   3 import android.app.Fragment;
+   4 import android.content.Context;
+   5 import android.content.DialogInterface;
+   6 import android.database.Cursor;
+   7 import android.os.AsyncTask;
+   8 import android.os.Bundle;
+   9 import android.support.annotation.NonNull;
+  10 import android.support.v7.app.AlertDialog;
+  11 import android.support.v7.widget.DividerItemDecoration;
+  12 import android.support.v7.widget.LinearLayoutManager;
+  13 import android.support.v7.widget.RecyclerView;
+  14 import android.view.ActionMode;
+  15 import android.view.LayoutInflater;
+  16 import android.view.Menu;
+  17 import android.view.MenuInflater;
+  18 import android.view.MenuItem;
+  19 import android.view.View;
+  20 import android.view.ViewGroup;
+  21 import android.widget.EditText;
+  22 import android.widget.ImageButton;
+  23 import android.widget.LinearLayout;
+  24 import android.widget.TextView;
+  25 import com.automattic.simplenote.analytics.AnalyticsTracker;
+  26 import com.automattic.simplenote.models.Note;
+  27 import com.automattic.simplenote.models.Tag;
+  28 import com.automattic.simplenote.utils.BaseCursorAdapter;
+  29 import com.automattic.simplenote.utils.HtmlCompat;
+  30 import com.simperium.client.Bucket;
+  31 import com.simperium.client.BucketObjectNameInvalid;
+  32 import com.simperium.client.Query;
+  33 import java.util.List;
+  34 
+  35 
+  36 public class TagsListFragment extends Fragment implements ActionMode.Callback , Bucket.Listener&lt;Tag&gt; {
+  37     private ActionMode mActionMode;
+  38 
+  39     private Bucket&lt;Tag&gt; mTagsBucket;
+  40 
+  41     private Bucket&lt;Note&gt; mNotesBucket;
+  42 
+  43     private TagsAdapter mTagsAdapter;
+  44 
+  45     /**
+  46      * Mandatory empty constructor for the fragment manager to instantiate the
+  47      * fragment (e.g. upon screen orientation changes).
+  48      */
+  49     public TagsListFragment() {
+  50     }
+  51 
+  52     @Override
+<abbr title="  53     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {">  53     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceS🔵</abbr>
+  54         View view = inflater.inflate(R.layout.fragment_tags_list, container, false);
+  55 
+  56         TextView emptyTextView = view.findViewById(android.R.id.empty);
+<abbr title="  57         emptyTextView.setText(HtmlCompat.fromHtml(&quot;&lt;strong&gt;&quot; + getString(R.string.no_tags_found) + &quot;&lt;/strong&gt;&quot;));">  57         emptyTextView.setText(HtmlCompat.fromHtml(&quot;&lt;strong&gt;&quot; + getString(R.string.no_tags_found) + &quot;&lt;/str🔵</abbr>
+  58         return view;
+  59     }
+  60 
+  61     @Override
+  62     public void onActivityCreated(Bundle savedInstanceState) {
+  63         super.onActivityCreated(savedInstanceState);
+  64         setHasOptionsMenu(true);
+  65         Simplenote application = ((Simplenote) (getActivity().getApplication()));
+  66         mTagsBucket = application.getTagsBucket();
+  67         mNotesBucket = application.getNotesBucket();
+  68         RecyclerView recyclerView = getActivity().findViewById(R.id.tagList);
+  69         mTagsAdapter = new TagsAdapter();
+  70         recyclerView.setAdapter(mTagsAdapter);
+  71         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+<abbr title="  72         recyclerView.addItemDecoration(new DividerItemDecoration(recyclerView.getContext(), DividerItemDecoration.VERTICAL));">  72         recyclerView.addItemDecoration(new DividerItemDecoration(recyclerView.getContext(), DividerItemDe🔵</abbr>
+  73         refreshTags();
+  74     }
+  75 
+  76     @Override
+  77     public void onResume() {
+  78         super.onResume();
+  79         mNotesBucket.start();
+  80         mTagsBucket.start();
+  81         mTagsBucket.addOnNetworkChangeListener(this);
+  82         mTagsBucket.addOnSaveObjectListener(this);
+  83         mTagsBucket.addOnDeleteObjectListener(this);
+  84     }
+  85 
+  86     @Override
+  87     public void onPause() {
+  88         super.onPause();
+  89         mTagsBucket.removeOnNetworkChangeListener(this);
+  90         mTagsBucket.removeOnSaveObjectListener(this);
+  91         mTagsBucket.removeOnDeleteObjectListener(this);
+  92         mNotesBucket.stop();
+  93         mTagsBucket.stop();
+  94     }
+  95 
+  96     protected void refreshTags() {
+<abbr title="  97         Query&lt;Tag&gt; tagQuery = Tag.all(mTagsBucket).reorder().orderByKey().include(Tag.NOTE_COUNT_INDEX_NAME);">  97         Query&lt;Tag&gt; tagQuery = Tag.all(mTagsBucket).reorder().orderByKey().include(Tag.NOTE_COUNT_INDEX_NA🔵</abbr>
+  98         Bucket.ObjectCursor&lt;Tag&gt; cursor = tagQuery.execute();
+  99         mTagsAdapter.swapCursor(cursor);
+ 100     }
+ 101 
+ 102     // TODO: Finish bulk editing
+ 103     @Override
+ 104     public boolean onCreateActionMode(ActionMode actionMode, Menu menu) {
+ 105         MenuInflater inflater = actionMode.getMenuInflater();
+ 106         inflater.inflate(R.menu.bulk_edit, menu);
+ 107         mActionMode = actionMode;
+ 108         return true;
+ 109     }
+ 110 
+ 111     @Override
+ 112     public boolean onPrepareActionMode(ActionMode actionMode, Menu menu) {
+ 113         return false;
+ 114     }
+ 115 
+ 116     @Override
+ 117     public boolean onActionItemClicked(ActionMode actionMode, MenuItem menuItem) {
+ 118         if (menuItem.getItemId() == R.id.menu_delete) {
+ 119             actionMode.finish();// Action picked, so close the CAB
+ 120 
+ 121             return true;
+ 122         }
+ 123         return false;
+ 124     }
+ 125 
+ 126     @Override
+ 127     public void onDestroyActionMode(ActionMode actionMode) {
+ 128         mActionMode = null;
+ 129     }
+ 130 
+ 131     @Override
+ 132     public boolean onOptionsItemSelected(MenuItem item) {
+ 133         if (item.getItemId() == android.R.id.home) {
+ 134             if (isAdded()) {
+ 135                 getActivity().finish();
+ 136                 return true;
+ 137             }
+ 138         }
+ 139         return super.onOptionsItemSelected(item);
+ 140     }
+ 141 
+ 142     // Tag Bucket listeners
+ 143     @Override
+ 144     public void onDeleteObject(Bucket&lt;Tag&gt; bucket, Tag object) {
+ 145         if (isAdded()) {
+ 146             getActivity().runOnUiThread(new Runnable() {
+ 147                 @Override
+ 148                 public void run() {
+ 149                     refreshTags();
+ 150                 }
+ 151             });
+ 152         }
+ 153     }
+ 154 
+ 155     @Override
+ 156     public void onNetworkChange(Bucket&lt;Tag&gt; bucket, Bucket.ChangeType type, String key) {
+ 157         if (isAdded()) {
+ 158             getActivity().runOnUiThread(new Runnable() {
+ 159                 @Override
+ 160                 public void run() {
+ 161                     refreshTags();
+ 162                 }
+ 163             });
+ 164         }
+ 165     }
+ 166 
+ 167     @Override
+ 168     public void onSaveObject(Bucket&lt;Tag&gt; bucket, Tag object) {
+ 169         if (isAdded()) {
+ 170             getActivity().runOnUiThread(new Runnable() {
+ 171                 @Override
+ 172                 public void run() {
+ 173                     refreshTags();
+ 174                 }
+ 175             });
+ 176         }
+ 177     }
+ 178 
+ 179     @Override
+ 180     public void onBeforeUpdateObject(Bucket&lt;Tag&gt; bucket, Tag object) {
+ 181         // noop
+ 182     }
+ 183 
+ 184     private class removeTagFromNotesTask extends AsyncTask&lt;Tag, Void, Void&gt; {
+ 185         @Override
+ 186         protected Void doInBackground(Tag... removedTags) {
+ 187             Tag tag = removedTags[0];
+ 188             if (tag != null) {
+ 189                 Bucket.ObjectCursor&lt;Note&gt; notesCursor = tag.findNotes(mNotesBucket);
+ 190                 while (notesCursor.moveToNext()) {
+ 191                     Note note = notesCursor.getObject();
+ 192                     List&lt;String&gt; tags = note.getTags();
+ 193                     tags.remove(tag.getName());
+ 194                     note.setTags(tags);
+ 195                     note.save();
+ 196                 }
+ 197                 notesCursor.close();
+ 198             }
+ 199             return null;
+ 200         }
+ 201     }
+ 202 
+ 203     private class TagsAdapter extends BaseCursorAdapter&lt;TagsAdapter.ViewHolder&gt; {
+ 204         public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+ 205             private TextView tagTitle;
+ 206 
+ 207             private TextView tagCountTextView;
+ 208 
+ 209             private ImageButton deleteButton;
+ 210 
+ 211             private ViewHolder(View itemView) {
+ 212                 super(itemView);
+ 213                 tagTitle = itemView.findViewById(R.id.tag_name);
+ 214                 tagCountTextView = itemView.findViewById(R.id.tag_count);
+ 215                 deleteButton = itemView.findViewById(R.id.tag_trash);
+ 216                 deleteButton.setOnClickListener(new View.OnClickListener() {
+ 217                     @Override
+ 218                     public void onClick(View view) {
+ 219                         if (!isAdded()) {
+ 220                             return;
+ 221                         }
+<abbr title=" 222                         final Tag tag = ((Bucket.ObjectCursor&lt;Tag&gt;) (getItem(getAdapterPosition()))).getObject();"> 222                         final Tag tag = ((Bucket.ObjectCursor&lt;Tag&gt;) (getItem(getAdapterPosition()))).getO🔵</abbr>
+<abbr title=" 223                         final int tagCount = mNotesBucket.query().where(&quot;tags&quot;, Query.ComparisonType.EQUAL_TO, tag.getName()).count();"> 223                         final int tagCount = mNotesBucket.query().where(&quot;tags&quot;, Query.ComparisonType.EQUA🔵</abbr>
+ 224                         if (tagCount == 0) {
+ 225                             deleteTag(tag);
+ 226                         } else if (tagCount &gt; 0) {
+ 227                             AlertDialog.Builder alert = new AlertDialog.Builder(getActivity());
+ 228                             alert.setTitle(R.string.delete_tag);
+ 229                             alert.setMessage(getString(R.string.confirm_delete_tag));
+ 230                             alert.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+ 231                                 public void onClick(DialogInterface dialog, int whichButton) {
+ 232                                     deleteTag(tag);
+ 233                                 }
+ 234                             });
+ 235                             alert.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+ 236                                 public void onClick(DialogInterface dialog, int whichButton) {
+ 237                                     // Do nothing, just closing the dialog
+ 238                                 }
+ 239                             });
+ 240                             alert.show();
+ 241                         }
+ 242                     }
+ 243                 });
+ 244                 itemView.setOnClickListener(this);
+ 245             }
+ 246 
+ 247             @Override
+ 248             public void onClick(View view) {
+ 249                 if (!isAdded()) {
+ 250                     return;
+ 251                 }
+ 252                 final AlertDialog.Builder alert = new AlertDialog.Builder(getActivity());
+<abbr title=" 253                 LinearLayout alertView = ((LinearLayout) (getActivity().getLayoutInflater().inflate(R.layout.edit_tag, null)));"> 253                 LinearLayout alertView = ((LinearLayout) (getActivity().getLayoutInflater().inflate(R.lay🔵</abbr>
+ 254                 final Tag tag = ((Bucket.ObjectCursor&lt;Tag&gt;) (getItem(getAdapterPosition()))).getObject();
+ 255                 final EditText tagNameEditText = alertView.findViewById(R.id.tag_name_edit);
+ 256                 tagNameEditText.setText(tag.getName());
+ 257                 tagNameEditText.setSelection(tagNameEditText.length());
+ 258                 alert.setView(alertView);
+ 259                 alert.setTitle(R.string.rename_tag);
+ 260                 alert.setPositiveButton(R.string.save, new DialogInterface.OnClickListener() {
+ 261                     public void onClick(DialogInterface dialog, int whichButton) {
+ 262                         String value = tagNameEditText.getText().toString().trim();
+ 263                         try {
+ 264                             tag.renameTo(value, mNotesBucket);
+<abbr title=" 265                             AnalyticsTracker.track(AnalyticsTracker.Stat.TAG_EDITOR_ACCESSED, AnalyticsTracker.CATEGORY_TAG, &quot;tag_alert_edit_box&quot;);"> 265                             AnalyticsTracker.track(AnalyticsTracker.Stat.TAG_EDITOR_ACCESSED, AnalyticsTr🔵</abbr>
+ 266                         } catch (BucketObjectNameInvalid e) {
+ 267                             android.util.Log.e(Simplenote.TAG, &quot;Unable to rename tag&quot;, e);
+ 268                             // TODO: show user a message that new tag name is not ok
+ 269                         }
+ 270                     }
+ 271                 });
+ 272                 alert.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+ 273                     public void onClick(DialogInterface dialog, int whichButton) {
+ 274                         // Do nothing
+ 275                     }
+ 276                 });
+ 277                 alert.show();
+ 278             }
+ 279 
+ 280         private void deleteTag(Tag tag) {
+ 281             tag.delete();
+ 282             new removeTagFromNotesTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, tag);
+ 283             AnalyticsTracker.track(
+ 284                     AnalyticsTracker.Stat.TAG_MENU_DELETED,
+ 285                     AnalyticsTracker.CATEGORY_TAG,
+ 286                     &quot;list_trash_button&quot;
+ 287             );
+ 288         }
+ 289         }
+ 290 
+ 291         private TagsAdapter() {
+ 292             super(null);
+ 293         }
+ 294 
+ 295         @NonNull
+ 296         @Override
+ 297         public ViewHolder onCreateViewHolder(@NonNull
+ 298         ViewGroup parent, int viewType) {
+ 299             Context context = parent.getContext();
+ 300             LayoutInflater inflater = LayoutInflater.from(context);
+ 301             View contactView = inflater.inflate(R.layout.tags_list_row, parent, false);
+ 302             return new ViewHolder(contactView);
+ 303         }
+ 304 
+ 305         @Override
+ 306         public void onBindViewHolder(@NonNull
+ 307         ViewHolder holder, Cursor cursor) {
+ 308             Tag tag = ((Bucket.ObjectCursor&lt;Tag&gt;) (cursor)).getObject();
+ 309             holder.tagTitle.setText(tag.getName());
+<abbr title=" 310             final int tagCount = mNotesBucket.query().where(&quot;tags&quot;, Query.ComparisonType.EQUAL_TO, tag.getSimperiumKey()).count();"> 310             final int tagCount = mNotesBucket.query().where(&quot;tags&quot;, Query.ComparisonType.EQUAL_TO, tag.ge🔵</abbr>
+ 311             if (tagCount &gt; 0) {
+ 312                 holder.tagCountTextView.setText(String.valueOf(tagCount));
+ 313             } else {
+ 314                 holder.tagCountTextView.setText(&quot;&quot;);
+ 315             }
+ 316         }
+ 317 
+ 318         @Override
+ 319         public void swapCursor(Cursor newCursor) {
+ 320             super.swapCursor(newCursor);
+ 321         }
+ 322     }
+ 323 }
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ </pre></td>
+                        </tr>
+                    </table>
+                </div>
+                <div id="bottom">
+                    <table style="margin:auto">
+                        <tr>
+                            <th>ours vs. base</th>
+                            <th>theirs vs. base</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1  package com.automattic.simplenote;
+   2  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">   3 -import android.app.ListFragment;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">   4 +import android.app.Fragment;</span>
+   5  import android.content.Context;
+   6  import android.content.DialogInterface;
+   7  import android.database.Cursor;
+   8  import android.os.AsyncTask;
+   9  import android.os.Bundle;
+  10  import android.support.annotation.NonNull;
+  11  import android.support.v7.app.AlertDialog;
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  12 +import android.support.v7.widget.DividerItemDecoration;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  13 +import android.support.v7.widget.LinearLayoutManager;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  14 +import android.support.v7.widget.RecyclerView;</span>
+  15  import android.view.ActionMode;
+  16  import android.view.LayoutInflater;
+  17  import android.view.Menu;
+  18  import android.view.MenuInflater;
+  19  import android.view.MenuItem;
+  20  import android.view.View;
+  21  import android.view.ViewGroup;
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  22 -import android.widget.AbsListView;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  23 -import android.widget.AdapterView;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  24 -import android.widget.CursorAdapter;</span>
+  25  import android.widget.EditText;
+  26  import android.widget.ImageButton;
+  27  import android.widget.LinearLayout;
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  28 -import android.widget.ListView;</span>
+  29  import android.widget.TextView;
+  30  
+  31  import com.automattic.simplenote.analytics.AnalyticsTracker;
+  32  import com.automattic.simplenote.models.Note;
+  33  import com.automattic.simplenote.models.Tag;
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  34 +import com.automattic.simplenote.utils.BaseCursorAdapter;</span>
+  35  import com.automattic.simplenote.utils.HtmlCompat;
+  36  import com.simperium.client.Bucket;
+  37  import com.simperium.client.BucketObjectNameInvalid;
+  38  import com.simperium.client.Query;
+  39  
+  40  import java.util.List;
+  41  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"><abbr title="  42 -public class TagsListFragment extends ListFragment implements AdapterView.OnItemClickListener, ActionMode.Callback, AbsListView.MultiChoiceModeListener, AdapterView.OnItemLongClickListener, Bucket.Listener&lt;Tag&gt; {">  42 -public class TagsListFragment extends ListFragment implements AdapterView.OnItemClickListener, ActionMode.Callback🔵</abbr></span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  43 +public class TagsListFragment extends Fragment implements ActionMode.Callback, Bucket.Listener&lt;Tag&gt; {</span>
+  44  
+  45      private ActionMode mActionMode;
+  46      private Bucket&lt;Tag&gt; mTagsBucket;
+  47      private Bucket&lt;Note&gt; mNotesBucket;
+  48      private TagsAdapter mTagsAdapter;
+  49  
+  50      /**
+  51       * Mandatory empty constructor for the fragment manager to instantiate the
+  52       * fragment (e.g. upon screen orientation changes).
+  53       */
+  54      public TagsListFragment() {
+  55      }
+  56  
+  57      @Override
+  58      public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+  59          View view = inflater.inflate(R.layout.fragment_tags_list, container, false);
+  60  
+  61          TextView emptyTextView = view.findViewById(android.R.id.empty);
+  62          emptyTextView.setText(HtmlCompat.fromHtml(&quot;&lt;strong&gt;&quot; + getString(R.string.no_tags_found) + &quot;&lt;/strong&gt;&quot;));
+  63          return view;
+  64      }
+  65  
+  66      @Override
+  67      public void onActivityCreated(Bundle savedInstanceState) {
+  68          super.onActivityCreated(savedInstanceState);
+  69  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  70 -        ListView listView = getListView();</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  71 -        listView.setMultiChoiceModeListener(this);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  72 -        listView.setOnItemClickListener(this);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  73 -        // Disabling long press CAB action for now since bulk deleting is incomplete</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  74 -        // listView.setOnItemLongClickListener(this);</span>
+  75          setHasOptionsMenu(true);
+  76  
+  77          Simplenote application = (Simplenote) getActivity().getApplication();
+  78          mTagsBucket = application.getTagsBucket();
+  79          mNotesBucket = application.getNotesBucket();
+  80  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  81 -        mTagsAdapter = new TagsAdapter(getActivity().getBaseContext(), null, 0);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  82 -        setListAdapter(mTagsAdapter);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  83 +        RecyclerView recyclerView = getActivity().findViewById(R.id.tagList);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  84 +        mTagsAdapter = new TagsAdapter();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  85 +        recyclerView.setAdapter(mTagsAdapter);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  86 +        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"><abbr title="  87 +        recyclerView.addItemDecoration(new DividerItemDecoration(recyclerView.getContext(), DividerItemDecoration.VERTICAL));">  87 +        recyclerView.addItemDecoration(new DividerItemDecoration(recyclerView.getContext(), DividerItemDecoration.🔵</abbr></span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  88 +</span>
+  89          refreshTags();
+  90      }
+  91  
+  92      @Override
+  93      public void onResume() {
+  94          super.onResume();
+  95  
+  96          mNotesBucket.start();
+  97          mTagsBucket.start();
+  98  
+  99          mTagsBucket.addOnNetworkChangeListener(this);
+ 100          mTagsBucket.addOnSaveObjectListener(this);
+ 101          mTagsBucket.addOnDeleteObjectListener(this);
+ 102      }
+ 103  
+ 104      @Override
+ 105      public void onPause() {
+ 106          super.onPause();
+ 107  
+ 108          mTagsBucket.removeOnNetworkChangeListener(this);
+ 109          mTagsBucket.removeOnSaveObjectListener(this);
+ 110          mTagsBucket.removeOnDeleteObjectListener(this);
+ 111  
+ 112          mNotesBucket.stop();
+ 113          mTagsBucket.stop();
+ 114      }
+ 115  
+ 116      protected void refreshTags() {
+ 117          Query&lt;Tag&gt; tagQuery = Tag.all(mTagsBucket).reorder().orderByKey().include(Tag.NOTE_COUNT_INDEX_NAME);
+ 118          Bucket.ObjectCursor&lt;Tag&gt; cursor = tagQuery.execute();
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 119 -        mTagsAdapter.changeCursor(cursor);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 120 -    }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 121 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 122 -    @Override</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 123 -    public void onItemClick(AdapterView&lt;?&gt; adapterView, View view, int row, long l) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 124 -        if (!isAdded()) return;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 125 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 126 -        final AlertDialog.Builder alert = new AlertDialog.Builder(getActivity());</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"><abbr title=" 127 -        LinearLayout alertView = (LinearLayout) getActivity().getLayoutInflater().inflate(R.layout.edit_tag, null);"> 127 -        LinearLayout alertView = (LinearLayout) getActivity().getLayoutInflater().inflate(R.layout.edit_tag, null)🔵</abbr></span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 128 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 129 -        final Tag tag = mTagsAdapter.getItem(row);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 130 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 131 -        final EditText tagNameEditText = alertView.findViewById(R.id.tag_name_edit);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 132 -        tagNameEditText.setText(tag.getName());</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 133 -        tagNameEditText.setSelection(tagNameEditText.length());</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 134 -        alert.setView(alertView);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 135 -        alert.setTitle(R.string.rename_tag);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 136 -        alert.setPositiveButton(R.string.save, new DialogInterface.OnClickListener() {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 137 -            public void onClick(DialogInterface dialog, int whichButton) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 138 -                String value = tagNameEditText.getText().toString().trim();</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 139 -                try {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 140 -                    tag.renameTo(value, mNotesBucket);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 141 -                    AnalyticsTracker.track(</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 142 -                            AnalyticsTracker.Stat.TAG_EDITOR_ACCESSED,</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 143 -                            AnalyticsTracker.CATEGORY_TAG,</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 144 -                            &quot;tag_alert_edit_box&quot;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 145 -                    );</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 146 -                } catch (BucketObjectNameInvalid e) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 147 -                    android.util.Log.e(Simplenote.TAG, &quot;Unable to rename tag&quot;, e);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 148 -                    // TODO: show user a message that new tag name is not ok</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 149 -                }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 150 -            }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 151 -        });</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 152 -        alert.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 153 -            public void onClick(DialogInterface dialog, int whichButton) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 154 -                // Do nothing</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 155 -            }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 156 -        });</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 157 -        alert.show();</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 158 -</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 159 +        mTagsAdapter.swapCursor(cursor);</span>
+ 160      }
+ 161  
+ 162      // TODO: Finish bulk editing
+ 163      @Override
+ 164      public boolean onCreateActionMode(ActionMode actionMode, Menu menu) {
+ 165          MenuInflater inflater = actionMode.getMenuInflater();
+ 166          inflater.inflate(R.menu.bulk_edit, menu);
+ 167          mActionMode = actionMode;
+ 168          return true;
+ 169      }
+ 170  
+ 171      @Override
+ 172      public boolean onPrepareActionMode(ActionMode actionMode, Menu menu) {
+ 173          return false;
+ 174      }
+ 175  
+ 176      @Override
+ 177      public boolean onActionItemClicked(ActionMode actionMode, MenuItem menuItem) {
+ 178          switch (menuItem.getItemId()) {
+ 179              case R.id.menu_delete:
+ 180                  actionMode.finish(); // Action picked, so close the CAB
+ 181                  return true;
+ 182              default:
+ 183                  return false;
+ 184          }
+
+
+
+
+
+ 185      }
+ 186  
+ 187      @Override
+ 188      public void onDestroyActionMode(ActionMode actionMode) {
+ 189          mActionMode = null;
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 190 -    }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 191 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 192 -    @Override</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 193 -    public void onItemCheckedStateChanged(ActionMode actionMode, int i, long l, boolean b) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 194 -        final int checkedCount = getListView().getCheckedItemCount();</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 195 -        switch (checkedCount) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 196 -            case 0:</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 197 -                actionMode.setSubtitle(null);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 198 -                break;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 199 -            case 1:</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 200 -                actionMode.setSubtitle(&quot;One item selected&quot;);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 201 -                break;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 202 -            default:</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 203 -                actionMode.setSubtitle(&quot;&quot; + checkedCount + &quot; items selected&quot;);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 204 -                break;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 205 -        }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 206 -    }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 207 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 208 -    @Override</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 209 -    public boolean onItemLongClick(AdapterView&lt;?&gt; adapterView, View view, int position, long l) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 210 -        getListView().setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 211 -        getListView().setItemChecked(position, true);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 212 -        if (isAdded() &amp;&amp; mActionMode == null) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 213 -            getActivity().startActionMode(this);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 214 -        }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 215 -        //isCABDestroyed = false;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 216 -        return false; // so this action does not consume the event!!!</span>
+ 217      }
+ 218  
+ 219      @Override
+ 220      public boolean onOptionsItemSelected(MenuItem item) {
+ 221  
+ 222          if (item.getItemId() == android.R.id.home) {
+ 223              if (isAdded()) {
+ 224                  getActivity().finish();
+ 225                  return true;
+ 226              }
+ 227          }
+ 228  
+ 229          return super.onOptionsItemSelected(item);
+ 230      }
+ 231  
+ 232      // Tag Bucket listeners
+ 233      @Override
+ 234      public void onDeleteObject(Bucket&lt;Tag&gt; bucket, Tag object) {
+ 235          if (isAdded()) {
+ 236              getActivity().runOnUiThread(new Runnable() {
+ 237                  @Override
+ 238                  public void run() {
+ 239                      refreshTags();
+ 240                  }
+ 241              });
+ 242          }
+ 243      }
+ 244  
+ 245      @Override
+ 246      public void onNetworkChange(Bucket&lt;Tag&gt; bucket, Bucket.ChangeType type, String key) {
+ 247          if (isAdded()) {
+ 248              getActivity().runOnUiThread(new Runnable() {
+ 249                  @Override
+ 250                  public void run() {
+ 251                      refreshTags();
+ 252                  }
+ 253              });
+ 254          }
+ 255      }
+ 256  
+ 257      @Override
+ 258      public void onSaveObject(Bucket&lt;Tag&gt; bucket, Tag object) {
+ 259          if (isAdded()) {
+ 260              getActivity().runOnUiThread(new Runnable() {
+ 261                  @Override
+ 262                  public void run() {
+ 263                      refreshTags();
+ 264                  }
+ 265              });
+ 266          }
+ 267      }
+ 268  
+ 269      @Override
+ 270      public void onBeforeUpdateObject(Bucket&lt;Tag&gt; bucket, Tag object) {
+ 271          // noop
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 272 -    }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 273 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 274 -    private class TagsAdapter extends CursorAdapter {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 275 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 276 -        private Bucket.ObjectCursor&lt;Tag&gt; mCursor;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 277 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 278 -        public TagsAdapter(Context context, Bucket.ObjectCursor&lt;Tag&gt; c, int flags) {</span>
+
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 279 -            super(context, c, flags);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 280 -            mCursor = c;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 281 -        }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 282 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 283 -        public void changeCursor(Bucket.ObjectCursor&lt;Tag&gt; cursor) {</span>
+
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 284 -            super.changeCursor(cursor);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 285 -            mCursor = cursor;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 286 -        }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 287 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 288 -        @Override</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 289 -        public Tag getItem(int row) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 290 -            super.getItem(row);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 291 -            return mCursor.getObject();</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 292 -        }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 293 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 294 -        @Override</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 295 -        public View getView(final int position, View convertView, ViewGroup parent) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 296 -            mCursor.moveToPosition(position);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 297 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 298 -            if (convertView == null) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 299 -                convertView = getActivity().getLayoutInflater().inflate(R.layout.tags_list_row, null);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 300 -            }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 301 -            final Tag tag = mCursor.getObject();</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 302 -            convertView.setTag(tag.getSimperiumKey());</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 303 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 304 -            TextView tagTitle = convertView.findViewById(R.id.tag_name);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 305 -            TextView tagCountTextView = convertView.findViewById(R.id.tag_count);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 306 -            tagTitle.setText(tag.getName());</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"><abbr title=" 307 -            final int tagCount = mNotesBucket.query().where(&quot;tags&quot;, Query.ComparisonType.EQUAL_TO, tag.getSimperiumKey()).count();"> 307 -            final int tagCount = mNotesBucket.query().where(&quot;tags&quot;, Query.ComparisonType.EQUAL_TO, tag.getSimperiu🔵</abbr></span>
+
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 308 -            if (tagCount &gt; 0) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 309 -                tagCountTextView.setText(String.valueOf(tagCount));</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 310 -            } else {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 311 -                tagCountTextView.setText(&quot;&quot;);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 312 -            }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 313 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 314 -            ImageButton deleteButton = convertView.findViewById(R.id.tag_trash);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 315 -            deleteButton.setOnClickListener(new View.OnClickListener() {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 316 -                @Override</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 317 -                public void onClick(View view) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 318 -                    if (!isAdded()) return;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 319 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 320 -                    if (tagCount == 0) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 321 -                        deleteTag(tag);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 322 -                    } else if (tagCount &gt; 0) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 323 -                        AlertDialog.Builder alert = new AlertDialog.Builder(getActivity());</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 324 -                        alert.setTitle(R.string.delete_tag);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 325 -                        alert.setMessage(getString(R.string.confirm_delete_tag));</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 326 -                        alert.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 327 -                            public void onClick(DialogInterface dialog, int whichButton) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 328 -                                deleteTag(tag);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 329 -                            }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 330 -                        });</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 331 -                        alert.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 332 -                            public void onClick(DialogInterface dialog, int whichButton) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 333 -                                // Do nothing, just closing the dialog</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 334 -                            }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 335 -                        });</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 336 -                        alert.show();</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 337 -                    }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 338 -                }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 339 -            });</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 340 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 341 -            return convertView;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 342 -        }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 343 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 344 -        private void deleteTag(Tag tag) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 345 -            tag.delete();</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 346 -            new removeTagFromNotesTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, tag);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 347 -            AnalyticsTracker.track(</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 348 -                    AnalyticsTracker.Stat.TAG_MENU_DELETED,</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 349 -                    AnalyticsTracker.CATEGORY_TAG,</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 350 -                    &quot;list_trash_button&quot;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 351 -            );</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 352 -        }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 353 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 354 -        @Override</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 355 -        public View newView(Context context, Cursor cursor, ViewGroup viewGroup) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 356 -            return null;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 357 -        }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 358 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 359 -        @Override</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 360 -        public void bindView(View view, Context context, Cursor cursor) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 361 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 362 -        }</span>
+ 363      }
+ 364  
+ 365      private class removeTagFromNotesTask extends AsyncTask&lt;Tag, Void, Void&gt; {
+ 366  
+ 367          @Override
+ 368          protected Void doInBackground(Tag... removedTags) {
+ 369              Tag tag = removedTags[0];
+ 370              if (tag != null) {
+ 371                  Bucket.ObjectCursor&lt;Note&gt; notesCursor = tag.findNotes(mNotesBucket);
+ 372                  while (notesCursor.moveToNext()) {
+ 373                      Note note = notesCursor.getObject();
+ 374                      List&lt;String&gt; tags = note.getTags();
+ 375                      tags.remove(tag.getName());
+ 376                      note.setTags(tags);
+ 377                      note.save();
+ 378                  }
+ 379                  notesCursor.close();
+ 380              }
+ 381              return null;
+ 382          }
+ 383      }
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 384 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 385 +    private class TagsAdapter extends BaseCursorAdapter&lt;TagsAdapter.ViewHolder&gt; {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 386 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 387 +        public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 388 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 389 +            private TextView tagTitle;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 390 +            private TextView tagCountTextView;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 391 +            private ImageButton deleteButton;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 392 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 393 +            private ViewHolder(View itemView) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 394 +                super(itemView);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 395 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 396 +                tagTitle = itemView.findViewById(R.id.tag_name);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 397 +                tagCountTextView = itemView.findViewById(R.id.tag_count);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 398 +                deleteButton = itemView.findViewById(R.id.tag_trash);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 399 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 400 +                deleteButton.setOnClickListener(new View.OnClickListener() {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 401 +                    @Override</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 402 +                    public void onClick(View view) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 403 +                        if (!isAdded()) return;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 404 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 405 +                        final Tag tag = ((Bucket.ObjectCursor&lt;Tag&gt;)getItem(getAdapterPosition())).getObject();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"><abbr title=" 406 +                        final int tagCount = mNotesBucket.query().where(&quot;tags&quot;, Query.ComparisonType.EQUAL_TO, tag.getSimperiumKey()).count();"> 406 +                        final int tagCount = mNotesBucket.query().where(&quot;tags&quot;, Query.ComparisonType.EQUAL_TO, tag🔵</abbr></span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 407 +                        if (tagCount == 0) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 408 +                            deleteTag(tag);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 409 +                        } else if (tagCount &gt; 0) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 410 +                            AlertDialog.Builder alert = new AlertDialog.Builder(getActivity());</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 411 +                            alert.setTitle(R.string.delete_tag);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 412 +                            alert.setMessage(getString(R.string.confirm_delete_tag));</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 413 +                            alert.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 414 +                                public void onClick(DialogInterface dialog, int whichButton) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 415 +                                    deleteTag(tag);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 416 +                                }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 417 +                            });</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 418 +                            alert.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 419 +                                public void onClick(DialogInterface dialog, int whichButton) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 420 +                                    // Do nothing, just closing the dialog</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 421 +                                }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 422 +                            });</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 423 +                            alert.show();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 424 +                        }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 425 +                    }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 426 +                });</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 427 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 428 +                itemView.setOnClickListener(this);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 429 +            }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 430 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 431 +            @Override</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 432 +            public void onClick(View view) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 433 +                if (!isAdded()) return;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 434 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 435 +                final AlertDialog.Builder alert = new AlertDialog.Builder(getActivity());</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"><abbr title=" 436 +                LinearLayout alertView = (LinearLayout) getActivity().getLayoutInflater().inflate(R.layout.edit_tag, null);"> 436 +                LinearLayout alertView = (LinearLayout) getActivity().getLayoutInflater().inflate(R.layout.edit_ta🔵</abbr></span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 437 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 438 +                final Tag tag = ((Bucket.ObjectCursor&lt;Tag&gt;)getItem(getAdapterPosition())).getObject();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 439 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 440 +                final EditText tagNameEditText = alertView.findViewById(R.id.tag_name_edit);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 441 +                tagNameEditText.setText(tag.getName());</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 442 +                tagNameEditText.setSelection(tagNameEditText.length());</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 443 +                alert.setView(alertView);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 444 +                alert.setTitle(R.string.rename_tag);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 445 +                alert.setPositiveButton(R.string.save, new DialogInterface.OnClickListener() {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 446 +                    public void onClick(DialogInterface dialog, int whichButton) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 447 +                        String value = tagNameEditText.getText().toString().trim();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 448 +                        try {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 449 +                            tag.renameTo(value, mNotesBucket);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 450 +                            AnalyticsTracker.track(</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 451 +                                    AnalyticsTracker.Stat.TAG_EDITOR_ACCESSED,</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 452 +                                    AnalyticsTracker.CATEGORY_TAG,</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 453 +                                    &quot;tag_alert_edit_box&quot;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 454 +                            );</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 455 +                        } catch (BucketObjectNameInvalid e) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 456 +                            android.util.Log.e(Simplenote.TAG, &quot;Unable to rename tag&quot;, e);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 457 +                            // TODO: show user a message that new tag name is not ok</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 458 +                        }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 459 +                    }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 460 +                });</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 461 +                alert.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 462 +                    public void onClick(DialogInterface dialog, int whichButton) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 463 +                        // Do nothing</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 464 +                    }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 465 +                });</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 466 +                alert.show();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 467 +            }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 468 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 469 +            private void deleteTag(Tag tag) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 470 +                tag.delete();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 471 +                new removeTagFromNotesTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, tag);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 472 +                AnalyticsTracker.track(</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 473 +                        AnalyticsTracker.Stat.TAG_MENU_DELETED,</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 474 +                        AnalyticsTracker.CATEGORY_TAG,</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 475 +                        &quot;list_trash_button&quot;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 476 +                );</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 477 +            }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 478 +        }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 479 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 480 +        private TagsAdapter() {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 481 +            super(null);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 482 +        }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 483 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 484 +        @NonNull</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 485 +        @Override</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 486 +        public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 487 +            Context context = parent.getContext();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 488 +            LayoutInflater inflater = LayoutInflater.from(context);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 489 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 490 +            View contactView = inflater.inflate(R.layout.tags_list_row, parent, false);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 491 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 492 +            return new ViewHolder(contactView);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 493 +        }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 494 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 495 +        @Override</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 496 +        public void onBindViewHolder(@NonNull ViewHolder holder, Cursor cursor) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 497 +            Tag tag = ((Bucket.ObjectCursor&lt;Tag&gt;)cursor).getObject();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 498 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 499 +            holder.tagTitle.setText(tag.getName());</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"><abbr title=" 500 +            final int tagCount = mNotesBucket.query().where(&quot;tags&quot;, Query.ComparisonType.EQUAL_TO, tag.getSimperiumKey()).count();"> 500 +            final int tagCount = mNotesBucket.query().where(&quot;tags&quot;, Query.ComparisonType.EQUAL_TO, tag.getSimperiu🔵</abbr></span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 501 +            if (tagCount &gt; 0) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 502 +                holder.tagCountTextView.setText(String.valueOf(tagCount));</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 503 +            } else {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 504 +                holder.tagCountTextView.setText(&quot;&quot;);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 505 +            }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 506 +        }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 507 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 508 +        @Override</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 509 +        public void swapCursor(Cursor newCursor) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 510 +            super.swapCursor(newCursor);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 511 +        }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 512 +    }</span>
+ 513  }</pre></td>
+                            <td><pre>   1  package com.automattic.simplenote;
+   2  
+   3  import android.app.ListFragment;
+
+   4  import android.content.Context;
+   5  import android.content.DialogInterface;
+   6  import android.database.Cursor;
+   7  import android.os.AsyncTask;
+   8  import android.os.Bundle;
+   9  import android.support.annotation.NonNull;
+  10  import android.support.v7.app.AlertDialog;
+
+
+
+  11  import android.view.ActionMode;
+  12  import android.view.LayoutInflater;
+  13  import android.view.Menu;
+  14  import android.view.MenuInflater;
+  15  import android.view.MenuItem;
+  16  import android.view.View;
+  17  import android.view.ViewGroup;
+  18  import android.widget.AbsListView;
+  19  import android.widget.AdapterView;
+  20  import android.widget.CursorAdapter;
+  21  import android.widget.EditText;
+  22  import android.widget.ImageButton;
+  23  import android.widget.LinearLayout;
+  24  import android.widget.ListView;
+  25  import android.widget.TextView;
+  26  
+  27  import com.automattic.simplenote.analytics.AnalyticsTracker;
+  28  import com.automattic.simplenote.models.Note;
+  29  import com.automattic.simplenote.models.Tag;
+
+  30  import com.automattic.simplenote.utils.HtmlCompat;
+  31  import com.simperium.client.Bucket;
+  32  import com.simperium.client.BucketObjectNameInvalid;
+  33  import com.simperium.client.Query;
+  34  
+  35  import java.util.List;
+  36  
+<abbr title="  37  public class TagsListFragment extends ListFragment implements AdapterView.OnItemClickListener, ActionMode.Callback, AbsListView.MultiChoiceModeListener, AdapterView.OnItemLongClickListener, Bucket.Listener&lt;Tag&gt; {">  37  public class TagsListFragment extends ListFragment implements AdapterView.OnItemClickListener, ActionMode.Callback🔵</abbr>
+
+  38  
+  39      private ActionMode mActionMode;
+  40      private Bucket&lt;Tag&gt; mTagsBucket;
+  41      private Bucket&lt;Note&gt; mNotesBucket;
+  42      private TagsAdapter mTagsAdapter;
+  43  
+  44      /**
+  45       * Mandatory empty constructor for the fragment manager to instantiate the
+  46       * fragment (e.g. upon screen orientation changes).
+  47       */
+  48      public TagsListFragment() {
+  49      }
+  50  
+  51      @Override
+  52      public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+  53          View view = inflater.inflate(R.layout.fragment_tags_list, container, false);
+  54  
+  55          TextView emptyTextView = view.findViewById(android.R.id.empty);
+  56          emptyTextView.setText(HtmlCompat.fromHtml(&quot;&lt;strong&gt;&quot; + getString(R.string.no_tags_found) + &quot;&lt;/strong&gt;&quot;));
+  57          return view;
+  58      }
+  59  
+  60      @Override
+  61      public void onActivityCreated(Bundle savedInstanceState) {
+  62          super.onActivityCreated(savedInstanceState);
+  63  
+  64          ListView listView = getListView();
+  65          listView.setMultiChoiceModeListener(this);
+  66          listView.setOnItemClickListener(this);
+  67          // Disabling long press CAB action for now since bulk deleting is incomplete
+  68          // listView.setOnItemLongClickListener(this);
+  69          setHasOptionsMenu(true);
+  70  
+  71          Simplenote application = (Simplenote) getActivity().getApplication();
+  72          mTagsBucket = application.getTagsBucket();
+  73          mNotesBucket = application.getNotesBucket();
+  74  
+  75          mTagsAdapter = new TagsAdapter(getActivity().getBaseContext(), null, 0);
+  76          setListAdapter(mTagsAdapter);
+
+
+
+
+
+
+  77          refreshTags();
+  78      }
+  79  
+  80      @Override
+  81      public void onResume() {
+  82          super.onResume();
+  83  
+  84          mNotesBucket.start();
+  85          mTagsBucket.start();
+  86  
+  87          mTagsBucket.addOnNetworkChangeListener(this);
+  88          mTagsBucket.addOnSaveObjectListener(this);
+  89          mTagsBucket.addOnDeleteObjectListener(this);
+  90      }
+  91  
+  92      @Override
+  93      public void onPause() {
+  94          super.onPause();
+  95  
+  96          mTagsBucket.removeOnNetworkChangeListener(this);
+  97          mTagsBucket.removeOnSaveObjectListener(this);
+  98          mTagsBucket.removeOnDeleteObjectListener(this);
+  99  
+ 100          mNotesBucket.stop();
+ 101          mTagsBucket.stop();
+ 102      }
+ 103  
+ 104      protected void refreshTags() {
+ 105          Query&lt;Tag&gt; tagQuery = Tag.all(mTagsBucket).reorder().orderByKey().include(Tag.NOTE_COUNT_INDEX_NAME);
+ 106          Bucket.ObjectCursor&lt;Tag&gt; cursor = tagQuery.execute();
+ 107          mTagsAdapter.changeCursor(cursor);
+ 108      }
+ 109  
+ 110      @Override
+ 111      public void onItemClick(AdapterView&lt;?&gt; adapterView, View view, int row, long l) {
+ 112          if (!isAdded()) return;
+ 113  
+ 114          final AlertDialog.Builder alert = new AlertDialog.Builder(getActivity());
+<abbr title=" 115          LinearLayout alertView = (LinearLayout) getActivity().getLayoutInflater().inflate(R.layout.edit_tag, null);"> 115          LinearLayout alertView = (LinearLayout) getActivity().getLayoutInflater().inflate(R.layout.edit_tag, null)🔵</abbr>
+ 116  
+ 117          final Tag tag = mTagsAdapter.getItem(row);
+ 118  
+ 119          final EditText tagNameEditText = alertView.findViewById(R.id.tag_name_edit);
+ 120          tagNameEditText.setText(tag.getName());
+ 121          tagNameEditText.setSelection(tagNameEditText.length());
+ 122          alert.setView(alertView);
+ 123          alert.setTitle(R.string.rename_tag);
+ 124          alert.setPositiveButton(R.string.save, new DialogInterface.OnClickListener() {
+ 125              public void onClick(DialogInterface dialog, int whichButton) {
+ 126                  String value = tagNameEditText.getText().toString().trim();
+ 127                  try {
+ 128                      tag.renameTo(value, mNotesBucket);
+ 129                      AnalyticsTracker.track(
+ 130                              AnalyticsTracker.Stat.TAG_EDITOR_ACCESSED,
+ 131                              AnalyticsTracker.CATEGORY_TAG,
+ 132                              &quot;tag_alert_edit_box&quot;
+ 133                      );
+ 134                  } catch (BucketObjectNameInvalid e) {
+ 135                      android.util.Log.e(Simplenote.TAG, &quot;Unable to rename tag&quot;, e);
+ 136                      // TODO: show user a message that new tag name is not ok
+ 137                  }
+ 138              }
+ 139          });
+ 140          alert.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+ 141              public void onClick(DialogInterface dialog, int whichButton) {
+ 142                  // Do nothing
+ 143              }
+ 144          });
+ 145          alert.show();
+ 146  
+
+ 147      }
+ 148  
+ 149      // TODO: Finish bulk editing
+ 150      @Override
+ 151      public boolean onCreateActionMode(ActionMode actionMode, Menu menu) {
+ 152          MenuInflater inflater = actionMode.getMenuInflater();
+ 153          inflater.inflate(R.menu.bulk_edit, menu);
+ 154          mActionMode = actionMode;
+ 155          return true;
+ 156      }
+ 157  
+ 158      @Override
+ 159      public boolean onPrepareActionMode(ActionMode actionMode, Menu menu) {
+ 160          return false;
+ 161      }
+ 162  
+ 163      @Override
+ 164      public boolean onActionItemClicked(ActionMode actionMode, MenuItem menuItem) {
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 165 -        switch (menuItem.getItemId()) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 166 -            case R.id.menu_delete:</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 167 -                actionMode.finish(); // Action picked, so close the CAB</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 168 -                return true;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 169 -            default:</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 170 -                return false;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 171 -        }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 172 +        if (menuItem.getItemId() == R.id.menu_delete) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 173 +            actionMode.finish(); // Action picked, so close the CAB</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 174 +            return true;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 175 +        }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 176 +        return false;</span>
+ 177      }
+ 178  
+ 179      @Override
+ 180      public void onDestroyActionMode(ActionMode actionMode) {
+ 181          mActionMode = null;
+ 182      }
+ 183  
+ 184      @Override
+ 185      public void onItemCheckedStateChanged(ActionMode actionMode, int i, long l, boolean b) {
+ 186          final int checkedCount = getListView().getCheckedItemCount();
+ 187          switch (checkedCount) {
+ 188              case 0:
+ 189                  actionMode.setSubtitle(null);
+ 190                  break;
+ 191              case 1:
+ 192                  actionMode.setSubtitle(&quot;One item selected&quot;);
+ 193                  break;
+ 194              default:
+ 195                  actionMode.setSubtitle(&quot;&quot; + checkedCount + &quot; items selected&quot;);
+ 196                  break;
+ 197          }
+ 198      }
+ 199  
+ 200      @Override
+ 201      public boolean onItemLongClick(AdapterView&lt;?&gt; adapterView, View view, int position, long l) {
+ 202          getListView().setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
+ 203          getListView().setItemChecked(position, true);
+ 204          if (isAdded() &amp;&amp; mActionMode == null) {
+ 205              getActivity().startActionMode(this);
+ 206          }
+ 207          //isCABDestroyed = false;
+ 208          return false; // so this action does not consume the event!!!
+ 209      }
+ 210  
+ 211      @Override
+ 212      public boolean onOptionsItemSelected(MenuItem item) {
+ 213  
+ 214          if (item.getItemId() == android.R.id.home) {
+ 215              if (isAdded()) {
+ 216                  getActivity().finish();
+ 217                  return true;
+ 218              }
+ 219          }
+ 220  
+ 221          return super.onOptionsItemSelected(item);
+ 222      }
+ 223  
+ 224      // Tag Bucket listeners
+ 225      @Override
+ 226      public void onDeleteObject(Bucket&lt;Tag&gt; bucket, Tag object) {
+ 227          if (isAdded()) {
+ 228              getActivity().runOnUiThread(new Runnable() {
+ 229                  @Override
+ 230                  public void run() {
+ 231                      refreshTags();
+ 232                  }
+ 233              });
+ 234          }
+ 235      }
+ 236  
+ 237      @Override
+ 238      public void onNetworkChange(Bucket&lt;Tag&gt; bucket, Bucket.ChangeType type, String key) {
+ 239          if (isAdded()) {
+ 240              getActivity().runOnUiThread(new Runnable() {
+ 241                  @Override
+ 242                  public void run() {
+ 243                      refreshTags();
+ 244                  }
+ 245              });
+ 246          }
+ 247      }
+ 248  
+ 249      @Override
+ 250      public void onSaveObject(Bucket&lt;Tag&gt; bucket, Tag object) {
+ 251          if (isAdded()) {
+ 252              getActivity().runOnUiThread(new Runnable() {
+ 253                  @Override
+ 254                  public void run() {
+ 255                      refreshTags();
+ 256                  }
+ 257              });
+ 258          }
+ 259      }
+ 260  
+ 261      @Override
+ 262      public void onBeforeUpdateObject(Bucket&lt;Tag&gt; bucket, Tag object) {
+ 263          // noop
+ 264      }
+ 265  
+ 266      private class TagsAdapter extends CursorAdapter {
+ 267  
+ 268          private Bucket.ObjectCursor&lt;Tag&gt; mCursor;
+ 269  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 270 -        public TagsAdapter(Context context, Bucket.ObjectCursor&lt;Tag&gt; c, int flags) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 271 +        TagsAdapter(Context context, Bucket.ObjectCursor&lt;Tag&gt; c, int flags) {</span>
+ 272              super(context, c, flags);
+ 273              mCursor = c;
+ 274          }
+ 275  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 276 -        public void changeCursor(Bucket.ObjectCursor&lt;Tag&gt; cursor) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 277 +        void changeCursor(Bucket.ObjectCursor&lt;Tag&gt; cursor) {</span>
+ 278              super.changeCursor(cursor);
+ 279              mCursor = cursor;
+ 280          }
+ 281  
+ 282          @Override
+ 283          public Tag getItem(int row) {
+ 284              super.getItem(row);
+ 285              return mCursor.getObject();
+ 286          }
+ 287  
+ 288          @Override
+ 289          public View getView(final int position, View convertView, ViewGroup parent) {
+ 290              mCursor.moveToPosition(position);
+ 291  
+ 292              if (convertView == null) {
+ 293                  convertView = getActivity().getLayoutInflater().inflate(R.layout.tags_list_row, null);
+ 294              }
+ 295              final Tag tag = mCursor.getObject();
+ 296              convertView.setTag(tag.getSimperiumKey());
+ 297  
+ 298              TextView tagTitle = convertView.findViewById(R.id.tag_name);
+ 299              TextView tagCountTextView = convertView.findViewById(R.id.tag_count);
+ 300              tagTitle.setText(tag.getName());
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"><abbr title=" 301 -            final int tagCount = mNotesBucket.query().where(&quot;tags&quot;, Query.ComparisonType.EQUAL_TO, tag.getSimperiumKey()).count();"> 301 -            final int tagCount = mNotesBucket.query().where(&quot;tags&quot;, Query.ComparisonType.EQUAL_TO, tag.getSimperiu🔵</abbr></span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"><abbr title=" 302 +            final int tagCount = mNotesBucket.query().where(&quot;tags&quot;, Query.ComparisonType.EQUAL_TO, tag.getName()).count();"> 302 +            final int tagCount = mNotesBucket.query().where(&quot;tags&quot;, Query.ComparisonType.EQUAL_TO, tag.getName()).🔵</abbr></span>
+ 303              if (tagCount &gt; 0) {
+ 304                  tagCountTextView.setText(String.valueOf(tagCount));
+ 305              } else {
+ 306                  tagCountTextView.setText(&quot;&quot;);
+ 307              }
+ 308  
+ 309              ImageButton deleteButton = convertView.findViewById(R.id.tag_trash);
+ 310              deleteButton.setOnClickListener(new View.OnClickListener() {
+ 311                  @Override
+ 312                  public void onClick(View view) {
+ 313                      if (!isAdded()) return;
+ 314  
+ 315                      if (tagCount == 0) {
+ 316                          deleteTag(tag);
+ 317                      } else if (tagCount &gt; 0) {
+ 318                          AlertDialog.Builder alert = new AlertDialog.Builder(getActivity());
+ 319                          alert.setTitle(R.string.delete_tag);
+ 320                          alert.setMessage(getString(R.string.confirm_delete_tag));
+ 321                          alert.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+ 322                              public void onClick(DialogInterface dialog, int whichButton) {
+ 323                                  deleteTag(tag);
+ 324                              }
+ 325                          });
+ 326                          alert.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+ 327                              public void onClick(DialogInterface dialog, int whichButton) {
+ 328                                  // Do nothing, just closing the dialog
+ 329                              }
+ 330                          });
+ 331                          alert.show();
+ 332                      }
+ 333                  }
+ 334              });
+ 335  
+ 336              return convertView;
+ 337          }
+ 338  
+ 339          private void deleteTag(Tag tag) {
+ 340              tag.delete();
+ 341              new removeTagFromNotesTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, tag);
+ 342              AnalyticsTracker.track(
+ 343                      AnalyticsTracker.Stat.TAG_MENU_DELETED,
+ 344                      AnalyticsTracker.CATEGORY_TAG,
+ 345                      &quot;list_trash_button&quot;
+ 346              );
+ 347          }
+ 348  
+ 349          @Override
+ 350          public View newView(Context context, Cursor cursor, ViewGroup viewGroup) {
+ 351              return null;
+ 352          }
+ 353  
+ 354          @Override
+ 355          public void bindView(View view, Context context, Cursor cursor) {
+ 356  
+ 357          }
+ 358      }
+ 359  
+ 360      private class removeTagFromNotesTask extends AsyncTask&lt;Tag, Void, Void&gt; {
+ 361  
+ 362          @Override
+ 363          protected Void doInBackground(Tag... removedTags) {
+ 364              Tag tag = removedTags[0];
+ 365              if (tag != null) {
+ 366                  Bucket.ObjectCursor&lt;Note&gt; notesCursor = tag.findNotes(mNotesBucket);
+ 367                  while (notesCursor.moveToNext()) {
+ 368                      Note note = notesCursor.getObject();
+ 369                      List&lt;String&gt; tags = note.getTags();
+ 370                      tags.remove(tag.getName());
+ 371                      note.setTags(tags);
+ 372                      note.save();
+ 373                  }
+ 374                  notesCursor.close();
+ 375              }
+ 376              return null;
+ 377          }
+ 378      }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 379  }</pre></td>
+                        </tr>
+                    </table>
+                </div>
+              </body>
+            </html>
+            

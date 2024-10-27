@@ -1,0 +1,1787 @@
+<!DOCTYPE html>
+    <html lang="en">
+              <head>
+                <meta charset="utf-8">
+                <title>24</title>
+                    <style>
+                        #top {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        #bottom {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        abbr {
+                          /* Here is the delay */
+                          transition-delay:0s;
+                        }
+                    </style>
+              </head>
+              <body>
+                <span style="height: 4vh">
+                    24
+                    <a href="23.html">prev</a>
+                    <a href="25.html">next</a>
+                    <a href="24_chunks.html">chunks</a>
+                    <a href="index.html">index</a>
+                    AriaLyy/Aria_ec1b504309d78f4ff275a5e6a6f08a5e0022f44b_Aria/src/main/java/com/arialyy/aria/core/download/DownloadReceiver.java
+                    <textarea rows=1 onclick='navigator.clipboard.writeText(this.value)'>cd C:\studies\se\mega\git-analyzer-plus\notebooks\debug
+del /Q *
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\AriaLyy\Aria show &quot;ec1b504309d78f4ff275a5e6a6f08a5e0022f44b:Aria/src/main/java/com/arialyy/aria/core/download/DownloadReceiver.java&quot; &gt; committed.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\AriaLyy\Aria show &quot;ec1b504309d78f4ff275a5e6a6f08a5e0022f44b^1:Aria/src/main/java/com/arialyy/aria/core/download/DownloadReceiver.java&quot; &gt; ours.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\AriaLyy\Aria show &quot;ec1b504309d78f4ff275a5e6a6f08a5e0022f44b^2:Aria/src/main/java/com/arialyy/aria/core/download/DownloadReceiver.java&quot; &gt; theirs.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\AriaLyy\Aria show &quot;cd587dd212fe20c8c7e9d44c6b009614eae38bef:Aria/src/main/java/com/arialyy/aria/core/download/DownloadReceiver.java&quot; &gt; base.java
+copy ours.java 1ours.java
+copy ours.java 2ours.java
+copy theirs.java 1theirs.java
+copy theirs.java 2theirs.java
+copy base.java 1base.java
+copy base.java 2base.java
+&quot;C:\Program Files\Java\jdk1.8.0_241\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\jFSTMerge\build\libs\jFSTMerge-all.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\jfstmerge.java --show-base
+&quot;C:\Program Files\Eclipse Adoptium\jdk-17.0.11.9-hotspot\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\spork\target\spork-0.5.0-SNAPSHOT.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\spork.java
+del /Q 1*.java
+del /Q 2*.java
+del /Q jfstmerge.java.merge
+</textarea>
+                    {strict: [[sbj]], subset: [[sbj]]}
+                </span>
+                <div id="top">
+
+                    <table>
+                        <tr>
+                            <th>line based (standard git)</th>
+                            <th>jfstmerge</th>
+                            <th>spork</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1 /*
+   2  * Copyright (C) 2016 AriaLyy(https://github.com/AriaLyy/Aria)
+   3  *
+   4  * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+   5  * you may not use this file except in compliance with the License.
+   6  * You may obtain a copy of the License at
+   7  *
+   8  *      http://www.apache.org/licenses/LICENSE-2.0
+   9  *
+  10  * Unless required by applicable law or agreed to in writing, software
+  11  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  12  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  13  * See the License for the specific language governing permissions and
+  14  * limitations under the License.
+  15  */
+  16 package com.arialyy.aria.core.download;
+  17 
+  18 import android.support.annotation.NonNull;
+  19 import android.text.TextUtils;
+  20 import com.arialyy.aria.core.AriaManager;
+  21 import com.arialyy.aria.core.command.ICmd;
+  22 import com.arialyy.aria.core.command.normal.CancelAllCmd;
+  23 import com.arialyy.aria.core.command.normal.NormalCmdFactory;
+  24 import com.arialyy.aria.core.common.ProxyHelper;
+  25 import com.arialyy.aria.core.inf.AbsEntity;
+  26 import com.arialyy.aria.core.inf.AbsReceiver;
+  27 import com.arialyy.aria.core.scheduler.DownloadGroupSchedulers;
+  28 import com.arialyy.aria.core.scheduler.DownloadSchedulers;
+  29 import com.arialyy.aria.core.scheduler.ISchedulerListener;
+  30 import com.arialyy.aria.orm.DbEntity;
+  31 import com.arialyy.aria.util.ALog;
+  32 import com.arialyy.aria.util.CheckUtil;
+  33 import com.arialyy.aria.util.CommonUtil;
+  34 import java.util.ArrayList;
+  35 import java.util.List;
+  36 import java.util.Set;
+  37 
+  38 /**
+  39  * Created by lyy on 2016/12/5.
+  40  * 下载功能接收器
+  41  */
+  42 public class DownloadReceiver extends AbsReceiver {
+  43   private final String TAG = &quot;DownloadReceiver&quot;;
+  44   public ISchedulerListener&lt;DownloadTask&gt; listener;
+  45 
+  46   /**
+  47    * 设置最大下载速度，单位：kb
+  48    * 该方法为实验性功能，清不要轻易在生产环境中使用。
+  49    *
+  50    * @param maxSpeed 为0表示不限速
+  51    */
+  52   @Deprecated public void setMaxSpeed(double maxSpeed) {
+  53     AriaManager.getInstance(AriaManager.APP).getDownloadConfig().setMsxSpeed(maxSpeed);
+  54   }
+  55 
+  56   /**
+  57    * 使用下载实体执行下载操作
+  58    *
+  59    * @param entity 下载实体
+  60    */
+  61   public DownloadTarget load(DownloadEntity entity) {
+  62     return load(entity, false);
+  63   }
+  64 
+  65   /**
+  66    * 使用下载实体执行下载操作
+  67    *
+  68    * @param refreshInfo 是否刷新下载信息
+  69    */
+  70   public DownloadTarget load(DownloadEntity entity, boolean refreshInfo) {
+  71 &lt;&lt;&lt;&lt;&lt;&lt;&lt; GitAnalyzerPlus_ours
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  72     CheckUtil.checkDownloadUrl(entity.getUrl());</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  73     if (entity.getUrl().startsWith(&quot;ftp&quot;)) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  74       ALog.w(TAG,</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"><abbr title="  75           &quot;使用实体启动FTP下载，如果你的FTP服务器需要登录，那么你需要调用登录的接口，如：Aria.download(this).load(url).login(user, pw).start()&quot;);">  75           &quot;使用实体启动FTP下载，如果你的FTP服务器需要登录，那么你需要调用登录的接口，如：Aria.download(this).load(url).login(user, pw).start(🔵</abbr></span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  76       return new FtpDownloadTarget(entity, targetName, refreshInfo);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  77     }</span>
+  78 ||||||| GitAnalyzerPlus_base
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  79     return new DownloadTarget(entity, targetName, refreshInfo);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  80   }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  81 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  82   /**</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  83    * 加载Http、https单任务下载地址</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  84    *</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  85    * @param url 下载地址</span>
+  86 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  87     CheckUtil.checkDownloadEntity(entity);</span>
+  88 &gt;&gt;&gt;&gt;&gt;&gt;&gt; GitAnalyzerPlus_theirs
+  89     return new DownloadTarget(entity, targetName, refreshInfo);
+  90   }
+  91 
+  92   /**
+  93    * 加载Http、https单任务下载地址
+  94    *
+  95    * @param url 下载地址
+  96    */
+  97   public DownloadTarget load(@NonNull String url) {
+  98     return load(url, false);
+  99   }
+ 100 
+ 101   /**
+ 102    * 加载Http、https单任务下载地址
+ 103    *
+ 104    * @param url 下载地址
+ 105    * @param refreshInfo 是否刷新下载信息
+ 106    */
+ 107   public DownloadTarget load(@NonNull String url, boolean refreshInfo) {
+ 108     CheckUtil.checkUrl(url);
+ 109     return new DownloadTarget(url, targetName, refreshInfo);
+ 110   }
+ 111 
+ 112   /**
+ 113    * 加载下载地址，如果任务组的中的下载地址改变了，则任务从新的一个任务组
+ 114    */
+ 115   public DownloadGroupTarget load(List&lt;String&gt; urls) {
+ 116     CheckUtil.checkDownloadUrls(urls);
+ 117     return new DownloadGroupTarget(urls, targetName);
+ 118   }
+ 119 
+ 120   /**
+ 121    * 使用下载实体执行FTP下载操作
+ 122    *
+ 123    * @param entity 下载实体
+ 124    */
+ 125   public FtpDownloadTarget loadFtp(DownloadEntity entity) {
+ 126     return loadFtp(entity, false);
+ 127   }
+ 128 
+ 129   /**
+ 130    * 使用下载实体执行下载操作
+ 131    *
+ 132    * @param refreshInfo 是否刷新下载信息
+ 133    */
+ 134   public FtpDownloadTarget loadFtp(DownloadEntity entity, boolean refreshInfo) {
+ 135     CheckUtil.checkDownloadEntity(entity);
+ 136     if (!entity.getUrl().startsWith(&quot;ftp&quot;)) {
+ 137       throw new IllegalArgumentException(&quot;非FTP请求不能使用该方法&quot;);
+ 138     }
+ 139     return new FtpDownloadTarget(entity, targetName, refreshInfo);
+ 140   }
+ 141 
+ 142   /**
+ 143    * 加载ftp单任务下载地址
+ 144    */
+ 145   public FtpDownloadTarget loadFtp(@NonNull String url) {
+ 146     return loadFtp(url, false);
+ 147   }
+ 148 
+ 149   /**
+ 150    * 加载ftp单任务下载地址
+ 151    *
+ 152    * @param refreshInfo 是否刷新下载信息
+ 153    */
+ 154   public FtpDownloadTarget loadFtp(@NonNull String url, boolean refreshInfo) {
+ 155     CheckUtil.checkUrl(url);
+ 156     return new FtpDownloadTarget(url, targetName, refreshInfo);
+ 157   }
+ 158 
+ 159   /**
+ 160    * 使用任务组实体执行任务组的实体执行任务组的下载操作
+ 161    *
+ 162    * @param groupEntity 如果加载的任务实体没有子项的下载地址，
+ 163    * 那么你需要使用{@link DownloadGroupTarget#setGroupUrl(List)}设置子项的下载地址
+ 164    */
+ 165   public DownloadGroupTarget load(DownloadGroupEntity groupEntity) {
+ 166     return new DownloadGroupTarget(groupEntity, targetName);
+ 167   }
+ 168 
+ 169   /**
+ 170    * 加载ftp文件夹下载地址
+ 171    */
+ 172   public FtpDirDownloadTarget loadFtpDir(@NonNull String dirUrl) {
+ 173     CheckUtil.checkUrl(dirUrl);
+ 174     return new FtpDirDownloadTarget(dirUrl, targetName);
+ 175   }
+ 176 
+ 177   /**
+ 178    * 将当前类注册到Aria
+ 179    */
+ 180   public DownloadReceiver register() {
+ 181     String className = obj.getClass().getName();
+ 182     Set&lt;String&gt; dCounter = ProxyHelper.getInstance().downloadCounter;
+ 183     Set&lt;String&gt; dgCounter = ProxyHelper.getInstance().downloadGroupCounter;
+ 184     Set&lt;String&gt; dgsCounter = ProxyHelper.getInstance().downloadGroupSubCounter;
+ 185     if (dCounter != null &amp;&amp; dCounter.contains(className)) {
+ 186       DownloadSchedulers.getInstance().register(obj);
+ 187     }
+ 188     if ((dgCounter != null &amp;&amp; dgCounter.contains(className)) || (dgsCounter != null
+ 189         &amp;&amp; dgsCounter.contains(className))) {
+ 190       DownloadGroupSchedulers.getInstance().register(obj);
+ 191     }
+ 192     return this;
+ 193   }
+ 194 
+ 195   /**
+ 196    * 取消注册，如果是Activity或fragment，Aria会界面销毁时自动调用该方法。
+ 197    * 如果是Dialog或popupwindow，需要你在撤销界面时调用该方法
+ 198    */
+ 199   @Override public void unRegister() {
+ 200     if (needRmListener) {
+ 201       unRegisterListener();
+ 202     }
+ 203     AriaManager.getInstance(AriaManager.APP).removeReceiver(obj);
+ 204   }
+ 205 
+ 206   @Override public void unRegisterListener() {
+ 207     String className = obj.getClass().getName();
+ 208     Set&lt;String&gt; dCounter = ProxyHelper.getInstance().downloadCounter;
+ 209     Set&lt;String&gt; dgCounter = ProxyHelper.getInstance().downloadGroupCounter;
+ 210     Set&lt;String&gt; dgsCounter = ProxyHelper.getInstance().downloadGroupSubCounter;
+ 211     if (dCounter != null &amp;&amp; dCounter.contains(className)) {
+ 212       DownloadSchedulers.getInstance().unRegister(obj);
+ 213     }
+ 214     if (dgCounter != null &amp;&amp; dgCounter.contains(className) || (dgsCounter != null
+ 215         &amp;&amp; dgsCounter.contains(className))) {
+ 216       DownloadGroupSchedulers.getInstance().unRegister(obj);
+ 217     }
+ 218   }
+ 219 
+ 220   @Override public void destroy() {
+ 221     targetName = null;
+ 222     listener = null;
+ 223   }
+ 224 
+ 225   /**
+ 226    * 通过下载链接获取下载实体
+ 227    */
+ 228   public DownloadEntity getDownloadEntity(String downloadUrl) {
+ 229     CheckUtil.checkUrl(downloadUrl);
+ 230     return DbEntity.findFirst(DownloadEntity.class, &quot;url=? and isGroupChild=&#x27;false&#x27;&quot;, downloadUrl);
+ 231   }
+ 232 
+ 233   /**
+ 234    * 通过下载链接获取保存在数据库的下载任务实体
+ 235    */
+ 236   public DownloadTaskEntity getDownloadTask(String downloadUrl) {
+ 237     CheckUtil.checkUrl(downloadUrl);
+ 238     DownloadEntity entity = getDownloadEntity(downloadUrl);
+ 239     if (entity == null || TextUtils.isEmpty(entity.getDownloadPath())) return null;
+ 240     return DbEntity.findFirst(DownloadTaskEntity.class, &quot;key=? and isGroupTask=&#x27;false&#x27;&quot;,
+ 241         entity.getDownloadPath());
+ 242   }
+ 243 
+ 244   /**
+ 245    * 通过下载链接获取保存在数据库的下载任务组实体
+ 246    */
+ 247   public DownloadGroupTaskEntity getDownloadGroupTask(List&lt;String&gt; urls) {
+ 248     CheckUtil.checkDownloadUrls(urls);
+ 249     String hashCode = CommonUtil.getMd5Code(urls);
+ 250     return DbEntity.findFirst(DownloadGroupTaskEntity.class, &quot;key=?&quot;, hashCode);
+ 251   }
+ 252 
+ 253   /**
+ 254    * 通过任务组key，获取任务组实体
+ 255    * 如果是http，key为所有子任务下载地址拼接后取md5
+ 256    * 如果是ftp，key为ftp服务器的文件夹路径
+ 257    */
+ 258   public DownloadGroupTaskEntity getDownloadGroupTask(String key) {
+ 259     return DbEntity.findFirst(DownloadGroupTaskEntity.class, &quot;key=?&quot;, key);
+ 260   }
+ 261 
+ 262   /**
+ 263    * 下载任务是否存在
+ 264    */
+ 265   @Override public boolean taskExists(String downloadUrl) {
+ 266     return DownloadEntity.findFirst(DownloadEntity.class, &quot;url=?&quot;, downloadUrl) != null;
+ 267   }
+ 268 
+ 269   /**
+ 270    * 获取普通下载任务列表
+ 271    */
+ 272   @Override public List&lt;DownloadEntity&gt; getSimpleTaskList() {
+ 273     return DownloadEntity.findDatas(DownloadEntity.class, &quot;isGroupChild=? and downloadPath!=&#x27;&#x27;&quot;,
+ 274         &quot;false&quot;);
+ 275   }
+ 276 
+ 277   /**
+ 278    * 获取任务组列表
+ 279    */
+ 280   public List&lt;DownloadGroupEntity&gt; getGroupTaskList() {
+ 281     return DownloadEntity.findAllData(DownloadGroupEntity.class);
+ 282   }
+ 283 
+ 284   /**
+ 285    * 获取普通任务和任务组的任务列表
+ 286    */
+ 287   public List&lt;AbsEntity&gt; getTotleTaskList() {
+ 288     List&lt;AbsEntity&gt; list = new ArrayList&lt;&gt;();
+ 289     List&lt;DownloadEntity&gt; simpleTask = getSimpleTaskList();
+ 290     List&lt;DownloadGroupEntity&gt; groupTask = getGroupTaskList();
+ 291     if (simpleTask != null &amp;&amp; !simpleTask.isEmpty()) {
+ 292       list.addAll(simpleTask);
+ 293     }
+ 294     if (groupTask != null &amp;&amp; !groupTask.isEmpty()) {
+ 295       list.addAll(groupTask);
+ 296     }
+ 297     return list;
+ 298   }
+ 299 
+ 300   /**
+ 301    * 停止所有正在下载的任务，并清空等待队列。
+ 302    */
+ 303   @Override public void stopAllTask() {
+ 304     AriaManager.getInstance(AriaManager.APP)
+ 305         .setCmd(NormalCmdFactory.getInstance()
+ 306             .createCmd(targetName, new DownloadTaskEntity(), NormalCmdFactory.TASK_STOP_ALL,
+ 307                 ICmd.TASK_TYPE_DOWNLOAD))
+ 308         .exe();
+ 309   }
+ 310 
+ 311   /**
+ 312    * 恢复所有正在下载的任务
+ 313    * 1.如果执行队列没有满，则开始下载任务，直到执行队列满
+ 314    * 2.如果队列执行队列已经满了，则将所有任务添加到等待队列中
+ 315    */
+ 316   public void resumeAllTask() {
+ 317     AriaManager.getInstance(AriaManager.APP)
+ 318         .setCmd(NormalCmdFactory.getInstance()
+ 319             .createCmd(targetName, new DownloadTaskEntity(), NormalCmdFactory.TASK_RESUME_ALL,
+ 320                 ICmd.TASK_TYPE_DOWNLOAD))
+ 321         .exe();
+ 322   }
+ 323 
+ 324   /**
+ 325    * 删除所有任务
+ 326    *
+ 327    * @param removeFile {@code true} 删除已经下载完成的任务，不仅删除下载记录，还会删除已经下载完成的文件，{@code false}
+ 328    * 如果文件已经下载完成，只删除下载记录
+ 329    */
+ 330   @Override public void removeAllTask(boolean removeFile) {
+ 331     final AriaManager ariaManager = AriaManager.getInstance(AriaManager.APP);
+ 332     CancelAllCmd cancelCmd =
+ 333         (CancelAllCmd) CommonUtil.createNormalCmd(targetName, new DownloadTaskEntity(),
+ 334             NormalCmdFactory.TASK_CANCEL_ALL, ICmd.TASK_TYPE_DOWNLOAD);
+ 335     cancelCmd.removeFile = removeFile;
+ 336     ariaManager.setCmd(cancelCmd).exe();
+ 337     Set&lt;String&gt; keys = ariaManager.getReceiver().keySet();
+ 338     for (String key : keys) {
+ 339       ariaManager.getReceiver().remove(key);
+ 340     }
+ 341   }
+ 342 }
+ 
+ 
+ </pre></td>
+                            <td><pre>   1 /*
+   2  * Copyright (C) 2016 AriaLyy(https://github.com/AriaLyy/Aria)
+   3  *
+   4  * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+   5  * you may not use this file except in compliance with the License.
+   6  * You may obtain a copy of the License at
+   7  *
+   8  *      http://www.apache.org/licenses/LICENSE-2.0
+   9  *
+  10  * Unless required by applicable law or agreed to in writing, software
+  11  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  12  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  13  * See the License for the specific language governing permissions and
+  14  * limitations under the License.
+  15  */
+  16 package com.arialyy.aria.core.download;
+  17 
+  18 import android.support.annotation.NonNull;
+  19 import android.text.TextUtils;
+  20 import com.arialyy.aria.core.AriaManager;
+  21 import com.arialyy.aria.core.command.ICmd;
+  22 import com.arialyy.aria.core.command.normal.CancelAllCmd;
+  23 import com.arialyy.aria.core.command.normal.NormalCmdFactory;
+  24 import com.arialyy.aria.core.common.ProxyHelper;
+  25 import com.arialyy.aria.core.inf.AbsEntity;
+  26 import com.arialyy.aria.core.inf.AbsReceiver;
+  27 import com.arialyy.aria.core.scheduler.DownloadGroupSchedulers;
+  28 import com.arialyy.aria.core.scheduler.DownloadSchedulers;
+  29 import com.arialyy.aria.core.scheduler.ISchedulerListener;
+  30 import com.arialyy.aria.orm.DbEntity;
+  31 import com.arialyy.aria.util.ALog;
+  32 import com.arialyy.aria.util.CheckUtil;
+  33 import com.arialyy.aria.util.CommonUtil;
+  34 import java.util.ArrayList;
+  35 import java.util.List;
+  36 import java.util.Set;
+  37 
+  38 /**
+  39  * Created by lyy on 2016/12/5.
+  40  * 下载功能接收器
+  41  */
+  42 public class DownloadReceiver extends AbsReceiver {
+  43   private final String TAG = &quot;DownloadReceiver&quot;;
+  44   public ISchedulerListener&lt;DownloadTask&gt; listener;
+  45 
+  46   /**
+  47    * 设置最大下载速度，单位：kb
+  48    * 该方法为实验性功能，清不要轻易在生产环境中使用。
+  49    *
+  50    * @param maxSpeed 为0表示不限速
+  51    */
+  52   @Deprecated public void setMaxSpeed(double maxSpeed) {
+  53     AriaManager.getInstance(AriaManager.APP).getDownloadConfig().setMsxSpeed(maxSpeed);
+  54   }
+  55 
+  56   /**
+  57    * 使用下载实体执行下载操作
+  58    *
+  59    * @param entity 下载实体
+  60    */
+  61   public DownloadTarget load(DownloadEntity entity) {
+  62     return load(entity, false);
+  63   }
+  64 
+  65   /**
+  66    * 使用下载实体执行下载操作
+  67    *
+  68    * @param refreshInfo 是否刷新下载信息
+  69    */
+  70   public DownloadTarget load(DownloadEntity entity, boolean refreshInfo) {
+  71 &lt;&lt;&lt;&lt;&lt;&lt;&lt; MINE
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  72     CheckUtil.checkDownloadUrl(entity.getUrl());</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  73     if (entity.getUrl().startsWith(&quot;ftp&quot;)) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  74       ALog.w(TAG,</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"><abbr title="  75           &quot;使用实体启动FTP下载，如果你的FTP服务器需要登录，那么你需要调用登录的接口，如：Aria.download(this).load(url).login(user, pw).start()&quot;);">  75           &quot;使用实体启动FTP下载，如果你的FTP服务器需要登录，那么你需要调用登录的接口，如：Aria.download(this).load(url).login(user, pw).start(🔵</abbr></span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  76       return new FtpDownloadTarget(entity, targetName, refreshInfo);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  77     }</span>
+  78 ||||||| BASE
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  79     return new DownloadTarget(entity, targetName, refreshInfo);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  80   }</span>
+  81 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  82     CheckUtil.checkDownloadEntity(entity);</span>
+  83 &gt;&gt;&gt;&gt;&gt;&gt;&gt; YOURS
+  84     return new DownloadTarget(entity, targetName, refreshInfo);
+  85   }
+  86 
+  87   /**
+  88    * 加载Http、https单任务下载地址
+  89    *
+  90    * @param url 下载地址
+  91    */
+  92   public DownloadTarget load(@NonNull String url) {
+  93     return load(url, false);
+  94   }
+  95 
+  96   /**
+  97    * 加载Http、https单任务下载地址
+  98    *
+  99    * @param url 下载地址
+ 100    * @param refreshInfo 是否刷新下载信息
+ 101    */
+ 102   public DownloadTarget load(@NonNull String url, boolean refreshInfo) {
+ 103     CheckUtil.checkUrl(url);
+ 104     return new DownloadTarget(url, targetName, refreshInfo);
+ 105   }
+ 106 
+ 107   /**
+ 108    * 加载下载地址，如果任务组的中的下载地址改变了，则任务从新的一个任务组
+ 109    */
+ 110   public DownloadGroupTarget load(List&lt;String&gt; urls) {
+ 111     CheckUtil.checkDownloadUrls(urls);
+ 112     return new DownloadGroupTarget(urls, targetName);
+ 113   }
+ 114 
+ 115   /**
+ 116    * 使用下载实体执行FTP下载操作
+ 117    *
+ 118    * @param entity 下载实体
+ 119    */
+ 120   public FtpDownloadTarget loadFtp(DownloadEntity entity) {
+ 121     return loadFtp(entity, false);
+ 122   }
+ 123 
+ 124   /**
+ 125    * 使用下载实体执行下载操作
+ 126    *
+ 127    * @param refreshInfo 是否刷新下载信息
+ 128    */
+ 129   public FtpDownloadTarget loadFtp(DownloadEntity entity, boolean refreshInfo) {
+ 130     CheckUtil.checkDownloadEntity(entity);
+ 131     if (!entity.getUrl().startsWith(&quot;ftp&quot;)) {
+ 132       throw new IllegalArgumentException(&quot;非FTP请求不能使用该方法&quot;);
+ 133     }
+ 134     return new FtpDownloadTarget(entity, targetName, refreshInfo);
+ 135   }
+ 136 
+ 137   /**
+ 138    * 加载ftp单任务下载地址
+ 139    */
+ 140   public FtpDownloadTarget loadFtp(@NonNull String url) {
+ 141     return loadFtp(url, false);
+ 142   }
+ 143 
+ 144   /**
+ 145    * 加载ftp单任务下载地址
+ 146    *
+ 147    * @param refreshInfo 是否刷新下载信息
+ 148    */
+ 149   public FtpDownloadTarget loadFtp(@NonNull String url, boolean refreshInfo) {
+ 150     CheckUtil.checkUrl(url);
+ 151     return new FtpDownloadTarget(url, targetName, refreshInfo);
+ 152   }
+ 153 
+ 154   /**
+ 155    * 使用任务组实体执行任务组的实体执行任务组的下载操作
+ 156    *
+ 157    * @param groupEntity 如果加载的任务实体没有子项的下载地址，
+ 158    * 那么你需要使用{@link DownloadGroupTarget#setGroupUrl(List)}设置子项的下载地址
+ 159    */
+ 160   public DownloadGroupTarget load(DownloadGroupEntity groupEntity) {
+ 161     return new DownloadGroupTarget(groupEntity, targetName);
+ 162   }
+ 163 
+ 164   /**
+ 165    * 加载ftp文件夹下载地址
+ 166    */
+ 167   public FtpDirDownloadTarget loadFtpDir(@NonNull String dirUrl) {
+ 168     CheckUtil.checkUrl(dirUrl);
+ 169     return new FtpDirDownloadTarget(dirUrl, targetName);
+ 170   }
+ 171 
+ 172   /**
+ 173    * 将当前类注册到Aria
+ 174    */
+ 175   public DownloadReceiver register() {
+ 176     String className = obj.getClass().getName();
+ 177     Set&lt;String&gt; dCounter = ProxyHelper.getInstance().downloadCounter;
+ 178     Set&lt;String&gt; dgCounter = ProxyHelper.getInstance().downloadGroupCounter;
+ 179     Set&lt;String&gt; dgsCounter = ProxyHelper.getInstance().downloadGroupSubCounter;
+ 180     if (dCounter != null &amp;&amp; dCounter.contains(className)) {
+ 181       DownloadSchedulers.getInstance().register(obj);
+ 182     }
+ 183     if ((dgCounter != null &amp;&amp; dgCounter.contains(className)) || (dgsCounter != null
+ 184         &amp;&amp; dgsCounter.contains(className))) {
+ 185       DownloadGroupSchedulers.getInstance().register(obj);
+ 186     }
+ 187     return this;
+ 188   }
+ 189 
+ 190   /**
+ 191    * 取消注册，如果是Activity或fragment，Aria会界面销毁时自动调用该方法。
+ 192    * 如果是Dialog或popupwindow，需要你在撤销界面时调用该方法
+ 193    */
+ 194   @Override public void unRegister() {
+ 195     if (needRmListener) {
+ 196       unRegisterListener();
+ 197     }
+ 198       AriaManager.getInstance(AriaManager.APP).removeReceiver(obj);
+ 199     }
+ 200 
+ 201   @Override public void unRegisterListener() {
+ 202     String className = obj.getClass().getName();
+ 203     Set&lt;String&gt; dCounter = ProxyHelper.getInstance().downloadCounter;
+ 204     Set&lt;String&gt; dgCounter = ProxyHelper.getInstance().downloadGroupCounter;
+ 205     Set&lt;String&gt; dgsCounter = ProxyHelper.getInstance().downloadGroupSubCounter;
+ 206     if (dCounter != null &amp;&amp; dCounter.contains(className)) {
+ 207       DownloadSchedulers.getInstance().unRegister(obj);
+ 208     }
+ 209     if (dgCounter != null &amp;&amp; dgCounter.contains(className) || (dgsCounter != null
+ 210         &amp;&amp; dgsCounter.contains(className))) {
+ 211       DownloadGroupSchedulers.getInstance().unRegister(obj);
+ 212     }
+ 213   }
+ 214 
+ 215   @Override public void destroy() {
+ 216     targetName = null;
+ 217     listener = null;
+ 218   }
+ 219 
+ 220   /**
+ 221    * 通过下载链接获取下载实体
+ 222    */
+ 223   public DownloadEntity getDownloadEntity(String downloadUrl) {
+ 224     CheckUtil.checkUrl(downloadUrl);
+ 225     return DbEntity.findFirst(DownloadEntity.class, &quot;url=? and isGroupChild=&#x27;false&#x27;&quot;, downloadUrl);
+ 226   }
+ 227 
+ 228   /**
+ 229    * 通过下载链接获取保存在数据库的下载任务实体
+ 230    */
+ 231   public DownloadTaskEntity getDownloadTask(String downloadUrl) {
+ 232     CheckUtil.checkUrl(downloadUrl);
+ 233     DownloadEntity entity = getDownloadEntity(downloadUrl);
+ 234     if (entity == null || TextUtils.isEmpty(entity.getDownloadPath())) return null;
+ 235     return DbEntity.findFirst(DownloadTaskEntity.class, &quot;key=? and isGroupTask=&#x27;false&#x27;&quot;,
+ 236         entity.getDownloadPath());
+ 237   }
+ 238 
+ 239   /**
+ 240    * 通过下载链接获取保存在数据库的下载任务组实体
+ 241    */
+ 242   public DownloadGroupTaskEntity getDownloadGroupTask(List&lt;String&gt; urls) {
+ 243     CheckUtil.checkDownloadUrls(urls);
+ 244     String hashCode = CommonUtil.getMd5Code(urls);
+ 245     return DbEntity.findFirst(DownloadGroupTaskEntity.class, &quot;key=?&quot;, hashCode);
+ 246   }
+ 247 
+ 248   /**
+ 249    * 通过任务组key，获取任务组实体
+ 250    * 如果是http，key为所有子任务下载地址拼接后取md5
+ 251    * 如果是ftp，key为ftp服务器的文件夹路径
+ 252    */
+ 253   public DownloadGroupTaskEntity getDownloadGroupTask(String key) {
+ 254     return DbEntity.findFirst(DownloadGroupTaskEntity.class, &quot;key=?&quot;, key);
+ 255   }
+ 256 
+ 257   /**
+ 258    * 下载任务是否存在
+ 259    */
+ 260   @Override public boolean taskExists(String downloadUrl) {
+ 261     return DownloadEntity.findFirst(DownloadEntity.class, &quot;url=?&quot;, downloadUrl) != null;
+ 262   }
+ 263 
+ 264   /**
+ 265    * 获取普通下载任务列表
+ 266    */
+ 267   @Override public List&lt;DownloadEntity&gt; getSimpleTaskList() {
+ 268     return DownloadEntity.findDatas(DownloadEntity.class, &quot;isGroupChild=? and downloadPath!=&#x27;&#x27;&quot;,
+ 269         &quot;false&quot;);
+ 270   }
+ 271 
+ 272   /**
+ 273    * 获取任务组列表
+ 274    */
+ 275   public List&lt;DownloadGroupEntity&gt; getGroupTaskList() {
+ 276     return DownloadEntity.findAllData(DownloadGroupEntity.class);
+ 277   }
+ 278 
+ 279   /**
+ 280    * 获取普通任务和任务组的任务列表
+ 281    */
+ 282   public List&lt;AbsEntity&gt; getTotleTaskList() {
+ 283     List&lt;AbsEntity&gt; list = new ArrayList&lt;&gt;();
+ 284     List&lt;DownloadEntity&gt; simpleTask = getSimpleTaskList();
+ 285     List&lt;DownloadGroupEntity&gt; groupTask = getGroupTaskList();
+ 286     if (simpleTask != null &amp;&amp; !simpleTask.isEmpty()) {
+ 287       list.addAll(simpleTask);
+ 288     }
+ 289     if (groupTask != null &amp;&amp; !groupTask.isEmpty()) {
+ 290       list.addAll(groupTask);
+ 291     }
+ 292     return list;
+ 293   }
+ 294 
+ 295   /**
+ 296    * 停止所有正在下载的任务，并清空等待队列。
+ 297    */
+ 298   @Override public void stopAllTask() {
+ 299     AriaManager.getInstance(AriaManager.APP)
+ 300         .setCmd(NormalCmdFactory.getInstance()
+ 301             .createCmd(targetName, new DownloadTaskEntity(), NormalCmdFactory.TASK_STOP_ALL,
+ 302                 ICmd.TASK_TYPE_DOWNLOAD))
+ 303         .exe();
+ 304   }
+ 305 
+ 306   /**
+ 307    * 恢复所有正在下载的任务
+ 308    * 1.如果执行队列没有满，则开始下载任务，直到执行队列满
+ 309    * 2.如果队列执行队列已经满了，则将所有任务添加到等待队列中
+ 310    */
+ 311   public void resumeAllTask() {
+ 312     AriaManager.getInstance(AriaManager.APP)
+ 313         .setCmd(NormalCmdFactory.getInstance()
+ 314             .createCmd(targetName, new DownloadTaskEntity(), NormalCmdFactory.TASK_RESUME_ALL,
+ 315                 ICmd.TASK_TYPE_DOWNLOAD))
+ 316         .exe();
+ 317   }
+ 318 
+ 319   /**
+ 320    * 删除所有任务
+ 321    *
+ 322    * @param removeFile {@code true} 删除已经下载完成的任务，不仅删除下载记录，还会删除已经下载完成的文件，{@code false}
+ 323    * 如果文件已经下载完成，只删除下载记录
+ 324    */
+ 325   @Override public void removeAllTask(boolean removeFile) {
+ 326     final AriaManager ariaManager = AriaManager.getInstance(AriaManager.APP);
+ 327     CancelAllCmd cancelCmd =
+ 328         (CancelAllCmd) CommonUtil.createNormalCmd(targetName, new DownloadTaskEntity(),
+ 329             NormalCmdFactory.TASK_CANCEL_ALL, ICmd.TASK_TYPE_DOWNLOAD);
+ 330     cancelCmd.removeFile = removeFile;
+ 331     ariaManager.setCmd(cancelCmd).exe();
+ 332     Set&lt;String&gt; keys = ariaManager.getReceiver().keySet();
+ 333     for (String key : keys) {
+ 334       ariaManager.getReceiver().remove(key);
+ 335     }
+ 336   }
+ 337 }
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ </pre></td>
+                            <td><pre>   1 /*
+   2  * Copyright (C) 2016 AriaLyy(https://github.com/AriaLyy/Aria)
+   3  *
+   4  * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+   5  * you may not use this file except in compliance with the License.
+   6  * You may obtain a copy of the License at
+   7  *
+   8  *      http://www.apache.org/licenses/LICENSE-2.0
+   9  *
+  10  * Unless required by applicable law or agreed to in writing, software
+  11  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  12  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  13  * See the License for the specific language governing permissions and
+  14  * limitations under the License.
+  15  */
+  16 package com.arialyy.aria.core.download;
+  17 
+  18 import android.support.annotation.NonNull;
+  19 import android.text.TextUtils;
+  20 import com.arialyy.aria.core.AriaManager;
+  21 import com.arialyy.aria.core.command.ICmd;
+  22 import com.arialyy.aria.core.command.normal.CancelAllCmd;
+  23 import com.arialyy.aria.core.command.normal.NormalCmdFactory;
+  24 import com.arialyy.aria.core.common.ProxyHelper;
+  25 import com.arialyy.aria.core.inf.AbsEntity;
+  26 import com.arialyy.aria.core.inf.AbsReceiver;
+  27 import com.arialyy.aria.core.scheduler.DownloadGroupSchedulers;
+  28 import com.arialyy.aria.core.scheduler.DownloadSchedulers;
+  29 import com.arialyy.aria.core.scheduler.ISchedulerListener;
+  30 import com.arialyy.aria.orm.DbEntity;
+  31 import com.arialyy.aria.util.ALog;
+  32 import com.arialyy.aria.util.CheckUtil;
+  33 import com.arialyy.aria.util.CommonUtil;
+  34 import java.util.ArrayList;
+  35 import java.util.List;
+  36 import java.util.Set;
+  37 
+  38 
+  39 /**
+  40  * Created by lyy on 2016/12/5.
+  41  * 下载功能接收器
+  42  */
+  43 public class DownloadReceiver extends AbsReceiver {
+  44   private final String TAG = &quot;DownloadReceiver&quot;;
+  45 
+  46   public ISchedulerListener&lt;DownloadTask&gt; listener;
+  47 
+  48   /**
+  49    * 设置最大下载速度，单位：kb
+  50    * 该方法为实验性功能，清不要轻易在生产环境中使用。
+  51    *
+  52    * @param maxSpeed 为0表示不限速
+  53    */
+  54   @Deprecated public void setMaxSpeed(double maxSpeed) {
+  55     AriaManager.getInstance(AriaManager.APP).getDownloadConfig().setMsxSpeed(maxSpeed);
+  56   }
+  57 
+  58   /**
+  59    * 使用下载实体执行下载操作
+  60    *
+  61    * @param entity 下载实体
+  62    */
+  63   public DownloadTarget load(DownloadEntity entity) {
+  64     return load(entity, false);
+  65   }
+  66 
+  67   /**
+  68    * 使用下载实体执行下载操作
+  69    *
+  70    * @param refreshInfo 是否刷新下载信息
+  71    */
+  72   public DownloadTarget load(DownloadEntity entity, boolean refreshInfo) {
+  73 
+  74 &lt;&lt;&lt;&lt;&lt;&lt;&lt; LEFT
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  75     CheckUtil.checkDownloadUrl(entity.getUrl());</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  76     if (entity.getUrl().startsWith(&quot;ftp&quot;)) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  77       ALog.w(TAG,</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"><abbr title="  78           &quot;使用实体启动FTP下载，如果你的FTP服务器需要登录，那么你需要调用登录的接口，如：Aria.download(this).load(url).login(user, pw).start()&quot;);">  78           &quot;使用实体启动FTP下载，如果你的FTP服务器需要登录，那么你需要调用登录的接口，如：Aria.download(this).load(url).login(user, pw).start(🔵</abbr></span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  79       return new FtpDownloadTarget(entity, targetName, refreshInfo);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  80     }</span>
+  81 ||||||| BASE
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"><abbr title="  82 /*d94z9sk0k4hf9j3ijd - note the base isn&#x27;t actually empty, spork simply doesn&#x27;t generate a base - gd930kwohrp23k5b6vdk93d3r*/">  82 /*d94z9sk0k4hf9j3ijd - note the base isn&#x27;t actually empty, spork simply doesn&#x27;t generate a base - gd930kw🔵</abbr></span>
+  83 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  84 </span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  85     CheckUtil.checkDownloadEntity(entity);</span>
+  86 &gt;&gt;&gt;&gt;&gt;&gt;&gt; RIGHT
+  87 
+  88     return new DownloadTarget(entity, targetName, refreshInfo);
+  89   }
+  90 
+  91   /**
+  92    * 加载Http、https单任务下载地址
+  93    *
+  94    * @param url 下载地址
+  95    */
+  96   public DownloadTarget load(@NonNull String url) {
+  97     return load(url, false);
+  98   }
+  99 
+ 100   /**
+ 101    * 加载Http、https单任务下载地址
+ 102    *
+ 103    * @param url 下载地址
+ 104    * @param refreshInfo 是否刷新下载信息
+ 105    */
+ 106   public DownloadTarget load(@NonNull
+ 107   String url, boolean refreshInfo) {
+ 108     CheckUtil.checkUrl(url);
+ 109     return new DownloadTarget(url, targetName, refreshInfo);
+ 110   }
+ 111 
+ 112   /**
+ 113    * 加载下载地址，如果任务组的中的下载地址改变了，则任务从新的一个任务组
+ 114    */
+ 115   public DownloadGroupTarget load(List&lt;String&gt; urls) {
+ 116     CheckUtil.checkDownloadUrls(urls);
+ 117     return new DownloadGroupTarget(urls, targetName);
+ 118   }
+ 119 
+ 120   /**
+ 121    * 使用下载实体执行FTP下载操作
+ 122    *
+ 123    * @param entity 下载实体
+ 124    */
+ 125   public FtpDownloadTarget loadFtp(DownloadEntity entity) {
+ 126     return loadFtp(entity, false);
+ 127   }
+ 128 
+ 129   /**
+ 130    * 使用下载实体执行下载操作
+ 131    *
+ 132    * @param refreshInfo 是否刷新下载信息
+ 133    */
+ 134   public FtpDownloadTarget loadFtp(DownloadEntity entity, boolean refreshInfo) {
+ 135     CheckUtil.checkDownloadEntity(entity);
+ 136     if (!entity.getUrl().startsWith(&quot;ftp&quot;)) {
+ 137       throw new IllegalArgumentException(&quot;非FTP请求不能使用该方法&quot;);
+ 138     }
+ 139     return new FtpDownloadTarget(entity, targetName, refreshInfo);
+ 140   }
+ 141 
+ 142   /**
+ 143    * 加载ftp单任务下载地址
+ 144    */
+ 145   public FtpDownloadTarget loadFtp(@NonNull String url) {
+ 146     return loadFtp(url, false);
+ 147   }
+ 148 
+ 149   /**
+ 150    * 加载ftp单任务下载地址
+ 151    *
+ 152    * @param refreshInfo 是否刷新下载信息
+ 153    */
+ 154   public FtpDownloadTarget loadFtp(@NonNull
+ 155   String url, boolean refreshInfo) {
+ 156     CheckUtil.checkUrl(url);
+ 157     return new FtpDownloadTarget(url, targetName, refreshInfo);
+ 158   }
+ 159 
+ 160   /**
+ 161    * 使用任务组实体执行任务组的实体执行任务组的下载操作
+ 162    *
+ 163    * @param groupEntity 如果加载的任务实体没有子项的下载地址，
+ 164    * 那么你需要使用{@link DownloadGroupTarget#setGroupUrl(List)}设置子项的下载地址
+ 165    */
+ 166   public DownloadGroupTarget load(DownloadGroupEntity groupEntity) {
+ 167     return new DownloadGroupTarget(groupEntity, targetName);
+ 168   }
+ 169 
+ 170   /**
+ 171    * 加载ftp文件夹下载地址
+ 172    */
+ 173   public FtpDirDownloadTarget loadFtpDir(@NonNull
+ 174   String dirUrl) {
+ 175     CheckUtil.checkUrl(dirUrl);
+ 176     return new FtpDirDownloadTarget(dirUrl, targetName);
+ 177   }
+ 178 
+ 179   /**
+ 180    * 将当前类注册到Aria
+ 181    */
+ 182   public DownloadReceiver register() {
+ 183     String className = obj.getClass().getName();
+ 184     Set&lt;String&gt; dCounter = ProxyHelper.getInstance().downloadCounter;
+ 185     Set&lt;String&gt; dgCounter = ProxyHelper.getInstance().downloadGroupCounter;
+ 186     Set&lt;String&gt; dgsCounter = ProxyHelper.getInstance().downloadGroupSubCounter;
+ 187     if (dCounter != null &amp;&amp; dCounter.contains(className)) {
+ 188       DownloadSchedulers.getInstance().register(obj);
+ 189     }
+ 190     if ((dgCounter != null &amp;&amp; dgCounter.contains(className)) || (dgsCounter != null
+ 191         &amp;&amp; dgsCounter.contains(className))) {
+ 192       DownloadGroupSchedulers.getInstance().register(obj);
+ 193     }
+ 194     return this;
+ 195   }
+ 196 
+ 197   /**
+ 198    * 取消注册，如果是Activity或fragment，Aria会界面销毁时自动调用该方法。
+ 199    * 如果是Dialog或popupwindow，需要你在撤销界面时调用该方法
+ 200    */
+ 201   @Override
+ 202   public void unRegister() {
+ 203     if (needRmListener) {
+ 204       unRegisterListener();
+ 205     }
+ 206     AriaManager.getInstance(AriaManager.APP).removeReceiver(obj);
+ 207   }
+ 208 
+ 209   @Override
+ 210   public void unRegisterListener() {
+ 211     String className = obj.getClass().getName();
+ 212     Set&lt;String&gt; dCounter = ProxyHelper.getInstance().downloadCounter;
+ 213     Set&lt;String&gt; dgCounter = ProxyHelper.getInstance().downloadGroupCounter;
+ 214     Set&lt;String&gt; dgsCounter = ProxyHelper.getInstance().downloadGroupSubCounter;
+ 215     if ((dCounter != null) &amp;&amp; dCounter.contains(className)) {
+ 216       DownloadSchedulers.getInstance().unRegister(obj);
+ 217     }
+<abbr title=" 218     if (((dgCounter != null) &amp;&amp; dgCounter.contains(className)) || ((dgsCounter != null) &amp;&amp; dgsCounter.contains(className))) {"> 218     if (((dgCounter != null) &amp;&amp; dgCounter.contains(className)) || ((dgsCounter != null) &amp;&amp; dgsCounter.con🔵</abbr>
+ 219       DownloadGroupSchedulers.getInstance().unRegister(obj);
+ 220     }
+ 221   }
+ 222 
+ 223   @Override public void destroy() {
+ 224     targetName = null;
+ 225     listener = null;
+ 226   }
+ 227 
+ 228   /**
+ 229    * 通过下载链接获取下载实体
+ 230    */
+ 231   public DownloadEntity getDownloadEntity(String downloadUrl) {
+ 232     CheckUtil.checkUrl(downloadUrl);
+ 233     return DbEntity.findFirst(DownloadEntity.class, &quot;url=? and isGroupChild=&#x27;false&#x27;&quot;, downloadUrl);
+ 234   }
+ 235 
+ 236   /**
+ 237    * 通过下载链接获取保存在数据库的下载任务实体
+ 238    */
+ 239   public DownloadTaskEntity getDownloadTask(String downloadUrl) {
+ 240     CheckUtil.checkUrl(downloadUrl);
+ 241     DownloadEntity entity = getDownloadEntity(downloadUrl);
+ 242     if ((entity == null) || TextUtils.isEmpty(entity.getDownloadPath())) {
+ 243       return null;
+ 244     }
+<abbr title=" 245     return DbEntity.findFirst(DownloadTaskEntity.class, &quot;key=? and isGroupTask=&#x27;false&#x27;&quot;, entity.getDownloadPath());"> 245     return DbEntity.findFirst(DownloadTaskEntity.class, &quot;key=? and isGroupTask=&#x27;false&#x27;&quot;, entity.getDownlo🔵</abbr>
+ 246   }
+ 247 
+ 248   /**
+ 249    * 通过下载链接获取保存在数据库的下载任务组实体
+ 250    */
+ 251   public DownloadGroupTaskEntity getDownloadGroupTask(List&lt;String&gt; urls) {
+ 252     CheckUtil.checkDownloadUrls(urls);
+ 253     String hashCode = CommonUtil.getMd5Code(urls);
+ 254     return DbEntity.findFirst(DownloadGroupTaskEntity.class, &quot;key=?&quot;, hashCode);
+ 255   }
+ 256 
+ 257   /**
+ 258    * 通过任务组key，获取任务组实体
+ 259    * 如果是http，key为所有子任务下载地址拼接后取md5
+ 260    * 如果是ftp，key为ftp服务器的文件夹路径
+ 261    */
+ 262   public DownloadGroupTaskEntity getDownloadGroupTask(String key) {
+ 263     return DbEntity.findFirst(DownloadGroupTaskEntity.class, &quot;key=?&quot;, key);
+ 264   }
+ 265 
+ 266   /**
+ 267    * 下载任务是否存在
+ 268    */
+ 269   @Override public boolean taskExists(String downloadUrl) {
+ 270     return DownloadEntity.findFirst(DownloadEntity.class, &quot;url=?&quot;, downloadUrl) != null;
+ 271   }
+ 272 
+ 273   /**
+ 274    * 获取普通下载任务列表
+ 275    */
+ 276   @Override public List&lt;DownloadEntity&gt; getSimpleTaskList() {
+ 277     return DownloadEntity.findDatas(DownloadEntity.class, &quot;isGroupChild=? and downloadPath!=&#x27;&#x27;&quot;,
+ 278         &quot;false&quot;);
+ 279   }
+ 280 
+ 281   /**
+ 282    * 获取任务组列表
+ 283    */
+ 284   public List&lt;DownloadGroupEntity&gt; getGroupTaskList() {
+ 285     return DownloadEntity.findAllData(DownloadGroupEntity.class);
+ 286   }
+ 287 
+ 288   /**
+ 289    * 获取普通任务和任务组的任务列表
+ 290    */
+ 291   public List&lt;AbsEntity&gt; getTotleTaskList() {
+ 292     List&lt;AbsEntity&gt; list = new ArrayList&lt;&gt;();
+ 293     List&lt;DownloadEntity&gt; simpleTask = getSimpleTaskList();
+ 294     List&lt;DownloadGroupEntity&gt; groupTask = getGroupTaskList();
+ 295     if (simpleTask != null &amp;&amp; !simpleTask.isEmpty()) {
+ 296       list.addAll(simpleTask);
+ 297     }
+ 298     if (groupTask != null &amp;&amp; !groupTask.isEmpty()) {
+ 299       list.addAll(groupTask);
+ 300     }
+ 301     return list;
+ 302   }
+ 303 
+ 304   /**
+ 305    * 停止所有正在下载的任务，并清空等待队列。
+ 306    */
+ 307   @Override public void stopAllTask() {
+ 308     AriaManager.getInstance(AriaManager.APP)
+ 309         .setCmd(NormalCmdFactory.getInstance()
+ 310             .createCmd(targetName, new DownloadTaskEntity(), NormalCmdFactory.TASK_STOP_ALL,
+ 311                 ICmd.TASK_TYPE_DOWNLOAD))
+ 312         .exe();
+ 313   }
+ 314 
+ 315   /**
+ 316    * 恢复所有正在下载的任务
+ 317    * 1.如果执行队列没有满，则开始下载任务，直到执行队列满
+ 318    * 2.如果队列执行队列已经满了，则将所有任务添加到等待队列中
+ 319    */
+ 320   public void resumeAllTask() {
+ 321     AriaManager.getInstance(AriaManager.APP)
+ 322         .setCmd(NormalCmdFactory.getInstance()
+ 323             .createCmd(targetName, new DownloadTaskEntity(), NormalCmdFactory.TASK_RESUME_ALL,
+ 324                 ICmd.TASK_TYPE_DOWNLOAD))
+ 325         .exe();
+ 326   }
+ 327 
+ 328   /**
+ 329    * 删除所有任务
+ 330    *
+ 331    * @param removeFile {@code true} 删除已经下载完成的任务，不仅删除下载记录，还会删除已经下载完成的文件，{@code false}
+ 332    * 如果文件已经下载完成，只删除下载记录
+ 333    */
+ 334   @Override public void removeAllTask(boolean removeFile) {
+ 335     final AriaManager ariaManager = AriaManager.getInstance(AriaManager.APP);
+ 336     CancelAllCmd cancelCmd =
+ 337         (CancelAllCmd) CommonUtil.createNormalCmd(targetName, new DownloadTaskEntity(),
+ 338             NormalCmdFactory.TASK_CANCEL_ALL, ICmd.TASK_TYPE_DOWNLOAD);
+ 339     cancelCmd.removeFile = removeFile;
+ 340     ariaManager.setCmd(cancelCmd).exe();
+ 341     Set&lt;String&gt; keys = ariaManager.getReceiver().keySet();
+ 342     for (String key : keys) {
+ 343       ariaManager.getReceiver().remove(key);
+ 344     }
+ 345   }
+ 346 }</pre></td>
+                        </tr>
+                    </table>
+                </div>
+                <div id="bottom">
+                    <table style="margin:auto">
+                        <tr>
+                            <th>ours vs. base</th>
+                            <th>theirs vs. base</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1  /*
+   2   * Copyright (C) 2016 AriaLyy(https://github.com/AriaLyy/Aria)
+   3   *
+   4   * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+   5   * you may not use this file except in compliance with the License.
+   6   * You may obtain a copy of the License at
+   7   *
+   8   *      http://www.apache.org/licenses/LICENSE-2.0
+   9   *
+  10   * Unless required by applicable law or agreed to in writing, software
+  11   * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  12   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  13   * See the License for the specific language governing permissions and
+  14   * limitations under the License.
+  15   */
+  16  package com.arialyy.aria.core.download;
+  17  
+  18  import android.support.annotation.NonNull;
+  19  import android.text.TextUtils;
+  20  import com.arialyy.aria.core.AriaManager;
+  21  import com.arialyy.aria.core.command.ICmd;
+  22  import com.arialyy.aria.core.command.normal.CancelAllCmd;
+  23  import com.arialyy.aria.core.command.normal.NormalCmdFactory;
+  24  import com.arialyy.aria.core.common.ProxyHelper;
+  25  import com.arialyy.aria.core.inf.AbsEntity;
+  26  import com.arialyy.aria.core.inf.AbsReceiver;
+  27  import com.arialyy.aria.core.scheduler.DownloadGroupSchedulers;
+  28  import com.arialyy.aria.core.scheduler.DownloadSchedulers;
+  29  import com.arialyy.aria.core.scheduler.ISchedulerListener;
+  30  import com.arialyy.aria.orm.DbEntity;
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  31 +import com.arialyy.aria.util.ALog;</span>
+  32  import com.arialyy.aria.util.CheckUtil;
+  33  import com.arialyy.aria.util.CommonUtil;
+  34  import java.util.ArrayList;
+  35  import java.util.List;
+  36  import java.util.Set;
+  37  
+  38  /**
+  39   * Created by lyy on 2016/12/5.
+  40   * 下载功能接收器
+  41   */
+  42  public class DownloadReceiver extends AbsReceiver {
+  43    private final String TAG = &quot;DownloadReceiver&quot;;
+  44    public ISchedulerListener&lt;DownloadTask&gt; listener;
+  45  
+  46    /**
+  47     * 设置最大下载速度，单位：kb
+  48     * 该方法为实验性功能，清不要轻易在生产环境中使用。
+  49     *
+  50     * @param maxSpeed 为0表示不限速
+  51     */
+  52    @Deprecated public void setMaxSpeed(double maxSpeed) {
+  53      AriaManager.getInstance(AriaManager.APP).getDownloadConfig().setMsxSpeed(maxSpeed);
+  54    }
+  55  
+  56    /**
+  57     * 使用下载实体执行下载操作
+  58     *
+  59     * @param entity 下载实体
+  60     */
+  61    public DownloadTarget load(DownloadEntity entity) {
+  62      return load(entity, false);
+  63    }
+  64  
+  65    /**
+  66     * 使用下载实体执行下载操作
+  67     *
+  68     * @param refreshInfo 是否刷新下载信息
+  69     */
+  70    public DownloadTarget load(DownloadEntity entity, boolean refreshInfo) {
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  71 +    CheckUtil.checkDownloadUrl(entity.getUrl());</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  72 +    if (entity.getUrl().startsWith(&quot;ftp&quot;)) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  73 +      ALog.w(TAG,</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  74 +          &quot;使用实体启动FTP下载，如果你的FTP服务器需要登录，那么你需要调用登录的接口，如：Aria.download(this).load(url).login(user, pw).start()&quot;);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  75 +      return new FtpDownloadTarget(entity, targetName, refreshInfo);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  76 +    }</span>
+  77      return new DownloadTarget(entity, targetName, refreshInfo);
+  78    }
+  79  
+  80    /**
+  81     * 加载Http、https单任务下载地址
+  82     *
+  83     * @param url 下载地址
+  84     */
+  85    public DownloadTarget load(@NonNull String url) {
+  86      return load(url, false);
+  87    }
+  88  
+  89    /**
+  90     * 加载Http、https单任务下载地址
+  91     *
+  92     * @param url 下载地址
+  93     * @param refreshInfo 是否刷新下载信息
+  94     */
+  95    public DownloadTarget load(@NonNull String url, boolean refreshInfo) {
+  96      CheckUtil.checkDownloadUrl(url);
+
+  97      return new DownloadTarget(url, targetName, refreshInfo);
+  98    }
+  99  
+ 100    /**
+ 101     * 加载下载地址，如果任务组的中的下载地址改变了，则任务从新的一个任务组
+ 102     */
+ 103    public DownloadGroupTarget load(List&lt;String&gt; urls) {
+ 104      CheckUtil.checkDownloadUrls(urls);
+ 105      return new DownloadGroupTarget(urls, targetName);
+ 106    }
+ 107  
+ 108    /**
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 109     * 加载ftp单任务下载地址
+ 110     */
+ 111    public FtpDownloadTarget loadFtp(@NonNull String url) {
+ 112      return loadFtp(url, false);
+ 113    }
+ 114  
+ 115    /**
+ 116     * 加载ftp单任务下载地址
+ 117     *
+ 118     * @param refreshInfo 是否刷新下载信息
+ 119     */
+ 120    public FtpDownloadTarget loadFtp(@NonNull String url, boolean refreshInfo) {
+ 121      CheckUtil.checkDownloadUrl(url);
+
+ 122      return new FtpDownloadTarget(url, targetName, refreshInfo);
+ 123    }
+ 124  
+ 125    /**
+ 126     * 使用任务组实体执行任务组的实体执行任务组的下载操作
+ 127     *
+ 128     * @param groupEntity 如果加载的任务实体没有子项的下载地址，
+ 129     * 那么你需要使用{@link DownloadGroupTarget#setGroupUrl(List)}设置子项的下载地址
+ 130     */
+ 131    public DownloadGroupTarget load(DownloadGroupEntity groupEntity) {
+ 132      return new DownloadGroupTarget(groupEntity, targetName);
+ 133    }
+ 134  
+ 135    /**
+ 136     * 加载ftp文件夹下载地址
+ 137     */
+ 138    public FtpDirDownloadTarget loadFtpDir(@NonNull String dirUrl) {
+ 139      CheckUtil.checkDownloadUrl(dirUrl);
+
+ 140      return new FtpDirDownloadTarget(dirUrl, targetName);
+ 141    }
+ 142  
+ 143    /**
+ 144     * 将当前类注册到Aria
+ 145     */
+ 146    public DownloadReceiver register() {
+ 147      String className = obj.getClass().getName();
+ 148      Set&lt;String&gt; dCounter = ProxyHelper.getInstance().downloadCounter;
+ 149      Set&lt;String&gt; dgCounter = ProxyHelper.getInstance().downloadGroupCounter;
+ 150      Set&lt;String&gt; dgsCounter = ProxyHelper.getInstance().downloadGroupSubCounter;
+ 151      if (dCounter != null &amp;&amp; dCounter.contains(className)) {
+ 152        DownloadSchedulers.getInstance().register(obj);
+ 153      }
+ 154      if ((dgCounter != null &amp;&amp; dgCounter.contains(className)) || (dgsCounter != null
+ 155          &amp;&amp; dgsCounter.contains(className))) {
+ 156        DownloadGroupSchedulers.getInstance().register(obj);
+ 157      }
+ 158      return this;
+ 159    }
+ 160  
+ 161    /**
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 162 -   * 取消注册</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 163 +   * 取消注册，如果是Activity或fragment，Aria会界面销毁时自动调用该方法。</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 164 +   * 如果是Dialog或popupwindow，需要你在撤销界面时调用该方法</span>
+ 165     */
+ 166    @Override public void unRegister() {
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 167 +    if (needRmListener) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 168 +      unRegisterListener();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 169 +    }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 170 +    AriaManager.getInstance(AriaManager.APP).removeReceiver(obj);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 171 +  }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 172 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 173 +  @Override public void unRegisterListener() {</span>
+ 174      String className = obj.getClass().getName();
+ 175      Set&lt;String&gt; dCounter = ProxyHelper.getInstance().downloadCounter;
+ 176      Set&lt;String&gt; dgCounter = ProxyHelper.getInstance().downloadGroupCounter;
+ 177      Set&lt;String&gt; dgsCounter = ProxyHelper.getInstance().downloadGroupSubCounter;
+ 178      if (dCounter != null &amp;&amp; dCounter.contains(className)) {
+ 179        DownloadSchedulers.getInstance().unRegister(obj);
+ 180      }
+ 181      if (dgCounter != null &amp;&amp; dgCounter.contains(className) || (dgsCounter != null
+ 182          &amp;&amp; dgsCounter.contains(className))) {
+ 183        DownloadGroupSchedulers.getInstance().unRegister(obj);
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 184 -    }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 185 -    if (needRmReceiver) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 186 -      AriaManager.getInstance(AriaManager.APP).removeReceiver(obj);</span>
+ 187      }
+ 188    }
+ 189  
+ 190    @Override public void destroy() {
+ 191      targetName = null;
+ 192      listener = null;
+ 193    }
+ 194  
+ 195    /**
+ 196     * 通过下载链接获取下载实体
+ 197     */
+ 198    public DownloadEntity getDownloadEntity(String downloadUrl) {
+ 199      CheckUtil.checkDownloadUrl(downloadUrl);
+
+ 200      return DbEntity.findFirst(DownloadEntity.class, &quot;url=? and isGroupChild=&#x27;false&#x27;&quot;, downloadUrl);
+ 201    }
+ 202  
+ 203    /**
+ 204     * 通过下载链接获取保存在数据库的下载任务实体
+ 205     */
+ 206    public DownloadTaskEntity getDownloadTask(String downloadUrl) {
+ 207      CheckUtil.checkDownloadUrl(downloadUrl);
+
+ 208      DownloadEntity entity = getDownloadEntity(downloadUrl);
+ 209      if (entity == null || TextUtils.isEmpty(entity.getDownloadPath())) return null;
+ 210      return DbEntity.findFirst(DownloadTaskEntity.class, &quot;key=? and isGroupTask=&#x27;false&#x27;&quot;,
+ 211          entity.getDownloadPath());
+ 212    }
+ 213  
+ 214    /**
+ 215     * 通过下载链接获取保存在数据库的下载任务组实体
+ 216     */
+ 217    public DownloadGroupTaskEntity getDownloadGroupTask(List&lt;String&gt; urls) {
+ 218      CheckUtil.checkDownloadUrls(urls);
+ 219      String hashCode = CommonUtil.getMd5Code(urls);
+ 220      return DbEntity.findFirst(DownloadGroupTaskEntity.class, &quot;key=?&quot;, hashCode);
+ 221    }
+ 222  
+ 223    /**
+ 224     * 通过任务组key，获取任务组实体
+ 225     * 如果是http，key为所有子任务下载地址拼接后取md5
+ 226     * 如果是ftp，key为ftp服务器的文件夹路径
+ 227     */
+ 228    public DownloadGroupTaskEntity getDownloadGroupTask(String key) {
+ 229      return DbEntity.findFirst(DownloadGroupTaskEntity.class, &quot;key=?&quot;, key);
+ 230    }
+ 231  
+ 232    /**
+ 233     * 下载任务是否存在
+ 234     */
+ 235    @Override public boolean taskExists(String downloadUrl) {
+ 236      return DownloadEntity.findFirst(DownloadEntity.class, &quot;url=?&quot;, downloadUrl) != null;
+ 237    }
+ 238  
+ 239    /**
+ 240     * 获取普通下载任务列表
+ 241     */
+ 242    @Override public List&lt;DownloadEntity&gt; getSimpleTaskList() {
+ 243      return DownloadEntity.findDatas(DownloadEntity.class, &quot;isGroupChild=? and downloadPath!=&#x27;&#x27;&quot;,
+ 244          &quot;false&quot;);
+ 245    }
+ 246  
+ 247    /**
+ 248     * 获取任务组列表
+ 249     */
+ 250    public List&lt;DownloadGroupEntity&gt; getGroupTaskList() {
+ 251      return DownloadEntity.findAllData(DownloadGroupEntity.class);
+ 252    }
+ 253  
+ 254    /**
+ 255     * 获取普通任务和任务组的任务列表
+ 256     */
+ 257    public List&lt;AbsEntity&gt; getTotleTaskList() {
+ 258      List&lt;AbsEntity&gt; list = new ArrayList&lt;&gt;();
+ 259      List&lt;DownloadEntity&gt; simpleTask = getSimpleTaskList();
+ 260      List&lt;DownloadGroupEntity&gt; groupTask = getGroupTaskList();
+ 261      if (simpleTask != null &amp;&amp; !simpleTask.isEmpty()) {
+ 262        list.addAll(simpleTask);
+ 263      }
+ 264      if (groupTask != null &amp;&amp; !groupTask.isEmpty()) {
+ 265        list.addAll(groupTask);
+ 266      }
+ 267      return list;
+ 268    }
+ 269  
+ 270    /**
+ 271     * 停止所有正在下载的任务，并清空等待队列。
+ 272     */
+ 273    @Override public void stopAllTask() {
+ 274      AriaManager.getInstance(AriaManager.APP)
+ 275          .setCmd(NormalCmdFactory.getInstance()
+ 276              .createCmd(targetName, new DownloadTaskEntity(), NormalCmdFactory.TASK_STOP_ALL,
+ 277                  ICmd.TASK_TYPE_DOWNLOAD))
+ 278          .exe();
+ 279    }
+ 280  
+ 281    /**
+ 282     * 恢复所有正在下载的任务
+ 283     * 1.如果执行队列没有满，则开始下载任务，直到执行队列满
+ 284     * 2.如果队列执行队列已经满了，则将所有任务添加到等待队列中
+ 285     */
+ 286    public void resumeAllTask() {
+ 287      AriaManager.getInstance(AriaManager.APP)
+ 288          .setCmd(NormalCmdFactory.getInstance()
+ 289              .createCmd(targetName, new DownloadTaskEntity(), NormalCmdFactory.TASK_RESUME_ALL,
+ 290                  ICmd.TASK_TYPE_DOWNLOAD))
+ 291          .exe();
+ 292    }
+ 293  
+ 294    /**
+ 295     * 删除所有任务
+ 296     *
+ 297     * @param removeFile {@code true} 删除已经下载完成的任务，不仅删除下载记录，还会删除已经下载完成的文件，{@code false}
+ 298     * 如果文件已经下载完成，只删除下载记录
+ 299     */
+ 300    @Override public void removeAllTask(boolean removeFile) {
+ 301      final AriaManager ariaManager = AriaManager.getInstance(AriaManager.APP);
+ 302      CancelAllCmd cancelCmd =
+ 303          (CancelAllCmd) CommonUtil.createNormalCmd(targetName, new DownloadTaskEntity(),
+ 304              NormalCmdFactory.TASK_CANCEL_ALL, ICmd.TASK_TYPE_DOWNLOAD);
+ 305      cancelCmd.removeFile = removeFile;
+ 306      ariaManager.setCmd(cancelCmd).exe();
+ 307      Set&lt;String&gt; keys = ariaManager.getReceiver().keySet();
+ 308      for (String key : keys) {
+ 309        ariaManager.getReceiver().remove(key);
+ 310      }
+ 311    }
+ 312  }</pre></td>
+                            <td><pre>   1  /*
+   2   * Copyright (C) 2016 AriaLyy(https://github.com/AriaLyy/Aria)
+   3   *
+   4   * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+   5   * you may not use this file except in compliance with the License.
+   6   * You may obtain a copy of the License at
+   7   *
+   8   *      http://www.apache.org/licenses/LICENSE-2.0
+   9   *
+  10   * Unless required by applicable law or agreed to in writing, software
+  11   * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  12   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  13   * See the License for the specific language governing permissions and
+  14   * limitations under the License.
+  15   */
+  16  package com.arialyy.aria.core.download;
+  17  
+  18  import android.support.annotation.NonNull;
+  19  import android.text.TextUtils;
+  20  import com.arialyy.aria.core.AriaManager;
+  21  import com.arialyy.aria.core.command.ICmd;
+  22  import com.arialyy.aria.core.command.normal.CancelAllCmd;
+  23  import com.arialyy.aria.core.command.normal.NormalCmdFactory;
+  24  import com.arialyy.aria.core.common.ProxyHelper;
+  25  import com.arialyy.aria.core.inf.AbsEntity;
+  26  import com.arialyy.aria.core.inf.AbsReceiver;
+  27  import com.arialyy.aria.core.scheduler.DownloadGroupSchedulers;
+  28  import com.arialyy.aria.core.scheduler.DownloadSchedulers;
+  29  import com.arialyy.aria.core.scheduler.ISchedulerListener;
+  30  import com.arialyy.aria.orm.DbEntity;
+
+  31  import com.arialyy.aria.util.CheckUtil;
+  32  import com.arialyy.aria.util.CommonUtil;
+  33  import java.util.ArrayList;
+  34  import java.util.List;
+  35  import java.util.Set;
+  36  
+  37  /**
+  38   * Created by lyy on 2016/12/5.
+  39   * 下载功能接收器
+  40   */
+  41  public class DownloadReceiver extends AbsReceiver {
+  42    private final String TAG = &quot;DownloadReceiver&quot;;
+  43    public ISchedulerListener&lt;DownloadTask&gt; listener;
+  44  
+  45    /**
+  46     * 设置最大下载速度，单位：kb
+  47     * 该方法为实验性功能，清不要轻易在生产环境中使用。
+  48     *
+  49     * @param maxSpeed 为0表示不限速
+  50     */
+  51    @Deprecated public void setMaxSpeed(double maxSpeed) {
+  52      AriaManager.getInstance(AriaManager.APP).getDownloadConfig().setMsxSpeed(maxSpeed);
+  53    }
+  54  
+  55    /**
+  56     * 使用下载实体执行下载操作
+  57     *
+  58     * @param entity 下载实体
+  59     */
+  60    public DownloadTarget load(DownloadEntity entity) {
+  61      return load(entity, false);
+  62    }
+  63  
+  64    /**
+  65     * 使用下载实体执行下载操作
+  66     *
+  67     * @param refreshInfo 是否刷新下载信息
+  68     */
+  69    public DownloadTarget load(DownloadEntity entity, boolean refreshInfo) {
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  70 +    CheckUtil.checkDownloadEntity(entity);</span>
+
+
+
+
+
+  71      return new DownloadTarget(entity, targetName, refreshInfo);
+  72    }
+  73  
+  74    /**
+  75     * 加载Http、https单任务下载地址
+  76     *
+  77     * @param url 下载地址
+  78     */
+  79    public DownloadTarget load(@NonNull String url) {
+  80      return load(url, false);
+  81    }
+  82  
+  83    /**
+  84     * 加载Http、https单任务下载地址
+  85     *
+  86     * @param url 下载地址
+  87     * @param refreshInfo 是否刷新下载信息
+  88     */
+  89    public DownloadTarget load(@NonNull String url, boolean refreshInfo) {
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  90 -    CheckUtil.checkDownloadUrl(url);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  91 +    CheckUtil.checkUrl(url);</span>
+  92      return new DownloadTarget(url, targetName, refreshInfo);
+  93    }
+  94  
+  95    /**
+  96     * 加载下载地址，如果任务组的中的下载地址改变了，则任务从新的一个任务组
+  97     */
+  98    public DownloadGroupTarget load(List&lt;String&gt; urls) {
+  99      CheckUtil.checkDownloadUrls(urls);
+ 100      return new DownloadGroupTarget(urls, targetName);
+ 101    }
+ 102  
+ 103    /**
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 104 +   * 使用下载实体执行FTP下载操作</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 105 +   *</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 106 +   * @param entity 下载实体</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 107 +   */</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 108 +  public FtpDownloadTarget loadFtp(DownloadEntity entity) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 109 +    return loadFtp(entity, false);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 110 +  }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 111 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 112 +  /**</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 113 +   * 使用下载实体执行下载操作</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 114 +   *</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 115 +   * @param refreshInfo 是否刷新下载信息</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 116 +   */</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 117 +  public FtpDownloadTarget loadFtp(DownloadEntity entity, boolean refreshInfo) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 118 +    CheckUtil.checkDownloadEntity(entity);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 119 +    if (!entity.getUrl().startsWith(&quot;ftp&quot;)) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 120 +      throw new IllegalArgumentException(&quot;非FTP请求不能使用该方法&quot;);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 121 +    }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 122 +    return new FtpDownloadTarget(entity, targetName, refreshInfo);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 123 +  }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 124 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 125 +  /**</span>
+ 126     * 加载ftp单任务下载地址
+ 127     */
+ 128    public FtpDownloadTarget loadFtp(@NonNull String url) {
+ 129      return loadFtp(url, false);
+ 130    }
+ 131  
+ 132    /**
+ 133     * 加载ftp单任务下载地址
+ 134     *
+ 135     * @param refreshInfo 是否刷新下载信息
+ 136     */
+ 137    public FtpDownloadTarget loadFtp(@NonNull String url, boolean refreshInfo) {
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 138 -    CheckUtil.checkDownloadUrl(url);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 139 +    CheckUtil.checkUrl(url);</span>
+ 140      return new FtpDownloadTarget(url, targetName, refreshInfo);
+ 141    }
+ 142  
+ 143    /**
+ 144     * 使用任务组实体执行任务组的实体执行任务组的下载操作
+ 145     *
+ 146     * @param groupEntity 如果加载的任务实体没有子项的下载地址，
+ 147     * 那么你需要使用{@link DownloadGroupTarget#setGroupUrl(List)}设置子项的下载地址
+ 148     */
+ 149    public DownloadGroupTarget load(DownloadGroupEntity groupEntity) {
+ 150      return new DownloadGroupTarget(groupEntity, targetName);
+ 151    }
+ 152  
+ 153    /**
+ 154     * 加载ftp文件夹下载地址
+ 155     */
+ 156    public FtpDirDownloadTarget loadFtpDir(@NonNull String dirUrl) {
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 157 -    CheckUtil.checkDownloadUrl(dirUrl);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 158 +    CheckUtil.checkUrl(dirUrl);</span>
+ 159      return new FtpDirDownloadTarget(dirUrl, targetName);
+ 160    }
+ 161  
+ 162    /**
+ 163     * 将当前类注册到Aria
+ 164     */
+ 165    public DownloadReceiver register() {
+ 166      String className = obj.getClass().getName();
+ 167      Set&lt;String&gt; dCounter = ProxyHelper.getInstance().downloadCounter;
+ 168      Set&lt;String&gt; dgCounter = ProxyHelper.getInstance().downloadGroupCounter;
+ 169      Set&lt;String&gt; dgsCounter = ProxyHelper.getInstance().downloadGroupSubCounter;
+ 170      if (dCounter != null &amp;&amp; dCounter.contains(className)) {
+ 171        DownloadSchedulers.getInstance().register(obj);
+ 172      }
+ 173      if ((dgCounter != null &amp;&amp; dgCounter.contains(className)) || (dgsCounter != null
+ 174          &amp;&amp; dgsCounter.contains(className))) {
+ 175        DownloadGroupSchedulers.getInstance().register(obj);
+ 176      }
+ 177      return this;
+ 178    }
+ 179  
+ 180    /**
+ 181     * 取消注册
+
+
+ 182     */
+ 183    @Override public void unRegister() {
+
+
+
+
+
+
+
+ 184      String className = obj.getClass().getName();
+ 185      Set&lt;String&gt; dCounter = ProxyHelper.getInstance().downloadCounter;
+ 186      Set&lt;String&gt; dgCounter = ProxyHelper.getInstance().downloadGroupCounter;
+ 187      Set&lt;String&gt; dgsCounter = ProxyHelper.getInstance().downloadGroupSubCounter;
+ 188      if (dCounter != null &amp;&amp; dCounter.contains(className)) {
+ 189        DownloadSchedulers.getInstance().unRegister(obj);
+ 190      }
+ 191      if (dgCounter != null &amp;&amp; dgCounter.contains(className) || (dgsCounter != null
+ 192          &amp;&amp; dgsCounter.contains(className))) {
+ 193        DownloadGroupSchedulers.getInstance().unRegister(obj);
+ 194      }
+ 195      if (needRmReceiver) {
+ 196        AriaManager.getInstance(AriaManager.APP).removeReceiver(obj);
+ 197      }
+ 198    }
+ 199  
+ 200    @Override public void destroy() {
+ 201      targetName = null;
+ 202      listener = null;
+ 203    }
+ 204  
+ 205    /**
+ 206     * 通过下载链接获取下载实体
+ 207     */
+ 208    public DownloadEntity getDownloadEntity(String downloadUrl) {
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 209 -    CheckUtil.checkDownloadUrl(downloadUrl);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 210 +    CheckUtil.checkUrl(downloadUrl);</span>
+ 211      return DbEntity.findFirst(DownloadEntity.class, &quot;url=? and isGroupChild=&#x27;false&#x27;&quot;, downloadUrl);
+ 212    }
+ 213  
+ 214    /**
+ 215     * 通过下载链接获取保存在数据库的下载任务实体
+ 216     */
+ 217    public DownloadTaskEntity getDownloadTask(String downloadUrl) {
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 218 -    CheckUtil.checkDownloadUrl(downloadUrl);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 219 +    CheckUtil.checkUrl(downloadUrl);</span>
+ 220      DownloadEntity entity = getDownloadEntity(downloadUrl);
+ 221      if (entity == null || TextUtils.isEmpty(entity.getDownloadPath())) return null;
+ 222      return DbEntity.findFirst(DownloadTaskEntity.class, &quot;key=? and isGroupTask=&#x27;false&#x27;&quot;,
+ 223          entity.getDownloadPath());
+ 224    }
+ 225  
+ 226    /**
+ 227     * 通过下载链接获取保存在数据库的下载任务组实体
+ 228     */
+ 229    public DownloadGroupTaskEntity getDownloadGroupTask(List&lt;String&gt; urls) {
+ 230      CheckUtil.checkDownloadUrls(urls);
+ 231      String hashCode = CommonUtil.getMd5Code(urls);
+ 232      return DbEntity.findFirst(DownloadGroupTaskEntity.class, &quot;key=?&quot;, hashCode);
+ 233    }
+ 234  
+ 235    /**
+ 236     * 通过任务组key，获取任务组实体
+ 237     * 如果是http，key为所有子任务下载地址拼接后取md5
+ 238     * 如果是ftp，key为ftp服务器的文件夹路径
+ 239     */
+ 240    public DownloadGroupTaskEntity getDownloadGroupTask(String key) {
+ 241      return DbEntity.findFirst(DownloadGroupTaskEntity.class, &quot;key=?&quot;, key);
+ 242    }
+ 243  
+ 244    /**
+ 245     * 下载任务是否存在
+ 246     */
+ 247    @Override public boolean taskExists(String downloadUrl) {
+ 248      return DownloadEntity.findFirst(DownloadEntity.class, &quot;url=?&quot;, downloadUrl) != null;
+ 249    }
+ 250  
+ 251    /**
+ 252     * 获取普通下载任务列表
+ 253     */
+ 254    @Override public List&lt;DownloadEntity&gt; getSimpleTaskList() {
+ 255      return DownloadEntity.findDatas(DownloadEntity.class, &quot;isGroupChild=? and downloadPath!=&#x27;&#x27;&quot;,
+ 256          &quot;false&quot;);
+ 257    }
+ 258  
+ 259    /**
+ 260     * 获取任务组列表
+ 261     */
+ 262    public List&lt;DownloadGroupEntity&gt; getGroupTaskList() {
+ 263      return DownloadEntity.findAllData(DownloadGroupEntity.class);
+ 264    }
+ 265  
+ 266    /**
+ 267     * 获取普通任务和任务组的任务列表
+ 268     */
+ 269    public List&lt;AbsEntity&gt; getTotleTaskList() {
+ 270      List&lt;AbsEntity&gt; list = new ArrayList&lt;&gt;();
+ 271      List&lt;DownloadEntity&gt; simpleTask = getSimpleTaskList();
+ 272      List&lt;DownloadGroupEntity&gt; groupTask = getGroupTaskList();
+ 273      if (simpleTask != null &amp;&amp; !simpleTask.isEmpty()) {
+ 274        list.addAll(simpleTask);
+ 275      }
+ 276      if (groupTask != null &amp;&amp; !groupTask.isEmpty()) {
+ 277        list.addAll(groupTask);
+ 278      }
+ 279      return list;
+ 280    }
+ 281  
+ 282    /**
+ 283     * 停止所有正在下载的任务，并清空等待队列。
+ 284     */
+ 285    @Override public void stopAllTask() {
+ 286      AriaManager.getInstance(AriaManager.APP)
+ 287          .setCmd(NormalCmdFactory.getInstance()
+ 288              .createCmd(targetName, new DownloadTaskEntity(), NormalCmdFactory.TASK_STOP_ALL,
+ 289                  ICmd.TASK_TYPE_DOWNLOAD))
+ 290          .exe();
+ 291    }
+ 292  
+ 293    /**
+ 294     * 恢复所有正在下载的任务
+ 295     * 1.如果执行队列没有满，则开始下载任务，直到执行队列满
+ 296     * 2.如果队列执行队列已经满了，则将所有任务添加到等待队列中
+ 297     */
+ 298    public void resumeAllTask() {
+ 299      AriaManager.getInstance(AriaManager.APP)
+ 300          .setCmd(NormalCmdFactory.getInstance()
+ 301              .createCmd(targetName, new DownloadTaskEntity(), NormalCmdFactory.TASK_RESUME_ALL,
+ 302                  ICmd.TASK_TYPE_DOWNLOAD))
+ 303          .exe();
+ 304    }
+ 305  
+ 306    /**
+ 307     * 删除所有任务
+ 308     *
+ 309     * @param removeFile {@code true} 删除已经下载完成的任务，不仅删除下载记录，还会删除已经下载完成的文件，{@code false}
+ 310     * 如果文件已经下载完成，只删除下载记录
+ 311     */
+ 312    @Override public void removeAllTask(boolean removeFile) {
+ 313      final AriaManager ariaManager = AriaManager.getInstance(AriaManager.APP);
+ 314      CancelAllCmd cancelCmd =
+ 315          (CancelAllCmd) CommonUtil.createNormalCmd(targetName, new DownloadTaskEntity(),
+ 316              NormalCmdFactory.TASK_CANCEL_ALL, ICmd.TASK_TYPE_DOWNLOAD);
+ 317      cancelCmd.removeFile = removeFile;
+ 318      ariaManager.setCmd(cancelCmd).exe();
+ 319      Set&lt;String&gt; keys = ariaManager.getReceiver().keySet();
+ 320      for (String key : keys) {
+ 321        ariaManager.getReceiver().remove(key);
+ 322      }
+ 323    }
+ 324  }</pre></td>
+                        </tr>
+                    </table>
+                </div>
+              </body>
+            </html>
+            

@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+    <html lang="en">
+              <head>
+                <meta charset="utf-8">
+                <title>580</title>
+                    <style>
+                        #top {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        #bottom {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        abbr {
+                          /* Here is the delay */
+                          transition-delay:0s;
+                        }
+                    </style>
+              </head>
+              <body>
+                <span style="height: 4vh">
+                    580
+                    <a href="579.html">prev</a>
+                    <a href="581.html">next</a>
+                    <a href="580_chunks.html">chunks</a>
+                    <a href="index.html">index</a>
+                    DTStack/flinkStreamSQL_3f89d1e66187447b56be7b8b76e9b09af9b9850d_hbase/hbase-sink/src/main/java/com/dtstack/flink/sql/sink/hbase/HbaseSink.java
+                    <textarea rows=1 onclick='navigator.clipboard.writeText(this.value)'>cd C:\studies\se\mega\git-analyzer-plus\notebooks\debug
+del /Q *
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;3f89d1e66187447b56be7b8b76e9b09af9b9850d:hbase/hbase-sink/src/main/java/com/dtstack/flink/sql/sink/hbase/HbaseSink.java&quot; &gt; committed.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;3f89d1e66187447b56be7b8b76e9b09af9b9850d^1:hbase/hbase-sink/src/main/java/com/dtstack/flink/sql/sink/hbase/HbaseSink.java&quot; &gt; ours.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;3f89d1e66187447b56be7b8b76e9b09af9b9850d^2:hbase/hbase-sink/src/main/java/com/dtstack/flink/sql/sink/hbase/HbaseSink.java&quot; &gt; theirs.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;b2e4085e6d35798d51707eb23aa215e0e694591e:hbase/hbase-sink/src/main/java/com/dtstack/flink/sql/sink/hbase/HbaseSink.java&quot; &gt; base.java
+copy ours.java 1ours.java
+copy ours.java 2ours.java
+copy theirs.java 1theirs.java
+copy theirs.java 2theirs.java
+copy base.java 1base.java
+copy base.java 2base.java
+&quot;C:\Program Files\Java\jdk1.8.0_241\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\jFSTMerge\build\libs\jFSTMerge-all.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\jfstmerge.java --show-base
+&quot;C:\Program Files\Eclipse Adoptium\jdk-17.0.11.9-hotspot\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\spork\target\spork-0.5.0-SNAPSHOT.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\spork.java
+del /Q 1*.java
+del /Q 2*.java
+del /Q jfstmerge.java.merge
+</textarea>
+                    {strict: [[b], [j]], subset: [[b], [j]]}
+                </span>
+                <div id="top">
+
+                    <table>
+                        <tr>
+                            <th>line based (standard git)</th>
+                            <th>jfstmerge</th>
+                            <th>spork</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1 /*
+   2  * Licensed to the Apache Software Foundation (ASF) under one
+   3  * or more contributor license agreements.  See the NOTICE file
+   4  * distributed with this work for additional information
+   5  * regarding copyright ownership.  The ASF licenses this file
+   6  * to you under the Apache License, Version 2.0 (the
+   7  * &quot;License&quot;); you may not use this file except in compliance
+   8  * with the License.  You may obtain a copy of the License at
+   9  *
+  10  *     http://www.apache.org/licenses/LICENSE-2.0
+  11  *
+  12  * Unless required by applicable law or agreed to in writing, software
+  13  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15  * See the License for the specific language governing permissions and
+  16  * limitations under the License.
+  17  */
+  18 
+  19  
+  20 
+  21 package com.dtstack.flink.sql.sink.hbase;
+  22 
+  23 import com.dtstack.flink.sql.sink.IStreamSinkGener;
+  24 import com.dtstack.flink.sql.sink.hbase.table.HbaseTableInfo;
+  25 import com.dtstack.flink.sql.table.AbstractTargetTableInfo;
+  26 import org.apache.flink.api.common.typeinfo.TypeInformation;
+  27 import org.apache.flink.api.java.tuple.Tuple2;
+  28 import org.apache.flink.api.java.typeutils.RowTypeInfo;
+  29 import org.apache.flink.api.java.typeutils.TupleTypeInfo;
+  30 import org.apache.flink.streaming.api.datastream.DataStream;
+  31 import org.apache.flink.streaming.api.datastream.DataStreamSink;
+  32 import org.apache.flink.streaming.api.functions.sink.OutputFormatSinkFunction;
+  33 import org.apache.flink.streaming.api.functions.sink.RichSinkFunction;
+  34 import org.apache.flink.table.sinks.RetractStreamTableSink;
+  35 import org.apache.flink.table.sinks.TableSink;
+  36 import org.apache.flink.types.Row;
+  37 
+  38 import java.util.Map;
+  39 
+  40 /**
+  41  * Date: 2018/09/14
+  42  * Company: www.dtstack.com
+  43  * @author sishu.yss
+  44  */
+  45 public class HbaseSink implements RetractStreamTableSink&lt;Row&gt;, IStreamSinkGener&lt;HbaseSink&gt; {
+  46 
+  47     protected String[] fieldNames;
+  48     protected Map&lt;String, String&gt; columnNameFamily;
+  49     TypeInformation&lt;?&gt;[] fieldTypes;
+  50     protected String zookeeperQuorum;
+  51     protected String port;
+  52     protected String parent;
+  53     protected String tableName;
+  54     protected String updateMode;
+  55     protected String[] rowkey;
+  56 
+  57     public HbaseSink() {
+  58         // TO DO NOTHING
+  59     }
+  60 
+  61     @Override
+  62     public HbaseSink genStreamSink(AbstractTargetTableInfo targetTableInfo) {
+  63         HbaseTableInfo hbaseTableInfo = (HbaseTableInfo) targetTableInfo;
+  64         this.zookeeperQuorum = hbaseTableInfo.getHost();
+  65         this.port = hbaseTableInfo.getPort();
+  66         this.parent = hbaseTableInfo.getParent();
+  67         this.tableName = hbaseTableInfo.getTableName();
+  68         this.rowkey = hbaseTableInfo.getRowkey();
+  69         this.columnNameFamily = hbaseTableInfo.getColumnNameFamily();
+  70         this.updateMode = hbaseTableInfo.getUpdateMode();
+  71         return this;
+  72     }
+  73 
+  74     @Override
+  75     public void emitDataStream(DataStream&lt;Tuple2&lt;Boolean, Row&gt;&gt; dataStream) {
+  76         consumeDataStream(dataStream);
+  77     }
+  78 
+  79     @Override
+<abbr title="  80     public DataStreamSink&lt;Tuple2&lt;Boolean, Row&gt;&gt; consumeDataStream(DataStream&lt;Tuple2&lt;Boolean, Row&gt;&gt; dataStream) {">  80     public DataStreamSink&lt;Tuple2&lt;Boolean, Row&gt;&gt; consumeDataStream(DataStream&lt;Tuple2&lt;Boolean, Row&gt;&gt; dataSt🔵</abbr>
+  81         HbaseOutputFormat.HbaseOutputFormatBuilder builder = HbaseOutputFormat.buildHbaseOutputFormat();
+  82 &lt;&lt;&lt;&lt;&lt;&lt;&lt; GitAnalyzerPlus_ours
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  83         builder.setHost(this.zookeeperQuorum).setZkParent(this.parent).setTable(this.tableName);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  84 </span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  85         builder.setRowkey(rowkey);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  86         builder.setColumnNames(fieldNames);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  87         builder.setColumnNameFamily(columnNameFamily);</span>
+  88 ||||||| GitAnalyzerPlus_base
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  89         </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  90         builder.setRowkey(rowkey);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  91         builder.setColumnNames(fieldNames);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  92         builder.setColumnNameFamily(columnNameFamily);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  93 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  94         HbaseOutputFormat outputFormat = builder.finish();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  95         RichSinkFunction richSinkFunction = new OutputFormatSinkFunction(outputFormat);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  96         dataStream.addSink(richSinkFunction);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  97     }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  98 </span>
+  99 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 100         builder.setHost(this.zookeeperQuorum)</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 101                 .setZkParent(this.parent)</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 102                 .setTable(this.tableName)</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 103                 .setRowkey(rowkey)</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 104                 .setUpdateMode(updateMode)</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 105                 .setColumnNames(fieldNames)</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 106                 .setColumnNameFamily(columnNameFamily);</span>
+ 107 &gt;&gt;&gt;&gt;&gt;&gt;&gt; GitAnalyzerPlus_theirs
+ 108 
+ 109         HbaseOutputFormat outputFormat = builder.finish();
+ 110         RichSinkFunction richSinkFunction = new OutputFormatSinkFunction(outputFormat);
+ 111         DataStreamSink dataStreamSink = dataStream.addSink(richSinkFunction);
+ 112         return dataStreamSink;
+ 113     }
+ 114 
+ 115     @Override
+<abbr title=" 116     public TableSink&lt;Tuple2&lt;Boolean, Row&gt;&gt; configure(String[] fieldNames, TypeInformation&lt;?&gt;[] fieldTypes) {"> 116     public TableSink&lt;Tuple2&lt;Boolean, Row&gt;&gt; configure(String[] fieldNames, TypeInformation&lt;?&gt;[] fieldTypes🔵</abbr>
+ 117         this.fieldNames = fieldNames;
+ 118         this.fieldTypes = fieldTypes;
+ 119         return this;
+ 120     }
+ 121 
+ 122     @Override
+ 123     public TupleTypeInfo&lt;Tuple2&lt;Boolean, Row&gt;&gt; getOutputType() {
+ 124         return new TupleTypeInfo(org.apache.flink.table.api.Types.BOOLEAN(), getRecordType());
+ 125     }
+ 126 
+ 127     @Override
+ 128     public TypeInformation&lt;Row&gt; getRecordType() {
+ 129         return new RowTypeInfo(fieldTypes, fieldNames);
+ 130     }
+ 131 
+ 132     @Override
+ 133     public String[] getFieldNames() {
+ 134         return fieldNames;
+ 135     }
+ 136 
+ 137     @Override
+ 138     public TypeInformation&lt;?&gt;[] getFieldTypes() {
+ 139         return fieldTypes;
+ 140     }
+ 141 }
+ 
+ 
+ 
+ 
+ </pre></td>
+                            <td><pre>   1 /*
+   2  * Licensed to the Apache Software Foundation (ASF) under one
+   3  * or more contributor license agreements.  See the NOTICE file
+   4  * distributed with this work for additional information
+   5  * regarding copyright ownership.  The ASF licenses this file
+   6  * to you under the Apache License, Version 2.0 (the
+   7  * &quot;License&quot;); you may not use this file except in compliance
+   8  * with the License.  You may obtain a copy of the License at
+   9  *
+  10  *     http://www.apache.org/licenses/LICENSE-2.0
+  11  *
+  12  * Unless required by applicable law or agreed to in writing, software
+  13  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15  * See the License for the specific language governing permissions and
+  16  * limitations under the License.
+  17  */
+  18 
+  19 
+  20 
+  21 package com.dtstack.flink.sql.sink.hbase;
+  22 
+  23 import com.dtstack.flink.sql.sink.IStreamSinkGener;
+  24 import com.dtstack.flink.sql.sink.hbase.table.HbaseTableInfo;
+  25 import com.dtstack.flink.sql.table.AbstractTargetTableInfo;
+  26 import org.apache.flink.api.common.typeinfo.TypeInformation;
+  27 import org.apache.flink.api.java.tuple.Tuple2;
+  28 import org.apache.flink.api.java.typeutils.RowTypeInfo;
+  29 import org.apache.flink.api.java.typeutils.TupleTypeInfo;
+  30 import org.apache.flink.streaming.api.datastream.DataStream;
+  31 import org.apache.flink.streaming.api.datastream.DataStreamSink;
+  32 import org.apache.flink.streaming.api.functions.sink.OutputFormatSinkFunction;
+  33 import org.apache.flink.streaming.api.functions.sink.RichSinkFunction;
+  34 import org.apache.flink.table.sinks.RetractStreamTableSink;
+  35 import org.apache.flink.table.sinks.TableSink;
+  36 import org.apache.flink.types.Row;
+  37 
+  38 import java.util.Map;
+  39 
+  40 /**
+  41  * Date: 2018/09/14
+  42  * Company: www.dtstack.com
+  43  * @author sishu.yss
+  44  */
+  45 public class HbaseSink implements RetractStreamTableSink&lt;Row&gt;, IStreamSinkGener&lt;HbaseSink&gt; {
+  46 
+  47     protected String[] fieldNames;
+  48     protected Map&lt;String, String&gt; columnNameFamily;
+  49     TypeInformation&lt;?&gt;[] fieldTypes;
+  50     protected String zookeeperQuorum;
+  51     protected String port;
+  52     protected String parent;
+  53     protected String tableName;
+  54     protected String updateMode;
+  55     protected String[] rowkey;
+  56 
+  57     public HbaseSink() {
+  58         // TO DO NOTHING
+  59     }
+  60 
+  61     @Override
+  62     public HbaseSink genStreamSink(AbstractTargetTableInfo targetTableInfo) {
+  63         HbaseTableInfo hbaseTableInfo = (HbaseTableInfo) targetTableInfo;
+  64         this.zookeeperQuorum = hbaseTableInfo.getHost();
+  65         this.port = hbaseTableInfo.getPort();
+  66         this.parent = hbaseTableInfo.getParent();
+  67         this.tableName = hbaseTableInfo.getTableName();
+  68         this.rowkey = hbaseTableInfo.getRowkey();
+  69         this.columnNameFamily = hbaseTableInfo.getColumnNameFamily();
+  70         this.updateMode = hbaseTableInfo.getUpdateMode();
+  71         return this;
+  72     }
+  73 
+  74     @Override
+  75     public void emitDataStream(DataStream&lt;Tuple2&lt;Boolean, Row&gt;&gt; dataStream) {
+  76 &lt;&lt;&lt;&lt;&lt;&lt;&lt; MINE
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  77         consumeDataStream(dataStream);</span>
+  78 ||||||| BASE
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  79         HbaseOutputFormat.HbaseOutputFormatBuilder builder = HbaseOutputFormat.buildHbaseOutputFormat();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  80         builder.setHost(this.zookeeperQuorum).setZkParent(this.parent).setTable(this.tableName);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  81 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  82         builder.setRowkey(rowkey);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  83         builder.setColumnNames(fieldNames);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  84         builder.setColumnNameFamily(columnNameFamily);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  85 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  86         HbaseOutputFormat outputFormat = builder.finish();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  87         RichSinkFunction richSinkFunction = new OutputFormatSinkFunction(outputFormat);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  88         dataStream.addSink(richSinkFunction);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  89     }</span>
+  90 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  91         HbaseOutputFormat.HbaseOutputFormatBuilder builder = HbaseOutputFormat.buildHbaseOutputFormat();</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  92         builder.setHost(this.zookeeperQuorum)</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  93                 .setZkParent(this.parent)</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  94                 .setTable(this.tableName)</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  95                 .setRowkey(rowkey)</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  96                 .setUpdateMode(updateMode)</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  97                 .setColumnNames(fieldNames)</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  98                 .setColumnNameFamily(columnNameFamily);</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  99 </span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 100         HbaseOutputFormat outputFormat = builder.finish();</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 101         RichSinkFunction richSinkFunction = new OutputFormatSinkFunction(outputFormat);</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 102         dataStream.addSink(richSinkFunction);</span>
+ 103 &gt;&gt;&gt;&gt;&gt;&gt;&gt; YOURS
+ 104     }
+ 105 
+ 106     @Override
+<abbr title=" 107     public DataStreamSink&lt;Tuple2&lt;Boolean, Row&gt;&gt; consumeDataStream(DataStream&lt;Tuple2&lt;Boolean, Row&gt;&gt; dataStream) {"> 107     public DataStreamSink&lt;Tuple2&lt;Boolean, Row&gt;&gt; consumeDataStream(DataStream&lt;Tuple2&lt;Boolean, Row&gt;&gt; dataSt🔵</abbr>
+ 108         HbaseOutputFormat.HbaseOutputFormatBuilder builder = HbaseOutputFormat.buildHbaseOutputFormat();
+ 109         builder.setHost(this.zookeeperQuorum).setZkParent(this.parent).setTable(this.tableName);
+ 110 
+ 111         builder.setRowkey(rowkey);
+ 112         builder.setColumnNames(fieldNames);
+ 113         builder.setColumnNameFamily(columnNameFamily);
+ 114 
+ 115         HbaseOutputFormat outputFormat = builder.finish();
+ 116         RichSinkFunction richSinkFunction = new OutputFormatSinkFunction(outputFormat);
+ 117         DataStreamSink dataStreamSink = dataStream.addSink(richSinkFunction);
+ 118         return dataStreamSink;
+ 119     }
+ 120 
+ 121     @Override
+<abbr title=" 122     public TableSink&lt;Tuple2&lt;Boolean, Row&gt;&gt; configure(String[] fieldNames, TypeInformation&lt;?&gt;[] fieldTypes) {"> 122     public TableSink&lt;Tuple2&lt;Boolean, Row&gt;&gt; configure(String[] fieldNames, TypeInformation&lt;?&gt;[] fieldTypes🔵</abbr>
+ 123         this.fieldNames = fieldNames;
+ 124         this.fieldTypes = fieldTypes;
+ 125         return this;
+ 126     }
+ 127 
+ 128     @Override
+ 129     public TupleTypeInfo&lt;Tuple2&lt;Boolean, Row&gt;&gt; getOutputType() {
+ 130         return new TupleTypeInfo(org.apache.flink.table.api.Types.BOOLEAN(), getRecordType());
+ 131     }
+ 132 
+ 133     @Override
+ 134     public TypeInformation&lt;Row&gt; getRecordType() {
+ 135         return new RowTypeInfo(fieldTypes, fieldNames);
+ 136     }
+ 137 
+ 138     @Override
+ 139     public String[] getFieldNames() {
+ 140         return fieldNames;
+ 141     }
+ 142 
+ 143     @Override
+ 144     public TypeInformation&lt;?&gt;[] getFieldTypes() {
+ 145         return fieldTypes;
+ 146     }
+ 147 }</pre></td>
+                            <td><pre>   1 /*
+   2  * Licensed to the Apache Software Foundation (ASF) under one
+   3  * or more contributor license agreements.  See the NOTICE file
+   4  * distributed with this work for additional information
+   5  * regarding copyright ownership.  The ASF licenses this file
+   6  * to you under the Apache License, Version 2.0 (the
+   7  * &quot;License&quot;); you may not use this file except in compliance
+   8  * with the License.  You may obtain a copy of the License at
+   9  *
+  10  *     http://www.apache.org/licenses/LICENSE-2.0
+  11  *
+  12  * Unless required by applicable law or agreed to in writing, software
+  13  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15  * See the License for the specific language governing permissions and
+  16  * limitations under the License.
+  17  */
+  18 package com.dtstack.flink.sql.sink.hbase;
+  19 
+  20 import com.dtstack.flink.sql.sink.IStreamSinkGener;
+  21 import com.dtstack.flink.sql.sink.hbase.table.HbaseTableInfo;
+  22 import com.dtstack.flink.sql.table.AbstractTargetTableInfo;
+  23 import java.util.Map;
+  24 import org.apache.flink.api.common.typeinfo.TypeInformation;
+  25 import org.apache.flink.api.java.tuple.Tuple2;
+  26 import org.apache.flink.api.java.typeutils.RowTypeInfo;
+  27 import org.apache.flink.api.java.typeutils.TupleTypeInfo;
+  28 import org.apache.flink.streaming.api.datastream.DataStream;
+  29 import org.apache.flink.streaming.api.datastream.DataStreamSink;
+  30 import org.apache.flink.streaming.api.functions.sink.OutputFormatSinkFunction;
+  31 import org.apache.flink.streaming.api.functions.sink.RichSinkFunction;
+  32 import org.apache.flink.table.sinks.RetractStreamTableSink;
+  33 import org.apache.flink.table.sinks.TableSink;
+  34 import org.apache.flink.types.Row;
+  35 
+  36 
+  37 /**
+  38  * Date: 2018/09/14
+  39  * Company: www.dtstack.com
+  40  * @author sishu.yss
+  41  */
+  42 public class HbaseSink implements RetractStreamTableSink&lt;Row&gt; , IStreamSinkGener&lt;HbaseSink&gt; {
+  43     protected String[] fieldNames;
+  44 
+  45     protected Map&lt;String, String&gt; columnNameFamily;
+  46 
+  47     TypeInformation&lt;?&gt;[] fieldTypes;
+  48 
+  49     protected String zookeeperQuorum;
+  50 
+  51     protected String port;
+  52 
+  53     protected String parent;
+  54 
+  55     protected String tableName;
+  56 
+  57     protected String updateMode;
+  58 
+  59     protected String[] rowkey;
+  60 
+  61     public HbaseSink() {
+  62         // TO DO NOTHING
+  63     }
+  64 
+  65     @Override
+  66     public HbaseSink genStreamSink(AbstractTargetTableInfo targetTableInfo) {
+  67         HbaseTableInfo hbaseTableInfo = ((HbaseTableInfo) (targetTableInfo));
+  68         this.zookeeperQuorum = hbaseTableInfo.getHost();
+  69         this.port = hbaseTableInfo.getPort();
+  70         this.parent = hbaseTableInfo.getParent();
+  71         this.tableName = hbaseTableInfo.getTableName();
+  72         this.rowkey = hbaseTableInfo.getRowkey();
+  73         this.columnNameFamily = hbaseTableInfo.getColumnNameFamily();
+  74         this.updateMode = hbaseTableInfo.getUpdateMode();
+  75         return this;
+  76     }
+  77 
+  78     @Override
+  79     public void emitDataStream(DataStream&lt;Tuple2&lt;Boolean, Row&gt;&gt; dataStream) {
+  80         consumeDataStream(dataStream);
+  81     }
+  82 
+  83     @Override
+<abbr title="  84     public DataStreamSink&lt;Tuple2&lt;Boolean, Row&gt;&gt; consumeDataStream(DataStream&lt;Tuple2&lt;Boolean, Row&gt;&gt; dataStream) {">  84     public DataStreamSink&lt;Tuple2&lt;Boolean, Row&gt;&gt; consumeDataStream(DataStream&lt;Tuple2&lt;Boolean, Row&gt;&gt; dataSt🔵</abbr>
+  85         HbaseOutputFormat.HbaseOutputFormatBuilder builder = HbaseOutputFormat.buildHbaseOutputFormat();
+<abbr title="  86         builder.setHost(this.zookeeperQuorum).setZkParent(this.parent).setTable(this.tableName).setRowkey(rowkey).setUpdateMode(updateMode).setColumnNames(fieldNames).setColumnNameFamily(columnNameFamily);">  86         builder.setHost(this.zookeeperQuorum).setZkParent(this.parent).setTable(this.tableName).setRowkey🔵</abbr>
+  87         HbaseOutputFormat outputFormat = builder.finish();
+  88         RichSinkFunction richSinkFunction = new OutputFormatSinkFunction(outputFormat);
+  89         DataStreamSink dataStreamSink = dataStream.addSink(richSinkFunction);
+  90         return dataStreamSink;
+  91     }
+  92 
+  93     @Override
+<abbr title="  94     public TableSink&lt;Tuple2&lt;Boolean, Row&gt;&gt; configure(String[] fieldNames, TypeInformation&lt;?&gt;[] fieldTypes) {">  94     public TableSink&lt;Tuple2&lt;Boolean, Row&gt;&gt; configure(String[] fieldNames, TypeInformation&lt;?&gt;[] fieldTypes🔵</abbr>
+  95         this.fieldNames = fieldNames;
+  96         this.fieldTypes = fieldTypes;
+  97         return this;
+  98     }
+  99 
+ 100     @Override
+ 101     public TupleTypeInfo&lt;Tuple2&lt;Boolean, Row&gt;&gt; getOutputType() {
+ 102         return new TupleTypeInfo(org.apache.flink.table.api.Types.BOOLEAN(), getRecordType());
+ 103     }
+ 104 
+ 105     @Override
+ 106     public TypeInformation&lt;Row&gt; getRecordType() {
+ 107         return new RowTypeInfo(fieldTypes, fieldNames);
+ 108     }
+ 109 
+ 110     @Override
+ 111     public String[] getFieldNames() {
+ 112         return fieldNames;
+ 113     }
+ 114 
+ 115     @Override
+ 116     public TypeInformation&lt;?&gt;[] getFieldTypes() {
+ 117         return fieldTypes;
+ 118     }
+ 119 }
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ </pre></td>
+                        </tr>
+                    </table>
+                </div>
+                <div id="bottom">
+                    <table style="margin:auto">
+                        <tr>
+                            <th>ours vs. base</th>
+                            <th>theirs vs. base</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1  /*
+   2   * Licensed to the Apache Software Foundation (ASF) under one
+   3   * or more contributor license agreements.  See the NOTICE file
+   4   * distributed with this work for additional information
+   5   * regarding copyright ownership.  The ASF licenses this file
+   6   * to you under the Apache License, Version 2.0 (the
+   7   * &quot;License&quot;); you may not use this file except in compliance
+   8   * with the License.  You may obtain a copy of the License at
+   9   *
+  10   *     http://www.apache.org/licenses/LICENSE-2.0
+  11   *
+  12   * Unless required by applicable law or agreed to in writing, software
+  13   * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15   * See the License for the specific language governing permissions and
+  16   * limitations under the License.
+  17   */
+  18  
+  19  
+  20  
+  21  package com.dtstack.flink.sql.sink.hbase;
+  22  
+  23  import com.dtstack.flink.sql.sink.IStreamSinkGener;
+  24  import com.dtstack.flink.sql.sink.hbase.table.HbaseTableInfo;
+  25  import com.dtstack.flink.sql.table.TargetTableInfo;
+
+  26  import org.apache.flink.api.common.typeinfo.TypeInformation;
+  27  import org.apache.flink.api.java.tuple.Tuple2;
+  28  import org.apache.flink.api.java.typeutils.RowTypeInfo;
+  29  import org.apache.flink.api.java.typeutils.TupleTypeInfo;
+  30  import org.apache.flink.streaming.api.datastream.DataStream;
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  31 +import org.apache.flink.streaming.api.datastream.DataStreamSink;</span>
+  32  import org.apache.flink.streaming.api.functions.sink.OutputFormatSinkFunction;
+  33  import org.apache.flink.streaming.api.functions.sink.RichSinkFunction;
+  34  import org.apache.flink.table.sinks.AppendStreamTableSink;
+  35  import org.apache.flink.table.sinks.RetractStreamTableSink;
+  36  import org.apache.flink.table.sinks.TableSink;
+  37  import org.apache.flink.types.Row;
+  38  
+  39  import java.util.Map;
+  40  
+  41  /**
+  42   * Date: 2018/09/14
+  43   * Company: www.dtstack.com
+  44   * @author sishu.yss
+  45   */
+  46  public class HbaseSink implements RetractStreamTableSink&lt;Row&gt;, IStreamSinkGener&lt;HbaseSink&gt; {
+  47  
+  48      protected String[] fieldNames;
+  49      protected Map&lt;String, String&gt; columnNameFamily;
+  50      TypeInformation&lt;?&gt;[] fieldTypes;
+  51      protected String zookeeperQuorum;
+  52      protected String port;
+  53      protected String parent;
+  54      protected String tableName;
+
+  55      protected String[] rowkey;
+  56  
+  57      public HbaseSink() {
+  58          // TO DO NOTHING
+  59      }
+  60  
+  61      @Override
+  62      public HbaseSink genStreamSink(TargetTableInfo targetTableInfo) {
+
+  63          HbaseTableInfo hbaseTableInfo = (HbaseTableInfo) targetTableInfo;
+  64          this.zookeeperQuorum = hbaseTableInfo.getHost();
+  65          this.port = hbaseTableInfo.getPort();
+  66          this.parent = hbaseTableInfo.getParent();
+  67          this.tableName = hbaseTableInfo.getTableName();
+  68          this.rowkey = hbaseTableInfo.getRowkey();
+  69          this.columnNameFamily = hbaseTableInfo.getColumnNameFamily();
+
+  70          return this;
+  71      }
+  72  
+  73      @Override
+  74      public void emitDataStream(DataStream&lt;Tuple2&lt;Boolean, Row&gt;&gt; dataStream) {
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  75 +        consumeDataStream(dataStream);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  76 +    }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  77 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  78 +    @Override</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  79 +    public DataStreamSink&lt;Tuple2&lt;Boolean, Row&gt;&gt; consumeDataStream(DataStream&lt;Tuple2&lt;Boolean, Row&gt;&gt; dataStream) {</span>
+  80          HbaseOutputFormat.HbaseOutputFormatBuilder builder = HbaseOutputFormat.buildHbaseOutputFormat();
+  81          builder.setHost(this.zookeeperQuorum).setZkParent(this.parent).setTable(this.tableName);
+  82  
+  83          builder.setRowkey(rowkey);
+  84          builder.setColumnNames(fieldNames);
+  85          builder.setColumnNameFamily(columnNameFamily);
+
+
+
+
+
+
+
+  86  
+  87          HbaseOutputFormat outputFormat = builder.finish();
+  88          RichSinkFunction richSinkFunction = new OutputFormatSinkFunction(outputFormat);
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  89 -        dataStream.addSink(richSinkFunction);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  90 +        DataStreamSink dataStreamSink = dataStream.addSink(richSinkFunction);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  91 +        return dataStreamSink;</span>
+  92      }
+  93  
+  94      @Override
+  95      public TableSink&lt;Tuple2&lt;Boolean, Row&gt;&gt; configure(String[] fieldNames, TypeInformation&lt;?&gt;[] fieldTypes) {
+  96          this.fieldNames = fieldNames;
+  97          this.fieldTypes = fieldTypes;
+  98          return this;
+  99      }
+ 100  
+ 101      @Override
+ 102      public TupleTypeInfo&lt;Tuple2&lt;Boolean, Row&gt;&gt; getOutputType() {
+ 103          return new TupleTypeInfo(org.apache.flink.table.api.Types.BOOLEAN(), getRecordType());
+ 104      }
+ 105  
+ 106      @Override
+ 107      public TypeInformation&lt;Row&gt; getRecordType() {
+ 108          return new RowTypeInfo(fieldTypes, fieldNames);
+ 109      }
+ 110  
+ 111      @Override
+ 112      public String[] getFieldNames() {
+ 113          return fieldNames;
+ 114      }
+ 115  
+ 116      @Override
+ 117      public TypeInformation&lt;?&gt;[] getFieldTypes() {
+ 118          return fieldTypes;
+ 119      }
+ 120  }</pre></td>
+                            <td><pre>   1  /*
+   2   * Licensed to the Apache Software Foundation (ASF) under one
+   3   * or more contributor license agreements.  See the NOTICE file
+   4   * distributed with this work for additional information
+   5   * regarding copyright ownership.  The ASF licenses this file
+   6   * to you under the Apache License, Version 2.0 (the
+   7   * &quot;License&quot;); you may not use this file except in compliance
+   8   * with the License.  You may obtain a copy of the License at
+   9   *
+  10   *     http://www.apache.org/licenses/LICENSE-2.0
+  11   *
+  12   * Unless required by applicable law or agreed to in writing, software
+  13   * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15   * See the License for the specific language governing permissions and
+  16   * limitations under the License.
+  17   */
+  18  
+  19  
+  20  
+  21  package com.dtstack.flink.sql.sink.hbase;
+  22  
+  23  import com.dtstack.flink.sql.sink.IStreamSinkGener;
+  24  import com.dtstack.flink.sql.sink.hbase.table.HbaseTableInfo;
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  25 -import com.dtstack.flink.sql.table.TargetTableInfo;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  26 +import com.dtstack.flink.sql.table.AbstractTargetTableInfo;</span>
+  27  import org.apache.flink.api.common.typeinfo.TypeInformation;
+  28  import org.apache.flink.api.java.tuple.Tuple2;
+  29  import org.apache.flink.api.java.typeutils.RowTypeInfo;
+  30  import org.apache.flink.api.java.typeutils.TupleTypeInfo;
+  31  import org.apache.flink.streaming.api.datastream.DataStream;
+
+  32  import org.apache.flink.streaming.api.functions.sink.OutputFormatSinkFunction;
+  33  import org.apache.flink.streaming.api.functions.sink.RichSinkFunction;
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  34 -import org.apache.flink.table.sinks.AppendStreamTableSink;</span>
+  35  import org.apache.flink.table.sinks.RetractStreamTableSink;
+  36  import org.apache.flink.table.sinks.TableSink;
+  37  import org.apache.flink.types.Row;
+  38  
+  39  import java.util.Map;
+  40  
+  41  /**
+  42   * Date: 2018/09/14
+  43   * Company: www.dtstack.com
+  44   * @author sishu.yss
+  45   */
+  46  public class HbaseSink implements RetractStreamTableSink&lt;Row&gt;, IStreamSinkGener&lt;HbaseSink&gt; {
+  47  
+  48      protected String[] fieldNames;
+  49      protected Map&lt;String, String&gt; columnNameFamily;
+  50      TypeInformation&lt;?&gt;[] fieldTypes;
+  51      protected String zookeeperQuorum;
+  52      protected String port;
+  53      protected String parent;
+  54      protected String tableName;
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  55 +    protected String updateMode;</span>
+  56      protected String[] rowkey;
+  57  
+  58      public HbaseSink() {
+  59          // TO DO NOTHING
+  60      }
+  61  
+  62      @Override
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  63 -    public HbaseSink genStreamSink(TargetTableInfo targetTableInfo) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  64 +    public HbaseSink genStreamSink(AbstractTargetTableInfo targetTableInfo) {</span>
+  65          HbaseTableInfo hbaseTableInfo = (HbaseTableInfo) targetTableInfo;
+  66          this.zookeeperQuorum = hbaseTableInfo.getHost();
+  67          this.port = hbaseTableInfo.getPort();
+  68          this.parent = hbaseTableInfo.getParent();
+  69          this.tableName = hbaseTableInfo.getTableName();
+  70          this.rowkey = hbaseTableInfo.getRowkey();
+  71          this.columnNameFamily = hbaseTableInfo.getColumnNameFamily();
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  72 +        this.updateMode = hbaseTableInfo.getUpdateMode();</span>
+  73          return this;
+  74      }
+  75  
+  76      @Override
+  77      public void emitDataStream(DataStream&lt;Tuple2&lt;Boolean, Row&gt;&gt; dataStream) {
+
+
+
+
+
+  78          HbaseOutputFormat.HbaseOutputFormatBuilder builder = HbaseOutputFormat.buildHbaseOutputFormat();
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  79 -        builder.setHost(this.zookeeperQuorum).setZkParent(this.parent).setTable(this.tableName);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  80 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  81 -        builder.setRowkey(rowkey);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  82 -        builder.setColumnNames(fieldNames);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  83 -        builder.setColumnNameFamily(columnNameFamily);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  84 +        builder.setHost(this.zookeeperQuorum)</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  85 +                .setZkParent(this.parent)</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  86 +                .setTable(this.tableName)</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  87 +                .setRowkey(rowkey)</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  88 +                .setUpdateMode(updateMode)</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  89 +                .setColumnNames(fieldNames)</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  90 +                .setColumnNameFamily(columnNameFamily);</span>
+  91  
+  92          HbaseOutputFormat outputFormat = builder.finish();
+  93          RichSinkFunction richSinkFunction = new OutputFormatSinkFunction(outputFormat);
+  94          dataStream.addSink(richSinkFunction);
+
+
+  95      }
+  96  
+  97      @Override
+  98      public TableSink&lt;Tuple2&lt;Boolean, Row&gt;&gt; configure(String[] fieldNames, TypeInformation&lt;?&gt;[] fieldTypes) {
+  99          this.fieldNames = fieldNames;
+ 100          this.fieldTypes = fieldTypes;
+ 101          return this;
+ 102      }
+ 103  
+ 104      @Override
+ 105      public TupleTypeInfo&lt;Tuple2&lt;Boolean, Row&gt;&gt; getOutputType() {
+ 106          return new TupleTypeInfo(org.apache.flink.table.api.Types.BOOLEAN(), getRecordType());
+ 107      }
+ 108  
+ 109      @Override
+ 110      public TypeInformation&lt;Row&gt; getRecordType() {
+ 111          return new RowTypeInfo(fieldTypes, fieldNames);
+ 112      }
+ 113  
+ 114      @Override
+ 115      public String[] getFieldNames() {
+ 116          return fieldNames;
+ 117      }
+ 118  
+ 119      @Override
+ 120      public TypeInformation&lt;?&gt;[] getFieldTypes() {
+ 121          return fieldTypes;
+ 122      }
+ 123  }</pre></td>
+                        </tr>
+                    </table>
+                </div>
+              </body>
+            </html>
+            

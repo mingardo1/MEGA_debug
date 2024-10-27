@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+    <html lang="en">
+              <head>
+                <meta charset="utf-8">
+                <title>23</title>
+                    <style>
+                        #top {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        #bottom {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        abbr {
+                          /* Here is the delay */
+                          transition-delay:0s;
+                        }
+                    </style>
+              </head>
+              <body>
+                <span style="height: 4vh">
+                    23
+                    <a href="22.html">prev</a>
+                    <a href="24.html">next</a>
+                    <a href="23_chunks.html">chunks</a>
+                    <a href="index.html">index</a>
+                    AriaLyy/Aria_5a70764596654bf9b70fb9295d7fef3a7b445fa0_AriaCompiler/src/main/java/com/arialyy/compiler/AriaProcessor.java
+                    <textarea rows=1 onclick='navigator.clipboard.writeText(this.value)'>cd C:\studies\se\mega\git-analyzer-plus\notebooks\debug
+del /Q *
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\AriaLyy\Aria show &quot;5a70764596654bf9b70fb9295d7fef3a7b445fa0:AriaCompiler/src/main/java/com/arialyy/compiler/AriaProcessor.java&quot; &gt; committed.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\AriaLyy\Aria show &quot;5a70764596654bf9b70fb9295d7fef3a7b445fa0^1:AriaCompiler/src/main/java/com/arialyy/compiler/AriaProcessor.java&quot; &gt; ours.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\AriaLyy\Aria show &quot;5a70764596654bf9b70fb9295d7fef3a7b445fa0^2:AriaCompiler/src/main/java/com/arialyy/compiler/AriaProcessor.java&quot; &gt; theirs.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\AriaLyy\Aria show &quot;3b30d31b8e7b111906dc91f9bcbaf2bfd9a39907:AriaCompiler/src/main/java/com/arialyy/compiler/AriaProcessor.java&quot; &gt; base.java
+copy ours.java 1ours.java
+copy ours.java 2ours.java
+copy theirs.java 1theirs.java
+copy theirs.java 2theirs.java
+copy base.java 1base.java
+copy base.java 2base.java
+&quot;C:\Program Files\Java\jdk1.8.0_241\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\jFSTMerge\build\libs\jFSTMerge-all.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\jfstmerge.java --show-base
+&quot;C:\Program Files\Eclipse Adoptium\jdk-17.0.11.9-hotspot\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\spork\target\spork-0.5.0-SNAPSHOT.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\spork.java
+del /Q 1*.java
+del /Q 2*.java
+del /Q jfstmerge.java.merge
+</textarea>
+                    {strict: [[sbj]], subset: [[sbj]]}
+                </span>
+                <div id="top">
+
+                    <table>
+                        <tr>
+                            <th>line based (standard git)</th>
+                            <th>jfstmerge</th>
+                            <th>spork</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1 /*
+   2  * Copyright (C) 2016 AriaLyy(https://github.com/AriaLyy/Aria)
+   3  *
+   4  * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+   5  * you may not use this file except in compliance with the License.
+   6  * You may obtain a copy of the License at
+   7  *
+   8  *      http://www.apache.org/licenses/LICENSE-2.0
+   9  *
+  10  * Unless required by applicable law or agreed to in writing, software
+  11  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  12  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  13  * See the License for the specific language governing permissions and
+  14  * limitations under the License.
+  15  */
+  16 package com.arialyy.compiler;
+  17 
+  18 import com.arialyy.annotations.Download;
+  19 import com.arialyy.annotations.DownloadGroup;
+  20 import com.arialyy.annotations.Upload;
+  21 import com.google.auto.service.AutoService;
+  22 import java.util.LinkedHashSet;
+  23 import java.util.Set;
+  24 import javax.annotation.processing.AbstractProcessor;
+  25 import javax.annotation.processing.ProcessingEnvironment;
+  26 import javax.annotation.processing.Processor;
+  27 import javax.annotation.processing.RoundEnvironment;
+  28 import javax.lang.model.SourceVersion;
+  29 import javax.lang.model.element.TypeElement;
+  30 
+  31 /**
+  32  * Created by lyy on 2017/6/6.
+  33  * 事件注解扫描器
+  34  */
+  35 @AutoService(Processor.class) public class AriaProcessor extends AbstractProcessor {
+  36   ElementHandler mHandler;
+  37 
+  38   @Override public synchronized void init(ProcessingEnvironment processingEnv) {
+  39     super.init(processingEnv);
+  40     PrintLog.init(processingEnv.getMessager());
+  41     mHandler = new ElementHandler(processingEnv.getFiler(), processingEnv.getElementUtils());
+  42   }
+  43 
+  44   @Override public Set&lt;String&gt; getSupportedAnnotationTypes() {
+  45     Set&lt;String&gt; annotataions = new LinkedHashSet&lt;&gt;();
+  46     //单任务下载的注解
+  47     annotataions.add(Download.onPre.class.getCanonicalName());
+  48     annotataions.add(Download.onNoSupportBreakPoint.class.getCanonicalName());
+  49     annotataions.add(Download.onTaskCancel.class.getCanonicalName());
+  50     annotataions.add(Download.onTaskComplete.class.getCanonicalName());
+  51     annotataions.add(Download.onTaskFail.class.getCanonicalName());
+  52     annotataions.add(Download.onTaskPre.class.getCanonicalName());
+  53     annotataions.add(Download.onTaskResume.class.getCanonicalName());
+  54     annotataions.add(Download.onTaskRunning.class.getCanonicalName());
+  55     annotataions.add(Download.onTaskStart.class.getCanonicalName());
+  56     annotataions.add(Download.onTaskStop.class.getCanonicalName());
+  57 &lt;&lt;&lt;&lt;&lt;&lt;&lt; GitAnalyzerPlus_ours
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  58     //下载任务的注解</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  59     annotataions.add(DownloadGroup.onPre.class.getCanonicalName());</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  60     annotataions.add(DownloadGroup.onTaskCancel.class.getCanonicalName());</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  61     annotataions.add(DownloadGroup.onTaskComplete.class.getCanonicalName());</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  62     annotataions.add(DownloadGroup.onTaskFail.class.getCanonicalName());</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  63     annotataions.add(DownloadGroup.onTaskPre.class.getCanonicalName());</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  64     annotataions.add(DownloadGroup.onTaskResume.class.getCanonicalName());</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  65     annotataions.add(DownloadGroup.onTaskRunning.class.getCanonicalName());</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  66     annotataions.add(DownloadGroup.onTaskStart.class.getCanonicalName());</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  67     annotataions.add(DownloadGroup.onTaskStop.class.getCanonicalName());</span>
+  68 ||||||| GitAnalyzerPlus_base
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  69     annotataions.add(Download.onPre.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  70     annotataions.add(Download.onNoSupportBreakPoint.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  71     annotataions.add(Download.onTaskCancel.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  72     annotataions.add(Download.onTaskComplete.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  73     annotataions.add(Download.onTaskFail.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  74     annotataions.add(Download.onTaskPre.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  75     annotataions.add(Download.onTaskResume.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  76     annotataions.add(Download.onTaskRunning.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  77     annotataions.add(Download.onTaskStart.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  78     annotataions.add(Download.onTaskStop.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  79     //上传任务的注解</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  80     annotataions.add(Upload.onPre.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  81     annotataions.add(Upload.onNoSupportBreakPoint.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  82     annotataions.add(Upload.onTaskCancel.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  83     annotataions.add(Upload.onTaskComplete.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  84     annotataions.add(Upload.onTaskFail.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  85     annotataions.add(Upload.onTaskResume.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  86     annotataions.add(Upload.onTaskRunning.class.getCanonicalName());</span>
+  87 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  88     //下载任务组的注解</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  89     annotataions.add(DownloadGroup.onPre.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  90     annotataions.add(DownloadGroup.onTaskCancel.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  91     annotataions.add(DownloadGroup.onTaskComplete.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  92     annotataions.add(DownloadGroup.onTaskFail.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  93     annotataions.add(DownloadGroup.onTaskPre.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  94     annotataions.add(DownloadGroup.onTaskResume.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  95     annotataions.add(DownloadGroup.onTaskRunning.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  96     annotataions.add(DownloadGroup.onTaskStart.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  97     annotataions.add(DownloadGroup.onTaskStop.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  98     //任务组子任务的注解</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  99     annotataions.add(DownloadGroup.onSubTaskPre.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 100     //annotataions.add(DownloadGroup.onSubTaskCancel.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 101     annotataions.add(DownloadGroup.onSubTaskComplete.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 102     annotataions.add(DownloadGroup.onSubTaskFail.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 103     annotataions.add(DownloadGroup.onSubTaskRunning.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 104     annotataions.add(DownloadGroup.onSubTaskStart.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 105     annotataions.add(DownloadGroup.onSubTaskStop.class.getCanonicalName());</span>
+ 106 &gt;&gt;&gt;&gt;&gt;&gt;&gt; GitAnalyzerPlus_theirs
+ 107     //上传任务的注解
+ 108     annotataions.add(Upload.onPre.class.getCanonicalName());
+ 109     annotataions.add(Upload.onNoSupportBreakPoint.class.getCanonicalName());
+ 110     annotataions.add(Upload.onTaskCancel.class.getCanonicalName());
+ 111     annotataions.add(Upload.onTaskComplete.class.getCanonicalName());
+ 112     annotataions.add(Upload.onTaskFail.class.getCanonicalName());
+ 113     annotataions.add(Upload.onTaskResume.class.getCanonicalName());
+ 114     annotataions.add(Upload.onTaskRunning.class.getCanonicalName());
+ 115     annotataions.add(Upload.onTaskStart.class.getCanonicalName());
+ 116     annotataions.add(Upload.onTaskStop.class.getCanonicalName());
+ 117     return annotataions;
+ 118   }
+ 119 
+ 120   @Override public SourceVersion getSupportedSourceVersion() {
+ 121     return SourceVersion.latestSupported();
+ 122   }
+ 123 
+ 124   @Override
+ 125   public boolean process(Set&lt;? extends TypeElement&gt; annotations, RoundEnvironment roundEnv) {
+ 126     mHandler.clean();
+ 127     mHandler.handleDownload(roundEnv);
+ 128     mHandler.handleDownloadGroup(roundEnv);
+ 129     mHandler.handleDownloadGroupSub(roundEnv);
+ 130     mHandler.handleUpload(roundEnv);
+ 131     mHandler.createProxyFile();
+ 132     return true;
+ 133   }
+ 134 }</pre></td>
+                            <td><pre>   1 /*
+   2  * Copyright (C) 2016 AriaLyy(https://github.com/AriaLyy/Aria)
+   3  *
+   4  * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+   5  * you may not use this file except in compliance with the License.
+   6  * You may obtain a copy of the License at
+   7  *
+   8  *      http://www.apache.org/licenses/LICENSE-2.0
+   9  *
+  10  * Unless required by applicable law or agreed to in writing, software
+  11  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  12  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  13  * See the License for the specific language governing permissions and
+  14  * limitations under the License.
+  15  */
+  16 package com.arialyy.compiler;
+  17 
+  18 import com.arialyy.annotations.Download;
+  19 import com.arialyy.annotations.DownloadGroup;
+  20 import com.arialyy.annotations.Upload;
+  21 import com.google.auto.service.AutoService;
+  22 import java.util.LinkedHashSet;
+  23 import java.util.Set;
+  24 import javax.annotation.processing.AbstractProcessor;
+  25 import javax.annotation.processing.ProcessingEnvironment;
+  26 import javax.annotation.processing.Processor;
+  27 import javax.annotation.processing.RoundEnvironment;
+  28 import javax.lang.model.SourceVersion;
+  29 import javax.lang.model.element.TypeElement;
+  30 
+  31 /**
+  32  * Created by lyy on 2017/6/6.
+  33  * 事件注解扫描器
+  34  */
+  35 @AutoService(Processor.class) public class AriaProcessor extends AbstractProcessor {
+  36   ElementHandler mHandler;
+  37 
+  38   @Override public synchronized void init(ProcessingEnvironment processingEnv) {
+  39     super.init(processingEnv);
+  40     PrintLog.init(processingEnv.getMessager());
+  41     mHandler = new ElementHandler(processingEnv.getFiler(), processingEnv.getElementUtils());
+  42   }
+  43 
+  44   @Override public Set&lt;String&gt; getSupportedAnnotationTypes() {
+  45     Set&lt;String&gt; annotataions = new LinkedHashSet&lt;&gt;();
+  46     //单任务下载的注解
+  47     annotataions.add(Download.onPre.class.getCanonicalName());
+  48     annotataions.add(Download.onNoSupportBreakPoint.class.getCanonicalName());
+  49     annotataions.add(Download.onTaskCancel.class.getCanonicalName());
+  50     annotataions.add(Download.onTaskComplete.class.getCanonicalName());
+  51     annotataions.add(Download.onTaskFail.class.getCanonicalName());
+  52     annotataions.add(Download.onTaskPre.class.getCanonicalName());
+  53     annotataions.add(Download.onTaskResume.class.getCanonicalName());
+  54     annotataions.add(Download.onTaskRunning.class.getCanonicalName());
+  55     annotataions.add(Download.onTaskStart.class.getCanonicalName());
+  56     annotataions.add(Download.onTaskStop.class.getCanonicalName());
+  57 &lt;&lt;&lt;&lt;&lt;&lt;&lt; MINE
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  58     //下载任务的注解</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  59     annotataions.add(DownloadGroup.onPre.class.getCanonicalName());</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  60     annotataions.add(DownloadGroup.onTaskCancel.class.getCanonicalName());</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  61     annotataions.add(DownloadGroup.onTaskComplete.class.getCanonicalName());</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  62     annotataions.add(DownloadGroup.onTaskFail.class.getCanonicalName());</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  63     annotataions.add(DownloadGroup.onTaskPre.class.getCanonicalName());</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  64     annotataions.add(DownloadGroup.onTaskResume.class.getCanonicalName());</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  65     annotataions.add(DownloadGroup.onTaskRunning.class.getCanonicalName());</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  66     annotataions.add(DownloadGroup.onTaskStart.class.getCanonicalName());</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  67     annotataions.add(DownloadGroup.onTaskStop.class.getCanonicalName());</span>
+  68 ||||||| BASE
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  69     //下载任务的注解</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  70     annotataions.add(Download.onPre.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  71     annotataions.add(Download.onNoSupportBreakPoint.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  72     annotataions.add(Download.onTaskCancel.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  73     annotataions.add(Download.onTaskComplete.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  74     annotataions.add(Download.onTaskFail.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  75     annotataions.add(Download.onTaskPre.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  76     annotataions.add(Download.onTaskResume.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  77     annotataions.add(Download.onTaskRunning.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  78     annotataions.add(Download.onTaskStart.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  79     annotataions.add(Download.onTaskStop.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  80     //上传任务的注解</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  81     annotataions.add(Upload.onPre.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  82     annotataions.add(Upload.onNoSupportBreakPoint.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  83     annotataions.add(Upload.onTaskCancel.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  84     annotataions.add(Upload.onTaskComplete.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  85     annotataions.add(Upload.onTaskFail.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  86     annotataions.add(Upload.onTaskResume.class.getCanonicalName());</span>
+  87 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  88     //下载任务组的注解</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  89     annotataions.add(DownloadGroup.onPre.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  90     annotataions.add(DownloadGroup.onTaskCancel.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  91     annotataions.add(DownloadGroup.onTaskComplete.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  92     annotataions.add(DownloadGroup.onTaskFail.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  93     annotataions.add(DownloadGroup.onTaskPre.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  94     annotataions.add(DownloadGroup.onTaskResume.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  95     annotataions.add(DownloadGroup.onTaskRunning.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  96     annotataions.add(DownloadGroup.onTaskStart.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  97     annotataions.add(DownloadGroup.onTaskStop.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  98     //任务组子任务的注解</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  99     annotataions.add(DownloadGroup.onSubTaskPre.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 100     //annotataions.add(DownloadGroup.onSubTaskCancel.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 101     annotataions.add(DownloadGroup.onSubTaskComplete.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 102     annotataions.add(DownloadGroup.onSubTaskFail.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 103     annotataions.add(DownloadGroup.onSubTaskRunning.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 104     annotataions.add(DownloadGroup.onSubTaskStart.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 105     annotataions.add(DownloadGroup.onSubTaskStop.class.getCanonicalName());</span>
+ 106 &gt;&gt;&gt;&gt;&gt;&gt;&gt; YOURS
+ 107     //上传任务的注解
+ 108     annotataions.add(Upload.onPre.class.getCanonicalName());
+ 109     annotataions.add(Upload.onNoSupportBreakPoint.class.getCanonicalName());
+ 110     annotataions.add(Upload.onTaskCancel.class.getCanonicalName());
+ 111     annotataions.add(Upload.onTaskComplete.class.getCanonicalName());
+ 112     annotataions.add(Upload.onTaskFail.class.getCanonicalName());
+ 113     annotataions.add(Upload.onTaskResume.class.getCanonicalName());
+ 114     annotataions.add(Upload.onTaskRunning.class.getCanonicalName());
+ 115     annotataions.add(Upload.onTaskStart.class.getCanonicalName());
+ 116     annotataions.add(Upload.onTaskStop.class.getCanonicalName());
+ 117     return annotataions;
+ 118   }
+ 119 
+ 120   @Override public SourceVersion getSupportedSourceVersion() {
+ 121     return SourceVersion.latestSupported();
+ 122   }
+ 123 
+ 124   @Override
+ 125   public boolean process(Set&lt;? extends TypeElement&gt; annotations, RoundEnvironment roundEnv) {
+ 126     mHandler.clean();
+ 127     mHandler.handleDownload(roundEnv);
+ 128     mHandler.handleDownloadGroup(roundEnv);
+ 129     mHandler.handleDownloadGroupSub(roundEnv);
+ 130     mHandler.handleUpload(roundEnv);
+ 131     mHandler.createProxyFile();
+ 132     return true;
+ 133   }
+ 134 }</pre></td>
+                            <td><pre>   1 /*
+   2  * Copyright (C) 2016 AriaLyy(https://github.com/AriaLyy/Aria)
+   3  *
+   4  * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+   5  * you may not use this file except in compliance with the License.
+   6  * You may obtain a copy of the License at
+   7  *
+   8  *      http://www.apache.org/licenses/LICENSE-2.0
+   9  *
+  10  * Unless required by applicable law or agreed to in writing, software
+  11  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  12  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  13  * See the License for the specific language governing permissions and
+  14  * limitations under the License.
+  15  */
+  16 package com.arialyy.compiler;
+  17 
+  18 import com.arialyy.annotations.Download;
+  19 import com.arialyy.annotations.DownloadGroup;
+  20 import com.arialyy.annotations.Upload;
+  21 import com.google.auto.service.AutoService;
+  22 import java.util.LinkedHashSet;
+  23 import java.util.Set;
+  24 import javax.annotation.processing.AbstractProcessor;
+  25 import javax.annotation.processing.ProcessingEnvironment;
+  26 import javax.annotation.processing.Processor;
+  27 import javax.annotation.processing.RoundEnvironment;
+  28 import javax.lang.model.SourceVersion;
+  29 import javax.lang.model.element.TypeElement;
+  30 
+  31 
+  32 /**
+  33  * Created by lyy on 2017/6/6.
+  34  * 事件注解扫描器
+  35  */
+  36 @AutoService(Processor.class)
+  37 public class AriaProcessor extends AbstractProcessor {
+  38   ElementHandler mHandler;
+  39 
+  40   @Override public synchronized void init(ProcessingEnvironment processingEnv) {
+  41     super.init(processingEnv);
+  42     PrintLog.init(processingEnv.getMessager());
+  43     mHandler = new ElementHandler(processingEnv.getFiler(), processingEnv.getElementUtils());
+  44   }
+  45 
+  46   @Override
+  47   public Set&lt;String&gt; getSupportedAnnotationTypes() {
+  48     Set&lt;String&gt; annotataions = new LinkedHashSet&lt;&gt;();
+  49     //单任务下载的注解
+  50     annotataions.add(Download.onPre.class.getCanonicalName());
+  51     annotataions.add(Download.onNoSupportBreakPoint.class.getCanonicalName());
+  52     annotataions.add(Download.onTaskCancel.class.getCanonicalName());
+  53     annotataions.add(Download.onTaskComplete.class.getCanonicalName());
+  54     annotataions.add(Download.onTaskFail.class.getCanonicalName());
+  55     annotataions.add(Download.onTaskPre.class.getCanonicalName());
+  56     annotataions.add(Download.onTaskResume.class.getCanonicalName());
+  57     annotataions.add(Download.onTaskRunning.class.getCanonicalName());
+  58     annotataions.add(Download.onTaskStart.class.getCanonicalName());
+  59     annotataions.add(Download.onTaskStop.class.getCanonicalName());
+  60 
+  61 &lt;&lt;&lt;&lt;&lt;&lt;&lt; LEFT
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  62     //下载任务的注解</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  63     annotataions.add(DownloadGroup.onPre.class.getCanonicalName());</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  64     annotataions.add(DownloadGroup.onTaskCancel.class.getCanonicalName());</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  65     annotataions.add(DownloadGroup.onTaskComplete.class.getCanonicalName());</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  66     annotataions.add(DownloadGroup.onTaskFail.class.getCanonicalName());</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  67     annotataions.add(DownloadGroup.onTaskPre.class.getCanonicalName());</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  68     annotataions.add(DownloadGroup.onTaskResume.class.getCanonicalName());</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  69     annotataions.add(DownloadGroup.onTaskRunning.class.getCanonicalName());</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  70     annotataions.add(DownloadGroup.onTaskStart.class.getCanonicalName());</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  71     annotataions.add(DownloadGroup.onTaskStop.class.getCanonicalName());</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  72 </span>
+  73 ||||||| BASE
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"><abbr title="  74 /*d94z9sk0k4hf9j3ijd - note the base isn&#x27;t actually empty, spork simply doesn&#x27;t generate a base - gd930kwohrp23k5b6vdk93d3r*/">  74 /*d94z9sk0k4hf9j3ijd - note the base isn&#x27;t actually empty, spork simply doesn&#x27;t generate a base - gd930kw🔵</abbr></span>
+  75 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  76 </span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  77     //下载任务组的注解</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  78     annotataions.add(DownloadGroup.onPre.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  79     annotataions.add(DownloadGroup.onTaskCancel.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  80     annotataions.add(DownloadGroup.onTaskComplete.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  81     annotataions.add(DownloadGroup.onTaskFail.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  82     annotataions.add(DownloadGroup.onTaskPre.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  83     annotataions.add(DownloadGroup.onTaskResume.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  84     annotataions.add(DownloadGroup.onTaskRunning.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  85     annotataions.add(DownloadGroup.onTaskStart.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  86     annotataions.add(DownloadGroup.onTaskStop.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  87     //任务组子任务的注解</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  88     annotataions.add(DownloadGroup.onSubTaskPre.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  89     //annotataions.add(DownloadGroup.onSubTaskCancel.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  90     annotataions.add(DownloadGroup.onSubTaskComplete.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  91     annotataions.add(DownloadGroup.onSubTaskFail.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  92     annotataions.add(DownloadGroup.onSubTaskRunning.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  93     annotataions.add(DownloadGroup.onSubTaskStart.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  94     annotataions.add(DownloadGroup.onSubTaskStop.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  95 </span>
+  96 &gt;&gt;&gt;&gt;&gt;&gt;&gt; RIGHT
+  97     //上传任务的注解
+  98     annotataions.add(Upload.onPre.class.getCanonicalName());
+  99     annotataions.add(Upload.onNoSupportBreakPoint.class.getCanonicalName());
+ 100     annotataions.add(Upload.onTaskCancel.class.getCanonicalName());
+ 101     annotataions.add(Upload.onTaskComplete.class.getCanonicalName());
+ 102     annotataions.add(Upload.onTaskFail.class.getCanonicalName());
+ 103     annotataions.add(Upload.onTaskResume.class.getCanonicalName());
+ 104     annotataions.add(Upload.onTaskRunning.class.getCanonicalName());
+ 105     annotataions.add(Upload.onTaskStart.class.getCanonicalName());
+ 106     annotataions.add(Upload.onTaskStop.class.getCanonicalName());
+ 107     return annotataions;
+ 108   }
+ 109 
+ 110   @Override public SourceVersion getSupportedSourceVersion() {
+ 111     return SourceVersion.latestSupported();
+ 112   }
+ 113 
+ 114   @Override
+ 115   public boolean process(Set&lt;? extends TypeElement&gt; annotations, RoundEnvironment roundEnv) {
+ 116     mHandler.clean();
+ 117     mHandler.handleDownload(roundEnv);
+ 118     mHandler.handleDownloadGroup(roundEnv);
+ 119     mHandler.handleDownloadGroupSub(roundEnv);
+ 120     mHandler.handleUpload(roundEnv);
+ 121     mHandler.createProxyFile();
+ 122     return true;
+ 123   }
+ 124 }
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ </pre></td>
+                        </tr>
+                    </table>
+                </div>
+                <div id="bottom">
+                    <table style="margin:auto">
+                        <tr>
+                            <th>ours vs. base</th>
+                            <th>theirs vs. base</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1  /*
+   2   * Copyright (C) 2016 AriaLyy(https://github.com/AriaLyy/Aria)
+   3   *
+   4   * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+   5   * you may not use this file except in compliance with the License.
+   6   * You may obtain a copy of the License at
+   7   *
+   8   *      http://www.apache.org/licenses/LICENSE-2.0
+   9   *
+  10   * Unless required by applicable law or agreed to in writing, software
+  11   * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  12   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  13   * See the License for the specific language governing permissions and
+  14   * limitations under the License.
+  15   */
+  16  package com.arialyy.compiler;
+  17  
+  18  import com.arialyy.annotations.Download;
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  19 +import com.arialyy.annotations.DownloadGroup;</span>
+  20  import com.arialyy.annotations.Upload;
+  21  import com.google.auto.service.AutoService;
+  22  import java.util.LinkedHashSet;
+  23  import java.util.Set;
+  24  import javax.annotation.processing.AbstractProcessor;
+  25  import javax.annotation.processing.ProcessingEnvironment;
+  26  import javax.annotation.processing.Processor;
+  27  import javax.annotation.processing.RoundEnvironment;
+  28  import javax.lang.model.SourceVersion;
+  29  import javax.lang.model.element.TypeElement;
+  30  
+  31  /**
+  32   * Created by lyy on 2017/6/6.
+  33   * 事件注解扫描器
+  34   */
+  35  @AutoService(Processor.class) public class AriaProcessor extends AbstractProcessor {
+  36    ElementHandler mHandler;
+  37  
+  38    @Override public synchronized void init(ProcessingEnvironment processingEnv) {
+  39      super.init(processingEnv);
+  40      PrintLog.init(processingEnv.getMessager());
+  41      mHandler = new ElementHandler(processingEnv.getFiler(), processingEnv.getElementUtils());
+  42    }
+  43  
+  44    @Override public Set&lt;String&gt; getSupportedAnnotationTypes() {
+  45      Set&lt;String&gt; annotataions = new LinkedHashSet&lt;&gt;();
+  46      //单任务下载的注解
+  47      annotataions.add(Download.onPre.class.getCanonicalName());
+  48      annotataions.add(Download.onNoSupportBreakPoint.class.getCanonicalName());
+  49      annotataions.add(Download.onTaskCancel.class.getCanonicalName());
+  50      annotataions.add(Download.onTaskComplete.class.getCanonicalName());
+  51      annotataions.add(Download.onTaskFail.class.getCanonicalName());
+  52      annotataions.add(Download.onTaskPre.class.getCanonicalName());
+  53      annotataions.add(Download.onTaskResume.class.getCanonicalName());
+  54      annotataions.add(Download.onTaskRunning.class.getCanonicalName());
+  55      annotataions.add(Download.onTaskStart.class.getCanonicalName());
+  56      annotataions.add(Download.onTaskStop.class.getCanonicalName());
+  57      //下载任务的注解
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  58 -    annotataions.add(Download.onPre.class.getCanonicalName());</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  59 -    annotataions.add(Download.onNoSupportBreakPoint.class.getCanonicalName());</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  60 -    annotataions.add(Download.onTaskCancel.class.getCanonicalName());</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  61 -    annotataions.add(Download.onTaskComplete.class.getCanonicalName());</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  62 -    annotataions.add(Download.onTaskFail.class.getCanonicalName());</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  63 -    annotataions.add(Download.onTaskPre.class.getCanonicalName());</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  64 -    annotataions.add(Download.onTaskResume.class.getCanonicalName());</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  65 -    annotataions.add(Download.onTaskRunning.class.getCanonicalName());</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  66 -    annotataions.add(Download.onTaskStart.class.getCanonicalName());</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  67 -    annotataions.add(Download.onTaskStop.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  68 +    annotataions.add(DownloadGroup.onPre.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  69 +    annotataions.add(DownloadGroup.onTaskCancel.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  70 +    annotataions.add(DownloadGroup.onTaskComplete.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  71 +    annotataions.add(DownloadGroup.onTaskFail.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  72 +    annotataions.add(DownloadGroup.onTaskPre.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  73 +    annotataions.add(DownloadGroup.onTaskResume.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  74 +    annotataions.add(DownloadGroup.onTaskRunning.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  75 +    annotataions.add(DownloadGroup.onTaskStart.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  76 +    annotataions.add(DownloadGroup.onTaskStop.class.getCanonicalName());</span>
+
+
+
+
+
+
+
+
+
+  77      //上传任务的注解
+  78      annotataions.add(Upload.onPre.class.getCanonicalName());
+  79      annotataions.add(Upload.onNoSupportBreakPoint.class.getCanonicalName());
+  80      annotataions.add(Upload.onTaskCancel.class.getCanonicalName());
+  81      annotataions.add(Upload.onTaskComplete.class.getCanonicalName());
+  82      annotataions.add(Upload.onTaskFail.class.getCanonicalName());
+  83      annotataions.add(Upload.onTaskResume.class.getCanonicalName());
+  84      annotataions.add(Upload.onTaskRunning.class.getCanonicalName());
+  85      annotataions.add(Upload.onTaskStart.class.getCanonicalName());
+  86      annotataions.add(Upload.onTaskStop.class.getCanonicalName());
+  87      return annotataions;
+  88    }
+  89  
+  90    @Override public SourceVersion getSupportedSourceVersion() {
+  91      return SourceVersion.latestSupported();
+  92    }
+  93  
+  94    @Override
+  95    public boolean process(Set&lt;? extends TypeElement&gt; annotations, RoundEnvironment roundEnv) {
+  96      mHandler.clean();
+  97      mHandler.handleDownload(roundEnv);
+  98      mHandler.handleDownloadGroup(roundEnv);
+
+  99      mHandler.handleUpload(roundEnv);
+ 100      mHandler.createProxyFile();
+ 101      return true;
+ 102    }
+ 103  }</pre></td>
+                            <td><pre>   1  /*
+   2   * Copyright (C) 2016 AriaLyy(https://github.com/AriaLyy/Aria)
+   3   *
+   4   * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+   5   * you may not use this file except in compliance with the License.
+   6   * You may obtain a copy of the License at
+   7   *
+   8   *      http://www.apache.org/licenses/LICENSE-2.0
+   9   *
+  10   * Unless required by applicable law or agreed to in writing, software
+  11   * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  12   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  13   * See the License for the specific language governing permissions and
+  14   * limitations under the License.
+  15   */
+  16  package com.arialyy.compiler;
+  17  
+  18  import com.arialyy.annotations.Download;
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  19 +import com.arialyy.annotations.DownloadGroup;</span>
+  20  import com.arialyy.annotations.Upload;
+  21  import com.google.auto.service.AutoService;
+  22  import java.util.LinkedHashSet;
+  23  import java.util.Set;
+  24  import javax.annotation.processing.AbstractProcessor;
+  25  import javax.annotation.processing.ProcessingEnvironment;
+  26  import javax.annotation.processing.Processor;
+  27  import javax.annotation.processing.RoundEnvironment;
+  28  import javax.lang.model.SourceVersion;
+  29  import javax.lang.model.element.TypeElement;
+  30  
+  31  /**
+  32   * Created by lyy on 2017/6/6.
+  33   * 事件注解扫描器
+  34   */
+  35  @AutoService(Processor.class) public class AriaProcessor extends AbstractProcessor {
+  36    ElementHandler mHandler;
+  37  
+  38    @Override public synchronized void init(ProcessingEnvironment processingEnv) {
+  39      super.init(processingEnv);
+  40      PrintLog.init(processingEnv.getMessager());
+  41      mHandler = new ElementHandler(processingEnv.getFiler(), processingEnv.getElementUtils());
+  42    }
+  43  
+  44    @Override public Set&lt;String&gt; getSupportedAnnotationTypes() {
+  45      Set&lt;String&gt; annotataions = new LinkedHashSet&lt;&gt;();
+  46      //单任务下载的注解
+  47      annotataions.add(Download.onPre.class.getCanonicalName());
+  48      annotataions.add(Download.onNoSupportBreakPoint.class.getCanonicalName());
+  49      annotataions.add(Download.onTaskCancel.class.getCanonicalName());
+  50      annotataions.add(Download.onTaskComplete.class.getCanonicalName());
+  51      annotataions.add(Download.onTaskFail.class.getCanonicalName());
+  52      annotataions.add(Download.onTaskPre.class.getCanonicalName());
+  53      annotataions.add(Download.onTaskResume.class.getCanonicalName());
+  54      annotataions.add(Download.onTaskRunning.class.getCanonicalName());
+  55      annotataions.add(Download.onTaskStart.class.getCanonicalName());
+  56      annotataions.add(Download.onTaskStop.class.getCanonicalName());
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  57 -    //下载任务的注解</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  58 -    annotataions.add(Download.onPre.class.getCanonicalName());</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  59 -    annotataions.add(Download.onNoSupportBreakPoint.class.getCanonicalName());</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  60 -    annotataions.add(Download.onTaskCancel.class.getCanonicalName());</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  61 -    annotataions.add(Download.onTaskComplete.class.getCanonicalName());</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  62 -    annotataions.add(Download.onTaskFail.class.getCanonicalName());</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  63 -    annotataions.add(Download.onTaskPre.class.getCanonicalName());</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  64 -    annotataions.add(Download.onTaskResume.class.getCanonicalName());</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  65 -    annotataions.add(Download.onTaskRunning.class.getCanonicalName());</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  66 -    annotataions.add(Download.onTaskStart.class.getCanonicalName());</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  67 -    annotataions.add(Download.onTaskStop.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  68 +    //下载任务组的注解</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  69 +    annotataions.add(DownloadGroup.onPre.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  70 +    annotataions.add(DownloadGroup.onTaskCancel.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  71 +    annotataions.add(DownloadGroup.onTaskComplete.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  72 +    annotataions.add(DownloadGroup.onTaskFail.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  73 +    annotataions.add(DownloadGroup.onTaskPre.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  74 +    annotataions.add(DownloadGroup.onTaskResume.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  75 +    annotataions.add(DownloadGroup.onTaskRunning.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  76 +    annotataions.add(DownloadGroup.onTaskStart.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  77 +    annotataions.add(DownloadGroup.onTaskStop.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  78 +    //任务组子任务的注解</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  79 +    annotataions.add(DownloadGroup.onSubTaskPre.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  80 +    //annotataions.add(DownloadGroup.onSubTaskCancel.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  81 +    annotataions.add(DownloadGroup.onSubTaskComplete.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  82 +    annotataions.add(DownloadGroup.onSubTaskFail.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  83 +    annotataions.add(DownloadGroup.onSubTaskRunning.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  84 +    annotataions.add(DownloadGroup.onSubTaskStart.class.getCanonicalName());</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  85 +    annotataions.add(DownloadGroup.onSubTaskStop.class.getCanonicalName());</span>
+  86      //上传任务的注解
+  87      annotataions.add(Upload.onPre.class.getCanonicalName());
+  88      annotataions.add(Upload.onNoSupportBreakPoint.class.getCanonicalName());
+  89      annotataions.add(Upload.onTaskCancel.class.getCanonicalName());
+  90      annotataions.add(Upload.onTaskComplete.class.getCanonicalName());
+  91      annotataions.add(Upload.onTaskFail.class.getCanonicalName());
+  92      annotataions.add(Upload.onTaskResume.class.getCanonicalName());
+  93      annotataions.add(Upload.onTaskRunning.class.getCanonicalName());
+  94      annotataions.add(Upload.onTaskStart.class.getCanonicalName());
+  95      annotataions.add(Upload.onTaskStop.class.getCanonicalName());
+  96      return annotataions;
+  97    }
+  98  
+  99    @Override public SourceVersion getSupportedSourceVersion() {
+ 100      return SourceVersion.latestSupported();
+ 101    }
+ 102  
+ 103    @Override
+ 104    public boolean process(Set&lt;? extends TypeElement&gt; annotations, RoundEnvironment roundEnv) {
+ 105      mHandler.clean();
+ 106      mHandler.handleDownload(roundEnv);
+ 107      mHandler.handleDownloadGroup(roundEnv);
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 108 +    mHandler.handleDownloadGroupSub(roundEnv);</span>
+ 109      mHandler.handleUpload(roundEnv);
+ 110      mHandler.createProxyFile();
+ 111      return true;
+ 112    }
+ 113  }</pre></td>
+                        </tr>
+                    </table>
+                </div>
+              </body>
+            </html>
+            

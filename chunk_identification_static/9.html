@@ -1,0 +1,1060 @@
+<!DOCTYPE html>
+    <html lang="en">
+              <head>
+                <meta charset="utf-8">
+                <title>9</title>
+                    <style>
+                        #top {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        #bottom {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        abbr {
+                          /* Here is the delay */
+                          transition-delay:0s;
+                        }
+                    </style>
+              </head>
+              <body>
+                <span style="height: 4vh">
+                    9
+                    <a href="8.html">prev</a>
+                    <a href="10.html">next</a>
+                    <a href="9_chunks.html">chunks</a>
+                    <a href="index.html">index</a>
+                    AriaLyy/Aria_202e6645300cc1a327e9c972c3f61f099631169e_Aria/src/main/java/com/arialyy/aria/core/download/group/DGroupUtil.java
+                    <textarea rows=1 onclick='navigator.clipboard.writeText(this.value)'>cd C:\studies\se\mega\git-analyzer-plus\notebooks\debug
+del /Q *
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\AriaLyy\Aria show &quot;202e6645300cc1a327e9c972c3f61f099631169e:Aria/src/main/java/com/arialyy/aria/core/download/group/DGroupUtil.java&quot; &gt; committed.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\AriaLyy\Aria show &quot;202e6645300cc1a327e9c972c3f61f099631169e^1:Aria/src/main/java/com/arialyy/aria/core/download/group/DGroupUtil.java&quot; &gt; ours.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\AriaLyy\Aria show &quot;202e6645300cc1a327e9c972c3f61f099631169e^2:Aria/src/main/java/com/arialyy/aria/core/download/group/DGroupUtil.java&quot; &gt; theirs.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\AriaLyy\Aria show &quot;a5fc5d0bcfacb42139b088f746beb7394c90a8c0:Aria/src/main/java/com/arialyy/aria/core/download/group/DGroupUtil.java&quot; &gt; base.java
+copy ours.java 1ours.java
+copy ours.java 2ours.java
+copy theirs.java 1theirs.java
+copy theirs.java 2theirs.java
+copy base.java 1base.java
+copy base.java 2base.java
+&quot;C:\Program Files\Java\jdk1.8.0_241\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\jFSTMerge\build\libs\jFSTMerge-all.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\jfstmerge.java --show-base
+&quot;C:\Program Files\Eclipse Adoptium\jdk-17.0.11.9-hotspot\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\spork\target\spork-0.5.0-SNAPSHOT.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\spork.java
+del /Q 1*.java
+del /Q 2*.java
+del /Q jfstmerge.java.merge
+</textarea>
+                    {strict: [[bj], [s]], subset: [[sbj]]}
+                </span>
+                <div id="top">
+
+                    <table>
+                        <tr>
+                            <th>line based (standard git)</th>
+                            <th>jfstmerge</th>
+                            <th>spork</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1 /*
+   2  * Copyright (C) 2016 AriaLyy(https://github.com/AriaLyy/Aria)
+   3  *
+   4  * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+   5  * you may not use this file except in compliance with the License.
+   6  * You may obtain a copy of the License at
+   7  *
+   8  *      http://www.apache.org/licenses/LICENSE-2.0
+   9  *
+  10  * Unless required by applicable law or agreed to in writing, software
+  11  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  12  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  13  * See the License for the specific language governing permissions and
+  14  * limitations under the License.
+  15  */
+  16 package com.arialyy.aria.core.download.group;
+  17 
+  18 import com.arialyy.aria.core.common.CompleteInfo;
+  19 import com.arialyy.aria.core.common.IUtil;
+  20 import com.arialyy.aria.core.common.OnFileInfoCallback;
+  21 import com.arialyy.aria.core.common.http.HttpTaskConfig;
+  22 import com.arialyy.aria.core.download.DGTaskWrapper;
+  23 import com.arialyy.aria.core.download.DTaskWrapper;
+  24 import com.arialyy.aria.core.download.DownloadEntity;
+  25 import com.arialyy.aria.core.download.downloader.HttpFileInfoThread;
+  26 import com.arialyy.aria.core.inf.AbsEntity;
+  27 import com.arialyy.aria.core.inf.IEntity;
+  28 import com.arialyy.aria.exception.AriaIOException;
+  29 import com.arialyy.aria.exception.BaseException;
+  30 import com.arialyy.aria.util.ALog;
+  31 import com.arialyy.aria.util.CommonUtil;
+  32 import java.util.ArrayList;
+  33 import java.util.List;
+  34 import java.util.concurrent.ExecutorService;
+  35 import java.util.concurrent.Executors;
+  36 
+  37 /**
+  38  * Created by AriaL on 2017/6/30.
+  39  * 任务组下载工具
+  40  */
+  41 public class DGroupUtil extends AbsGroupUtil implements IUtil {
+  42   private static final String TAG = &quot;DownloadGroupUtil&quot;;
+  43   private final Object LOCK = new Object();
+  44   private ExecutorService mPool = null;
+  45   private boolean getLenComplete = false;
+  46   private List&lt;DTaskWrapper&gt; mTempWrapper = new ArrayList&lt;&gt;();
+  47 
+  48   public DGroupUtil(IDGroupListener listener, DGTaskWrapper taskWrapper) {
+  49     super(listener, taskWrapper);
+  50   }
+  51 
+  52   @Override int getTaskType() {
+  53     return HTTP_GROUP;
+  54   }
+  55 
+  56   @Override public void onPreCancel() {
+  57     super.onPreCancel();
+  58   }
+  59 
+  60   @Override protected boolean onPreStop() {
+  61     // 如果是isUnknownSize()标志，并且获取大小没有完成，则直接回调onStop
+  62     if (mPool != null &amp;&amp; !getLenComplete) {
+  63       ALog.d(TAG, &quot;获取长度未完成的情况下，停止组合任务&quot;);
+  64       mPool.shutdown();
+  65       mListener.onStop(0);
+  66       return true;
+  67     }
+  68     return false;
+  69   }
+  70 
+  71 &lt;&lt;&lt;&lt;&lt;&lt;&lt; GitAnalyzerPlus_ours
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  72   @Override protected void onPreStart() {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  73     super.onPreStart();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  74     initState();</span>
+  75 ||||||| GitAnalyzerPlus_base
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  76   @Override protected void onStart() {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  77     super.onStart();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  78     if (mState.getCompleteNum() == mState.getSubSize()) {</span>
+  79 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  80   @Override protected boolean onStart() {</span>
+  81 &gt;&gt;&gt;&gt;&gt;&gt;&gt; GitAnalyzerPlus_theirs
+  82     if (mState.getCompleteNum() == mState.getSubSize()) {
+  83       mListener.onComplete();
+  84     } else {
+  85       // 处理组合任务大小未知的情况
+  86       if (mGTWrapper.isUnknownSize() &amp;&amp; mGTWrapper.getEntity().getFileSize() &lt; 1) {
+  87         mPool = Executors.newCachedThreadPool();
+  88         getGroupSize();
+  89         try {
+  90           synchronized (LOCK) {
+  91             LOCK.wait();
+  92           }
+  93         } catch (InterruptedException e) {
+  94           e.printStackTrace();
+  95         }
+  96         return getLenComplete;
+  97       } else {
+  98         for (DTaskWrapper wrapper : mGTWrapper.getSubTaskWrapper()) {
+  99           if (wrapper.getState() != IEntity.STATE_COMPLETE) {
+ 100             createAndStartSubLoader(wrapper);
+ 101           }
+ 102         }
+ 103       }
+ 104     }
+ 105     return true;
+ 106   }
+ 107 
+ 108   /**
+ 109    * 获取组合任务大小，使用该方式获取到的组合任务大小，子任务不需要再重新获取文件大小
+ 110    */
+ 111   private void getGroupSize() {
+ 112     new Thread(new Runnable() {
+ 113       int count;
+ 114       int failCount;
+ 115 
+ 116       @Override public void run() {
+ 117         for (DTaskWrapper dTaskWrapper : mGTWrapper.getSubTaskWrapper()) {
+ 118           cloneHeader(dTaskWrapper);
+ 119           mPool.submit(new HttpFileInfoThread(dTaskWrapper, new OnFileInfoCallback() {
+ 120             @Override public void onComplete(String url, CompleteInfo info) {
+ 121               if (!mGTWrapper.isUnknownSize()) {
+ 122                 createAndStartSubLoader((DTaskWrapper) info.wrapper, false);
+ 123               } else {
+ 124                 mTempWrapper.add((DTaskWrapper) info.wrapper);
+ 125               }
+ 126               count++;
+ 127               checkGetSizeComplete(count, failCount);
+ 128               ALog.d(TAG, &quot;获取子任务信息完成&quot;);
+ 129             }
+ 130 
+ 131             @Override public void onFail(AbsEntity entity, BaseException e, boolean needRetry) {
+ 132               ALog.e(TAG, String.format(&quot;获取文件信息失败，url：%s&quot;, ((DownloadEntity) entity).getUrl()));
+ 133               count++;
+ 134               failCount++;
+ 135               mListener.onSubFail((DownloadEntity) entity, new AriaIOException(TAG,
+ 136                   String.format(&quot;子任务获取文件长度失败，url：%s&quot;, ((DownloadEntity) entity).getUrl())));
+ 137               checkGetSizeComplete(count, failCount);
+ 138               mState.countFailNum(entity.getKey());
+ 139             }
+ 140           }));
+ 141         }
+ 142       }
+ 143     }).start();
+ 144   }
+ 145 
+ 146   /**
+ 147    * 检查组合任务大小是否获取完成，获取完成后取消阻塞，并设置组合任务大小
+ 148    */
+ 149   private void checkGetSizeComplete(int count, int failCount) {
+ 150     if (failCount == mGTWrapper.getSubTaskWrapper().size()) {
+ 151       mState.isRunning = false;
+ 152       mListener.onFail(false, new AriaIOException(TAG, &quot;获取子任务长度失败&quot;));
+ 153       notifyLock();
+ 154       return;
+ 155     }
+ 156     if (count == mGTWrapper.getSubTaskWrapper().size()) {
+ 157       long size = 0;
+ 158       for (DTaskWrapper wrapper : mGTWrapper.getSubTaskWrapper()) {
+ 159         size += wrapper.getEntity().getFileSize();
+ 160       }
+ 161       mGTWrapper.getEntity().setConvertFileSize(CommonUtil.formatFileSize(size));
+ 162       mGTWrapper.getEntity().setFileSize(size);
+ 163       mGTWrapper.getEntity().update();
+ 164       getLenComplete = true;
+ 165       ALog.d(TAG, String.format(&quot;获取组合任务长度完成，组合任务总长度：%s，失败的只任务数：%s&quot;, size, failCount));
+ 166       // 未知大小的组合任务，延迟下载
+ 167       if (mGTWrapper.isUnknownSize()) {
+ 168         for (DTaskWrapper wrapper : mTempWrapper) {
+ 169           createAndStartSubLoader(wrapper, false);
+ 170         }
+ 171       }
+ 172       notifyLock();
+ 173     }
+ 174   }
+ 175 
+ 176   private void notifyLock() {
+ 177     synchronized (LOCK) {
+ 178       LOCK.notifyAll();
+ 179     }
+ 180   }
+ 181 
+ 182   /**
+ 183    * 子任务使用父包裹器的属性
+ 184    */
+ 185   private void cloneHeader(DTaskWrapper taskWrapper) {
+ 186     HttpTaskConfig groupDelegate = mGTWrapper.asHttp();
+ 187     HttpTaskConfig subDelegate = taskWrapper.asHttp();
+ 188 
+ 189     // 设置属性
+ 190     subDelegate.setFileLenAdapter(groupDelegate.getFileLenAdapter());
+ 191     subDelegate.setRequestEnum(groupDelegate.getRequestEnum());
+ 192     subDelegate.setHeaders(groupDelegate.getHeaders());
+ 193     subDelegate.setProxy(groupDelegate.getProxy());
+ 194     subDelegate.setParams(groupDelegate.getParams());
+ 195   }
+ 196 }
+ 
+ 
+ 
+ 
+ 
+ </pre></td>
+                            <td><pre>   1 /*
+   2  * Copyright (C) 2016 AriaLyy(https://github.com/AriaLyy/Aria)
+   3  *
+   4  * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+   5  * you may not use this file except in compliance with the License.
+   6  * You may obtain a copy of the License at
+   7  *
+   8  *      http://www.apache.org/licenses/LICENSE-2.0
+   9  *
+  10  * Unless required by applicable law or agreed to in writing, software
+  11  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  12  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  13  * See the License for the specific language governing permissions and
+  14  * limitations under the License.
+  15  */
+  16 package com.arialyy.aria.core.download.group;
+  17 
+  18 import com.arialyy.aria.core.common.CompleteInfo;
+  19 import com.arialyy.aria.core.common.IUtil;
+  20 import com.arialyy.aria.core.common.OnFileInfoCallback;
+  21 import com.arialyy.aria.core.common.http.HttpTaskConfig;
+  22 import com.arialyy.aria.core.download.DGTaskWrapper;
+  23 import com.arialyy.aria.core.download.DTaskWrapper;
+  24 import com.arialyy.aria.core.download.DownloadEntity;
+  25 import com.arialyy.aria.core.download.downloader.HttpFileInfoThread;
+  26 import com.arialyy.aria.core.inf.AbsEntity;
+  27 import com.arialyy.aria.core.inf.IEntity;
+  28 import com.arialyy.aria.exception.AriaIOException;
+  29 import com.arialyy.aria.exception.BaseException;
+  30 import com.arialyy.aria.util.ALog;
+  31 import com.arialyy.aria.util.CommonUtil;
+  32 import java.util.ArrayList;
+  33 import java.util.List;
+  34 import java.util.concurrent.ExecutorService;
+  35 import java.util.concurrent.Executors;
+  36 
+  37 /**
+  38  * Created by AriaL on 2017/6/30.
+  39  * 任务组下载工具
+  40  */
+  41 public class DGroupUtil extends AbsGroupUtil implements IUtil {
+  42   private static final String TAG = &quot;DownloadGroupUtil&quot;;
+  43   private final Object LOCK = new Object();
+  44   private ExecutorService mPool = null;
+  45   private boolean getLenComplete = false;
+  46   private List&lt;DTaskWrapper&gt; mTempWrapper = new ArrayList&lt;&gt;();
+  47 
+  48   public DGroupUtil(IDGroupListener listener, DGTaskWrapper taskWrapper) {
+  49     super(listener, taskWrapper);
+  50   }
+  51 
+  52   @Override int getTaskType() {
+  53     return HTTP_GROUP;
+  54   }
+  55 
+  56   @Override public void onPreCancel() {
+  57     super.onPreCancel();
+  58   }
+  59 
+  60   @Override protected boolean onPreStop() {
+  61     // 如果是isUnknownSize()标志，并且获取大小没有完成，则直接回调onStop
+  62     if (mPool != null &amp;&amp; !getLenComplete) {
+  63       ALog.d(TAG, &quot;获取长度未完成的情况下，停止组合任务&quot;);
+  64       mPool.shutdown();
+  65       mListener.onStop(0);
+  66       return true;
+  67     }
+  68     return false;
+  69   }
+  70 
+  71 &lt;&lt;&lt;&lt;&lt;&lt;&lt; MINE
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  72 @Override protected void onPreStart() {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  73     super.onPreStart();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  74     initState();</span>
+  75 ||||||| BASE
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  76 @Override protected void onStart() {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  77     super.onStart();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  78     if (mState.getCompleteNum() == mState.getSubSize()) {</span>
+  79 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  80 @Override protected boolean onStart() {</span>
+  81 &gt;&gt;&gt;&gt;&gt;&gt;&gt; YOURS
+  82     if (mState.getCompleteNum() == mState.getSubSize()) {
+  83       mListener.onComplete();
+  84     } else {
+  85       // 处理组合任务大小未知的情况
+  86       if (mGTWrapper.isUnknownSize() &amp;&amp; mGTWrapper.getEntity().getFileSize() &lt; 1) {
+  87         mPool = Executors.newCachedThreadPool();
+  88         getGroupSize();
+  89         try {
+  90           synchronized (LOCK) {
+  91             LOCK.wait();
+  92           }
+  93         } catch (InterruptedException e) {
+  94           e.printStackTrace();
+  95         }
+  96         return getLenComplete;
+  97       } else {
+  98         for (DTaskWrapper wrapper : mGTWrapper.getSubTaskWrapper()) {
+  99           if (wrapper.getState() != IEntity.STATE_COMPLETE) {
+ 100             createAndStartSubLoader(wrapper);
+ 101           }
+ 102         }
+ 103       }
+ 104     }
+ 105     return true;
+ 106   }
+ 107 
+ 108   /**
+ 109    * 获取组合任务大小，使用该方式获取到的组合任务大小，子任务不需要再重新获取文件大小
+ 110    */
+ 111   private void getGroupSize() {
+ 112     new Thread(new Runnable() {
+ 113       int count;
+ 114       int failCount;
+ 115 
+ 116       @Override public void run() {
+ 117         for (DTaskWrapper dTaskWrapper : mGTWrapper.getSubTaskWrapper()) {
+ 118           cloneHeader(dTaskWrapper);
+ 119           mPool.submit(new HttpFileInfoThread(dTaskWrapper, new OnFileInfoCallback() {
+ 120             @Override public void onComplete(String url, CompleteInfo info) {
+ 121               if (!mGTWrapper.isUnknownSize()) {
+ 122                 createAndStartSubLoader((DTaskWrapper) info.wrapper, false);
+ 123               } else {
+ 124                 mTempWrapper.add((DTaskWrapper) info.wrapper);
+ 125               }
+ 126               count++;
+ 127               checkGetSizeComplete(count, failCount);
+ 128               ALog.d(TAG, &quot;获取子任务信息完成&quot;);
+ 129             }
+ 130 
+ 131             @Override public void onFail(AbsEntity entity, BaseException e, boolean needRetry) {
+ 132               ALog.e(TAG, String.format(&quot;获取文件信息失败，url：%s&quot;, ((DownloadEntity) entity).getUrl()));
+ 133               count++;
+ 134               failCount++;
+ 135               mListener.onSubFail((DownloadEntity) entity, new AriaIOException(TAG,
+ 136                   String.format(&quot;子任务获取文件长度失败，url：%s&quot;, ((DownloadEntity) entity).getUrl())));
+ 137               checkGetSizeComplete(count, failCount);
+ 138               mState.countFailNum(entity.getKey());
+ 139             }
+ 140           }));
+ 141         }
+ 142       }
+ 143     }).start();
+ 144   }
+ 145 
+ 146   /**
+ 147    * 检查组合任务大小是否获取完成，获取完成后取消阻塞，并设置组合任务大小
+ 148    */
+ 149   private void checkGetSizeComplete(int count, int failCount) {
+ 150     if (failCount == mGTWrapper.getSubTaskWrapper().size()) {
+ 151       mState.isRunning = false;
+ 152       mListener.onFail(false, new AriaIOException(TAG, &quot;获取子任务长度失败&quot;));
+ 153       notifyLock();
+ 154       return;
+ 155     }
+ 156     if (count == mGTWrapper.getSubTaskWrapper().size()) {
+ 157       long size = 0;
+ 158       for (DTaskWrapper wrapper : mGTWrapper.getSubTaskWrapper()) {
+ 159         size += wrapper.getEntity().getFileSize();
+ 160       }
+ 161       mGTWrapper.getEntity().setConvertFileSize(CommonUtil.formatFileSize(size));
+ 162       mGTWrapper.getEntity().setFileSize(size);
+ 163       mGTWrapper.getEntity().update();
+ 164       getLenComplete = true;
+ 165       ALog.d(TAG, String.format(&quot;获取组合任务长度完成，组合任务总长度：%s，失败的只任务数：%s&quot;, size, failCount));
+ 166       // 未知大小的组合任务，延迟下载
+ 167       if (mGTWrapper.isUnknownSize()) {
+ 168         for (DTaskWrapper wrapper : mTempWrapper) {
+ 169           createAndStartSubLoader(wrapper, false);
+ 170         }
+ 171       }
+ 172       notifyLock();
+ 173     }
+ 174   }
+ 175 
+ 176   private void notifyLock() {
+ 177     synchronized (LOCK) {
+ 178       LOCK.notifyAll();
+ 179     }
+ 180   }
+ 181 
+ 182   /**
+ 183    * 子任务使用父包裹器的属性
+ 184    */
+ 185   private void cloneHeader(DTaskWrapper taskWrapper) {
+ 186     HttpTaskConfig groupDelegate = mGTWrapper.asHttp();
+ 187     HttpTaskConfig subDelegate = taskWrapper.asHttp();
+ 188 
+ 189     // 设置属性
+ 190     subDelegate.setFileLenAdapter(groupDelegate.getFileLenAdapter());
+ 191     subDelegate.setRequestEnum(groupDelegate.getRequestEnum());
+ 192     subDelegate.setHeaders(groupDelegate.getHeaders());
+ 193     subDelegate.setProxy(groupDelegate.getProxy());
+ 194     subDelegate.setParams(groupDelegate.getParams());
+ 195   }
+ 196 }
+ 
+ 
+ 
+ 
+ 
+ </pre></td>
+                            <td><pre>   1 /*
+   2  * Copyright (C) 2016 AriaLyy(https://github.com/AriaLyy/Aria)
+   3  *
+   4  * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+   5  * you may not use this file except in compliance with the License.
+   6  * You may obtain a copy of the License at
+   7  *
+   8  *      http://www.apache.org/licenses/LICENSE-2.0
+   9  *
+  10  * Unless required by applicable law or agreed to in writing, software
+  11  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  12  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  13  * See the License for the specific language governing permissions and
+  14  * limitations under the License.
+  15  */
+  16 package com.arialyy.aria.core.download.group;
+  17 
+  18 import com.arialyy.aria.core.common.CompleteInfo;
+  19 import com.arialyy.aria.core.common.IUtil;
+  20 import com.arialyy.aria.core.common.OnFileInfoCallback;
+  21 import com.arialyy.aria.core.common.http.HttpTaskConfig;
+  22 import com.arialyy.aria.core.download.DGTaskWrapper;
+  23 import com.arialyy.aria.core.download.DTaskWrapper;
+  24 import com.arialyy.aria.core.download.DownloadEntity;
+  25 import com.arialyy.aria.core.download.downloader.HttpFileInfoThread;
+  26 import com.arialyy.aria.core.inf.AbsEntity;
+  27 import com.arialyy.aria.core.inf.IEntity;
+  28 import com.arialyy.aria.exception.AriaIOException;
+  29 import com.arialyy.aria.exception.BaseException;
+  30 import com.arialyy.aria.util.ALog;
+  31 import com.arialyy.aria.util.CommonUtil;
+  32 import java.util.ArrayList;
+  33 import java.util.List;
+  34 import java.util.concurrent.ExecutorService;
+  35 import java.util.concurrent.Executors;
+  36 
+  37 
+  38 /**
+  39  * Created by AriaL on 2017/6/30.
+  40  * 任务组下载工具
+  41  */
+  42 public class DGroupUtil extends AbsGroupUtil implements IUtil {
+  43   private static final String TAG = &quot;DownloadGroupUtil&quot;;
+  44 
+  45   private final Object LOCK = new Object();
+  46 
+  47   private ExecutorService mPool = null;
+  48 
+  49   private boolean getLenComplete = false;
+  50 
+  51   private List&lt;DTaskWrapper&gt; mTempWrapper = new ArrayList&lt;&gt;();
+  52 
+  53   public DGroupUtil(IDGroupListener listener, DGTaskWrapper taskWrapper) {
+  54     super(listener, taskWrapper);
+  55   }
+  56 
+  57   @Override int getTaskType() {
+  58     return HTTP_GROUP;
+  59   }
+  60 
+  61   @Override public void onPreCancel() {
+  62     super.onPreCancel();
+  63   }
+  64 
+  65   @Override protected boolean onPreStop() {
+  66     // 如果是isUnknownSize()标志，并且获取大小没有完成，则直接回调onStop
+  67     if (mPool != null &amp;&amp; !getLenComplete) {
+  68       ALog.d(TAG, &quot;获取长度未完成的情况下，停止组合任务&quot;);
+  69       mPool.shutdown();
+  70       mListener.onStop(0);
+  71       return true;
+  72     }
+  73     return false;
+  74   }
+  75 
+  76   @Override
+  77   protected boolean onPreStart() {
+  78 
+  79 &lt;&lt;&lt;&lt;&lt;&lt;&lt; LEFT
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  80     super.onPreStart();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  81     initState();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  82 </span>
+  83 ||||||| BASE
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"><abbr title="  84 /*d94z9sk0k4hf9j3ijd - note the base isn&#x27;t actually empty, spork simply doesn&#x27;t generate a base - gd930kwohrp23k5b6vdk93d3r*/">  84 /*d94z9sk0k4hf9j3ijd - note the base isn&#x27;t actually empty, spork simply doesn&#x27;t generate a base - gd930kw🔵</abbr></span>
+  85 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  86 </span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  87 </span>
+  88 &gt;&gt;&gt;&gt;&gt;&gt;&gt; RIGHT
+  89     if (mState.getCompleteNum() == mState.getSubSize()) {
+  90       mListener.onComplete();
+  91     } else {
+  92       // 处理组合任务大小未知的情况
+  93       if (mGTWrapper.isUnknownSize() &amp;&amp; mGTWrapper.getEntity().getFileSize() &lt; 1) {
+  94         mPool = Executors.newCachedThreadPool();
+  95         getGroupSize();
+  96         try {
+  97           synchronized (LOCK) {
+  98             LOCK.wait();
+  99           }
+ 100         } catch (InterruptedException e) {
+ 101           e.printStackTrace();
+ 102         }
+ 103         return getLenComplete;
+ 104       } else {
+ 105         for (DTaskWrapper wrapper : mGTWrapper.getSubTaskWrapper()) {
+ 106           if (wrapper.getState() != IEntity.STATE_COMPLETE) {
+ 107             createAndStartSubLoader(wrapper);
+ 108           }
+ 109         }
+ 110       }
+ 111     }
+ 112     return true;
+ 113   }
+ 114 
+ 115   /**
+ 116    * 获取组合任务大小，使用该方式获取到的组合任务大小，子任务不需要再重新获取文件大小
+ 117    */
+ 118   private void getGroupSize() {
+ 119     new Thread(new Runnable() {
+ 120       int count;
+ 121       int failCount;
+ 122 
+ 123       @Override public void run() {
+ 124         for (DTaskWrapper dTaskWrapper : mGTWrapper.getSubTaskWrapper()) {
+ 125           cloneHeader(dTaskWrapper);
+ 126           mPool.submit(new HttpFileInfoThread(dTaskWrapper, new OnFileInfoCallback() {
+ 127             @Override public void onComplete(String url, CompleteInfo info) {
+ 128               if (!mGTWrapper.isUnknownSize()) {
+ 129                 createAndStartSubLoader((DTaskWrapper) info.wrapper, false);
+ 130               } else {
+ 131                 mTempWrapper.add((DTaskWrapper) info.wrapper);
+ 132               }
+ 133               count++;
+ 134               checkGetSizeComplete(count, failCount);
+ 135               ALog.d(TAG, &quot;获取子任务信息完成&quot;);
+ 136             }
+ 137 
+ 138             @Override public void onFail(AbsEntity entity, BaseException e, boolean needRetry) {
+ 139               ALog.e(TAG, String.format(&quot;获取文件信息失败，url：%s&quot;, ((DownloadEntity) entity).getUrl()));
+ 140               count++;
+ 141               failCount++;
+ 142               mListener.onSubFail((DownloadEntity) entity, new AriaIOException(TAG,
+ 143                   String.format(&quot;子任务获取文件长度失败，url：%s&quot;, ((DownloadEntity) entity).getUrl())));
+ 144               checkGetSizeComplete(count, failCount);
+ 145               mState.countFailNum(entity.getKey());
+ 146             }
+ 147           }));
+ 148         }
+ 149       }
+ 150     }).start();
+ 151   }
+ 152 
+ 153   /**
+ 154    * 检查组合任务大小是否获取完成，获取完成后取消阻塞，并设置组合任务大小
+ 155    */
+ 156   private void checkGetSizeComplete(int count, int failCount) {
+ 157     if (failCount == mGTWrapper.getSubTaskWrapper().size()) {
+ 158       mState.isRunning = false;
+ 159       mListener.onFail(false, new AriaIOException(TAG, &quot;获取子任务长度失败&quot;));
+ 160       notifyLock();
+ 161       return;
+ 162     }
+ 163     if (count == mGTWrapper.getSubTaskWrapper().size()) {
+ 164       long size = 0;
+ 165       for (DTaskWrapper wrapper : mGTWrapper.getSubTaskWrapper()) {
+ 166         size += wrapper.getEntity().getFileSize();
+ 167       }
+ 168       mGTWrapper.getEntity().setConvertFileSize(CommonUtil.formatFileSize(size));
+ 169       mGTWrapper.getEntity().setFileSize(size);
+ 170       mGTWrapper.getEntity().update();
+ 171       getLenComplete = true;
+ 172       ALog.d(TAG, String.format(&quot;获取组合任务长度完成，组合任务总长度：%s，失败的只任务数：%s&quot;, size, failCount));
+ 173       // 未知大小的组合任务，延迟下载
+ 174       if (mGTWrapper.isUnknownSize()) {
+ 175         for (DTaskWrapper wrapper : mTempWrapper) {
+ 176           createAndStartSubLoader(wrapper, false);
+ 177         }
+ 178       }
+ 179       notifyLock();
+ 180     }
+ 181   }
+ 182 
+ 183   private void notifyLock() {
+ 184     synchronized (LOCK) {
+ 185       LOCK.notifyAll();
+ 186     }
+ 187   }
+ 188 
+ 189   /**
+ 190    * 子任务使用父包裹器的属性
+ 191    */
+ 192   private void cloneHeader(DTaskWrapper taskWrapper) {
+ 193     HttpTaskConfig groupDelegate = mGTWrapper.asHttp();
+ 194     HttpTaskConfig subDelegate = taskWrapper.asHttp();
+ 195 
+ 196     // 设置属性
+ 197     subDelegate.setFileLenAdapter(groupDelegate.getFileLenAdapter());
+ 198     subDelegate.setRequestEnum(groupDelegate.getRequestEnum());
+ 199     subDelegate.setHeaders(groupDelegate.getHeaders());
+ 200     subDelegate.setProxy(groupDelegate.getProxy());
+ 201     subDelegate.setParams(groupDelegate.getParams());
+ 202   }
+ 203 }</pre></td>
+                        </tr>
+                    </table>
+                </div>
+                <div id="bottom">
+                    <table style="margin:auto">
+                        <tr>
+                            <th>ours vs. base</th>
+                            <th>theirs vs. base</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1  /*
+   2   * Copyright (C) 2016 AriaLyy(https://github.com/AriaLyy/Aria)
+   3   *
+   4   * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+   5   * you may not use this file except in compliance with the License.
+   6   * You may obtain a copy of the License at
+   7   *
+   8   *      http://www.apache.org/licenses/LICENSE-2.0
+   9   *
+  10   * Unless required by applicable law or agreed to in writing, software
+  11   * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  12   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  13   * See the License for the specific language governing permissions and
+  14   * limitations under the License.
+  15   */
+  16  package com.arialyy.aria.core.download.group;
+  17  
+  18  import com.arialyy.aria.core.common.CompleteInfo;
+  19  import com.arialyy.aria.core.common.IUtil;
+  20  import com.arialyy.aria.core.common.OnFileInfoCallback;
+  21  import com.arialyy.aria.core.common.http.HttpTaskConfig;
+  22  import com.arialyy.aria.core.download.DGTaskWrapper;
+  23  import com.arialyy.aria.core.download.DTaskWrapper;
+  24  import com.arialyy.aria.core.download.DownloadEntity;
+  25  import com.arialyy.aria.core.download.downloader.HttpFileInfoThread;
+  26  import com.arialyy.aria.core.inf.AbsEntity;
+  27  import com.arialyy.aria.core.inf.IEntity;
+  28  import com.arialyy.aria.exception.AriaIOException;
+  29  import com.arialyy.aria.exception.BaseException;
+  30  import com.arialyy.aria.util.ALog;
+  31  import com.arialyy.aria.util.CommonUtil;
+  32  import java.util.ArrayList;
+  33  import java.util.List;
+  34  import java.util.concurrent.ExecutorService;
+  35  import java.util.concurrent.Executors;
+  36  
+  37  /**
+  38   * Created by AriaL on 2017/6/30.
+  39   * 任务组下载工具
+  40   */
+  41  public class DGroupUtil extends AbsGroupUtil implements IUtil {
+  42    private static final String TAG = &quot;DownloadGroupUtil&quot;;
+  43    private final Object LOCK = new Object();
+  44    private ExecutorService mPool = null;
+  45    private boolean getLenComplete = false;
+  46    private List&lt;DTaskWrapper&gt; mTempWrapper = new ArrayList&lt;&gt;();
+  47  
+  48    public DGroupUtil(IDGroupListener listener, DGTaskWrapper taskWrapper) {
+  49      super(listener, taskWrapper);
+  50    }
+  51  
+  52    @Override int getTaskType() {
+  53      return HTTP_GROUP;
+  54    }
+  55  
+  56    @Override public void onPreCancel() {
+  57      super.onPreCancel();
+  58    }
+  59  
+  60    @Override protected boolean onPreStop() {
+  61      // 如果是isUnknownSize()标志，并且获取大小没有完成，则直接回调onStop
+  62      if (mPool != null &amp;&amp; !getLenComplete) {
+  63        ALog.d(TAG, &quot;获取长度未完成的情况下，停止组合任务&quot;);
+  64        mPool.shutdown();
+  65        mListener.onStop(0);
+  66        return true;
+  67      }
+  68      return false;
+  69    }
+  70  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  71 -  @Override protected void onStart() {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  72 -    super.onStart();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  73 +  @Override protected void onPreStart() {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  74 +    super.onPreStart();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  75 +    initState();</span>
+  76      if (mState.getCompleteNum() == mState.getSubSize()) {
+  77        mListener.onComplete();
+  78      } else {
+  79        // 处理组合任务大小未知的情况
+  80        if (mGTWrapper.isUnknownSize() &amp;&amp; mGTWrapper.getEntity().getFileSize() &lt; 1) {
+  81          mPool = Executors.newCachedThreadPool();
+  82          getGroupSize();
+  83          try {
+  84            synchronized (LOCK) {
+  85              LOCK.wait();
+  86            }
+  87          } catch (InterruptedException e) {
+  88            e.printStackTrace();
+  89          }
+
+  90        } else {
+  91          for (DTaskWrapper wrapper : mGTWrapper.getSubTaskWrapper()) {
+  92            if (wrapper.getState() != IEntity.STATE_COMPLETE) {
+  93              createAndStartSubLoader(wrapper);
+  94            }
+  95          }
+  96        }
+  97      }
+
+  98    }
+  99  
+ 100    /**
+ 101     * 获取组合任务大小，使用该方式获取到的组合任务大小，子任务不需要再重新获取文件大小
+ 102     */
+ 103    private void getGroupSize() {
+ 104      new Thread(new Runnable() {
+ 105        int count;
+ 106        int failCount;
+ 107  
+ 108        @Override public void run() {
+ 109          for (DTaskWrapper dTaskWrapper : mGTWrapper.getSubTaskWrapper()) {
+ 110            cloneHeader(dTaskWrapper);
+ 111            mPool.submit(new HttpFileInfoThread(dTaskWrapper, new OnFileInfoCallback() {
+ 112              @Override public void onComplete(String url, CompleteInfo info) {
+ 113                if (!mGTWrapper.isUnknownSize()) {
+ 114                  createAndStartSubLoader((DTaskWrapper) info.wrapper, false);
+ 115                } else {
+ 116                  mTempWrapper.add((DTaskWrapper) info.wrapper);
+ 117                }
+ 118                count++;
+ 119                checkGetSizeComplete(count, failCount);
+ 120                ALog.d(TAG, &quot;获取子任务信息完成&quot;);
+ 121              }
+ 122  
+ 123              @Override public void onFail(AbsEntity entity, BaseException e, boolean needRetry) {
+ 124                ALog.e(TAG, String.format(&quot;获取文件信息失败，url：%s&quot;, ((DownloadEntity) entity).getUrl()));
+ 125                count++;
+ 126                failCount++;
+ 127                mListener.onSubFail((DownloadEntity) entity, new AriaIOException(TAG,
+ 128                    String.format(&quot;子任务获取文件长度失败，url：%s&quot;, ((DownloadEntity) entity).getUrl())));
+ 129                checkGetSizeComplete(count, failCount);
+ 130                mState.countFailNum(entity.getKey());
+ 131              }
+ 132            }));
+ 133          }
+ 134        }
+ 135      }).start();
+ 136    }
+ 137  
+ 138    /**
+ 139     * 检查组合任务大小是否获取完成，获取完成后取消阻塞，并设置组合任务大小
+ 140     */
+ 141    private void checkGetSizeComplete(int count, int failCount) {
+ 142      if (failCount == mGTWrapper.getSubTaskWrapper().size()) {
+
+ 143        mListener.onFail(false, new AriaIOException(TAG, &quot;获取子任务长度失败&quot;));
+ 144        notifyLock();
+ 145        return;
+ 146      }
+ 147      if (count == mGTWrapper.getSubTaskWrapper().size()) {
+ 148        long size = 0;
+ 149        for (DTaskWrapper wrapper : mGTWrapper.getSubTaskWrapper()) {
+ 150          size += wrapper.getEntity().getFileSize();
+ 151        }
+ 152        mGTWrapper.getEntity().setConvertFileSize(CommonUtil.formatFileSize(size));
+ 153        mGTWrapper.getEntity().setFileSize(size);
+ 154        mGTWrapper.getEntity().update();
+ 155        getLenComplete = true;
+ 156        ALog.d(TAG, String.format(&quot;获取组合任务长度完成，组合任务总长度：%s，失败的只任务数：%s&quot;, size, failCount));
+ 157        // 未知大小的组合任务，延迟下载
+ 158        if (mGTWrapper.isUnknownSize()) {
+ 159          for (DTaskWrapper wrapper : mTempWrapper) {
+ 160            createAndStartSubLoader(wrapper, false);
+ 161          }
+ 162        }
+ 163        notifyLock();
+ 164      }
+ 165    }
+ 166  
+ 167    private void notifyLock() {
+ 168      synchronized (LOCK) {
+ 169        LOCK.notifyAll();
+ 170      }
+ 171    }
+ 172  
+ 173    /**
+ 174     * 子任务使用父包裹器的属性
+ 175     */
+ 176    private void cloneHeader(DTaskWrapper taskWrapper) {
+ 177      HttpTaskConfig groupDelegate = mGTWrapper.asHttp();
+ 178      HttpTaskConfig subDelegate = taskWrapper.asHttp();
+ 179  
+ 180      // 设置属性
+ 181      subDelegate.setFileLenAdapter(groupDelegate.getFileLenAdapter());
+ 182      subDelegate.setRequestEnum(groupDelegate.getRequestEnum());
+ 183      subDelegate.setHeaders(groupDelegate.getHeaders());
+ 184      subDelegate.setProxy(groupDelegate.getProxy());
+ 185      subDelegate.setParams(groupDelegate.getParams());
+ 186    }
+ 187  }</pre></td>
+                            <td><pre>   1  /*
+   2   * Copyright (C) 2016 AriaLyy(https://github.com/AriaLyy/Aria)
+   3   *
+   4   * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+   5   * you may not use this file except in compliance with the License.
+   6   * You may obtain a copy of the License at
+   7   *
+   8   *      http://www.apache.org/licenses/LICENSE-2.0
+   9   *
+  10   * Unless required by applicable law or agreed to in writing, software
+  11   * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  12   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  13   * See the License for the specific language governing permissions and
+  14   * limitations under the License.
+  15   */
+  16  package com.arialyy.aria.core.download.group;
+  17  
+  18  import com.arialyy.aria.core.common.CompleteInfo;
+  19  import com.arialyy.aria.core.common.IUtil;
+  20  import com.arialyy.aria.core.common.OnFileInfoCallback;
+  21  import com.arialyy.aria.core.common.http.HttpTaskConfig;
+  22  import com.arialyy.aria.core.download.DGTaskWrapper;
+  23  import com.arialyy.aria.core.download.DTaskWrapper;
+  24  import com.arialyy.aria.core.download.DownloadEntity;
+  25  import com.arialyy.aria.core.download.downloader.HttpFileInfoThread;
+  26  import com.arialyy.aria.core.inf.AbsEntity;
+  27  import com.arialyy.aria.core.inf.IEntity;
+  28  import com.arialyy.aria.exception.AriaIOException;
+  29  import com.arialyy.aria.exception.BaseException;
+  30  import com.arialyy.aria.util.ALog;
+  31  import com.arialyy.aria.util.CommonUtil;
+  32  import java.util.ArrayList;
+  33  import java.util.List;
+  34  import java.util.concurrent.ExecutorService;
+  35  import java.util.concurrent.Executors;
+  36  
+  37  /**
+  38   * Created by AriaL on 2017/6/30.
+  39   * 任务组下载工具
+  40   */
+  41  public class DGroupUtil extends AbsGroupUtil implements IUtil {
+  42    private static final String TAG = &quot;DownloadGroupUtil&quot;;
+  43    private final Object LOCK = new Object();
+  44    private ExecutorService mPool = null;
+  45    private boolean getLenComplete = false;
+  46    private List&lt;DTaskWrapper&gt; mTempWrapper = new ArrayList&lt;&gt;();
+  47  
+  48    public DGroupUtil(IDGroupListener listener, DGTaskWrapper taskWrapper) {
+  49      super(listener, taskWrapper);
+  50    }
+  51  
+  52    @Override int getTaskType() {
+  53      return HTTP_GROUP;
+  54    }
+  55  
+  56    @Override public void onPreCancel() {
+  57      super.onPreCancel();
+  58    }
+  59  
+  60    @Override protected boolean onPreStop() {
+  61      // 如果是isUnknownSize()标志，并且获取大小没有完成，则直接回调onStop
+  62      if (mPool != null &amp;&amp; !getLenComplete) {
+  63        ALog.d(TAG, &quot;获取长度未完成的情况下，停止组合任务&quot;);
+  64        mPool.shutdown();
+  65        mListener.onStop(0);
+  66        return true;
+  67      }
+  68      return false;
+  69    }
+  70  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  71 -  @Override protected void onStart() {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  72 -    super.onStart();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  73 +  @Override protected boolean onStart() {</span>
+
+
+  74      if (mState.getCompleteNum() == mState.getSubSize()) {
+  75        mListener.onComplete();
+  76      } else {
+  77        // 处理组合任务大小未知的情况
+  78        if (mGTWrapper.isUnknownSize() &amp;&amp; mGTWrapper.getEntity().getFileSize() &lt; 1) {
+  79          mPool = Executors.newCachedThreadPool();
+  80          getGroupSize();
+  81          try {
+  82            synchronized (LOCK) {
+  83              LOCK.wait();
+  84            }
+  85          } catch (InterruptedException e) {
+  86            e.printStackTrace();
+  87          }
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  88 +        return getLenComplete;</span>
+  89        } else {
+  90          for (DTaskWrapper wrapper : mGTWrapper.getSubTaskWrapper()) {
+  91            if (wrapper.getState() != IEntity.STATE_COMPLETE) {
+  92              createAndStartSubLoader(wrapper);
+  93            }
+  94          }
+  95        }
+  96      }
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  97 +    return true;</span>
+  98    }
+  99  
+ 100    /**
+ 101     * 获取组合任务大小，使用该方式获取到的组合任务大小，子任务不需要再重新获取文件大小
+ 102     */
+ 103    private void getGroupSize() {
+ 104      new Thread(new Runnable() {
+ 105        int count;
+ 106        int failCount;
+ 107  
+ 108        @Override public void run() {
+ 109          for (DTaskWrapper dTaskWrapper : mGTWrapper.getSubTaskWrapper()) {
+ 110            cloneHeader(dTaskWrapper);
+ 111            mPool.submit(new HttpFileInfoThread(dTaskWrapper, new OnFileInfoCallback() {
+ 112              @Override public void onComplete(String url, CompleteInfo info) {
+ 113                if (!mGTWrapper.isUnknownSize()) {
+ 114                  createAndStartSubLoader((DTaskWrapper) info.wrapper, false);
+ 115                } else {
+ 116                  mTempWrapper.add((DTaskWrapper) info.wrapper);
+ 117                }
+ 118                count++;
+ 119                checkGetSizeComplete(count, failCount);
+ 120                ALog.d(TAG, &quot;获取子任务信息完成&quot;);
+ 121              }
+ 122  
+ 123              @Override public void onFail(AbsEntity entity, BaseException e, boolean needRetry) {
+ 124                ALog.e(TAG, String.format(&quot;获取文件信息失败，url：%s&quot;, ((DownloadEntity) entity).getUrl()));
+ 125                count++;
+ 126                failCount++;
+ 127                mListener.onSubFail((DownloadEntity) entity, new AriaIOException(TAG,
+ 128                    String.format(&quot;子任务获取文件长度失败，url：%s&quot;, ((DownloadEntity) entity).getUrl())));
+ 129                checkGetSizeComplete(count, failCount);
+ 130                mState.countFailNum(entity.getKey());
+ 131              }
+ 132            }));
+ 133          }
+ 134        }
+ 135      }).start();
+ 136    }
+ 137  
+ 138    /**
+ 139     * 检查组合任务大小是否获取完成，获取完成后取消阻塞，并设置组合任务大小
+ 140     */
+ 141    private void checkGetSizeComplete(int count, int failCount) {
+ 142      if (failCount == mGTWrapper.getSubTaskWrapper().size()) {
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 143 +      mState.isRunning = false;</span>
+ 144        mListener.onFail(false, new AriaIOException(TAG, &quot;获取子任务长度失败&quot;));
+ 145        notifyLock();
+ 146        return;
+ 147      }
+ 148      if (count == mGTWrapper.getSubTaskWrapper().size()) {
+ 149        long size = 0;
+ 150        for (DTaskWrapper wrapper : mGTWrapper.getSubTaskWrapper()) {
+ 151          size += wrapper.getEntity().getFileSize();
+ 152        }
+ 153        mGTWrapper.getEntity().setConvertFileSize(CommonUtil.formatFileSize(size));
+ 154        mGTWrapper.getEntity().setFileSize(size);
+ 155        mGTWrapper.getEntity().update();
+ 156        getLenComplete = true;
+ 157        ALog.d(TAG, String.format(&quot;获取组合任务长度完成，组合任务总长度：%s，失败的只任务数：%s&quot;, size, failCount));
+ 158        // 未知大小的组合任务，延迟下载
+ 159        if (mGTWrapper.isUnknownSize()) {
+ 160          for (DTaskWrapper wrapper : mTempWrapper) {
+ 161            createAndStartSubLoader(wrapper, false);
+ 162          }
+ 163        }
+ 164        notifyLock();
+ 165      }
+ 166    }
+ 167  
+ 168    private void notifyLock() {
+ 169      synchronized (LOCK) {
+ 170        LOCK.notifyAll();
+ 171      }
+ 172    }
+ 173  
+ 174    /**
+ 175     * 子任务使用父包裹器的属性
+ 176     */
+ 177    private void cloneHeader(DTaskWrapper taskWrapper) {
+ 178      HttpTaskConfig groupDelegate = mGTWrapper.asHttp();
+ 179      HttpTaskConfig subDelegate = taskWrapper.asHttp();
+ 180  
+ 181      // 设置属性
+ 182      subDelegate.setFileLenAdapter(groupDelegate.getFileLenAdapter());
+ 183      subDelegate.setRequestEnum(groupDelegate.getRequestEnum());
+ 184      subDelegate.setHeaders(groupDelegate.getHeaders());
+ 185      subDelegate.setProxy(groupDelegate.getProxy());
+ 186      subDelegate.setParams(groupDelegate.getParams());
+ 187    }
+ 188  }</pre></td>
+                        </tr>
+                    </table>
+                </div>
+              </body>
+            </html>
+            

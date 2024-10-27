@@ -1,0 +1,2389 @@
+<!DOCTYPE html>
+    <html lang="en">
+              <head>
+                <meta charset="utf-8">
+                <title>293</title>
+                    <style>
+                        #top {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        #bottom {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        abbr {
+                          /* Here is the delay */
+                          transition-delay:0s;
+                        }
+                    </style>
+              </head>
+              <body>
+                <span style="height: 4vh">
+                    293
+                    <a href="292.html">prev</a>
+                    <a href="294.html">next</a>
+                    <a href="293_chunks.html">chunks</a>
+                    <a href="index.html">index</a>
+                    DTStack/flinkStreamSQL_6394dabf12bde9a136026840bf80bb5fe2ce3a94_core/src/main/java/com/dtstack/flink/sql/exec/ExecuteProcessHelper.java
+                    <textarea rows=1 onclick='navigator.clipboard.writeText(this.value)'>cd C:\studies\se\mega\git-analyzer-plus\notebooks\debug
+del /Q *
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;6394dabf12bde9a136026840bf80bb5fe2ce3a94:core/src/main/java/com/dtstack/flink/sql/exec/ExecuteProcessHelper.java&quot; &gt; committed.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;6394dabf12bde9a136026840bf80bb5fe2ce3a94^1:core/src/main/java/com/dtstack/flink/sql/exec/ExecuteProcessHelper.java&quot; &gt; ours.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;6394dabf12bde9a136026840bf80bb5fe2ce3a94^2:core/src/main/java/com/dtstack/flink/sql/exec/ExecuteProcessHelper.java&quot; &gt; theirs.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;585aba8904d56b54b787807a447c4a88d9b1bd6c:core/src/main/java/com/dtstack/flink/sql/exec/ExecuteProcessHelper.java&quot; &gt; base.java
+copy ours.java 1ours.java
+copy ours.java 2ours.java
+copy theirs.java 1theirs.java
+copy theirs.java 2theirs.java
+copy base.java 1base.java
+copy base.java 2base.java
+&quot;C:\Program Files\Java\jdk1.8.0_241\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\jFSTMerge\build\libs\jFSTMerge-all.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\jfstmerge.java --show-base
+&quot;C:\Program Files\Eclipse Adoptium\jdk-17.0.11.9-hotspot\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\spork\target\spork-0.5.0-SNAPSHOT.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\spork.java
+del /Q 1*.java
+del /Q 2*.java
+del /Q jfstmerge.java.merge
+</textarea>
+                    {strict: [[b]], subset: [[b]]}
+                </span>
+                <div id="top">
+
+                    <table>
+                        <tr>
+                            <th>line based (standard git)</th>
+                            <th>jfstmerge</th>
+                            <th>spork</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1 /*
+   2  * Licensed to the Apache Software Foundation (ASF) under one
+   3  * or more contributor license agreements.  See the NOTICE file
+   4  * distributed with this work for additional information
+   5  * regarding copyright ownership.  The ASF licenses this file
+   6  * to you under the Apache License, Version 2.0 (the
+   7  * &quot;License&quot;); you may not use this file except in compliance
+   8  * with the License.  You may obtain a copy of the License at
+   9  *
+  10  *     http://www.apache.org/licenses/LICENSE-2.0
+  11  *
+  12  * Unless required by applicable law or agreed to in writing, software
+  13  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15  * See the License for the specific language governing permissions and
+  16  * limitations under the License.
+  17  */
+  18 
+  19 package com.dtstack.flink.sql.exec;
+  20 
+  21 import com.dtstack.flink.sql.classloader.ClassLoaderManager;
+  22 import com.dtstack.flink.sql.dirtyManager.manager.DirtyDataManager;
+  23 import com.dtstack.flink.sql.enums.ClusterMode;
+  24 import com.dtstack.flink.sql.enums.ECacheType;
+  25 import com.dtstack.flink.sql.enums.EPluginLoadMode;
+  26 import com.dtstack.flink.sql.environment.MyLocalStreamEnvironment;
+  27 import com.dtstack.flink.sql.environment.StreamEnvConfigManager;
+  28 import com.dtstack.flink.sql.function.FunctionManager;
+  29 import com.dtstack.flink.sql.option.OptionParser;
+  30 import com.dtstack.flink.sql.option.Options;
+  31 import com.dtstack.flink.sql.parser.CreateFuncParser;
+  32 import com.dtstack.flink.sql.parser.CreateTmpTableParser;
+  33 import com.dtstack.flink.sql.parser.FlinkPlanner;
+  34 import com.dtstack.flink.sql.parser.InsertSqlParser;
+  35 import com.dtstack.flink.sql.parser.SqlParser;
+  36 import com.dtstack.flink.sql.parser.SqlTree;
+  37 import com.dtstack.flink.sql.side.AbstractSideTableInfo;
+  38 import com.dtstack.flink.sql.side.SideSqlExec;
+  39 import com.dtstack.flink.sql.sink.StreamSinkFactory;
+  40 import com.dtstack.flink.sql.source.StreamSourceFactory;
+  41 import com.dtstack.flink.sql.table.AbstractSourceTableInfo;
+  42 import com.dtstack.flink.sql.table.AbstractTableInfo;
+  43 import com.dtstack.flink.sql.table.AbstractTargetTableInfo;
+  44 import com.dtstack.flink.sql.util.DtStringUtil;
+  45 import com.dtstack.flink.sql.util.PluginUtil;
+  46 import com.dtstack.flink.sql.util.TypeInfoDataTypeConverter;
+  47 import com.dtstack.flink.sql.watermarker.WaterMarkerAssigner;
+  48 import com.fasterxml.jackson.databind.ObjectMapper;
+  49 import com.google.common.base.Preconditions;
+  50 import com.google.common.base.Strings;
+  51 import com.google.common.collect.Lists;
+  52 import com.google.common.collect.Maps;
+  53 import com.google.common.collect.Sets;
+  54 import org.apache.calcite.sql.SqlInsert;
+  55 import org.apache.calcite.sql.SqlNode;
+  56 import org.apache.commons.io.Charsets;
+  57 import org.apache.commons.lang3.StringUtils;
+  58 import org.apache.flink.api.common.typeinfo.TypeInformation;
+  59 import org.apache.flink.api.java.typeutils.RowTypeInfo;
+  60 import org.apache.flink.streaming.api.datastream.DataStream;
+  61 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+  62 import org.apache.flink.table.api.EnvironmentSettings;
+  63 import org.apache.flink.table.api.Table;
+  64 import org.apache.flink.table.api.TableConfig;
+  65 import org.apache.flink.table.api.TableEnvironment;
+  66 import org.apache.flink.table.api.java.StreamTableEnvironment;
+  67 import org.apache.flink.table.api.java.internal.StreamTableEnvironmentImpl;
+  68 import org.apache.flink.table.sinks.TableSink;
+  69 import org.apache.flink.table.types.DataType;
+  70 import org.slf4j.Logger;
+  71 import org.slf4j.LoggerFactory;
+  72 
+  73 import java.io.File;
+  74 import java.lang.reflect.InvocationTargetException;
+  75 import java.net.URL;
+  76 import java.net.URLClassLoader;
+  77 import java.net.URLDecoder;
+  78 import java.time.ZoneId;
+  79 import java.util.ArrayList;
+  80 import java.util.Arrays;
+  81 import java.util.List;
+  82 import java.util.Map;
+  83 import java.util.Objects;
+  84 import java.util.Properties;
+  85 import java.util.Set;
+  86 import java.util.TimeZone;
+  87 import java.util.stream.Stream;
+  88 
+  89 /**
+  90  *  任务执行时的流程方法
+  91  * Date: 2020/2/17
+  92  * Company: www.dtstack.com
+  93  * @author maqi
+  94  */
+  95 public class ExecuteProcessHelper {
+  96 
+  97     private static final String CLASS_FILE_NAME_FMT = &quot;class_path_%d&quot;;
+  98     private static final Logger LOG = LoggerFactory.getLogger(ExecuteProcessHelper.class);
+  99     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+ 100 
+ 101     private static final String TIME_ZONE = &quot;timezone&quot;;
+ 102     private static final String PLUGIN_PATH_STR = &quot;pluginPath&quot;;
+ 103     private static final String PLUGIN_LOAD_STR = &quot;pluginLoadMode&quot;;
+ 104 
+ 105     public static FlinkPlanner flinkPlanner = new FlinkPlanner();
+ 106 
+ 107     public static ParamsInfo parseParams(String[] args) throws Exception {
+ 108         LOG.info(&quot;------------program params-------------------------&quot;);
+ 109         Arrays.stream(args).forEach(arg -&gt; LOG.info(&quot;{}&quot;, arg));
+ 110         LOG.info(&quot;-------------------------------------------&quot;);
+ 111 
+ 112         OptionParser optionParser = new OptionParser(args);
+ 113         Options options = optionParser.getOptions();
+ 114 
+ 115         String sql = URLDecoder.decode(options.getSql(), Charsets.UTF_8.name());
+ 116         String name = options.getName();
+ 117         String localSqlPluginPath = options.getLocalSqlPluginPath();
+ 118         String remoteSqlPluginPath = options.getRemoteSqlPluginPath();
+ 119         String pluginLoadMode = options.getPluginLoadMode();
+ 120         String deployMode = options.getMode();
+ 121         String dirtyStr = options.getDirtyProperties();
+ 122 
+<abbr title=" 123         Preconditions.checkArgument(checkRemoteSqlPluginPath(remoteSqlPluginPath, deployMode, pluginLoadMode),"> 123         Preconditions.checkArgument(checkRemoteSqlPluginPath(remoteSqlPluginPath, deployMode, pluginLoadM🔵</abbr>
+ 124                 &quot;Non-local mode or shipfile deployment mode, remoteSqlPluginPath is required&quot;);
+ 125         String confProp = URLDecoder.decode(options.getConfProp(), Charsets.UTF_8.toString());
+ 126         Properties confProperties = PluginUtil.jsonStrToObject(confProp, Properties.class);
+ 127         Properties dirtyProperties = PluginUtil.jsonStrToObject(Objects.isNull(dirtyStr) ?
+ 128                 DirtyDataManager.buildDefaultDirty() : dirtyStr, Properties.class);
+ 129 
+ 130         if (Objects.isNull(dirtyProperties.getProperty(PLUGIN_LOAD_STR))) {
+ 131             dirtyProperties.put(PLUGIN_LOAD_STR, pluginLoadMode);
+ 132         }
+ 133 
+<abbr title=" 134         if (!pluginLoadMode.equalsIgnoreCase(EPluginLoadMode.LOCALTEST.name()) &amp;&amp; Objects.isNull(dirtyProperties.getProperty(PLUGIN_PATH_STR))) {"> 134         if (!pluginLoadMode.equalsIgnoreCase(EPluginLoadMode.LOCALTEST.name()) &amp;&amp; Objects.isNull(dirtyPro🔵</abbr>
+ 135             dirtyProperties.setProperty(PLUGIN_PATH_STR,
+ 136                     Objects.isNull(remoteSqlPluginPath) ? localSqlPluginPath : remoteSqlPluginPath);
+ 137         }
+ 138 
+ 139         List&lt;URL&gt; jarUrlList = getExternalJarUrls(options.getAddjar());
+ 140 
+ 141         return ParamsInfo.builder()
+ 142                 .setSql(sql)
+ 143                 .setName(name)
+ 144                 .setLocalSqlPluginPath(localSqlPluginPath)
+ 145                 .setRemoteSqlPluginPath(remoteSqlPluginPath)
+ 146                 .setPluginLoadMode(pluginLoadMode)
+ 147                 .setDeployMode(deployMode)
+ 148                 .setConfProp(confProperties)
+ 149                 .setJarUrlList(jarUrlList)
+ 150                 .setDirtyProperties(dirtyProperties)
+ 151                 .build();
+ 152 
+ 153     }
+ 154 
+ 155     /**
+ 156      * 非local模式或者shipfile部署模式，remoteSqlPluginPath必填
+ 157      *
+ 158      * @param remoteSqlPluginPath
+ 159      * @param deployMode
+ 160      * @param pluginLoadMode
+ 161      * @return
+ 162      */
+<abbr title=" 163     public static boolean checkRemoteSqlPluginPath(String remoteSqlPluginPath, String deployMode, String pluginLoadMode) {"> 163     public static boolean checkRemoteSqlPluginPath(String remoteSqlPluginPath, String deployMode, String 🔵</abbr>
+ 164         if (StringUtils.isEmpty(remoteSqlPluginPath)) {
+ 165             return StringUtils.equalsIgnoreCase(pluginLoadMode, EPluginLoadMode.SHIPFILE.name())
+ 166                     || StringUtils.equalsIgnoreCase(deployMode, ClusterMode.local.name());
+ 167         }
+ 168         return true;
+ 169     }
+ 170 
+ 171 
+ 172     public static StreamExecutionEnvironment getStreamExecution(ParamsInfo paramsInfo) throws Exception {
+<abbr title=" 173         StreamExecutionEnvironment env = ExecuteProcessHelper.getStreamExeEnv(paramsInfo.getConfProp(), paramsInfo.getDeployMode());"> 173         StreamExecutionEnvironment env = ExecuteProcessHelper.getStreamExeEnv(paramsInfo.getConfProp(), p🔵</abbr>
+ 174         StreamTableEnvironment tableEnv = getStreamTableEnv(env, paramsInfo.getConfProp());
+ 175 
+ 176 
+ 177         SqlParser.setLocalSqlPluginRoot(paramsInfo.getLocalSqlPluginPath());
+ 178         SqlTree sqlTree = SqlParser.parseSql(paramsInfo.getSql(), paramsInfo.getPluginLoadMode());
+ 179 
+ 180         Map&lt;String, AbstractSideTableInfo&gt; sideTableMap = Maps.newHashMap();
+ 181         Map&lt;String, Table&gt; registerTableCache = Maps.newHashMap();
+ 182 
+ 183         //register udf
+<abbr title=" 184         ExecuteProcessHelper.registerUserDefinedFunction(sqlTree, paramsInfo.getJarUrlList(), tableEnv, paramsInfo.isGetPlan());"> 184         ExecuteProcessHelper.registerUserDefinedFunction(sqlTree, paramsInfo.getJarUrlList(), tableEnv, p🔵</abbr>
+ 185         //register table schema
+ 186         Set&lt;URL&gt; classPathSets = ExecuteProcessHelper.registerTable(
+ 187                 sqlTree
+ 188                 , env
+ 189                 , tableEnv
+ 190                 , paramsInfo.getLocalSqlPluginPath()
+ 191                 , paramsInfo.getRemoteSqlPluginPath()
+ 192                 , paramsInfo.getPluginLoadMode()
+ 193                 , paramsInfo.getDirtyProperties()
+ 194                 , sideTableMap
+ 195                 , registerTableCache);
+ 196         // cache classPathSets
+ 197         ExecuteProcessHelper.registerPluginUrlToCachedFile(env, classPathSets);
+ 198 
+ 199 &lt;&lt;&lt;&lt;&lt;&lt;&lt; GitAnalyzerPlus_ours
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 200         ExecuteProcessHelper.sqlTranslation(</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 201                 paramsInfo.getLocalSqlPluginPath(),</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 202                 paramsInfo.getPluginLoadMode(),</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 203                 tableEnv,</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 204                 sqlTree,</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 205                 sideTableMap,</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 206                 registerTableCache);</span>
+ 207 ||||||| GitAnalyzerPlus_base
+ 208 &lt;&lt;&lt;&lt;&lt;&lt;&lt; OURS
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 209         ExecuteProcessHelper.sqlTranslation(</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 210                 paramsInfo.getLocalSqlPluginPath(),</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 211                 paramsInfo.getPluginLoadMode(),</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 212                 tableEnv,</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 213                 sqlTree,</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 214                 sideTableMap,</span>
+ 215 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"><abbr title=" 216         ExecuteProcessHelper.sqlTranslation(paramsInfo.getLocalSqlPluginPath(), paramsInfo.getPluginLoadMode(), tableEnv, sqlTree, sideTableMap, registerTableCache);"> 216         ExecuteProcessHelper.sqlTranslation(paramsInfo.getLocalSqlPluginPath(), paramsInfo.getPluginLoadM🔵</abbr></span>
+ 217 &gt;&gt;&gt;&gt;&gt;&gt;&gt; GitAnalyzerPlus_theirs
+ 218 
+ 219         if (env instanceof MyLocalStreamEnvironment) {
+ 220             ((MyLocalStreamEnvironment) env).setClasspaths(ClassLoaderManager.getClassPath());
+ 221         }
+ 222         return env;
+ 223     }
+ 224 
+ 225 
+ 226     public static List&lt;URL&gt; getExternalJarUrls(String addJarListStr) throws java.io.IOException {
+ 227         List&lt;URL&gt; jarUrlList = Lists.newArrayList();
+ 228         if (Strings.isNullOrEmpty(addJarListStr)) {
+ 229             return jarUrlList;
+ 230         }
+ 231 
+<abbr title=" 232         List&lt;String&gt; addJarFileList = OBJECT_MAPPER.readValue(URLDecoder.decode(addJarListStr, Charsets.UTF_8.name()), List.class);"> 232         List&lt;String&gt; addJarFileList = OBJECT_MAPPER.readValue(URLDecoder.decode(addJarListStr, Charsets.U🔵</abbr>
+ 233         //Get External jar to load
+ 234         for (String addJarPath : addJarFileList) {
+ 235             jarUrlList.add(new File(addJarPath).toURI().toURL());
+ 236         }
+ 237         return jarUrlList;
+ 238     }
+ 239 
+ 240     private static void sqlTranslation(String localSqlPluginPath,
+ 241                                        String pluginLoadMode,
+ 242                                        StreamTableEnvironment tableEnv,
+ 243                                        SqlTree sqlTree, Map&lt;String, AbstractSideTableInfo&gt; sideTableMap,
+ 244                                        Map&lt;String, Table&gt; registerTableCache) throws Exception {
+ 245 
+ 246         SideSqlExec sideSqlExec = new SideSqlExec();
+ 247         sideSqlExec.setLocalSqlPluginPath(localSqlPluginPath);
+ 248         sideSqlExec.setPluginLoadMode(pluginLoadMode);
+ 249 
+ 250         int scope = 0;
+ 251         for (CreateTmpTableParser.SqlParserResult result : sqlTree.getTmpSqlList()) {
+<abbr title=" 252             sideSqlExec.exec(result.getExecSql(), sideTableMap, tableEnv, registerTableCache, result, scope + &quot;&quot;);"> 252             sideSqlExec.exec(result.getExecSql(), sideTableMap, tableEnv, registerTableCache, result, sco🔵</abbr>
+ 253             scope++;
+ 254         }
+ 255 
+ 256         for (InsertSqlParser.SqlParseResult result : sqlTree.getExecSqlList()) {
+ 257             if (LOG.isInfoEnabled()) {
+ 258                 LOG.info(&quot;exe-sql:\n&quot; + result.getExecSql());
+ 259             }
+ 260             boolean isSide = false;
+ 261             for (String tableName : result.getTargetTableList()) {
+ 262                 if (sqlTree.getTmpTableMap().containsKey(tableName)) {
+ 263                     CreateTmpTableParser.SqlParserResult tmp = sqlTree.getTmpTableMap().get(tableName);
+ 264                     String realSql = DtStringUtil.replaceIgnoreQuota(result.getExecSql(), &quot;`&quot;, &quot;&quot;);
+ 265 
+ 266                     SqlNode sqlNode = flinkPlanner.getParser().parse(realSql);
+ 267                     String tmpSql = ((SqlInsert) sqlNode).getSource().toString();
+ 268                     tmp.setExecSql(tmpSql);
+<abbr title=" 269                     sideSqlExec.exec(tmp.getExecSql(), sideTableMap, tableEnv, registerTableCache, tmp, scope + &quot;&quot;);"> 269                     sideSqlExec.exec(tmp.getExecSql(), sideTableMap, tableEnv, registerTableCache, tmp, s🔵</abbr>
+ 270                 } else {
+ 271                     for (String sourceTable : result.getSourceTableList()) {
+ 272                         if (sideTableMap.containsKey(sourceTable)) {
+ 273                             isSide = true;
+ 274                             break;
+ 275                         }
+ 276                     }
+ 277                     if (isSide) {
+ 278                         //sql-dimensional table contains the dimension table of execution
+<abbr title=" 279                         sideSqlExec.exec(result.getExecSql(), sideTableMap, tableEnv, registerTableCache, null, String.valueOf(scope));"> 279                         sideSqlExec.exec(result.getExecSql(), sideTableMap, tableEnv, registerTableCache,🔵</abbr>
+ 280                     } else {
+ 281                         LOG.info(&quot;----------exec sql without dimension join-----------&quot;);
+<abbr title=" 282                         LOG.info(&quot;----------real sql exec is--------------------------\n{}&quot;, result.getExecSql());"> 282                         LOG.info(&quot;----------real sql exec is--------------------------\n{}&quot;, result.getEx🔵</abbr>
+ 283                         FlinkSQLExec.sqlUpdate(tableEnv, result.getExecSql());
+ 284                         if (LOG.isInfoEnabled()) {
+ 285                             LOG.info(&quot;exec sql: &quot; + result.getExecSql());
+ 286                         }
+ 287                     }
+ 288                 }
+ 289 
+ 290                 scope++;
+ 291             }
+ 292         }
+ 293     }
+ 294 
+<abbr title=" 295     public static void registerUserDefinedFunction(SqlTree sqlTree, List&lt;URL&gt; jarUrlList, TableEnvironment tableEnv, boolean getPlan)"> 295     public static void registerUserDefinedFunction(SqlTree sqlTree, List&lt;URL&gt; jarUrlList, TableEnvironmen🔵</abbr>
+ 296             throws IllegalAccessException, InvocationTargetException {
+ 297         // udf和tableEnv须由同一个类加载器加载
+ 298         ClassLoader levelClassLoader = tableEnv.getClass().getClassLoader();
+ 299         ClassLoader currentClassLoader = Thread.currentThread().getContextClassLoader();
+ 300         URLClassLoader classLoader = null;
+ 301         List&lt;CreateFuncParser.SqlParserResult&gt; funcList = sqlTree.getFunctionList();
+ 302         for (CreateFuncParser.SqlParserResult funcInfo : funcList) {
+ 303             // 构建plan的情况下，udf和tableEnv不需要是同一个类加载器
+ 304             if (getPlan) {
+<abbr title=" 305                 classLoader = ClassLoaderManager.loadExtraJar(jarUrlList, (URLClassLoader) currentClassLoader);"> 305                 classLoader = ClassLoaderManager.loadExtraJar(jarUrlList, (URLClassLoader) currentClassLo🔵</abbr>
+ 306             }
+ 307 
+ 308             //classloader
+ 309             if (classLoader == null) {
+<abbr title=" 310                 classLoader = ClassLoaderManager.loadExtraJar(jarUrlList, (URLClassLoader) levelClassLoader);"> 310                 classLoader = ClassLoaderManager.loadExtraJar(jarUrlList, (URLClassLoader) levelClassLoad🔵</abbr>
+ 311             }
+<abbr title=" 312             FunctionManager.registerUDF(funcInfo.getType(), funcInfo.getClassName(), funcInfo.getName(), tableEnv, classLoader);"> 312             FunctionManager.registerUDF(funcInfo.getType(), funcInfo.getClassName(), funcInfo.getName(), 🔵</abbr>
+ 313         }
+ 314     }
+ 315 
+ 316     /**
+ 317      * 向Flink注册源表和结果表，返回执行时插件包的全路径
+ 318      *
+ 319      * @param sqlTree
+ 320      * @param env
+ 321      * @param tableEnv
+ 322      * @param localSqlPluginPath
+ 323      * @param remoteSqlPluginPath
+ 324      * @param pluginLoadMode      插件加载模式 classpath or shipfile
+ 325      * @param sideTableMap
+ 326      * @param registerTableCache
+ 327      * @return
+ 328      * @throws Exception
+ 329      */
+ 330     public static Set&lt;URL&gt; registerTable(
+ 331             SqlTree sqlTree
+ 332             , StreamExecutionEnvironment env
+ 333             , StreamTableEnvironment tableEnv
+ 334             , String localSqlPluginPath
+ 335             , String remoteSqlPluginPath
+ 336             , String pluginLoadMode
+ 337             , Properties dirtyProperties
+ 338             , Map&lt;String, AbstractSideTableInfo&gt; sideTableMap
+ 339             , Map&lt;String, Table&gt; registerTableCache
+ 340     ) throws Exception {
+ 341         Set&lt;URL&gt; pluginClassPathSets = Sets.newHashSet();
+ 342         WaterMarkerAssigner waterMarkerAssigner = new WaterMarkerAssigner();
+ 343         for (AbstractTableInfo tableInfo : sqlTree.getTableInfoMap().values()) {
+ 344 
+ 345             // 配置dirty manager
+ 346             tableInfo.setDirtyProperties(dirtyProperties);
+ 347 
+ 348             if (tableInfo instanceof AbstractSourceTableInfo) {
+ 349 
+ 350                 AbstractSourceTableInfo sourceTableInfo = (AbstractSourceTableInfo) tableInfo;
+<abbr title=" 351                 Table table = StreamSourceFactory.getStreamSource(sourceTableInfo, env, tableEnv, localSqlPluginPath, pluginLoadMode);"> 351                 Table table = StreamSourceFactory.getStreamSource(sourceTableInfo, env, tableEnv, localSq🔵</abbr>
+ 352                 tableEnv.registerTable(sourceTableInfo.getAdaptName(), table);
+<abbr title=" 353                 //Note --- parameter conversion function can not be used inside a function of the type of polymerization"> 353                 //Note --- parameter conversion function can not be used inside a function of the type of🔵</abbr>
+ 354                 //Create table in which the function is arranged only need adaptation sql
+ 355                 String adaptSql = sourceTableInfo.getAdaptSelectSql();
+ 356                 Table adaptTable = adaptSql == null ? table : tableEnv.sqlQuery(adaptSql);
+ 357 
+<abbr title=" 358                 RowTypeInfo typeInfo = new RowTypeInfo(fromDataTypeToLegacyInfo(adaptTable.getSchema().getFieldDataTypes()), adaptTable.getSchema().getFieldNames());"> 358                 RowTypeInfo typeInfo = new RowTypeInfo(fromDataTypeToLegacyInfo(adaptTable.getSchema().ge🔵</abbr>
+ 359                 DataStream adaptStream = tableEnv.toAppendStream(adaptTable, typeInfo);
+ 360 
+ 361                 String fields = String.join(&quot;,&quot;, typeInfo.getFieldNames());
+ 362 
+ 363                 if (waterMarkerAssigner.checkNeedAssignWaterMarker(sourceTableInfo)) {
+<abbr title=" 364                     adaptStream = waterMarkerAssigner.assignWaterMarker(adaptStream, typeInfo, sourceTableInfo);"> 364                     adaptStream = waterMarkerAssigner.assignWaterMarker(adaptStream, typeInfo, sourceTabl🔵</abbr>
+ 365                     fields += &quot;,ROWTIME.ROWTIME&quot;;
+ 366                 } else {
+ 367                     fields += &quot;,PROCTIME.PROCTIME&quot;;
+ 368                 }
+ 369 
+ 370                 Table regTable = tableEnv.fromDataStream(adaptStream, fields);
+ 371                 tableEnv.createTemporaryView(tableInfo.getName(), regTable);
+ 372                 if (LOG.isInfoEnabled()) {
+ 373                     LOG.info(&quot;registe table {} success.&quot;, tableInfo.getName());
+ 374                 }
+ 375                 registerTableCache.put(tableInfo.getName(), regTable);
+ 376 
+<abbr title=" 377                 URL sourceTablePathUrl = PluginUtil.buildSourceAndSinkPathByLoadMode(tableInfo.getType(), AbstractSourceTableInfo.SOURCE_SUFFIX, localSqlPluginPath, remoteSqlPluginPath, pluginLoadMode);"> 377                 URL sourceTablePathUrl = PluginUtil.buildSourceAndSinkPathByLoadMode(tableInfo.getType(),🔵</abbr>
+ 378                 pluginClassPathSets.add(sourceTablePathUrl);
+ 379             } else if (tableInfo instanceof AbstractTargetTableInfo) {
+<abbr title=" 380                 TableSink tableSink = StreamSinkFactory.getTableSink((AbstractTargetTableInfo) tableInfo, localSqlPluginPath, pluginLoadMode);"> 380                 TableSink tableSink = StreamSinkFactory.getTableSink((AbstractTargetTableInfo) tableInfo,🔵</abbr>
+ 381                 // TODO Kafka Sink直接注册，其他的Sink要修复才可以。
+ 382                 if (tableInfo.getType().startsWith(&quot;kafka&quot;)) {
+ 383                     tableEnv.registerTableSink(tableInfo.getName(), tableSink);
+ 384                 } else {
+<abbr title=" 385                     TypeInformation[] flinkTypes = FunctionManager.transformTypes(tableInfo.getFieldClasses());"> 385                     TypeInformation[] flinkTypes = FunctionManager.transformTypes(tableInfo.getFieldClass🔵</abbr>
+<abbr title=" 386                     tableEnv.registerTableSink(tableInfo.getName(), tableInfo.getFields(), flinkTypes, tableSink);"> 386                     tableEnv.registerTableSink(tableInfo.getName(), tableInfo.getFields(), flinkTypes, ta🔵</abbr>
+ 387                 }
+ 388 
+<abbr title=" 389                 URL sinkTablePathUrl = PluginUtil.buildSourceAndSinkPathByLoadMode(tableInfo.getType(), AbstractTargetTableInfo.TARGET_SUFFIX, localSqlPluginPath, remoteSqlPluginPath, pluginLoadMode);"> 389                 URL sinkTablePathUrl = PluginUtil.buildSourceAndSinkPathByLoadMode(tableInfo.getType(), A🔵</abbr>
+ 390                 pluginClassPathSets.add(sinkTablePathUrl);
+ 391             } else if (tableInfo instanceof AbstractSideTableInfo) {
+<abbr title=" 392                 String sideOperator = ECacheType.ALL.name().equalsIgnoreCase(((AbstractSideTableInfo) tableInfo).getCacheType()) ? &quot;all&quot; : &quot;async&quot;;"> 392                 String sideOperator = ECacheType.ALL.name().equalsIgnoreCase(((AbstractSideTableInfo) tab🔵</abbr>
+ 393                 sideTableMap.put(tableInfo.getName(), (AbstractSideTableInfo) tableInfo);
+ 394 
+<abbr title=" 395                 URL sideTablePathUrl = PluginUtil.buildSidePathByLoadMode(tableInfo.getType(), sideOperator, AbstractSideTableInfo.TARGET_SUFFIX, localSqlPluginPath, remoteSqlPluginPath, pluginLoadMode);"> 395                 URL sideTablePathUrl = PluginUtil.buildSidePathByLoadMode(tableInfo.getType(), sideOperat🔵</abbr>
+ 396                 pluginClassPathSets.add(sideTablePathUrl);
+ 397             } else {
+ 398                 throw new RuntimeException(&quot;not support table type:&quot; + tableInfo.getType());
+ 399             }
+ 400         }
+ 401         if (localSqlPluginPath == null || localSqlPluginPath.isEmpty()) {
+ 402             return Sets.newHashSet();
+ 403         }
+ 404         return pluginClassPathSets;
+ 405     }
+ 406 
+ 407     /**
+ 408      *   perjob模式将job依赖的插件包路径存储到cacheFile，在外围将插件包路径传递给jobgraph
+ 409      * @param env
+ 410      * @param classPathSet
+ 411      */
+<abbr title=" 412     public static void registerPluginUrlToCachedFile(StreamExecutionEnvironment env, Set&lt;URL&gt; classPathSet) {"> 412     public static void registerPluginUrlToCachedFile(StreamExecutionEnvironment env, Set&lt;URL&gt; classPathSe🔵</abbr>
+ 413         int i = 0;
+ 414         for (URL url : classPathSet) {
+ 415             String classFileName = String.format(CLASS_FILE_NAME_FMT, i);
+ 416             env.registerCachedFile(url.getPath(), classFileName, true);
+ 417             i++;
+ 418         }
+ 419     }
+ 420 
+<abbr title=" 421     public static StreamExecutionEnvironment getStreamExeEnv(Properties confProperties, String deployMode) throws Exception {"> 421     public static StreamExecutionEnvironment getStreamExeEnv(Properties confProperties, String deployMode🔵</abbr>
+ 422         StreamExecutionEnvironment env = !ClusterMode.local.name().equals(deployMode) ?
+ 423                 StreamExecutionEnvironment.getExecutionEnvironment() :
+ 424                 new MyLocalStreamEnvironment();
+ 425 
+ 426         StreamEnvConfigManager.streamExecutionEnvironmentConfig(env, confProperties);
+ 427         return env;
+ 428     }
+ 429 
+ 430 
+<abbr title=" 431     public static StreamTableEnvironment getStreamTableEnv(StreamExecutionEnvironment env, Properties confProperties) {"> 431     public static StreamTableEnvironment getStreamTableEnv(StreamExecutionEnvironment env, Properties con🔵</abbr>
+ 432         // use blink and streammode
+ 433         EnvironmentSettings settings = EnvironmentSettings.newInstance()
+ 434                 .useBlinkPlanner()
+ 435                 .inStreamingMode()
+ 436                 .build();
+ 437 
+ 438         TableConfig tableConfig = new TableConfig();
+ 439 
+ 440         timeZoneCheck(confProperties.getProperty(TIME_ZONE, TimeZone.getDefault().getID()));
+ 441 
+<abbr title=" 442         tableConfig.setLocalTimeZone(ZoneId.of(confProperties.getProperty(TIME_ZONE, TimeZone.getDefault().getID())));"> 442         tableConfig.setLocalTimeZone(ZoneId.of(confProperties.getProperty(TIME_ZONE, TimeZone.getDefault(🔵</abbr>
+ 443 
+ 444         StreamTableEnvironment tableEnv = StreamTableEnvironmentImpl.create(env, settings, tableConfig);
+ 445         StreamEnvConfigManager.streamTableEnvironmentStateTTLConfig(tableEnv, confProperties);
+ 446         StreamEnvConfigManager.streamTableEnvironmentEarlyTriggerConfig(tableEnv, confProperties);
+ 447         return tableEnv;
+ 448     }
+ 449 
+ 450     private static void timeZoneCheck(String timeZone) {
+ 451         ArrayList&lt;String&gt; zones = Lists.newArrayList(TimeZone.getAvailableIDs());
+ 452         if (!zones.contains(timeZone)) {
+ 453             throw new IllegalArgumentException(String.format(&quot; timezone of %s is Incorrect!&quot;, timeZone));
+ 454         }
+ 455     }
+ 456 
+ 457     private static TypeInformation&lt;?&gt;[] fromDataTypeToLegacyInfo(DataType[] dataType) {
+ 458         return Stream.of(dataType)
+ 459                 .map(TypeInfoDataTypeConverter::toLegacyTypeInfo)
+ 460                 .toArray(TypeInformation[]::new);
+ 461     }
+ 462 }</pre></td>
+                            <td><pre>   1 /*
+   2  * Licensed to the Apache Software Foundation (ASF) under one
+   3  * or more contributor license agreements.  See the NOTICE file
+   4  * distributed with this work for additional information
+   5  * regarding copyright ownership.  The ASF licenses this file
+   6  * to you under the Apache License, Version 2.0 (the
+   7  * &quot;License&quot;); you may not use this file except in compliance
+   8  * with the License.  You may obtain a copy of the License at
+   9  *
+  10  *     http://www.apache.org/licenses/LICENSE-2.0
+  11  *
+  12  * Unless required by applicable law or agreed to in writing, software
+  13  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15  * See the License for the specific language governing permissions and
+  16  * limitations under the License.
+  17  */
+  18 
+  19 package com.dtstack.flink.sql.exec;
+  20 
+  21 import com.dtstack.flink.sql.classloader.ClassLoaderManager;
+  22 import com.dtstack.flink.sql.dirtyManager.manager.DirtyDataManager;
+  23 import com.dtstack.flink.sql.enums.ClusterMode;
+  24 import com.dtstack.flink.sql.enums.ECacheType;
+  25 import com.dtstack.flink.sql.enums.EPluginLoadMode;
+  26 import com.dtstack.flink.sql.environment.MyLocalStreamEnvironment;
+  27 import com.dtstack.flink.sql.environment.StreamEnvConfigManager;
+  28 import com.dtstack.flink.sql.function.FunctionManager;
+  29 import com.dtstack.flink.sql.option.OptionParser;
+  30 import com.dtstack.flink.sql.option.Options;
+  31 import com.dtstack.flink.sql.parser.CreateFuncParser;
+  32 import com.dtstack.flink.sql.parser.CreateTmpTableParser;
+  33 import com.dtstack.flink.sql.parser.FlinkPlanner;
+  34 import com.dtstack.flink.sql.parser.InsertSqlParser;
+  35 import com.dtstack.flink.sql.parser.SqlParser;
+  36 import com.dtstack.flink.sql.parser.SqlTree;
+  37 import com.dtstack.flink.sql.side.AbstractSideTableInfo;
+  38 import com.dtstack.flink.sql.side.SideSqlExec;
+  39 import com.dtstack.flink.sql.sink.StreamSinkFactory;
+  40 import com.dtstack.flink.sql.source.StreamSourceFactory;
+  41 import com.dtstack.flink.sql.table.AbstractSourceTableInfo;
+  42 import com.dtstack.flink.sql.table.AbstractTableInfo;
+  43 import com.dtstack.flink.sql.table.AbstractTargetTableInfo;
+  44 import com.dtstack.flink.sql.util.DtStringUtil;
+  45 import com.dtstack.flink.sql.util.PluginUtil;
+  46 import com.dtstack.flink.sql.util.TypeInfoDataTypeConverter;
+  47 import com.dtstack.flink.sql.watermarker.WaterMarkerAssigner;
+  48 import com.fasterxml.jackson.databind.ObjectMapper;
+  49 import com.google.common.base.Preconditions;
+  50 import com.google.common.base.Strings;
+  51 import com.google.common.collect.Lists;
+  52 import com.google.common.collect.Maps;
+  53 import com.google.common.collect.Sets;
+  54 import org.apache.calcite.sql.SqlInsert;
+  55 import org.apache.calcite.sql.SqlNode;
+  56 import org.apache.commons.io.Charsets;
+  57 import org.apache.commons.lang3.StringUtils;
+  58 import org.apache.flink.api.common.typeinfo.TypeInformation;
+  59 import org.apache.flink.api.java.typeutils.RowTypeInfo;
+  60 import org.apache.flink.streaming.api.datastream.DataStream;
+  61 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+  62 import org.apache.flink.table.api.EnvironmentSettings;
+  63 import org.apache.flink.table.api.Table;
+  64 import org.apache.flink.table.api.TableConfig;
+  65 import org.apache.flink.table.api.TableEnvironment;
+  66 import org.apache.flink.table.api.java.StreamTableEnvironment;
+  67 import org.apache.flink.table.api.java.internal.StreamTableEnvironmentImpl;
+  68 import org.apache.flink.table.sinks.TableSink;
+  69 import org.apache.flink.table.types.DataType;
+  70 import org.slf4j.Logger;
+  71 import org.slf4j.LoggerFactory;
+  72 
+  73 import java.io.File;
+  74 import java.lang.reflect.InvocationTargetException;
+  75 import java.net.URL;
+  76 import java.net.URLClassLoader;
+  77 import java.net.URLDecoder;
+  78 import java.time.ZoneId;
+  79 import java.util.ArrayList;
+  80 import java.util.Arrays;
+  81 import java.util.List;
+  82 import java.util.Map;
+  83 import java.util.Objects;
+  84 import java.util.Properties;
+  85 import java.util.Set;
+  86 import java.util.TimeZone;
+  87 import java.util.stream.Stream;
+  88 
+  89 /**
+  90  *  任务执行时的流程方法
+  91  * Date: 2020/2/17
+  92  * Company: www.dtstack.com
+  93  * @author maqi
+  94  */
+  95 public class ExecuteProcessHelper {
+  96 
+  97     private static final String CLASS_FILE_NAME_FMT = &quot;class_path_%d&quot;;
+  98     private static final Logger LOG = LoggerFactory.getLogger(ExecuteProcessHelper.class);
+  99     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+ 100 
+ 101     private static final String TIME_ZONE = &quot;timezone&quot;;
+ 102     private static final String PLUGIN_PATH_STR = &quot;pluginPath&quot;;
+ 103     private static final String PLUGIN_LOAD_STR = &quot;pluginLoadMode&quot;;
+ 104 
+ 105     public static FlinkPlanner flinkPlanner = new FlinkPlanner();
+ 106 
+ 107     public static ParamsInfo parseParams(String[] args) throws Exception {
+ 108         LOG.info(&quot;------------program params-------------------------&quot;);
+ 109         Arrays.stream(args).forEach(arg -&gt; LOG.info(&quot;{}&quot;, arg));
+ 110         LOG.info(&quot;-------------------------------------------&quot;);
+ 111 
+ 112         OptionParser optionParser = new OptionParser(args);
+ 113         Options options = optionParser.getOptions();
+ 114 
+ 115         String sql = URLDecoder.decode(options.getSql(), Charsets.UTF_8.name());
+ 116         String name = options.getName();
+ 117         String localSqlPluginPath = options.getLocalSqlPluginPath();
+ 118         String remoteSqlPluginPath = options.getRemoteSqlPluginPath();
+ 119         String pluginLoadMode = options.getPluginLoadMode();
+ 120         String deployMode = options.getMode();
+ 121         String dirtyStr = options.getDirtyProperties();
+ 122 
+<abbr title=" 123         Preconditions.checkArgument(checkRemoteSqlPluginPath(remoteSqlPluginPath, deployMode, pluginLoadMode),"> 123         Preconditions.checkArgument(checkRemoteSqlPluginPath(remoteSqlPluginPath, deployMode, pluginLoadM🔵</abbr>
+ 124                 &quot;Non-local mode or shipfile deployment mode, remoteSqlPluginPath is required&quot;);
+ 125         String confProp = URLDecoder.decode(options.getConfProp(), Charsets.UTF_8.toString());
+ 126         Properties confProperties = PluginUtil.jsonStrToObject(confProp, Properties.class);
+ 127         Properties dirtyProperties = PluginUtil.jsonStrToObject(Objects.isNull(dirtyStr) ?
+ 128                 DirtyDataManager.buildDefaultDirty() : dirtyStr, Properties.class);
+ 129 
+ 130         if (Objects.isNull(dirtyProperties.getProperty(PLUGIN_LOAD_STR))) {
+ 131             dirtyProperties.put(PLUGIN_LOAD_STR, pluginLoadMode);
+ 132         }
+ 133 
+<abbr title=" 134         if (!pluginLoadMode.equalsIgnoreCase(EPluginLoadMode.LOCALTEST.name()) &amp;&amp; Objects.isNull(dirtyProperties.getProperty(PLUGIN_PATH_STR))) {"> 134         if (!pluginLoadMode.equalsIgnoreCase(EPluginLoadMode.LOCALTEST.name()) &amp;&amp; Objects.isNull(dirtyPro🔵</abbr>
+ 135             dirtyProperties.setProperty(PLUGIN_PATH_STR,
+ 136                     Objects.isNull(remoteSqlPluginPath) ? localSqlPluginPath : remoteSqlPluginPath);
+ 137         }
+ 138 
+ 139         List&lt;URL&gt; jarUrlList = getExternalJarUrls(options.getAddjar());
+ 140 
+ 141         return ParamsInfo.builder()
+ 142                 .setSql(sql)
+ 143                 .setName(name)
+ 144                 .setLocalSqlPluginPath(localSqlPluginPath)
+ 145                 .setRemoteSqlPluginPath(remoteSqlPluginPath)
+ 146                 .setPluginLoadMode(pluginLoadMode)
+ 147                 .setDeployMode(deployMode)
+ 148                 .setConfProp(confProperties)
+ 149                 .setJarUrlList(jarUrlList)
+ 150                 .setDirtyProperties(dirtyProperties)
+ 151                 .build();
+ 152 
+ 153     }
+ 154 
+ 155     /**
+ 156      * 非local模式或者shipfile部署模式，remoteSqlPluginPath必填
+ 157      *
+ 158      * @param remoteSqlPluginPath
+ 159      * @param deployMode
+ 160      * @param pluginLoadMode
+ 161      * @return
+ 162      */
+<abbr title=" 163     public static boolean checkRemoteSqlPluginPath(String remoteSqlPluginPath, String deployMode, String pluginLoadMode) {"> 163     public static boolean checkRemoteSqlPluginPath(String remoteSqlPluginPath, String deployMode, String 🔵</abbr>
+ 164         if (StringUtils.isEmpty(remoteSqlPluginPath)) {
+ 165             return StringUtils.equalsIgnoreCase(pluginLoadMode, EPluginLoadMode.SHIPFILE.name())
+ 166                     || StringUtils.equalsIgnoreCase(deployMode, ClusterMode.local.name());
+ 167         }
+ 168         return true;
+ 169     }
+ 170 
+ 171 
+ 172     public static StreamExecutionEnvironment getStreamExecution(ParamsInfo paramsInfo) throws Exception {
+<abbr title=" 173         StreamExecutionEnvironment env = ExecuteProcessHelper.getStreamExeEnv(paramsInfo.getConfProp(), paramsInfo.getDeployMode());"> 173         StreamExecutionEnvironment env = ExecuteProcessHelper.getStreamExeEnv(paramsInfo.getConfProp(), p🔵</abbr>
+ 174         StreamTableEnvironment tableEnv = getStreamTableEnv(env, paramsInfo.getConfProp());
+ 175 
+ 176 
+ 177         SqlParser.setLocalSqlPluginRoot(paramsInfo.getLocalSqlPluginPath());
+ 178         SqlTree sqlTree = SqlParser.parseSql(paramsInfo.getSql(), paramsInfo.getPluginLoadMode());
+ 179 
+ 180         Map&lt;String, AbstractSideTableInfo&gt; sideTableMap = Maps.newHashMap();
+ 181         Map&lt;String, Table&gt; registerTableCache = Maps.newHashMap();
+ 182 
+ 183         //register udf
+<abbr title=" 184         ExecuteProcessHelper.registerUserDefinedFunction(sqlTree, paramsInfo.getJarUrlList(), tableEnv, paramsInfo.isGetPlan());"> 184         ExecuteProcessHelper.registerUserDefinedFunction(sqlTree, paramsInfo.getJarUrlList(), tableEnv, p🔵</abbr>
+ 185         //register table schema
+ 186         Set&lt;URL&gt; classPathSets = ExecuteProcessHelper.registerTable(
+ 187                 sqlTree
+ 188                 , env
+ 189                 , tableEnv
+ 190                 , paramsInfo.getLocalSqlPluginPath()
+ 191                 , paramsInfo.getRemoteSqlPluginPath()
+ 192                 , paramsInfo.getPluginLoadMode()
+ 193                 , paramsInfo.getDirtyProperties()
+ 194                 , sideTableMap
+ 195                 , registerTableCache);
+ 196         // cache classPathSets
+ 197         ExecuteProcessHelper.registerPluginUrlToCachedFile(env, classPathSets);
+ 198 
+ 199         ExecuteProcessHelper.sqlTranslation(
+ 200                 paramsInfo.getLocalSqlPluginPath(),
+ 201                 paramsInfo.getPluginLoadMode(),
+ 202                 tableEnv,
+ 203                 sqlTree,
+ 204                 sideTableMap,
+ 205                 registerTableCache);
+ 206 
+ 207         if (env instanceof MyLocalStreamEnvironment) {
+ 208             ((MyLocalStreamEnvironment) env).setClasspaths(ClassLoaderManager.getClassPath());
+ 209         }
+ 210         return env;
+ 211     }
+ 212 
+ 213 
+ 214     public static List&lt;URL&gt; getExternalJarUrls(String addJarListStr) throws java.io.IOException {
+ 215         List&lt;URL&gt; jarUrlList = Lists.newArrayList();
+ 216         if (Strings.isNullOrEmpty(addJarListStr)) {
+ 217             return jarUrlList;
+ 218         }
+ 219 
+<abbr title=" 220         List&lt;String&gt; addJarFileList = OBJECT_MAPPER.readValue(URLDecoder.decode(addJarListStr, Charsets.UTF_8.name()), List.class);"> 220         List&lt;String&gt; addJarFileList = OBJECT_MAPPER.readValue(URLDecoder.decode(addJarListStr, Charsets.U🔵</abbr>
+ 221         //Get External jar to load
+ 222         for (String addJarPath : addJarFileList) {
+ 223             jarUrlList.add(new File(addJarPath).toURI().toURL());
+ 224         }
+ 225         return jarUrlList;
+ 226     }
+ 227 
+ 228     private static void sqlTranslation(String localSqlPluginPath,
+ 229                                        String pluginLoadMode,
+ 230                                        StreamTableEnvironment tableEnv,
+ 231                                        SqlTree sqlTree, Map&lt;String, AbstractSideTableInfo&gt; sideTableMap,
+ 232                                        Map&lt;String, Table&gt; registerTableCache) throws Exception {
+ 233 
+ 234         SideSqlExec sideSqlExec = new SideSqlExec();
+ 235         sideSqlExec.setLocalSqlPluginPath(localSqlPluginPath);
+ 236         sideSqlExec.setPluginLoadMode(pluginLoadMode);
+ 237 
+ 238         int scope = 0;
+ 239         for (CreateTmpTableParser.SqlParserResult result : sqlTree.getTmpSqlList()) {
+<abbr title=" 240             sideSqlExec.exec(result.getExecSql(), sideTableMap, tableEnv, registerTableCache, result, scope + &quot;&quot;);"> 240             sideSqlExec.exec(result.getExecSql(), sideTableMap, tableEnv, registerTableCache, result, sco🔵</abbr>
+ 241             scope++;
+ 242         }
+ 243 
+ 244         for (InsertSqlParser.SqlParseResult result : sqlTree.getExecSqlList()) {
+ 245             if (LOG.isInfoEnabled()) {
+ 246                 LOG.info(&quot;exe-sql:\n&quot; + result.getExecSql());
+ 247             }
+ 248             boolean isSide = false;
+ 249             for (String tableName : result.getTargetTableList()) {
+ 250                 if (sqlTree.getTmpTableMap().containsKey(tableName)) {
+ 251                     CreateTmpTableParser.SqlParserResult tmp = sqlTree.getTmpTableMap().get(tableName);
+ 252                     String realSql = DtStringUtil.replaceIgnoreQuota(result.getExecSql(), &quot;`&quot;, &quot;&quot;);
+ 253 
+ 254                     SqlNode sqlNode = flinkPlanner.getParser().parse(realSql);
+ 255                     String tmpSql = ((SqlInsert) sqlNode).getSource().toString();
+ 256                     tmp.setExecSql(tmpSql);
+<abbr title=" 257                     sideSqlExec.exec(tmp.getExecSql(), sideTableMap, tableEnv, registerTableCache, tmp, scope + &quot;&quot;);"> 257                     sideSqlExec.exec(tmp.getExecSql(), sideTableMap, tableEnv, registerTableCache, tmp, s🔵</abbr>
+ 258                 } else {
+ 259                     for (String sourceTable : result.getSourceTableList()) {
+ 260                         if (sideTableMap.containsKey(sourceTable)) {
+ 261                             isSide = true;
+ 262                             break;
+ 263                         }
+ 264                     }
+ 265                     if (isSide) {
+ 266                         //sql-dimensional table contains the dimension table of execution
+<abbr title=" 267                         sideSqlExec.exec(result.getExecSql(), sideTableMap, tableEnv, registerTableCache, null, String.valueOf(scope));"> 267                         sideSqlExec.exec(result.getExecSql(), sideTableMap, tableEnv, registerTableCache,🔵</abbr>
+ 268                     } else {
+ 269                         LOG.info(&quot;----------exec sql without dimension join-----------&quot;);
+<abbr title=" 270                         LOG.info(&quot;----------real sql exec is--------------------------\n{}&quot;, result.getExecSql());"> 270                         LOG.info(&quot;----------real sql exec is--------------------------\n{}&quot;, result.getEx🔵</abbr>
+ 271                         FlinkSQLExec.sqlUpdate(tableEnv, result.getExecSql());
+ 272                         if (LOG.isInfoEnabled()) {
+ 273                             LOG.info(&quot;exec sql: &quot; + result.getExecSql());
+ 274                         }
+ 275                     }
+ 276                 }
+ 277 
+ 278                 scope++;
+ 279             }
+ 280         }
+ 281     }
+ 282 
+<abbr title=" 283     public static void registerUserDefinedFunction(SqlTree sqlTree, List&lt;URL&gt; jarUrlList, TableEnvironment tableEnv, boolean getPlan)"> 283     public static void registerUserDefinedFunction(SqlTree sqlTree, List&lt;URL&gt; jarUrlList, TableEnvironmen🔵</abbr>
+ 284             throws IllegalAccessException, InvocationTargetException {
+ 285         // udf和tableEnv须由同一个类加载器加载
+ 286         ClassLoader levelClassLoader = tableEnv.getClass().getClassLoader();
+ 287         ClassLoader currentClassLoader = Thread.currentThread().getContextClassLoader();
+ 288         URLClassLoader classLoader = null;
+ 289         List&lt;CreateFuncParser.SqlParserResult&gt; funcList = sqlTree.getFunctionList();
+ 290         for (CreateFuncParser.SqlParserResult funcInfo : funcList) {
+ 291             // 构建plan的情况下，udf和tableEnv不需要是同一个类加载器
+ 292             if (getPlan) {
+<abbr title=" 293                 classLoader = ClassLoaderManager.loadExtraJar(jarUrlList, (URLClassLoader) currentClassLoader);"> 293                 classLoader = ClassLoaderManager.loadExtraJar(jarUrlList, (URLClassLoader) currentClassLo🔵</abbr>
+ 294             }
+ 295 
+ 296             //classloader
+ 297             if (classLoader == null) {
+<abbr title=" 298                 classLoader = ClassLoaderManager.loadExtraJar(jarUrlList, (URLClassLoader) levelClassLoader);"> 298                 classLoader = ClassLoaderManager.loadExtraJar(jarUrlList, (URLClassLoader) levelClassLoad🔵</abbr>
+ 299             }
+<abbr title=" 300             FunctionManager.registerUDF(funcInfo.getType(), funcInfo.getClassName(), funcInfo.getName(), tableEnv, classLoader);"> 300             FunctionManager.registerUDF(funcInfo.getType(), funcInfo.getClassName(), funcInfo.getName(), 🔵</abbr>
+ 301         }
+ 302     }
+ 303 
+ 304     /**
+ 305      * 向Flink注册源表和结果表，返回执行时插件包的全路径
+ 306      *
+ 307      * @param sqlTree
+ 308      * @param env
+ 309      * @param tableEnv
+ 310      * @param localSqlPluginPath
+ 311      * @param remoteSqlPluginPath
+ 312      * @param pluginLoadMode      插件加载模式 classpath or shipfile
+ 313      * @param sideTableMap
+ 314      * @param registerTableCache
+ 315      * @return
+ 316      * @throws Exception
+ 317      */
+ 318     public static Set&lt;URL&gt; registerTable(
+ 319             SqlTree sqlTree
+ 320             , StreamExecutionEnvironment env
+ 321             , StreamTableEnvironment tableEnv
+ 322             , String localSqlPluginPath
+ 323             , String remoteSqlPluginPath
+ 324             , String pluginLoadMode
+ 325             , Properties dirtyProperties
+ 326             , Map&lt;String, AbstractSideTableInfo&gt; sideTableMap
+ 327             , Map&lt;String, Table&gt; registerTableCache
+ 328     ) throws Exception {
+ 329         Set&lt;URL&gt; pluginClassPathSets = Sets.newHashSet();
+ 330         WaterMarkerAssigner waterMarkerAssigner = new WaterMarkerAssigner();
+ 331         for (AbstractTableInfo tableInfo : sqlTree.getTableInfoMap().values()) {
+ 332 
+ 333             // 配置dirty manager
+ 334             tableInfo.setDirtyProperties(dirtyProperties);
+ 335 
+ 336             if (tableInfo instanceof AbstractSourceTableInfo) {
+ 337 
+ 338                 AbstractSourceTableInfo sourceTableInfo = (AbstractSourceTableInfo) tableInfo;
+<abbr title=" 339                 Table table = StreamSourceFactory.getStreamSource(sourceTableInfo, env, tableEnv, localSqlPluginPath, pluginLoadMode);"> 339                 Table table = StreamSourceFactory.getStreamSource(sourceTableInfo, env, tableEnv, localSq🔵</abbr>
+ 340                 tableEnv.registerTable(sourceTableInfo.getAdaptName(), table);
+<abbr title=" 341                 //Note --- parameter conversion function can not be used inside a function of the type of polymerization"> 341                 //Note --- parameter conversion function can not be used inside a function of the type of🔵</abbr>
+ 342                 //Create table in which the function is arranged only need adaptation sql
+ 343                 String adaptSql = sourceTableInfo.getAdaptSelectSql();
+ 344                 Table adaptTable = adaptSql == null ? table : tableEnv.sqlQuery(adaptSql);
+ 345 
+<abbr title=" 346                 RowTypeInfo typeInfo = new RowTypeInfo(fromDataTypeToLegacyInfo(adaptTable.getSchema().getFieldDataTypes()), adaptTable.getSchema().getFieldNames());"> 346                 RowTypeInfo typeInfo = new RowTypeInfo(fromDataTypeToLegacyInfo(adaptTable.getSchema().ge🔵</abbr>
+ 347                 DataStream adaptStream = tableEnv.toAppendStream(adaptTable, typeInfo);
+ 348 
+ 349                 String fields = String.join(&quot;,&quot;, typeInfo.getFieldNames());
+ 350 
+ 351                 if (waterMarkerAssigner.checkNeedAssignWaterMarker(sourceTableInfo)) {
+<abbr title=" 352                     adaptStream = waterMarkerAssigner.assignWaterMarker(adaptStream, typeInfo, sourceTableInfo);"> 352                     adaptStream = waterMarkerAssigner.assignWaterMarker(adaptStream, typeInfo, sourceTabl🔵</abbr>
+ 353                     fields += &quot;,ROWTIME.ROWTIME&quot;;
+ 354                 } else {
+ 355                     fields += &quot;,PROCTIME.PROCTIME&quot;;
+ 356                 }
+ 357 
+ 358                 Table regTable = tableEnv.fromDataStream(adaptStream, fields);
+ 359                 tableEnv.createTemporaryView(tableInfo.getName(), regTable);
+ 360                 if (LOG.isInfoEnabled()) {
+ 361                     LOG.info(&quot;registe table {} success.&quot;, tableInfo.getName());
+ 362                 }
+ 363                 registerTableCache.put(tableInfo.getName(), regTable);
+ 364 
+<abbr title=" 365                 URL sourceTablePathUrl = PluginUtil.buildSourceAndSinkPathByLoadMode(tableInfo.getType(), AbstractSourceTableInfo.SOURCE_SUFFIX, localSqlPluginPath, remoteSqlPluginPath, pluginLoadMode);"> 365                 URL sourceTablePathUrl = PluginUtil.buildSourceAndSinkPathByLoadMode(tableInfo.getType(),🔵</abbr>
+ 366                 pluginClassPathSets.add(sourceTablePathUrl);
+ 367             } else if (tableInfo instanceof AbstractTargetTableInfo) {
+<abbr title=" 368                 TableSink tableSink = StreamSinkFactory.getTableSink((AbstractTargetTableInfo) tableInfo, localSqlPluginPath, pluginLoadMode);"> 368                 TableSink tableSink = StreamSinkFactory.getTableSink((AbstractTargetTableInfo) tableInfo,🔵</abbr>
+ 369                 // TODO Kafka Sink直接注册，其他的Sink要修复才可以。
+ 370                 if (tableInfo.getType().startsWith(&quot;kafka&quot;)) {
+ 371                     tableEnv.registerTableSink(tableInfo.getName(), tableSink);
+ 372                 } else {
+<abbr title=" 373                     TypeInformation[] flinkTypes = FunctionManager.transformTypes(tableInfo.getFieldClasses());"> 373                     TypeInformation[] flinkTypes = FunctionManager.transformTypes(tableInfo.getFieldClass🔵</abbr>
+<abbr title=" 374                     tableEnv.registerTableSink(tableInfo.getName(), tableInfo.getFields(), flinkTypes, tableSink);"> 374                     tableEnv.registerTableSink(tableInfo.getName(), tableInfo.getFields(), flinkTypes, ta🔵</abbr>
+ 375                 }
+ 376 
+<abbr title=" 377                 URL sinkTablePathUrl = PluginUtil.buildSourceAndSinkPathByLoadMode(tableInfo.getType(), AbstractTargetTableInfo.TARGET_SUFFIX, localSqlPluginPath, remoteSqlPluginPath, pluginLoadMode);"> 377                 URL sinkTablePathUrl = PluginUtil.buildSourceAndSinkPathByLoadMode(tableInfo.getType(), A🔵</abbr>
+ 378                 pluginClassPathSets.add(sinkTablePathUrl);
+ 379             } else if (tableInfo instanceof AbstractSideTableInfo) {
+<abbr title=" 380                 String sideOperator = ECacheType.ALL.name().equalsIgnoreCase(((AbstractSideTableInfo) tableInfo).getCacheType()) ? &quot;all&quot; : &quot;async&quot;;"> 380                 String sideOperator = ECacheType.ALL.name().equalsIgnoreCase(((AbstractSideTableInfo) tab🔵</abbr>
+ 381                 sideTableMap.put(tableInfo.getName(), (AbstractSideTableInfo) tableInfo);
+ 382 
+<abbr title=" 383                 URL sideTablePathUrl = PluginUtil.buildSidePathByLoadMode(tableInfo.getType(), sideOperator, AbstractSideTableInfo.TARGET_SUFFIX, localSqlPluginPath, remoteSqlPluginPath, pluginLoadMode);"> 383                 URL sideTablePathUrl = PluginUtil.buildSidePathByLoadMode(tableInfo.getType(), sideOperat🔵</abbr>
+ 384                 pluginClassPathSets.add(sideTablePathUrl);
+ 385             } else {
+ 386                 throw new RuntimeException(&quot;not support table type:&quot; + tableInfo.getType());
+ 387             }
+ 388         }
+ 389         if (localSqlPluginPath == null || localSqlPluginPath.isEmpty()) {
+ 390             return Sets.newHashSet();
+ 391         }
+ 392         return pluginClassPathSets;
+ 393     }
+ 394 
+ 395     /**
+ 396      *   perjob模式将job依赖的插件包路径存储到cacheFile，在外围将插件包路径传递给jobgraph
+ 397      * @param env
+ 398      * @param classPathSet
+ 399      */
+<abbr title=" 400     public static void registerPluginUrlToCachedFile(StreamExecutionEnvironment env, Set&lt;URL&gt; classPathSet) {"> 400     public static void registerPluginUrlToCachedFile(StreamExecutionEnvironment env, Set&lt;URL&gt; classPathSe🔵</abbr>
+ 401         int i = 0;
+ 402         for (URL url : classPathSet) {
+ 403             String classFileName = String.format(CLASS_FILE_NAME_FMT, i);
+ 404             env.registerCachedFile(url.getPath(), classFileName, true);
+ 405             i++;
+ 406         }
+ 407     }
+ 408 
+<abbr title=" 409     public static StreamExecutionEnvironment getStreamExeEnv(Properties confProperties, String deployMode) throws Exception {"> 409     public static StreamExecutionEnvironment getStreamExeEnv(Properties confProperties, String deployMode🔵</abbr>
+ 410         StreamExecutionEnvironment env = !ClusterMode.local.name().equals(deployMode) ?
+ 411                 StreamExecutionEnvironment.getExecutionEnvironment() :
+ 412                 new MyLocalStreamEnvironment();
+ 413 
+ 414         StreamEnvConfigManager.streamExecutionEnvironmentConfig(env, confProperties);
+ 415         return env;
+ 416     }
+ 417 
+ 418 
+<abbr title=" 419     public static StreamTableEnvironment getStreamTableEnv(StreamExecutionEnvironment env, Properties confProperties) {"> 419     public static StreamTableEnvironment getStreamTableEnv(StreamExecutionEnvironment env, Properties con🔵</abbr>
+ 420         // use blink and streammode
+ 421         EnvironmentSettings settings = EnvironmentSettings.newInstance()
+ 422                 .useBlinkPlanner()
+ 423                 .inStreamingMode()
+ 424                 .build();
+ 425 
+ 426         TableConfig tableConfig = new TableConfig();
+ 427 
+ 428         timeZoneCheck(confProperties.getProperty(TIME_ZONE, TimeZone.getDefault().getID()));
+ 429 
+<abbr title=" 430         tableConfig.setLocalTimeZone(ZoneId.of(confProperties.getProperty(TIME_ZONE, TimeZone.getDefault().getID())));"> 430         tableConfig.setLocalTimeZone(ZoneId.of(confProperties.getProperty(TIME_ZONE, TimeZone.getDefault(🔵</abbr>
+ 431 
+ 432         StreamTableEnvironment tableEnv = StreamTableEnvironmentImpl.create(env, settings, tableConfig);
+ 433         StreamEnvConfigManager.streamTableEnvironmentStateTTLConfig(tableEnv, confProperties);
+ 434         StreamEnvConfigManager.streamTableEnvironmentEarlyTriggerConfig(tableEnv, confProperties);
+ 435         return tableEnv;
+ 436     }
+ 437 
+ 438     private static void timeZoneCheck(String timeZone) {
+ 439         ArrayList&lt;String&gt; zones = Lists.newArrayList(TimeZone.getAvailableIDs());
+ 440         if (!zones.contains(timeZone)) {
+ 441             throw new IllegalArgumentException(String.format(&quot; timezone of %s is Incorrect!&quot;, timeZone));
+ 442         }
+ 443     }
+ 444 
+ 445     private static TypeInformation&lt;?&gt;[] fromDataTypeToLegacyInfo(DataType[] dataType) {
+ 446         return Stream.of(dataType)
+ 447                 .map(TypeInfoDataTypeConverter::toLegacyTypeInfo)
+ 448                 .toArray(TypeInformation[]::new);
+ 449     }
+ 450 }
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ </pre></td>
+                            <td><pre>   1 /*
+   2  * Licensed to the Apache Software Foundation (ASF) under one
+   3  * or more contributor license agreements.  See the NOTICE file
+   4  * distributed with this work for additional information
+   5  * regarding copyright ownership.  The ASF licenses this file
+   6  * to you under the Apache License, Version 2.0 (the
+   7  * &quot;License&quot;); you may not use this file except in compliance
+   8  * with the License.  You may obtain a copy of the License at
+   9  *
+  10  *     http://www.apache.org/licenses/LICENSE-2.0
+  11  *
+  12  * Unless required by applicable law or agreed to in writing, software
+  13  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15  * See the License for the specific language governing permissions and
+  16  * limitations under the License.
+  17  */
+  18 package com.dtstack.flink.sql.exec;
+  19 
+  20 import com.dtstack.flink.sql.classloader.ClassLoaderManager;
+  21 import com.dtstack.flink.sql.dirtyManager.manager.DirtyDataManager;
+  22 import com.dtstack.flink.sql.enums.ClusterMode;
+  23 import com.dtstack.flink.sql.enums.ECacheType;
+  24 import com.dtstack.flink.sql.enums.EPluginLoadMode;
+  25 import com.dtstack.flink.sql.environment.MyLocalStreamEnvironment;
+  26 import com.dtstack.flink.sql.environment.StreamEnvConfigManager;
+  27 import com.dtstack.flink.sql.function.FunctionManager;
+  28 import com.dtstack.flink.sql.option.OptionParser;
+  29 import com.dtstack.flink.sql.option.Options;
+  30 import com.dtstack.flink.sql.parser.CreateFuncParser;
+  31 import com.dtstack.flink.sql.parser.CreateTmpTableParser;
+  32 import com.dtstack.flink.sql.parser.FlinkPlanner;
+  33 import com.dtstack.flink.sql.parser.InsertSqlParser;
+  34 import com.dtstack.flink.sql.parser.SqlParser;
+  35 import com.dtstack.flink.sql.parser.SqlTree;
+  36 import com.dtstack.flink.sql.side.AbstractSideTableInfo;
+  37 import com.dtstack.flink.sql.side.SideSqlExec;
+  38 import com.dtstack.flink.sql.sink.StreamSinkFactory;
+  39 import com.dtstack.flink.sql.source.StreamSourceFactory;
+  40 import com.dtstack.flink.sql.table.AbstractSourceTableInfo;
+  41 import com.dtstack.flink.sql.table.AbstractTableInfo;
+  42 import com.dtstack.flink.sql.table.AbstractTargetTableInfo;
+  43 import com.dtstack.flink.sql.util.DtStringUtil;
+  44 import com.dtstack.flink.sql.util.PluginUtil;
+  45 import com.dtstack.flink.sql.util.TypeInfoDataTypeConverter;
+  46 import com.dtstack.flink.sql.watermarker.WaterMarkerAssigner;
+  47 import com.fasterxml.jackson.databind.ObjectMapper;
+  48 import com.google.common.base.Preconditions;
+  49 import com.google.common.base.Strings;
+  50 import com.google.common.collect.Lists;
+  51 import com.google.common.collect.Maps;
+  52 import com.google.common.collect.Sets;
+  53 import java.io.File;
+  54 import java.lang.reflect.InvocationTargetException;
+  55 import java.net.URL;
+  56 import java.net.URLClassLoader;
+  57 import java.net.URLDecoder;
+  58 import java.time.ZoneId;
+  59 import java.util.ArrayList;
+  60 import java.util.Arrays;
+  61 import java.util.List;
+  62 import java.util.Map;
+  63 import java.util.Objects;
+  64 import java.util.Properties;
+  65 import java.util.Set;
+  66 import java.util.TimeZone;
+  67 import java.util.stream.Stream;
+  68 import org.apache.calcite.sql.SqlInsert;
+  69 import org.apache.calcite.sql.SqlNode;
+  70 import org.apache.commons.io.Charsets;
+  71 import org.apache.commons.lang3.StringUtils;
+  72 import org.apache.flink.api.common.typeinfo.TypeInformation;
+  73 import org.apache.flink.api.java.typeutils.RowTypeInfo;
+  74 import org.apache.flink.streaming.api.datastream.DataStream;
+  75 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+  76 import org.apache.flink.table.api.EnvironmentSettings;
+  77 import org.apache.flink.table.api.Table;
+  78 import org.apache.flink.table.api.TableConfig;
+  79 import org.apache.flink.table.api.TableEnvironment;
+  80 import org.apache.flink.table.api.java.StreamTableEnvironment;
+  81 import org.apache.flink.table.api.java.internal.StreamTableEnvironmentImpl;
+  82 import org.apache.flink.table.sinks.TableSink;
+  83 import org.apache.flink.table.types.DataType;
+  84 import org.slf4j.Logger;
+  85 import org.slf4j.LoggerFactory;
+  86 
+  87 
+  88 /**
+  89  *  任务执行时的流程方法
+  90  * Date: 2020/2/17
+  91  * Company: www.dtstack.com
+  92  * @author maqi
+  93  */
+  94 public class ExecuteProcessHelper {
+  95     private static final String CLASS_FILE_NAME_FMT = &quot;class_path_%d&quot;;
+  96 
+  97     private static final Logger LOG = LoggerFactory.getLogger(ExecuteProcessHelper.class);
+  98 
+  99     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+ 100 
+ 101     private static final String TIME_ZONE = &quot;timezone&quot;;
+ 102 
+ 103     private static final String PLUGIN_PATH_STR = &quot;pluginPath&quot;;
+ 104 
+ 105     private static final String PLUGIN_LOAD_STR = &quot;pluginLoadMode&quot;;
+ 106 
+ 107     public static FlinkPlanner flinkPlanner = new FlinkPlanner();
+ 108 
+ 109     public static ParamsInfo parseParams(String[] args) throws Exception {
+ 110         LOG.info(&quot;------------program params-------------------------&quot;);
+ 111         Arrays.stream(args).forEach(( arg) -&gt; LOG.info(&quot;{}&quot;, arg));
+ 112         LOG.info(&quot;-------------------------------------------&quot;);
+ 113         OptionParser optionParser = new OptionParser(args);
+ 114         Options options = optionParser.getOptions();
+ 115         String sql = URLDecoder.decode(options.getSql(), Charsets.UTF_8.name());
+ 116         String name = options.getName();
+ 117         String localSqlPluginPath = options.getLocalSqlPluginPath();
+ 118         String remoteSqlPluginPath = options.getRemoteSqlPluginPath();
+ 119         String pluginLoadMode = options.getPluginLoadMode();
+ 120         String deployMode = options.getMode();
+ 121         String dirtyStr = options.getDirtyProperties();
+<abbr title=" 122         Preconditions.checkArgument(checkRemoteSqlPluginPath(remoteSqlPluginPath, deployMode, pluginLoadMode), &quot;Non-local mode or shipfile deployment mode, remoteSqlPluginPath is required&quot;);"> 122         Preconditions.checkArgument(checkRemoteSqlPluginPath(remoteSqlPluginPath, deployMode, pluginLoadM🔵</abbr>
+ 123         String confProp = URLDecoder.decode(options.getConfProp(), Charsets.UTF_8.toString());
+ 124         Properties confProperties = PluginUtil.jsonStrToObject(confProp, Properties.class);
+<abbr title=" 125         Properties dirtyProperties = PluginUtil.jsonStrToObject(Objects.isNull(dirtyStr) ? DirtyDataManager.buildDefaultDirty() : dirtyStr, Properties.class);"> 125         Properties dirtyProperties = PluginUtil.jsonStrToObject(Objects.isNull(dirtyStr) ? DirtyDataManag🔵</abbr>
+ 126         if (Objects.isNull(dirtyProperties.getProperty(PLUGIN_LOAD_STR))) {
+ 127             dirtyProperties.put(PLUGIN_LOAD_STR, pluginLoadMode);
+ 128         }
+<abbr title=" 129         if ((!pluginLoadMode.equalsIgnoreCase(EPluginLoadMode.LOCALTEST.name())) &amp;&amp; Objects.isNull(dirtyProperties.getProperty(PLUGIN_PATH_STR))) {"> 129         if ((!pluginLoadMode.equalsIgnoreCase(EPluginLoadMode.LOCALTEST.name())) &amp;&amp; Objects.isNull(dirtyP🔵</abbr>
+<abbr title=" 130             dirtyProperties.setProperty(PLUGIN_PATH_STR, Objects.isNull(remoteSqlPluginPath) ? localSqlPluginPath : remoteSqlPluginPath);"> 130             dirtyProperties.setProperty(PLUGIN_PATH_STR, Objects.isNull(remoteSqlPluginPath) ? localSqlPl🔵</abbr>
+ 131         }
+ 132         List&lt;URL&gt; jarUrlList = getExternalJarUrls(options.getAddjar());
+<abbr title=" 133         return ParamsInfo.builder().setSql(sql).setName(name).setLocalSqlPluginPath(localSqlPluginPath).setRemoteSqlPluginPath(remoteSqlPluginPath).setPluginLoadMode(pluginLoadMode).setDeployMode(deployMode).setConfProp(confProperties).setJarUrlList(jarUrlList).setDirtyProperties(dirtyProperties).build();"> 133         return ParamsInfo.builder().setSql(sql).setName(name).setLocalSqlPluginPath(localSqlPluginPath).s🔵</abbr>
+ 134     }
+ 135 
+ 136     /**
+ 137      *   非local模式或者shipfile部署模式，remoteSqlPluginPath必填
+ 138      * @param remoteSqlPluginPath
+ 139      * @param deployMode
+ 140      * @param pluginLoadMode
+ 141      * @return
+ 142      */
+<abbr title=" 143     public static boolean checkRemoteSqlPluginPath(String remoteSqlPluginPath, String deployMode, String pluginLoadMode) {"> 143     public static boolean checkRemoteSqlPluginPath(String remoteSqlPluginPath, String deployMode, String 🔵</abbr>
+ 144         if (StringUtils.isEmpty(remoteSqlPluginPath)) {
+ 145             return StringUtils.equalsIgnoreCase(pluginLoadMode, EPluginLoadMode.SHIPFILE.name())
+ 146                     || StringUtils.equalsIgnoreCase(deployMode, ClusterMode.local.name());
+ 147         }
+ 148         return true;
+ 149     }
+ 150 
+ 151     public static StreamExecutionEnvironment getStreamExecution(ParamsInfo paramsInfo) throws Exception {
+<abbr title=" 152         StreamExecutionEnvironment env = ExecuteProcessHelper.getStreamExeEnv(paramsInfo.getConfProp(), paramsInfo.getDeployMode());"> 152         StreamExecutionEnvironment env = ExecuteProcessHelper.getStreamExeEnv(paramsInfo.getConfProp(), p🔵</abbr>
+ 153         StreamTableEnvironment tableEnv = getStreamTableEnv(env, paramsInfo.getConfProp());
+ 154         SqlParser.setLocalSqlPluginRoot(paramsInfo.getLocalSqlPluginPath());
+ 155         SqlTree sqlTree = SqlParser.parseSql(paramsInfo.getSql(), paramsInfo.getPluginLoadMode());
+ 156         Map&lt;String, AbstractSideTableInfo&gt; sideTableMap = Maps.newHashMap();
+ 157         Map&lt;String, Table&gt; registerTableCache = Maps.newHashMap();
+ 158         // register udf
+<abbr title=" 159         ExecuteProcessHelper.registerUserDefinedFunction(sqlTree, paramsInfo.getJarUrlList(), tableEnv, paramsInfo.isGetPlan());"> 159         ExecuteProcessHelper.registerUserDefinedFunction(sqlTree, paramsInfo.getJarUrlList(), tableEnv, p🔵</abbr>
+ 160         //register table schema
+<abbr title=" 161         Set&lt;URL&gt; classPathSets = ExecuteProcessHelper.registerTable(sqlTree, env, tableEnv, paramsInfo.getLocalSqlPluginPath(), paramsInfo.getRemoteSqlPluginPath(), paramsInfo.getPluginLoadMode(), paramsInfo.getDirtyProperties(), sideTableMap, registerTableCache);"> 161         Set&lt;URL&gt; classPathSets = ExecuteProcessHelper.registerTable(sqlTree, env, tableEnv, paramsInfo.ge🔵</abbr>
+ 162         // cache classPathSets
+ 163         ExecuteProcessHelper.registerPluginUrlToCachedFile(env, classPathSets);
+<abbr title=" 164         ExecuteProcessHelper.sqlTranslation(paramsInfo.getLocalSqlPluginPath(), paramsInfo.getPluginLoadMode(), tableEnv, sqlTree, sideTableMap, registerTableCache);"> 164         ExecuteProcessHelper.sqlTranslation(paramsInfo.getLocalSqlPluginPath(), paramsInfo.getPluginLoadM🔵</abbr>
+ 165         if (env instanceof MyLocalStreamEnvironment) {
+ 166             ((MyLocalStreamEnvironment) (env)).setClasspaths(ClassLoaderManager.getClassPath());
+ 167         }
+ 168         return env;
+ 169     }
+ 170 
+ 171     public static List&lt;URL&gt; getExternalJarUrls(String addJarListStr) throws java.io.IOException {
+ 172         List&lt;URL&gt; jarUrlList = Lists.newArrayList();
+ 173         if (Strings.isNullOrEmpty(addJarListStr)) {
+ 174             return jarUrlList;
+ 175         }
+ 176 
+<abbr title=" 177         List&lt;String&gt; addJarFileList = OBJECT_MAPPER.readValue(URLDecoder.decode(addJarListStr, Charsets.UTF_8.name()), List.class);"> 177         List&lt;String&gt; addJarFileList = OBJECT_MAPPER.readValue(URLDecoder.decode(addJarListStr, Charsets.U🔵</abbr>
+ 178         //Get External jar to load
+ 179         for (String addJarPath : addJarFileList) {
+ 180             jarUrlList.add(new File(addJarPath).toURI().toURL());
+ 181         }
+ 182         return jarUrlList;
+ 183     }
+ 184 
+ 185     private static void sqlTranslation(String localSqlPluginPath,
+ 186                                        String pluginLoadMode,
+ 187                                        StreamTableEnvironment tableEnv,
+ 188                                        SqlTree sqlTree,Map&lt;String, AbstractSideTableInfo&gt; sideTableMap,
+ 189                                        Map&lt;String, Table&gt; registerTableCache) throws Exception {
+ 190 
+ 191         SideSqlExec sideSqlExec = new SideSqlExec();
+ 192         sideSqlExec.setLocalSqlPluginPath(localSqlPluginPath);
+ 193         sideSqlExec.setPluginLoadMode(pluginLoadMode);
+ 194 
+ 195         int scope = 0;
+ 196         for (CreateTmpTableParser.SqlParserResult result : sqlTree.getTmpSqlList()) {
+<abbr title=" 197             sideSqlExec.exec(result.getExecSql(), sideTableMap, tableEnv, registerTableCache, result, scope + &quot;&quot;);"> 197             sideSqlExec.exec(result.getExecSql(), sideTableMap, tableEnv, registerTableCache, result, sco🔵</abbr>
+ 198             scope++;
+ 199         }
+ 200 
+ 201         for (InsertSqlParser.SqlParseResult result : sqlTree.getExecSqlList()) {
+ 202             if (LOG.isInfoEnabled()) {
+ 203                 LOG.info(&quot;exe-sql:\n&quot; + result.getExecSql());
+ 204             }
+ 205             boolean isSide = false;
+ 206             for (String tableName : result.getTargetTableList()) {
+ 207                 if (sqlTree.getTmpTableMap().containsKey(tableName)) {
+ 208                     CreateTmpTableParser.SqlParserResult tmp = sqlTree.getTmpTableMap().get(tableName);
+ 209                     String realSql = DtStringUtil.replaceIgnoreQuota(result.getExecSql(), &quot;`&quot;, &quot;&quot;);
+ 210 
+ 211                     SqlNode sqlNode = flinkPlanner.getParser().parse(realSql);
+ 212                     String tmpSql = ((SqlInsert) sqlNode).getSource().toString();
+ 213                     tmp.setExecSql(tmpSql);
+<abbr title=" 214                     sideSqlExec.exec(tmp.getExecSql(), sideTableMap, tableEnv, registerTableCache, tmp, scope + &quot;&quot;);"> 214                     sideSqlExec.exec(tmp.getExecSql(), sideTableMap, tableEnv, registerTableCache, tmp, s🔵</abbr>
+ 215                 } else {
+ 216                     for (String sourceTable : result.getSourceTableList()) {
+ 217                         if (sideTableMap.containsKey(sourceTable)) {
+ 218                             isSide = true;
+ 219                             break;
+ 220                         }
+ 221                     }
+ 222                     if (isSide) {
+ 223                         //sql-dimensional table contains the dimension table of execution
+<abbr title=" 224                         sideSqlExec.exec(result.getExecSql(), sideTableMap, tableEnv, registerTableCache, null, String.valueOf(scope));"> 224                         sideSqlExec.exec(result.getExecSql(), sideTableMap, tableEnv, registerTableCache,🔵</abbr>
+ 225                     } else {
+ 226                         LOG.info(&quot;----------exec sql without dimension join-----------&quot;);
+<abbr title=" 227                         LOG.info(&quot;----------real sql exec is--------------------------\n{}&quot;, result.getExecSql());"> 227                         LOG.info(&quot;----------real sql exec is--------------------------\n{}&quot;, result.getEx🔵</abbr>
+ 228                         FlinkSQLExec.sqlUpdate(tableEnv, result.getExecSql());
+ 229                         if (LOG.isInfoEnabled()) {
+ 230                             LOG.info(&quot;exec sql: &quot; + result.getExecSql());
+ 231                         }
+ 232                     }
+ 233                 }
+ 234 
+ 235                 scope++;
+ 236             }
+ 237         }
+ 238     }
+ 239 
+<abbr title=" 240     public static void registerUserDefinedFunction(SqlTree sqlTree, List&lt;URL&gt; jarUrlList, TableEnvironment tableEnv, boolean getPlan)"> 240     public static void registerUserDefinedFunction(SqlTree sqlTree, List&lt;URL&gt; jarUrlList, TableEnvironmen🔵</abbr>
+ 241             throws IllegalAccessException, InvocationTargetException {
+ 242         // udf和tableEnv须由同一个类加载器加载
+ 243         ClassLoader levelClassLoader = tableEnv.getClass().getClassLoader();
+ 244         ClassLoader currentClassLoader = Thread.currentThread().getContextClassLoader();
+ 245         URLClassLoader classLoader = null;
+ 246         List&lt;CreateFuncParser.SqlParserResult&gt; funcList = sqlTree.getFunctionList();
+ 247         for (CreateFuncParser.SqlParserResult funcInfo : funcList) {
+ 248             // 构建plan的情况下，udf和tableEnv不需要是同一个类加载器
+ 249             if (getPlan) {
+<abbr title=" 250                 classLoader = ClassLoaderManager.loadExtraJar(jarUrlList, (URLClassLoader) currentClassLoader);"> 250                 classLoader = ClassLoaderManager.loadExtraJar(jarUrlList, (URLClassLoader) currentClassLo🔵</abbr>
+ 251             }
+ 252 
+ 253             //classloader
+ 254             if (classLoader == null) {
+<abbr title=" 255                 classLoader = ClassLoaderManager.loadExtraJar(jarUrlList, (URLClassLoader) levelClassLoader);"> 255                 classLoader = ClassLoaderManager.loadExtraJar(jarUrlList, (URLClassLoader) levelClassLoad🔵</abbr>
+ 256             }
+<abbr title=" 257             FunctionManager.registerUDF(funcInfo.getType(), funcInfo.getClassName(), funcInfo.getName(), tableEnv, classLoader);"> 257             FunctionManager.registerUDF(funcInfo.getType(), funcInfo.getClassName(), funcInfo.getName(), 🔵</abbr>
+ 258         }
+ 259     }
+ 260 
+ 261     /**
+ 262      *    向Flink注册源表和结果表，返回执行时插件包的全路径
+ 263      * @param sqlTree
+ 264      * @param env
+ 265      * @param tableEnv
+ 266      * @param localSqlPluginPath
+ 267      * @param remoteSqlPluginPath
+ 268      * @param pluginLoadMode   插件加载模式 classpath or shipfile
+ 269      * @param sideTableMap
+ 270      * @param registerTableCache
+ 271      * @return
+ 272      * @throws Exception
+ 273      */
+<abbr title=" 274     public static Set&lt;URL&gt; registerTable(SqlTree sqlTree, StreamExecutionEnvironment env, StreamTableEnvironment tableEnv, String localSqlPluginPath, String remoteSqlPluginPath, String pluginLoadMode, Properties dirtyProperties, Map&lt;String, AbstractSideTableInfo&gt; sideTableMap, Map&lt;String, Table&gt; registerTableCache) throws Exception {"> 274     public static Set&lt;URL&gt; registerTable(SqlTree sqlTree, StreamExecutionEnvironment env, StreamTableEnvi🔵</abbr>
+ 275         Set&lt;URL&gt; pluginClassPathSets = Sets.newHashSet();
+ 276         WaterMarkerAssigner waterMarkerAssigner = new WaterMarkerAssigner();
+ 277         for (AbstractTableInfo tableInfo : sqlTree.getTableInfoMap().values()) {
+ 278             // 配置dirty manager
+ 279             tableInfo.setDirtyProperties(dirtyProperties);
+ 280             if (tableInfo instanceof AbstractSourceTableInfo) {
+ 281                 AbstractSourceTableInfo sourceTableInfo = ((AbstractSourceTableInfo) (tableInfo));
+<abbr title=" 282                 Table table = StreamSourceFactory.getStreamSource(sourceTableInfo, env, tableEnv, localSqlPluginPath, pluginLoadMode);"> 282                 Table table = StreamSourceFactory.getStreamSource(sourceTableInfo, env, tableEnv, localSq🔵</abbr>
+ 283                 tableEnv.registerTable(sourceTableInfo.getAdaptName(), table);
+<abbr title=" 284                 // Note --- parameter conversion function can not be used inside a function of the type of polymerization"> 284                 // Note --- parameter conversion function can not be used inside a function of the type o🔵</abbr>
+ 285                 // Create table in which the function is arranged only need adaptation sql
+ 286                 String adaptSql = sourceTableInfo.getAdaptSelectSql();
+ 287                 Table adaptTable = (adaptSql == null) ? table : tableEnv.sqlQuery(adaptSql);
+<abbr title=" 288                 RowTypeInfo typeInfo = new RowTypeInfo(fromDataTypeToLegacyInfo(adaptTable.getSchema().getFieldDataTypes()), adaptTable.getSchema().getFieldNames());"> 288                 RowTypeInfo typeInfo = new RowTypeInfo(fromDataTypeToLegacyInfo(adaptTable.getSchema().ge🔵</abbr>
+ 289                 DataStream adaptStream = tableEnv.toAppendStream(adaptTable, typeInfo);
+ 290                 String fields = String.join(&quot;,&quot;, typeInfo.getFieldNames());
+ 291                 if (waterMarkerAssigner.checkNeedAssignWaterMarker(sourceTableInfo)) {
+<abbr title=" 292                     adaptStream = waterMarkerAssigner.assignWaterMarker(adaptStream, typeInfo, sourceTableInfo);"> 292                     adaptStream = waterMarkerAssigner.assignWaterMarker(adaptStream, typeInfo, sourceTabl🔵</abbr>
+ 293                     fields += &quot;,ROWTIME.ROWTIME&quot;;
+ 294                 } else {
+ 295                     fields += &quot;,PROCTIME.PROCTIME&quot;;
+ 296                 }
+ 297                 Table regTable = tableEnv.fromDataStream(adaptStream, fields);
+ 298                 tableEnv.createTemporaryView(tableInfo.getName(), regTable);
+ 299                 if (LOG.isInfoEnabled()) {
+ 300                     LOG.info(&quot;registe table {} success.&quot;, tableInfo.getName());
+ 301                 }
+ 302                 registerTableCache.put(tableInfo.getName(), regTable);
+<abbr title=" 303                 URL sourceTablePathUrl = PluginUtil.buildSourceAndSinkPathByLoadMode(tableInfo.getType(), AbstractSourceTableInfo.SOURCE_SUFFIX, localSqlPluginPath, remoteSqlPluginPath, pluginLoadMode);"> 303                 URL sourceTablePathUrl = PluginUtil.buildSourceAndSinkPathByLoadMode(tableInfo.getType(),🔵</abbr>
+ 304                 pluginClassPathSets.add(sourceTablePathUrl);
+ 305             } else if (tableInfo instanceof AbstractTargetTableInfo) {
+<abbr title=" 306                 TableSink tableSink = StreamSinkFactory.getTableSink(((AbstractTargetTableInfo) (tableInfo)), localSqlPluginPath, pluginLoadMode);"> 306                 TableSink tableSink = StreamSinkFactory.getTableSink(((AbstractTargetTableInfo) (tableInf🔵</abbr>
+ 307                 // TODO Kafka Sink直接注册，其他的Sink要修复才可以。
+ 308                 if (tableInfo.getType().startsWith(&quot;kafka&quot;)) {
+ 309                     tableEnv.registerTableSink(tableInfo.getName(), tableSink);
+ 310                 } else {
+<abbr title=" 311                     TypeInformation[] flinkTypes = FunctionManager.transformTypes(tableInfo.getFieldClasses());"> 311                     TypeInformation[] flinkTypes = FunctionManager.transformTypes(tableInfo.getFieldClass🔵</abbr>
+<abbr title=" 312                     tableEnv.registerTableSink(tableInfo.getName(), tableInfo.getFields(), flinkTypes, tableSink);"> 312                     tableEnv.registerTableSink(tableInfo.getName(), tableInfo.getFields(), flinkTypes, ta🔵</abbr>
+ 313                 }
+<abbr title=" 314                 URL sinkTablePathUrl = PluginUtil.buildSourceAndSinkPathByLoadMode(tableInfo.getType(), AbstractTargetTableInfo.TARGET_SUFFIX, localSqlPluginPath, remoteSqlPluginPath, pluginLoadMode);"> 314                 URL sinkTablePathUrl = PluginUtil.buildSourceAndSinkPathByLoadMode(tableInfo.getType(), A🔵</abbr>
+ 315                 pluginClassPathSets.add(sinkTablePathUrl);
+ 316             } else if (tableInfo instanceof AbstractSideTableInfo) {
+<abbr title=" 317                 String sideOperator = (ECacheType.ALL.name().equalsIgnoreCase(((AbstractSideTableInfo) (tableInfo)).getCacheType())) ? &quot;all&quot; : &quot;async&quot;;"> 317                 String sideOperator = (ECacheType.ALL.name().equalsIgnoreCase(((AbstractSideTableInfo) (t🔵</abbr>
+ 318                 sideTableMap.put(tableInfo.getName(), ((AbstractSideTableInfo) (tableInfo)));
+<abbr title=" 319                 URL sideTablePathUrl = PluginUtil.buildSidePathByLoadMode(tableInfo.getType(), sideOperator, AbstractSideTableInfo.TARGET_SUFFIX, localSqlPluginPath, remoteSqlPluginPath, pluginLoadMode);"> 319                 URL sideTablePathUrl = PluginUtil.buildSidePathByLoadMode(tableInfo.getType(), sideOperat🔵</abbr>
+ 320                 pluginClassPathSets.add(sideTablePathUrl);
+ 321             } else {
+ 322                 throw new RuntimeException(&quot;not support table type:&quot; + tableInfo.getType());
+ 323             }
+ 324         }
+ 325         if ((localSqlPluginPath == null) || localSqlPluginPath.isEmpty()) {
+ 326             return Sets.newHashSet();
+ 327         }
+ 328         return pluginClassPathSets;
+ 329     }
+ 330 
+ 331     /**
+ 332      *   perjob模式将job依赖的插件包路径存储到cacheFile，在外围将插件包路径传递给jobgraph
+ 333      * @param env
+ 334      * @param classPathSet
+ 335      */
+<abbr title=" 336     public static void registerPluginUrlToCachedFile(StreamExecutionEnvironment env, Set&lt;URL&gt; classPathSet) {"> 336     public static void registerPluginUrlToCachedFile(StreamExecutionEnvironment env, Set&lt;URL&gt; classPathSe🔵</abbr>
+ 337         int i = 0;
+ 338         for (URL url : classPathSet) {
+ 339             String classFileName = String.format(CLASS_FILE_NAME_FMT, i);
+ 340             env.registerCachedFile(url.getPath(), classFileName, true);
+ 341             i++;
+ 342         }
+ 343     }
+ 344 
+<abbr title=" 345     public static StreamExecutionEnvironment getStreamExeEnv(Properties confProperties, String deployMode) throws Exception {"> 345     public static StreamExecutionEnvironment getStreamExeEnv(Properties confProperties, String deployMode🔵</abbr>
+ 346         StreamExecutionEnvironment env = !ClusterMode.local.name().equals(deployMode) ?
+ 347                 StreamExecutionEnvironment.getExecutionEnvironment() :
+ 348                 new MyLocalStreamEnvironment();
+ 349 
+ 350         StreamEnvConfigManager.streamExecutionEnvironmentConfig(env, confProperties);
+ 351         return env;
+ 352     }
+ 353 
+<abbr title=" 354     public static StreamTableEnvironment getStreamTableEnv(StreamExecutionEnvironment env, Properties confProperties) {"> 354     public static StreamTableEnvironment getStreamTableEnv(StreamExecutionEnvironment env, Properties con🔵</abbr>
+ 355         // use blink and streammode
+ 356         EnvironmentSettings settings = EnvironmentSettings.newInstance()
+ 357                 .useBlinkPlanner()
+ 358                 .inStreamingMode()
+ 359                 .build();
+ 360 
+ 361         TableConfig tableConfig = new TableConfig();
+ 362 
+ 363         timeZoneCheck(confProperties.getProperty(TIME_ZONE, TimeZone.getDefault().getID()));
+ 364 
+<abbr title=" 365         tableConfig.setLocalTimeZone(ZoneId.of(confProperties.getProperty(TIME_ZONE, TimeZone.getDefault().getID())));"> 365         tableConfig.setLocalTimeZone(ZoneId.of(confProperties.getProperty(TIME_ZONE, TimeZone.getDefault(🔵</abbr>
+ 366 
+ 367         StreamTableEnvironment tableEnv = StreamTableEnvironmentImpl.create(env, settings, tableConfig);
+ 368         StreamEnvConfigManager.streamTableEnvironmentStateTTLConfig(tableEnv, confProperties);
+ 369         StreamEnvConfigManager.streamTableEnvironmentEarlyTriggerConfig(tableEnv, confProperties);
+ 370         return tableEnv;
+ 371     }
+ 372 
+ 373     private static void timeZoneCheck(String timeZone) {
+ 374         ArrayList&lt;String&gt; zones = Lists.newArrayList(TimeZone.getAvailableIDs());
+ 375         if (!zones.contains(timeZone)){
+ 376             throw new IllegalArgumentException(String.format(&quot; timezone of %s is Incorrect!&quot;, timeZone));
+ 377         }
+ 378     }
+ 379 
+ 380     private static TypeInformation&lt;?&gt;[] fromDataTypeToLegacyInfo(DataType[] dataType) {
+ 381         return Stream.of(dataType)
+ 382                 .map(TypeInfoDataTypeConverter::toLegacyTypeInfo)
+ 383                 .toArray(TypeInformation[]::new);
+ 384     }
+ 385 }
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ </pre></td>
+                        </tr>
+                    </table>
+                </div>
+                <div id="bottom">
+                    <table style="margin:auto">
+                        <tr>
+                            <th>ours vs. base</th>
+                            <th>theirs vs. base</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1  /*
+   2   * Licensed to the Apache Software Foundation (ASF) under one
+   3   * or more contributor license agreements.  See the NOTICE file
+   4   * distributed with this work for additional information
+   5   * regarding copyright ownership.  The ASF licenses this file
+   6   * to you under the Apache License, Version 2.0 (the
+   7   * &quot;License&quot;); you may not use this file except in compliance
+   8   * with the License.  You may obtain a copy of the License at
+   9   *
+  10   *     http://www.apache.org/licenses/LICENSE-2.0
+  11   *
+  12   * Unless required by applicable law or agreed to in writing, software
+  13   * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15   * See the License for the specific language governing permissions and
+  16   * limitations under the License.
+  17   */
+  18  
+  19  package com.dtstack.flink.sql.exec;
+  20  
+  21  import com.dtstack.flink.sql.classloader.ClassLoaderManager;
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  22 +import com.dtstack.flink.sql.dirtyManager.manager.DirtyDataManager;</span>
+  23  import com.dtstack.flink.sql.enums.ClusterMode;
+  24  import com.dtstack.flink.sql.enums.ECacheType;
+  25  import com.dtstack.flink.sql.enums.EPluginLoadMode;
+  26  import com.dtstack.flink.sql.environment.MyLocalStreamEnvironment;
+  27  import com.dtstack.flink.sql.environment.StreamEnvConfigManager;
+  28  import com.dtstack.flink.sql.function.FunctionManager;
+  29  import com.dtstack.flink.sql.option.OptionParser;
+  30  import com.dtstack.flink.sql.option.Options;
+  31  import com.dtstack.flink.sql.parser.CreateFuncParser;
+  32  import com.dtstack.flink.sql.parser.CreateTmpTableParser;
+  33  import com.dtstack.flink.sql.parser.FlinkPlanner;
+  34  import com.dtstack.flink.sql.parser.InsertSqlParser;
+  35  import com.dtstack.flink.sql.parser.SqlParser;
+  36  import com.dtstack.flink.sql.parser.SqlTree;
+  37  import com.dtstack.flink.sql.side.AbstractSideTableInfo;
+  38  import com.dtstack.flink.sql.side.SideSqlExec;
+  39  import com.dtstack.flink.sql.sink.StreamSinkFactory;
+  40  import com.dtstack.flink.sql.source.StreamSourceFactory;
+  41  import com.dtstack.flink.sql.table.AbstractSourceTableInfo;
+  42  import com.dtstack.flink.sql.table.AbstractTableInfo;
+  43  import com.dtstack.flink.sql.table.AbstractTargetTableInfo;
+  44  import com.dtstack.flink.sql.util.DtStringUtil;
+  45  import com.dtstack.flink.sql.util.PluginUtil;
+  46  import com.dtstack.flink.sql.util.TypeInfoDataTypeConverter;
+  47  import com.dtstack.flink.sql.watermarker.WaterMarkerAssigner;
+  48  import com.fasterxml.jackson.databind.ObjectMapper;
+  49  import com.google.common.base.Preconditions;
+  50  import com.google.common.base.Strings;
+  51  import com.google.common.collect.Lists;
+  52  import com.google.common.collect.Maps;
+  53  import com.google.common.collect.Sets;
+  54  import org.apache.calcite.sql.SqlInsert;
+  55  import org.apache.calcite.sql.SqlNode;
+  56  import org.apache.commons.io.Charsets;
+  57  import org.apache.commons.lang3.StringUtils;
+  58  import org.apache.flink.api.common.typeinfo.TypeInformation;
+  59  import org.apache.flink.api.java.typeutils.RowTypeInfo;
+  60  import org.apache.flink.streaming.api.datastream.DataStream;
+  61  import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+  62  import org.apache.flink.table.api.EnvironmentSettings;
+  63  import org.apache.flink.table.api.Table;
+  64  import org.apache.flink.table.api.TableConfig;
+  65  import org.apache.flink.table.api.TableEnvironment;
+  66  import org.apache.flink.table.api.java.StreamTableEnvironment;
+  67  import org.apache.flink.table.api.java.internal.StreamTableEnvironmentImpl;
+  68  import org.apache.flink.table.sinks.TableSink;
+  69  import org.apache.flink.table.types.DataType;
+  70  import org.slf4j.Logger;
+  71  import org.slf4j.LoggerFactory;
+  72  
+  73  import java.io.File;
+  74  import java.lang.reflect.InvocationTargetException;
+  75  import java.net.URL;
+  76  import java.net.URLClassLoader;
+  77  import java.net.URLDecoder;
+  78  import java.time.ZoneId;
+  79  import java.util.ArrayList;
+  80  import java.util.Arrays;
+  81  import java.util.List;
+  82  import java.util.Map;
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  83 +import java.util.Objects;</span>
+  84  import java.util.Properties;
+  85  import java.util.Set;
+  86  import java.util.TimeZone;
+  87  import java.util.stream.Stream;
+  88  
+  89  /**
+  90   *  任务执行时的流程方法
+  91   * Date: 2020/2/17
+  92   * Company: www.dtstack.com
+  93   * @author maqi
+  94   */
+  95  public class ExecuteProcessHelper {
+  96  
+  97      private static final String CLASS_FILE_NAME_FMT = &quot;class_path_%d&quot;;
+  98      private static final Logger LOG = LoggerFactory.getLogger(ExecuteProcessHelper.class);
+  99      private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+ 100  
+ 101      private static final String TIME_ZONE = &quot;timezone&quot;;
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 102 +    private static final String PLUGIN_PATH_STR = &quot;pluginPath&quot;;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 103 +    private static final String PLUGIN_LOAD_STR = &quot;pluginLoadMode&quot;;</span>
+ 104  
+ 105      public static FlinkPlanner flinkPlanner = new FlinkPlanner();
+ 106  
+ 107      public static ParamsInfo parseParams(String[] args) throws Exception {
+ 108          LOG.info(&quot;------------program params-------------------------&quot;);
+ 109          Arrays.stream(args).forEach(arg -&gt; LOG.info(&quot;{}&quot;, arg));
+ 110          LOG.info(&quot;-------------------------------------------&quot;);
+ 111  
+ 112          OptionParser optionParser = new OptionParser(args);
+ 113          Options options = optionParser.getOptions();
+ 114  
+ 115          String sql = URLDecoder.decode(options.getSql(), Charsets.UTF_8.name());
+ 116          String name = options.getName();
+ 117          String localSqlPluginPath = options.getLocalSqlPluginPath();
+ 118          String remoteSqlPluginPath = options.getRemoteSqlPluginPath();
+ 119          String pluginLoadMode = options.getPluginLoadMode();
+ 120          String deployMode = options.getMode();
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 121 +        String dirtyStr = options.getDirtyProperties();</span>
+ 122  
+ 123          Preconditions.checkArgument(checkRemoteSqlPluginPath(remoteSqlPluginPath, deployMode, pluginLoadMode),
+ 124                  &quot;Non-local mode or shipfile deployment mode, remoteSqlPluginPath is required&quot;);
+ 125          String confProp = URLDecoder.decode(options.getConfProp(), Charsets.UTF_8.toString());
+ 126          Properties confProperties = PluginUtil.jsonStrToObject(confProp, Properties.class);
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 127 +        Properties dirtyProperties = PluginUtil.jsonStrToObject(Objects.isNull(dirtyStr) ?</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 128 +                DirtyDataManager.buildDefaultDirty() : dirtyStr, Properties.class);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 129 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 130 +        if (Objects.isNull(dirtyProperties.getProperty(PLUGIN_LOAD_STR))) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 131 +            dirtyProperties.put(PLUGIN_LOAD_STR, pluginLoadMode);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 132 +        }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 133 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"><abbr title=" 134 +        if (!pluginLoadMode.equalsIgnoreCase(EPluginLoadMode.LOCALTEST.name()) &amp;&amp; Objects.isNull(dirtyProperties.getProperty(PLUGIN_PATH_STR))) {"> 134 +        if (!pluginLoadMode.equalsIgnoreCase(EPluginLoadMode.LOCALTEST.name()) &amp;&amp; Objects.isNull(dirtyProperties.g🔵</abbr></span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 135 +            dirtyProperties.setProperty(PLUGIN_PATH_STR,</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 136 +                    Objects.isNull(remoteSqlPluginPath) ? localSqlPluginPath : remoteSqlPluginPath);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 137 +        }</span>
+ 138  
+ 139          List&lt;URL&gt; jarUrlList = getExternalJarUrls(options.getAddjar());
+ 140  
+ 141          return ParamsInfo.builder()
+ 142                  .setSql(sql)
+ 143                  .setName(name)
+ 144                  .setLocalSqlPluginPath(localSqlPluginPath)
+ 145                  .setRemoteSqlPluginPath(remoteSqlPluginPath)
+ 146                  .setPluginLoadMode(pluginLoadMode)
+ 147                  .setDeployMode(deployMode)
+ 148                  .setConfProp(confProperties)
+ 149                  .setJarUrlList(jarUrlList)
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 150 +                .setDirtyProperties(dirtyProperties)</span>
+ 151                  .build();
+ 152  
+ 153      }
+ 154  
+ 155      /**
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 156 -     *   非local模式或者shipfile部署模式，remoteSqlPluginPath必填</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 157 +     * 非local模式或者shipfile部署模式，remoteSqlPluginPath必填</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 158 +     *</span>
+ 159       * @param remoteSqlPluginPath
+ 160       * @param deployMode
+ 161       * @param pluginLoadMode
+ 162       * @return
+ 163       */
+<abbr title=" 164      public static boolean checkRemoteSqlPluginPath(String remoteSqlPluginPath, String deployMode, String pluginLoadMode) {"> 164      public static boolean checkRemoteSqlPluginPath(String remoteSqlPluginPath, String deployMode, String pluginLoa🔵</abbr>
+ 165          if (StringUtils.isEmpty(remoteSqlPluginPath)) {
+ 166              return StringUtils.equalsIgnoreCase(pluginLoadMode, EPluginLoadMode.SHIPFILE.name())
+ 167                      || StringUtils.equalsIgnoreCase(deployMode, ClusterMode.local.name());
+ 168          }
+ 169          return true;
+ 170      }
+ 171  
+ 172  
+ 173      public static StreamExecutionEnvironment getStreamExecution(ParamsInfo paramsInfo) throws Exception {
+<abbr title=" 174          StreamExecutionEnvironment env = ExecuteProcessHelper.getStreamExeEnv(paramsInfo.getConfProp(), paramsInfo.getDeployMode());"> 174          StreamExecutionEnvironment env = ExecuteProcessHelper.getStreamExeEnv(paramsInfo.getConfProp(), paramsInfo🔵</abbr>
+ 175          StreamTableEnvironment tableEnv = getStreamTableEnv(env, paramsInfo.getConfProp());
+ 176  
+ 177  
+ 178          SqlParser.setLocalSqlPluginRoot(paramsInfo.getLocalSqlPluginPath());
+ 179          SqlTree sqlTree = SqlParser.parseSql(paramsInfo.getSql(), paramsInfo.getPluginLoadMode());
+ 180  
+ 181          Map&lt;String, AbstractSideTableInfo&gt; sideTableMap = Maps.newHashMap();
+ 182          Map&lt;String, Table&gt; registerTableCache = Maps.newHashMap();
+ 183  
+ 184          //register udf
+<abbr title=" 185          ExecuteProcessHelper.registerUserDefinedFunction(sqlTree, paramsInfo.getJarUrlList(), tableEnv, paramsInfo.isGetPlan());"> 185          ExecuteProcessHelper.registerUserDefinedFunction(sqlTree, paramsInfo.getJarUrlList(), tableEnv, paramsInfo🔵</abbr>
+ 186          //register table schema
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"><abbr title=" 187 -        Set&lt;URL&gt; classPathSets = ExecuteProcessHelper.registerTable(sqlTree, env, tableEnv, paramsInfo.getLocalSqlPluginPath(),"> 187 -        Set&lt;URL&gt; classPathSets = ExecuteProcessHelper.registerTable(sqlTree, env, tableEnv, paramsInfo.getLocalSql🔵</abbr></span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"><abbr title=" 188 -                paramsInfo.getRemoteSqlPluginPath(), paramsInfo.getPluginLoadMode(), sideTableMap, registerTableCache);"> 188 -                paramsInfo.getRemoteSqlPluginPath(), paramsInfo.getPluginLoadMode(), sideTableMap, registerTableCa🔵</abbr></span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 189 +        Set&lt;URL&gt; classPathSets = ExecuteProcessHelper.registerTable(</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 190 +                sqlTree</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 191 +                , env</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 192 +                , tableEnv</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 193 +                , paramsInfo.getLocalSqlPluginPath()</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 194 +                , paramsInfo.getRemoteSqlPluginPath()</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 195 +                , paramsInfo.getPluginLoadMode()</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 196 +                , paramsInfo.getDirtyProperties()</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 197 +                , sideTableMap</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 198 +                , registerTableCache);</span>
+ 199          // cache classPathSets
+ 200          ExecuteProcessHelper.registerPluginUrlToCachedFile(env, classPathSets);
+ 201  
+ 202          ExecuteProcessHelper.sqlTranslation(
+ 203                  paramsInfo.getLocalSqlPluginPath(),
+ 204                  paramsInfo.getPluginLoadMode(),
+ 205                  tableEnv,
+ 206                  sqlTree,
+ 207                  sideTableMap,
+ 208                  registerTableCache);
+
+ 209  
+ 210          if (env instanceof MyLocalStreamEnvironment) {
+ 211              ((MyLocalStreamEnvironment) env).setClasspaths(ClassLoaderManager.getClassPath());
+ 212          }
+ 213          return env;
+ 214      }
+ 215  
+ 216  
+ 217      public static List&lt;URL&gt; getExternalJarUrls(String addJarListStr) throws java.io.IOException {
+ 218          List&lt;URL&gt; jarUrlList = Lists.newArrayList();
+ 219          if (Strings.isNullOrEmpty(addJarListStr)) {
+ 220              return jarUrlList;
+ 221          }
+ 222  
+<abbr title=" 223          List&lt;String&gt; addJarFileList = OBJECT_MAPPER.readValue(URLDecoder.decode(addJarListStr, Charsets.UTF_8.name()), List.class);"> 223          List&lt;String&gt; addJarFileList = OBJECT_MAPPER.readValue(URLDecoder.decode(addJarListStr, Charsets.UTF_8.name🔵</abbr>
+ 224          //Get External jar to load
+ 225          for (String addJarPath : addJarFileList) {
+ 226              jarUrlList.add(new File(addJarPath).toURI().toURL());
+ 227          }
+ 228          return jarUrlList;
+ 229      }
+ 230  
+ 231      private static void sqlTranslation(String localSqlPluginPath,
+ 232                                         String pluginLoadMode,
+ 233                                         StreamTableEnvironment tableEnv,
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 234 -                                       SqlTree sqlTree,Map&lt;String, AbstractSideTableInfo&gt; sideTableMap,</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 235 +                                       SqlTree sqlTree, Map&lt;String, AbstractSideTableInfo&gt; sideTableMap,</span>
+ 236                                         Map&lt;String, Table&gt; registerTableCache) throws Exception {
+ 237  
+ 238          SideSqlExec sideSqlExec = new SideSqlExec();
+ 239          sideSqlExec.setLocalSqlPluginPath(localSqlPluginPath);
+ 240          sideSqlExec.setPluginLoadMode(pluginLoadMode);
+ 241  
+ 242          int scope = 0;
+ 243          for (CreateTmpTableParser.SqlParserResult result : sqlTree.getTmpSqlList()) {
+ 244              sideSqlExec.exec(result.getExecSql(), sideTableMap, tableEnv, registerTableCache, result, scope + &quot;&quot;);
+ 245              scope++;
+ 246          }
+ 247  
+ 248          for (InsertSqlParser.SqlParseResult result : sqlTree.getExecSqlList()) {
+ 249              if (LOG.isInfoEnabled()) {
+ 250                  LOG.info(&quot;exe-sql:\n&quot; + result.getExecSql());
+ 251              }
+ 252              boolean isSide = false;
+ 253              for (String tableName : result.getTargetTableList()) {
+ 254                  if (sqlTree.getTmpTableMap().containsKey(tableName)) {
+ 255                      CreateTmpTableParser.SqlParserResult tmp = sqlTree.getTmpTableMap().get(tableName);
+ 256                      String realSql = DtStringUtil.replaceIgnoreQuota(result.getExecSql(), &quot;`&quot;, &quot;&quot;);
+ 257  
+ 258                      SqlNode sqlNode = flinkPlanner.getParser().parse(realSql);
+ 259                      String tmpSql = ((SqlInsert) sqlNode).getSource().toString();
+ 260                      tmp.setExecSql(tmpSql);
+<abbr title=" 261                      sideSqlExec.exec(tmp.getExecSql(), sideTableMap, tableEnv, registerTableCache, tmp, scope + &quot;&quot;);"> 261                      sideSqlExec.exec(tmp.getExecSql(), sideTableMap, tableEnv, registerTableCache, tmp, scope + &quot;&quot;🔵</abbr>
+ 262                  } else {
+ 263                      for (String sourceTable : result.getSourceTableList()) {
+ 264                          if (sideTableMap.containsKey(sourceTable)) {
+ 265                              isSide = true;
+ 266                              break;
+ 267                          }
+ 268                      }
+ 269                      if (isSide) {
+ 270                          //sql-dimensional table contains the dimension table of execution
+<abbr title=" 271                          sideSqlExec.exec(result.getExecSql(), sideTableMap, tableEnv, registerTableCache, null, String.valueOf(scope));"> 271                          sideSqlExec.exec(result.getExecSql(), sideTableMap, tableEnv, registerTableCache, null, St🔵</abbr>
+ 272                      } else {
+ 273                          LOG.info(&quot;----------exec sql without dimension join-----------&quot;);
+ 274                          LOG.info(&quot;----------real sql exec is--------------------------\n{}&quot;, result.getExecSql());
+ 275                          FlinkSQLExec.sqlUpdate(tableEnv, result.getExecSql());
+ 276                          if (LOG.isInfoEnabled()) {
+ 277                              LOG.info(&quot;exec sql: &quot; + result.getExecSql());
+ 278                          }
+ 279                      }
+ 280                  }
+ 281  
+ 282                  scope++;
+ 283              }
+ 284          }
+ 285      }
+ 286  
+<abbr title=" 287      public static void registerUserDefinedFunction(SqlTree sqlTree, List&lt;URL&gt; jarUrlList, TableEnvironment tableEnv, boolean getPlan)"> 287      public static void registerUserDefinedFunction(SqlTree sqlTree, List&lt;URL&gt; jarUrlList, TableEnvironment tableEn🔵</abbr>
+ 288              throws IllegalAccessException, InvocationTargetException {
+ 289          // udf和tableEnv须由同一个类加载器加载
+ 290          ClassLoader levelClassLoader = tableEnv.getClass().getClassLoader();
+ 291          ClassLoader currentClassLoader = Thread.currentThread().getContextClassLoader();
+ 292          URLClassLoader classLoader = null;
+ 293          List&lt;CreateFuncParser.SqlParserResult&gt; funcList = sqlTree.getFunctionList();
+ 294          for (CreateFuncParser.SqlParserResult funcInfo : funcList) {
+ 295              // 构建plan的情况下，udf和tableEnv不需要是同一个类加载器
+ 296              if (getPlan) {
+ 297                  classLoader = ClassLoaderManager.loadExtraJar(jarUrlList, (URLClassLoader) currentClassLoader);
+ 298              }
+ 299  
+ 300              //classloader
+ 301              if (classLoader == null) {
+ 302                  classLoader = ClassLoaderManager.loadExtraJar(jarUrlList, (URLClassLoader) levelClassLoader);
+ 303              }
+<abbr title=" 304              FunctionManager.registerUDF(funcInfo.getType(), funcInfo.getClassName(), funcInfo.getName(), tableEnv, classLoader);"> 304              FunctionManager.registerUDF(funcInfo.getType(), funcInfo.getClassName(), funcInfo.getName(), tableEnv,🔵</abbr>
+ 305          }
+ 306      }
+ 307  
+ 308      /**
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 309 -     *    向Flink注册源表和结果表，返回执行时插件包的全路径</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 310 +     * 向Flink注册源表和结果表，返回执行时插件包的全路径</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 311 +     *</span>
+ 312       * @param sqlTree
+ 313       * @param env
+ 314       * @param tableEnv
+ 315       * @param localSqlPluginPath
+ 316       * @param remoteSqlPluginPath
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 317 -     * @param pluginLoadMode   插件加载模式 classpath or shipfile</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 318 +     * @param pluginLoadMode      插件加载模式 classpath or shipfile</span>
+ 319       * @param sideTableMap
+ 320       * @param registerTableCache
+ 321       * @return
+ 322       * @throws Exception
+ 323       */
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 324 -    public static Set&lt;URL&gt; registerTable(SqlTree sqlTree,</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 325 -                                         StreamExecutionEnvironment env,</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 326 -                                         StreamTableEnvironment tableEnv,</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 327 -                                         String localSqlPluginPath,</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 328 -                                         String remoteSqlPluginPath,</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 329 -                                         String pluginLoadMode,</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 330 -                                         Map&lt;String, AbstractSideTableInfo&gt; sideTableMap,</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 331 -                                         Map&lt;String, Table&gt; registerTableCache) throws Exception {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 332 +    public static Set&lt;URL&gt; registerTable(</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 333 +            SqlTree sqlTree</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 334 +            , StreamExecutionEnvironment env</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 335 +            , StreamTableEnvironment tableEnv</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 336 +            , String localSqlPluginPath</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 337 +            , String remoteSqlPluginPath</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 338 +            , String pluginLoadMode</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 339 +            , Properties dirtyProperties</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 340 +            , Map&lt;String, AbstractSideTableInfo&gt; sideTableMap</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 341 +            , Map&lt;String, Table&gt; registerTableCache</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 342 +    ) throws Exception {</span>
+ 343          Set&lt;URL&gt; pluginClassPathSets = Sets.newHashSet();
+ 344          WaterMarkerAssigner waterMarkerAssigner = new WaterMarkerAssigner();
+ 345          for (AbstractTableInfo tableInfo : sqlTree.getTableInfoMap().values()) {
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 346 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 347 +            // 配置dirty manager</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 348 +            tableInfo.setDirtyProperties(dirtyProperties);</span>
+ 349  
+ 350              if (tableInfo instanceof AbstractSourceTableInfo) {
+ 351  
+ 352                  AbstractSourceTableInfo sourceTableInfo = (AbstractSourceTableInfo) tableInfo;
+<abbr title=" 353                  Table table = StreamSourceFactory.getStreamSource(sourceTableInfo, env, tableEnv, localSqlPluginPath, pluginLoadMode);"> 353                  Table table = StreamSourceFactory.getStreamSource(sourceTableInfo, env, tableEnv, localSqlPluginPa🔵</abbr>
+ 354                  tableEnv.registerTable(sourceTableInfo.getAdaptName(), table);
+<abbr title=" 355                  //Note --- parameter conversion function can not be used inside a function of the type of polymerization"> 355                  //Note --- parameter conversion function can not be used inside a function of the type of polymeri🔵</abbr>
+ 356                  //Create table in which the function is arranged only need adaptation sql
+ 357                  String adaptSql = sourceTableInfo.getAdaptSelectSql();
+ 358                  Table adaptTable = adaptSql == null ? table : tableEnv.sqlQuery(adaptSql);
+ 359  
+<abbr title=" 360                  RowTypeInfo typeInfo = new RowTypeInfo(fromDataTypeToLegacyInfo(adaptTable.getSchema().getFieldDataTypes()), adaptTable.getSchema().getFieldNames());"> 360                  RowTypeInfo typeInfo = new RowTypeInfo(fromDataTypeToLegacyInfo(adaptTable.getSchema().getFieldDat🔵</abbr>
+ 361                  DataStream adaptStream = tableEnv.toAppendStream(adaptTable, typeInfo);
+ 362  
+ 363                  String fields = String.join(&quot;,&quot;, typeInfo.getFieldNames());
+ 364  
+ 365                  if (waterMarkerAssigner.checkNeedAssignWaterMarker(sourceTableInfo)) {
+ 366                      adaptStream = waterMarkerAssigner.assignWaterMarker(adaptStream, typeInfo, sourceTableInfo);
+ 367                      fields += &quot;,ROWTIME.ROWTIME&quot;;
+ 368                  } else {
+ 369                      fields += &quot;,PROCTIME.PROCTIME&quot;;
+ 370                  }
+ 371  
+ 372                  Table regTable = tableEnv.fromDataStream(adaptStream, fields);
+ 373                  tableEnv.createTemporaryView(tableInfo.getName(), regTable);
+ 374                  if (LOG.isInfoEnabled()) {
+ 375                      LOG.info(&quot;registe table {} success.&quot;, tableInfo.getName());
+ 376                  }
+ 377                  registerTableCache.put(tableInfo.getName(), regTable);
+ 378  
+<abbr title=" 379                  URL sourceTablePathUrl = PluginUtil.buildSourceAndSinkPathByLoadMode(tableInfo.getType(), AbstractSourceTableInfo.SOURCE_SUFFIX, localSqlPluginPath, remoteSqlPluginPath, pluginLoadMode);"> 379                  URL sourceTablePathUrl = PluginUtil.buildSourceAndSinkPathByLoadMode(tableInfo.getType(), Abstract🔵</abbr>
+ 380                  pluginClassPathSets.add(sourceTablePathUrl);
+ 381              } else if (tableInfo instanceof AbstractTargetTableInfo) {
+<abbr title=" 382                  TableSink tableSink = StreamSinkFactory.getTableSink((AbstractTargetTableInfo) tableInfo, localSqlPluginPath, pluginLoadMode);"> 382                  TableSink tableSink = StreamSinkFactory.getTableSink((AbstractTargetTableInfo) tableInfo, localSql🔵</abbr>
+ 383                  // TODO Kafka Sink直接注册，其他的Sink要修复才可以。
+ 384                  if (tableInfo.getType().startsWith(&quot;kafka&quot;)) {
+ 385                      tableEnv.registerTableSink(tableInfo.getName(), tableSink);
+ 386                  } else {
+ 387                      TypeInformation[] flinkTypes = FunctionManager.transformTypes(tableInfo.getFieldClasses());
+ 388                      tableEnv.registerTableSink(tableInfo.getName(), tableInfo.getFields(), flinkTypes, tableSink);
+ 389                  }
+ 390  
+<abbr title=" 391                  URL sinkTablePathUrl = PluginUtil.buildSourceAndSinkPathByLoadMode(tableInfo.getType(), AbstractTargetTableInfo.TARGET_SUFFIX, localSqlPluginPath, remoteSqlPluginPath, pluginLoadMode);"> 391                  URL sinkTablePathUrl = PluginUtil.buildSourceAndSinkPathByLoadMode(tableInfo.getType(), AbstractTa🔵</abbr>
+ 392                  pluginClassPathSets.add(sinkTablePathUrl);
+ 393              } else if (tableInfo instanceof AbstractSideTableInfo) {
+<abbr title=" 394                  String sideOperator = ECacheType.ALL.name().equalsIgnoreCase(((AbstractSideTableInfo) tableInfo).getCacheType()) ? &quot;all&quot; : &quot;async&quot;;"> 394                  String sideOperator = ECacheType.ALL.name().equalsIgnoreCase(((AbstractSideTableInfo) tableInfo).g🔵</abbr>
+ 395                  sideTableMap.put(tableInfo.getName(), (AbstractSideTableInfo) tableInfo);
+ 396  
+<abbr title=" 397                  URL sideTablePathUrl = PluginUtil.buildSidePathByLoadMode(tableInfo.getType(), sideOperator, AbstractSideTableInfo.TARGET_SUFFIX, localSqlPluginPath, remoteSqlPluginPath, pluginLoadMode);"> 397                  URL sideTablePathUrl = PluginUtil.buildSidePathByLoadMode(tableInfo.getType(), sideOperator, Abstr🔵</abbr>
+ 398                  pluginClassPathSets.add(sideTablePathUrl);
+ 399              } else {
+ 400                  throw new RuntimeException(&quot;not support table type:&quot; + tableInfo.getType());
+ 401              }
+ 402          }
+ 403          if (localSqlPluginPath == null || localSqlPluginPath.isEmpty()) {
+ 404              return Sets.newHashSet();
+ 405          }
+ 406          return pluginClassPathSets;
+ 407      }
+ 408  
+ 409      /**
+ 410       *   perjob模式将job依赖的插件包路径存储到cacheFile，在外围将插件包路径传递给jobgraph
+ 411       * @param env
+ 412       * @param classPathSet
+ 413       */
+ 414      public static void registerPluginUrlToCachedFile(StreamExecutionEnvironment env, Set&lt;URL&gt; classPathSet) {
+ 415          int i = 0;
+ 416          for (URL url : classPathSet) {
+ 417              String classFileName = String.format(CLASS_FILE_NAME_FMT, i);
+ 418              env.registerCachedFile(url.getPath(), classFileName, true);
+ 419              i++;
+ 420          }
+ 421      }
+ 422  
+<abbr title=" 423      public static StreamExecutionEnvironment getStreamExeEnv(Properties confProperties, String deployMode) throws Exception {"> 423      public static StreamExecutionEnvironment getStreamExeEnv(Properties confProperties, String deployMode) throws 🔵</abbr>
+ 424          StreamExecutionEnvironment env = !ClusterMode.local.name().equals(deployMode) ?
+ 425                  StreamExecutionEnvironment.getExecutionEnvironment() :
+ 426                  new MyLocalStreamEnvironment();
+ 427  
+ 428          StreamEnvConfigManager.streamExecutionEnvironmentConfig(env, confProperties);
+ 429          return env;
+ 430      }
+ 431  
+ 432  
+<abbr title=" 433      public static StreamTableEnvironment getStreamTableEnv(StreamExecutionEnvironment env, Properties confProperties) {"> 433      public static StreamTableEnvironment getStreamTableEnv(StreamExecutionEnvironment env, Properties confProperti🔵</abbr>
+ 434          // use blink and streammode
+ 435          EnvironmentSettings settings = EnvironmentSettings.newInstance()
+ 436                  .useBlinkPlanner()
+ 437                  .inStreamingMode()
+ 438                  .build();
+ 439  
+ 440          TableConfig tableConfig = new TableConfig();
+ 441  
+ 442          timeZoneCheck(confProperties.getProperty(TIME_ZONE, TimeZone.getDefault().getID()));
+ 443  
+<abbr title=" 444          tableConfig.setLocalTimeZone(ZoneId.of(confProperties.getProperty(TIME_ZONE, TimeZone.getDefault().getID())));"> 444          tableConfig.setLocalTimeZone(ZoneId.of(confProperties.getProperty(TIME_ZONE, TimeZone.getDefault().getID()🔵</abbr>
+ 445  
+ 446          StreamTableEnvironment tableEnv = StreamTableEnvironmentImpl.create(env, settings, tableConfig);
+ 447          StreamEnvConfigManager.streamTableEnvironmentStateTTLConfig(tableEnv, confProperties);
+ 448          StreamEnvConfigManager.streamTableEnvironmentEarlyTriggerConfig(tableEnv, confProperties);
+ 449          return tableEnv;
+ 450      }
+ 451  
+ 452      private static void timeZoneCheck(String timeZone) {
+ 453          ArrayList&lt;String&gt; zones = Lists.newArrayList(TimeZone.getAvailableIDs());
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 454 -        if (!zones.contains(timeZone)){</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 455 +        if (!zones.contains(timeZone)) {</span>
+ 456              throw new IllegalArgumentException(String.format(&quot; timezone of %s is Incorrect!&quot;, timeZone));
+ 457          }
+ 458      }
+ 459  
+ 460      private static TypeInformation&lt;?&gt;[] fromDataTypeToLegacyInfo(DataType[] dataType) {
+ 461          return Stream.of(dataType)
+ 462                  .map(TypeInfoDataTypeConverter::toLegacyTypeInfo)
+ 463                  .toArray(TypeInformation[]::new);
+ 464      }
+ 465  }</pre></td>
+                            <td><pre>   1  /*
+   2   * Licensed to the Apache Software Foundation (ASF) under one
+   3   * or more contributor license agreements.  See the NOTICE file
+   4   * distributed with this work for additional information
+   5   * regarding copyright ownership.  The ASF licenses this file
+   6   * to you under the Apache License, Version 2.0 (the
+   7   * &quot;License&quot;); you may not use this file except in compliance
+   8   * with the License.  You may obtain a copy of the License at
+   9   *
+  10   *     http://www.apache.org/licenses/LICENSE-2.0
+  11   *
+  12   * Unless required by applicable law or agreed to in writing, software
+  13   * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15   * See the License for the specific language governing permissions and
+  16   * limitations under the License.
+  17   */
+  18  
+  19  package com.dtstack.flink.sql.exec;
+  20  
+  21  import com.dtstack.flink.sql.classloader.ClassLoaderManager;
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  22 +import com.dtstack.flink.sql.dirtyManager.manager.DirtyDataManager;</span>
+  23  import com.dtstack.flink.sql.enums.ClusterMode;
+  24  import com.dtstack.flink.sql.enums.ECacheType;
+  25  import com.dtstack.flink.sql.enums.EPluginLoadMode;
+  26  import com.dtstack.flink.sql.environment.MyLocalStreamEnvironment;
+  27  import com.dtstack.flink.sql.environment.StreamEnvConfigManager;
+  28  import com.dtstack.flink.sql.function.FunctionManager;
+  29  import com.dtstack.flink.sql.option.OptionParser;
+  30  import com.dtstack.flink.sql.option.Options;
+  31  import com.dtstack.flink.sql.parser.CreateFuncParser;
+  32  import com.dtstack.flink.sql.parser.CreateTmpTableParser;
+  33  import com.dtstack.flink.sql.parser.FlinkPlanner;
+  34  import com.dtstack.flink.sql.parser.InsertSqlParser;
+  35  import com.dtstack.flink.sql.parser.SqlParser;
+  36  import com.dtstack.flink.sql.parser.SqlTree;
+  37  import com.dtstack.flink.sql.side.AbstractSideTableInfo;
+  38  import com.dtstack.flink.sql.side.SideSqlExec;
+  39  import com.dtstack.flink.sql.sink.StreamSinkFactory;
+  40  import com.dtstack.flink.sql.source.StreamSourceFactory;
+  41  import com.dtstack.flink.sql.table.AbstractSourceTableInfo;
+  42  import com.dtstack.flink.sql.table.AbstractTableInfo;
+  43  import com.dtstack.flink.sql.table.AbstractTargetTableInfo;
+  44  import com.dtstack.flink.sql.util.DtStringUtil;
+  45  import com.dtstack.flink.sql.util.PluginUtil;
+  46  import com.dtstack.flink.sql.util.TypeInfoDataTypeConverter;
+  47  import com.dtstack.flink.sql.watermarker.WaterMarkerAssigner;
+  48  import com.fasterxml.jackson.databind.ObjectMapper;
+  49  import com.google.common.base.Preconditions;
+  50  import com.google.common.base.Strings;
+  51  import com.google.common.collect.Lists;
+  52  import com.google.common.collect.Maps;
+  53  import com.google.common.collect.Sets;
+  54  import org.apache.calcite.sql.SqlInsert;
+  55  import org.apache.calcite.sql.SqlNode;
+  56  import org.apache.commons.io.Charsets;
+  57  import org.apache.commons.lang3.StringUtils;
+  58  import org.apache.flink.api.common.typeinfo.TypeInformation;
+  59  import org.apache.flink.api.java.typeutils.RowTypeInfo;
+  60  import org.apache.flink.streaming.api.datastream.DataStream;
+  61  import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+  62  import org.apache.flink.table.api.EnvironmentSettings;
+  63  import org.apache.flink.table.api.Table;
+  64  import org.apache.flink.table.api.TableConfig;
+  65  import org.apache.flink.table.api.TableEnvironment;
+  66  import org.apache.flink.table.api.java.StreamTableEnvironment;
+  67  import org.apache.flink.table.api.java.internal.StreamTableEnvironmentImpl;
+  68  import org.apache.flink.table.sinks.TableSink;
+  69  import org.apache.flink.table.types.DataType;
+  70  import org.slf4j.Logger;
+  71  import org.slf4j.LoggerFactory;
+  72  
+  73  import java.io.File;
+  74  import java.lang.reflect.InvocationTargetException;
+  75  import java.net.URL;
+  76  import java.net.URLClassLoader;
+  77  import java.net.URLDecoder;
+  78  import java.time.ZoneId;
+  79  import java.util.ArrayList;
+  80  import java.util.Arrays;
+  81  import java.util.List;
+  82  import java.util.Map;
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  83 +import java.util.Objects;</span>
+  84  import java.util.Properties;
+  85  import java.util.Set;
+  86  import java.util.TimeZone;
+  87  import java.util.stream.Stream;
+  88  
+  89  /**
+  90   *  任务执行时的流程方法
+  91   * Date: 2020/2/17
+  92   * Company: www.dtstack.com
+  93   * @author maqi
+  94   */
+  95  public class ExecuteProcessHelper {
+  96  
+  97      private static final String CLASS_FILE_NAME_FMT = &quot;class_path_%d&quot;;
+  98      private static final Logger LOG = LoggerFactory.getLogger(ExecuteProcessHelper.class);
+  99      private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+ 100  
+ 101      private static final String TIME_ZONE = &quot;timezone&quot;;
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 102 +    private static final String PLUGIN_PATH_STR = &quot;pluginPath&quot;;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 103 +    private static final String PLUGIN_LOAD_STR = &quot;pluginLoadMode&quot;;</span>
+ 104  
+ 105      public static FlinkPlanner flinkPlanner = new FlinkPlanner();
+ 106  
+ 107      public static ParamsInfo parseParams(String[] args) throws Exception {
+ 108          LOG.info(&quot;------------program params-------------------------&quot;);
+ 109          Arrays.stream(args).forEach(arg -&gt; LOG.info(&quot;{}&quot;, arg));
+ 110          LOG.info(&quot;-------------------------------------------&quot;);
+ 111  
+ 112          OptionParser optionParser = new OptionParser(args);
+ 113          Options options = optionParser.getOptions();
+ 114  
+ 115          String sql = URLDecoder.decode(options.getSql(), Charsets.UTF_8.name());
+ 116          String name = options.getName();
+ 117          String localSqlPluginPath = options.getLocalSqlPluginPath();
+ 118          String remoteSqlPluginPath = options.getRemoteSqlPluginPath();
+ 119          String pluginLoadMode = options.getPluginLoadMode();
+ 120          String deployMode = options.getMode();
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 121 +        String dirtyStr = options.getDirtyProperties();</span>
+ 122  
+ 123          Preconditions.checkArgument(checkRemoteSqlPluginPath(remoteSqlPluginPath, deployMode, pluginLoadMode),
+ 124                  &quot;Non-local mode or shipfile deployment mode, remoteSqlPluginPath is required&quot;);
+ 125          String confProp = URLDecoder.decode(options.getConfProp(), Charsets.UTF_8.toString());
+ 126          Properties confProperties = PluginUtil.jsonStrToObject(confProp, Properties.class);
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 127 +        Properties dirtyProperties = PluginUtil.jsonStrToObject(Objects.isNull(dirtyStr) ?</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 128 +                DirtyDataManager.buildDefaultDirty() : dirtyStr, Properties.class);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 129 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 130 +        if (Objects.isNull(dirtyProperties.getProperty(PLUGIN_LOAD_STR))) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 131 +            dirtyProperties.put(PLUGIN_LOAD_STR, pluginLoadMode);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 132 +        }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 133 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"><abbr title=" 134 +        if (!pluginLoadMode.equalsIgnoreCase(EPluginLoadMode.LOCALTEST.name()) &amp;&amp; Objects.isNull(dirtyProperties.getProperty(PLUGIN_PATH_STR))) {"> 134 +        if (!pluginLoadMode.equalsIgnoreCase(EPluginLoadMode.LOCALTEST.name()) &amp;&amp; Objects.isNull(dirtyProperties.g🔵</abbr></span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 135 +            dirtyProperties.setProperty(PLUGIN_PATH_STR,</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 136 +                    Objects.isNull(remoteSqlPluginPath) ? localSqlPluginPath : remoteSqlPluginPath);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 137 +        }</span>
+ 138  
+ 139          List&lt;URL&gt; jarUrlList = getExternalJarUrls(options.getAddjar());
+ 140  
+ 141          return ParamsInfo.builder()
+ 142                  .setSql(sql)
+ 143                  .setName(name)
+ 144                  .setLocalSqlPluginPath(localSqlPluginPath)
+ 145                  .setRemoteSqlPluginPath(remoteSqlPluginPath)
+ 146                  .setPluginLoadMode(pluginLoadMode)
+ 147                  .setDeployMode(deployMode)
+ 148                  .setConfProp(confProperties)
+ 149                  .setJarUrlList(jarUrlList)
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 150 +                .setDirtyProperties(dirtyProperties)</span>
+ 151                  .build();
+ 152  
+ 153      }
+ 154  
+ 155      /**
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 156 -     *   非local模式或者shipfile部署模式，remoteSqlPluginPath必填</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 157 +     * 非local模式或者shipfile部署模式，remoteSqlPluginPath必填</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 158 +     *</span>
+ 159       * @param remoteSqlPluginPath
+ 160       * @param deployMode
+ 161       * @param pluginLoadMode
+ 162       * @return
+ 163       */
+<abbr title=" 164      public static boolean checkRemoteSqlPluginPath(String remoteSqlPluginPath, String deployMode, String pluginLoadMode) {"> 164      public static boolean checkRemoteSqlPluginPath(String remoteSqlPluginPath, String deployMode, String pluginLoa🔵</abbr>
+ 165          if (StringUtils.isEmpty(remoteSqlPluginPath)) {
+ 166              return StringUtils.equalsIgnoreCase(pluginLoadMode, EPluginLoadMode.SHIPFILE.name())
+ 167                      || StringUtils.equalsIgnoreCase(deployMode, ClusterMode.local.name());
+ 168          }
+ 169          return true;
+ 170      }
+ 171  
+ 172  
+ 173      public static StreamExecutionEnvironment getStreamExecution(ParamsInfo paramsInfo) throws Exception {
+<abbr title=" 174          StreamExecutionEnvironment env = ExecuteProcessHelper.getStreamExeEnv(paramsInfo.getConfProp(), paramsInfo.getDeployMode());"> 174          StreamExecutionEnvironment env = ExecuteProcessHelper.getStreamExeEnv(paramsInfo.getConfProp(), paramsInfo🔵</abbr>
+ 175          StreamTableEnvironment tableEnv = getStreamTableEnv(env, paramsInfo.getConfProp());
+ 176  
+ 177  
+ 178          SqlParser.setLocalSqlPluginRoot(paramsInfo.getLocalSqlPluginPath());
+ 179          SqlTree sqlTree = SqlParser.parseSql(paramsInfo.getSql(), paramsInfo.getPluginLoadMode());
+ 180  
+ 181          Map&lt;String, AbstractSideTableInfo&gt; sideTableMap = Maps.newHashMap();
+ 182          Map&lt;String, Table&gt; registerTableCache = Maps.newHashMap();
+ 183  
+ 184          //register udf
+<abbr title=" 185          ExecuteProcessHelper.registerUserDefinedFunction(sqlTree, paramsInfo.getJarUrlList(), tableEnv, paramsInfo.isGetPlan());"> 185          ExecuteProcessHelper.registerUserDefinedFunction(sqlTree, paramsInfo.getJarUrlList(), tableEnv, paramsInfo🔵</abbr>
+ 186          //register table schema
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"><abbr title=" 187 -        Set&lt;URL&gt; classPathSets = ExecuteProcessHelper.registerTable(sqlTree, env, tableEnv, paramsInfo.getLocalSqlPluginPath(),"> 187 -        Set&lt;URL&gt; classPathSets = ExecuteProcessHelper.registerTable(sqlTree, env, tableEnv, paramsInfo.getLocalSql🔵</abbr></span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"><abbr title=" 188 -                paramsInfo.getRemoteSqlPluginPath(), paramsInfo.getPluginLoadMode(), sideTableMap, registerTableCache);"> 188 -                paramsInfo.getRemoteSqlPluginPath(), paramsInfo.getPluginLoadMode(), sideTableMap, registerTableCa🔵</abbr></span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 189 +        Set&lt;URL&gt; classPathSets = ExecuteProcessHelper.registerTable(</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 190 +                sqlTree</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 191 +                , env</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 192 +                , tableEnv</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 193 +                , paramsInfo.getLocalSqlPluginPath()</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 194 +                , paramsInfo.getRemoteSqlPluginPath()</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 195 +                , paramsInfo.getPluginLoadMode()</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 196 +                , paramsInfo.getDirtyProperties()</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 197 +                , sideTableMap</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 198 +                , registerTableCache);</span>
+ 199          // cache classPathSets
+ 200          ExecuteProcessHelper.registerPluginUrlToCachedFile(env, classPathSets);
+ 201  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 202 -        ExecuteProcessHelper.sqlTranslation(</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 203 -                paramsInfo.getLocalSqlPluginPath(),</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 204 -                paramsInfo.getPluginLoadMode(),</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 205 -                tableEnv,</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 206 -                sqlTree,</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 207 -                sideTableMap,</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 208 -                registerTableCache);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"><abbr title=" 209 +        ExecuteProcessHelper.sqlTranslation(paramsInfo.getLocalSqlPluginPath(), paramsInfo.getPluginLoadMode(), tableEnv, sqlTree, sideTableMap, registerTableCache);"> 209 +        ExecuteProcessHelper.sqlTranslation(paramsInfo.getLocalSqlPluginPath(), paramsInfo.getPluginLoadMode(), ta🔵</abbr></span>
+ 210  
+ 211          if (env instanceof MyLocalStreamEnvironment) {
+ 212              ((MyLocalStreamEnvironment) env).setClasspaths(ClassLoaderManager.getClassPath());
+ 213          }
+ 214          return env;
+ 215      }
+ 216  
+ 217  
+ 218      public static List&lt;URL&gt; getExternalJarUrls(String addJarListStr) throws java.io.IOException {
+ 219          List&lt;URL&gt; jarUrlList = Lists.newArrayList();
+ 220          if (Strings.isNullOrEmpty(addJarListStr)) {
+ 221              return jarUrlList;
+ 222          }
+ 223  
+<abbr title=" 224          List&lt;String&gt; addJarFileList = OBJECT_MAPPER.readValue(URLDecoder.decode(addJarListStr, Charsets.UTF_8.name()), List.class);"> 224          List&lt;String&gt; addJarFileList = OBJECT_MAPPER.readValue(URLDecoder.decode(addJarListStr, Charsets.UTF_8.name🔵</abbr>
+ 225          //Get External jar to load
+ 226          for (String addJarPath : addJarFileList) {
+ 227              jarUrlList.add(new File(addJarPath).toURI().toURL());
+ 228          }
+ 229          return jarUrlList;
+ 230      }
+ 231  
+ 232      private static void sqlTranslation(String localSqlPluginPath,
+ 233                                         String pluginLoadMode,
+ 234                                         StreamTableEnvironment tableEnv,
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 235 -                                       SqlTree sqlTree,Map&lt;String, AbstractSideTableInfo&gt; sideTableMap,</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 236 +                                       SqlTree sqlTree, Map&lt;String, AbstractSideTableInfo&gt; sideTableMap,</span>
+ 237                                         Map&lt;String, Table&gt; registerTableCache) throws Exception {
+ 238  
+ 239          SideSqlExec sideSqlExec = new SideSqlExec();
+ 240          sideSqlExec.setLocalSqlPluginPath(localSqlPluginPath);
+ 241          sideSqlExec.setPluginLoadMode(pluginLoadMode);
+ 242  
+ 243          int scope = 0;
+ 244          for (CreateTmpTableParser.SqlParserResult result : sqlTree.getTmpSqlList()) {
+ 245              sideSqlExec.exec(result.getExecSql(), sideTableMap, tableEnv, registerTableCache, result, scope + &quot;&quot;);
+ 246              scope++;
+ 247          }
+ 248  
+ 249          for (InsertSqlParser.SqlParseResult result : sqlTree.getExecSqlList()) {
+ 250              if (LOG.isInfoEnabled()) {
+ 251                  LOG.info(&quot;exe-sql:\n&quot; + result.getExecSql());
+ 252              }
+ 253              boolean isSide = false;
+ 254              for (String tableName : result.getTargetTableList()) {
+ 255                  if (sqlTree.getTmpTableMap().containsKey(tableName)) {
+ 256                      CreateTmpTableParser.SqlParserResult tmp = sqlTree.getTmpTableMap().get(tableName);
+ 257                      String realSql = DtStringUtil.replaceIgnoreQuota(result.getExecSql(), &quot;`&quot;, &quot;&quot;);
+ 258  
+ 259                      SqlNode sqlNode = flinkPlanner.getParser().parse(realSql);
+ 260                      String tmpSql = ((SqlInsert) sqlNode).getSource().toString();
+ 261                      tmp.setExecSql(tmpSql);
+<abbr title=" 262                      sideSqlExec.exec(tmp.getExecSql(), sideTableMap, tableEnv, registerTableCache, tmp, scope + &quot;&quot;);"> 262                      sideSqlExec.exec(tmp.getExecSql(), sideTableMap, tableEnv, registerTableCache, tmp, scope + &quot;&quot;🔵</abbr>
+ 263                  } else {
+ 264                      for (String sourceTable : result.getSourceTableList()) {
+ 265                          if (sideTableMap.containsKey(sourceTable)) {
+ 266                              isSide = true;
+ 267                              break;
+ 268                          }
+ 269                      }
+ 270                      if (isSide) {
+ 271                          //sql-dimensional table contains the dimension table of execution
+<abbr title=" 272                          sideSqlExec.exec(result.getExecSql(), sideTableMap, tableEnv, registerTableCache, null, String.valueOf(scope));"> 272                          sideSqlExec.exec(result.getExecSql(), sideTableMap, tableEnv, registerTableCache, null, St🔵</abbr>
+ 273                      } else {
+ 274                          LOG.info(&quot;----------exec sql without dimension join-----------&quot;);
+ 275                          LOG.info(&quot;----------real sql exec is--------------------------\n{}&quot;, result.getExecSql());
+ 276                          FlinkSQLExec.sqlUpdate(tableEnv, result.getExecSql());
+ 277                          if (LOG.isInfoEnabled()) {
+ 278                              LOG.info(&quot;exec sql: &quot; + result.getExecSql());
+ 279                          }
+ 280                      }
+ 281                  }
+ 282  
+ 283                  scope++;
+ 284              }
+ 285          }
+ 286      }
+ 287  
+<abbr title=" 288      public static void registerUserDefinedFunction(SqlTree sqlTree, List&lt;URL&gt; jarUrlList, TableEnvironment tableEnv, boolean getPlan)"> 288      public static void registerUserDefinedFunction(SqlTree sqlTree, List&lt;URL&gt; jarUrlList, TableEnvironment tableEn🔵</abbr>
+ 289              throws IllegalAccessException, InvocationTargetException {
+ 290          // udf和tableEnv须由同一个类加载器加载
+ 291          ClassLoader levelClassLoader = tableEnv.getClass().getClassLoader();
+ 292          ClassLoader currentClassLoader = Thread.currentThread().getContextClassLoader();
+ 293          URLClassLoader classLoader = null;
+ 294          List&lt;CreateFuncParser.SqlParserResult&gt; funcList = sqlTree.getFunctionList();
+ 295          for (CreateFuncParser.SqlParserResult funcInfo : funcList) {
+ 296              // 构建plan的情况下，udf和tableEnv不需要是同一个类加载器
+ 297              if (getPlan) {
+ 298                  classLoader = ClassLoaderManager.loadExtraJar(jarUrlList, (URLClassLoader) currentClassLoader);
+ 299              }
+ 300  
+ 301              //classloader
+ 302              if (classLoader == null) {
+ 303                  classLoader = ClassLoaderManager.loadExtraJar(jarUrlList, (URLClassLoader) levelClassLoader);
+ 304              }
+<abbr title=" 305              FunctionManager.registerUDF(funcInfo.getType(), funcInfo.getClassName(), funcInfo.getName(), tableEnv, classLoader);"> 305              FunctionManager.registerUDF(funcInfo.getType(), funcInfo.getClassName(), funcInfo.getName(), tableEnv,🔵</abbr>
+ 306          }
+ 307      }
+ 308  
+ 309      /**
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 310 -     *    向Flink注册源表和结果表，返回执行时插件包的全路径</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 311 +     * 向Flink注册源表和结果表，返回执行时插件包的全路径</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 312 +     *</span>
+ 313       * @param sqlTree
+ 314       * @param env
+ 315       * @param tableEnv
+ 316       * @param localSqlPluginPath
+ 317       * @param remoteSqlPluginPath
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 318 -     * @param pluginLoadMode   插件加载模式 classpath or shipfile</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 319 +     * @param pluginLoadMode      插件加载模式 classpath or shipfile</span>
+ 320       * @param sideTableMap
+ 321       * @param registerTableCache
+ 322       * @return
+ 323       * @throws Exception
+ 324       */
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 325 -    public static Set&lt;URL&gt; registerTable(SqlTree sqlTree,</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 326 -                                         StreamExecutionEnvironment env,</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 327 -                                         StreamTableEnvironment tableEnv,</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 328 -                                         String localSqlPluginPath,</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 329 -                                         String remoteSqlPluginPath,</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 330 -                                         String pluginLoadMode,</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 331 -                                         Map&lt;String, AbstractSideTableInfo&gt; sideTableMap,</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 332 -                                         Map&lt;String, Table&gt; registerTableCache) throws Exception {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 333 +    public static Set&lt;URL&gt; registerTable(</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 334 +            SqlTree sqlTree</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 335 +            , StreamExecutionEnvironment env</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 336 +            , StreamTableEnvironment tableEnv</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 337 +            , String localSqlPluginPath</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 338 +            , String remoteSqlPluginPath</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 339 +            , String pluginLoadMode</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 340 +            , Properties dirtyProperties</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 341 +            , Map&lt;String, AbstractSideTableInfo&gt; sideTableMap</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 342 +            , Map&lt;String, Table&gt; registerTableCache</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 343 +    ) throws Exception {</span>
+ 344          Set&lt;URL&gt; pluginClassPathSets = Sets.newHashSet();
+ 345          WaterMarkerAssigner waterMarkerAssigner = new WaterMarkerAssigner();
+ 346          for (AbstractTableInfo tableInfo : sqlTree.getTableInfoMap().values()) {
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 347 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 348 +            // 配置dirty manager</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 349 +            tableInfo.setDirtyProperties(dirtyProperties);</span>
+ 350  
+ 351              if (tableInfo instanceof AbstractSourceTableInfo) {
+ 352  
+ 353                  AbstractSourceTableInfo sourceTableInfo = (AbstractSourceTableInfo) tableInfo;
+<abbr title=" 354                  Table table = StreamSourceFactory.getStreamSource(sourceTableInfo, env, tableEnv, localSqlPluginPath, pluginLoadMode);"> 354                  Table table = StreamSourceFactory.getStreamSource(sourceTableInfo, env, tableEnv, localSqlPluginPa🔵</abbr>
+ 355                  tableEnv.registerTable(sourceTableInfo.getAdaptName(), table);
+<abbr title=" 356                  //Note --- parameter conversion function can not be used inside a function of the type of polymerization"> 356                  //Note --- parameter conversion function can not be used inside a function of the type of polymeri🔵</abbr>
+ 357                  //Create table in which the function is arranged only need adaptation sql
+ 358                  String adaptSql = sourceTableInfo.getAdaptSelectSql();
+ 359                  Table adaptTable = adaptSql == null ? table : tableEnv.sqlQuery(adaptSql);
+ 360  
+<abbr title=" 361                  RowTypeInfo typeInfo = new RowTypeInfo(fromDataTypeToLegacyInfo(adaptTable.getSchema().getFieldDataTypes()), adaptTable.getSchema().getFieldNames());"> 361                  RowTypeInfo typeInfo = new RowTypeInfo(fromDataTypeToLegacyInfo(adaptTable.getSchema().getFieldDat🔵</abbr>
+ 362                  DataStream adaptStream = tableEnv.toAppendStream(adaptTable, typeInfo);
+ 363  
+ 364                  String fields = String.join(&quot;,&quot;, typeInfo.getFieldNames());
+ 365  
+ 366                  if (waterMarkerAssigner.checkNeedAssignWaterMarker(sourceTableInfo)) {
+ 367                      adaptStream = waterMarkerAssigner.assignWaterMarker(adaptStream, typeInfo, sourceTableInfo);
+ 368                      fields += &quot;,ROWTIME.ROWTIME&quot;;
+ 369                  } else {
+ 370                      fields += &quot;,PROCTIME.PROCTIME&quot;;
+ 371                  }
+ 372  
+ 373                  Table regTable = tableEnv.fromDataStream(adaptStream, fields);
+ 374                  tableEnv.createTemporaryView(tableInfo.getName(), regTable);
+ 375                  if (LOG.isInfoEnabled()) {
+ 376                      LOG.info(&quot;registe table {} success.&quot;, tableInfo.getName());
+ 377                  }
+ 378                  registerTableCache.put(tableInfo.getName(), regTable);
+ 379  
+<abbr title=" 380                  URL sourceTablePathUrl = PluginUtil.buildSourceAndSinkPathByLoadMode(tableInfo.getType(), AbstractSourceTableInfo.SOURCE_SUFFIX, localSqlPluginPath, remoteSqlPluginPath, pluginLoadMode);"> 380                  URL sourceTablePathUrl = PluginUtil.buildSourceAndSinkPathByLoadMode(tableInfo.getType(), Abstract🔵</abbr>
+ 381                  pluginClassPathSets.add(sourceTablePathUrl);
+ 382              } else if (tableInfo instanceof AbstractTargetTableInfo) {
+<abbr title=" 383                  TableSink tableSink = StreamSinkFactory.getTableSink((AbstractTargetTableInfo) tableInfo, localSqlPluginPath, pluginLoadMode);"> 383                  TableSink tableSink = StreamSinkFactory.getTableSink((AbstractTargetTableInfo) tableInfo, localSql🔵</abbr>
+ 384                  // TODO Kafka Sink直接注册，其他的Sink要修复才可以。
+ 385                  if (tableInfo.getType().startsWith(&quot;kafka&quot;)) {
+ 386                      tableEnv.registerTableSink(tableInfo.getName(), tableSink);
+ 387                  } else {
+ 388                      TypeInformation[] flinkTypes = FunctionManager.transformTypes(tableInfo.getFieldClasses());
+ 389                      tableEnv.registerTableSink(tableInfo.getName(), tableInfo.getFields(), flinkTypes, tableSink);
+ 390                  }
+ 391  
+<abbr title=" 392                  URL sinkTablePathUrl = PluginUtil.buildSourceAndSinkPathByLoadMode(tableInfo.getType(), AbstractTargetTableInfo.TARGET_SUFFIX, localSqlPluginPath, remoteSqlPluginPath, pluginLoadMode);"> 392                  URL sinkTablePathUrl = PluginUtil.buildSourceAndSinkPathByLoadMode(tableInfo.getType(), AbstractTa🔵</abbr>
+ 393                  pluginClassPathSets.add(sinkTablePathUrl);
+ 394              } else if (tableInfo instanceof AbstractSideTableInfo) {
+<abbr title=" 395                  String sideOperator = ECacheType.ALL.name().equalsIgnoreCase(((AbstractSideTableInfo) tableInfo).getCacheType()) ? &quot;all&quot; : &quot;async&quot;;"> 395                  String sideOperator = ECacheType.ALL.name().equalsIgnoreCase(((AbstractSideTableInfo) tableInfo).g🔵</abbr>
+ 396                  sideTableMap.put(tableInfo.getName(), (AbstractSideTableInfo) tableInfo);
+ 397  
+<abbr title=" 398                  URL sideTablePathUrl = PluginUtil.buildSidePathByLoadMode(tableInfo.getType(), sideOperator, AbstractSideTableInfo.TARGET_SUFFIX, localSqlPluginPath, remoteSqlPluginPath, pluginLoadMode);"> 398                  URL sideTablePathUrl = PluginUtil.buildSidePathByLoadMode(tableInfo.getType(), sideOperator, Abstr🔵</abbr>
+ 399                  pluginClassPathSets.add(sideTablePathUrl);
+ 400              } else {
+ 401                  throw new RuntimeException(&quot;not support table type:&quot; + tableInfo.getType());
+ 402              }
+ 403          }
+ 404          if (localSqlPluginPath == null || localSqlPluginPath.isEmpty()) {
+ 405              return Sets.newHashSet();
+ 406          }
+ 407          return pluginClassPathSets;
+ 408      }
+ 409  
+ 410      /**
+ 411       *   perjob模式将job依赖的插件包路径存储到cacheFile，在外围将插件包路径传递给jobgraph
+ 412       * @param env
+ 413       * @param classPathSet
+ 414       */
+ 415      public static void registerPluginUrlToCachedFile(StreamExecutionEnvironment env, Set&lt;URL&gt; classPathSet) {
+ 416          int i = 0;
+ 417          for (URL url : classPathSet) {
+ 418              String classFileName = String.format(CLASS_FILE_NAME_FMT, i);
+ 419              env.registerCachedFile(url.getPath(), classFileName, true);
+ 420              i++;
+ 421          }
+ 422      }
+ 423  
+<abbr title=" 424      public static StreamExecutionEnvironment getStreamExeEnv(Properties confProperties, String deployMode) throws Exception {"> 424      public static StreamExecutionEnvironment getStreamExeEnv(Properties confProperties, String deployMode) throws 🔵</abbr>
+ 425          StreamExecutionEnvironment env = !ClusterMode.local.name().equals(deployMode) ?
+ 426                  StreamExecutionEnvironment.getExecutionEnvironment() :
+ 427                  new MyLocalStreamEnvironment();
+ 428  
+ 429          StreamEnvConfigManager.streamExecutionEnvironmentConfig(env, confProperties);
+ 430          return env;
+ 431      }
+ 432  
+ 433  
+<abbr title=" 434      public static StreamTableEnvironment getStreamTableEnv(StreamExecutionEnvironment env, Properties confProperties) {"> 434      public static StreamTableEnvironment getStreamTableEnv(StreamExecutionEnvironment env, Properties confProperti🔵</abbr>
+ 435          // use blink and streammode
+ 436          EnvironmentSettings settings = EnvironmentSettings.newInstance()
+ 437                  .useBlinkPlanner()
+ 438                  .inStreamingMode()
+ 439                  .build();
+ 440  
+ 441          TableConfig tableConfig = new TableConfig();
+ 442  
+ 443          timeZoneCheck(confProperties.getProperty(TIME_ZONE, TimeZone.getDefault().getID()));
+ 444  
+<abbr title=" 445          tableConfig.setLocalTimeZone(ZoneId.of(confProperties.getProperty(TIME_ZONE, TimeZone.getDefault().getID())));"> 445          tableConfig.setLocalTimeZone(ZoneId.of(confProperties.getProperty(TIME_ZONE, TimeZone.getDefault().getID()🔵</abbr>
+ 446  
+ 447          StreamTableEnvironment tableEnv = StreamTableEnvironmentImpl.create(env, settings, tableConfig);
+ 448          StreamEnvConfigManager.streamTableEnvironmentStateTTLConfig(tableEnv, confProperties);
+ 449          StreamEnvConfigManager.streamTableEnvironmentEarlyTriggerConfig(tableEnv, confProperties);
+ 450          return tableEnv;
+ 451      }
+ 452  
+ 453      private static void timeZoneCheck(String timeZone) {
+ 454          ArrayList&lt;String&gt; zones = Lists.newArrayList(TimeZone.getAvailableIDs());
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 455 -        if (!zones.contains(timeZone)){</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 456 +        if (!zones.contains(timeZone)) {</span>
+ 457              throw new IllegalArgumentException(String.format(&quot; timezone of %s is Incorrect!&quot;, timeZone));
+ 458          }
+ 459      }
+ 460  
+ 461      private static TypeInformation&lt;?&gt;[] fromDataTypeToLegacyInfo(DataType[] dataType) {
+ 462          return Stream.of(dataType)
+ 463                  .map(TypeInfoDataTypeConverter::toLegacyTypeInfo)
+ 464                  .toArray(TypeInformation[]::new);
+ 465      }
+ 466  }</pre></td>
+                        </tr>
+                    </table>
+                </div>
+              </body>
+            </html>
+            

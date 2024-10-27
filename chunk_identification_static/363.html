@@ -1,0 +1,1368 @@
+<!DOCTYPE html>
+    <html lang="en">
+              <head>
+                <meta charset="utf-8">
+                <title>363</title>
+                    <style>
+                        #top {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        #bottom {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        abbr {
+                          /* Here is the delay */
+                          transition-delay:0s;
+                        }
+                    </style>
+              </head>
+              <body>
+                <span style="height: 4vh">
+                    363
+                    <a href="362.html">prev</a>
+                    <a href="364.html">next</a>
+                    <a href="363_chunks.html">chunks</a>
+                    <a href="index.html">index</a>
+                    DTStack/flinkStreamSQL_9484dcc3afc98fc80f154c1e92bdda2b92d39e52_core/src/main/java/com/dtstack/flink/sql/format/dtnest/DtNestRowDeserializationSchema.java
+                    <textarea rows=1 onclick='navigator.clipboard.writeText(this.value)'>cd C:\studies\se\mega\git-analyzer-plus\notebooks\debug
+del /Q *
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;9484dcc3afc98fc80f154c1e92bdda2b92d39e52:core/src/main/java/com/dtstack/flink/sql/format/dtnest/DtNestRowDeserializationSchema.java&quot; &gt; committed.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;9484dcc3afc98fc80f154c1e92bdda2b92d39e52^1:core/src/main/java/com/dtstack/flink/sql/format/dtnest/DtNestRowDeserializationSchema.java&quot; &gt; ours.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;9484dcc3afc98fc80f154c1e92bdda2b92d39e52^2:core/src/main/java/com/dtstack/flink/sql/format/dtnest/DtNestRowDeserializationSchema.java&quot; &gt; theirs.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;e0a10435dcb243a911c0405daebc6aa667d5119d:core/src/main/java/com/dtstack/flink/sql/format/dtnest/DtNestRowDeserializationSchema.java&quot; &gt; base.java
+copy ours.java 1ours.java
+copy ours.java 2ours.java
+copy theirs.java 1theirs.java
+copy theirs.java 2theirs.java
+copy base.java 1base.java
+copy base.java 2base.java
+&quot;C:\Program Files\Java\jdk1.8.0_241\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\jFSTMerge\build\libs\jFSTMerge-all.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\jfstmerge.java --show-base
+&quot;C:\Program Files\Eclipse Adoptium\jdk-17.0.11.9-hotspot\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\spork\target\spork-0.5.0-SNAPSHOT.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\spork.java
+del /Q 1*.java
+del /Q 2*.java
+del /Q jfstmerge.java.merge
+</textarea>
+                    {strict: [[b], [bs]], subset: [[b], [bs]]}
+                </span>
+                <div id="top">
+
+                    <table>
+                        <tr>
+                            <th>line based (standard git)</th>
+                            <th>jfstmerge</th>
+                            <th>spork</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1 /*
+   2  * Licensed to the Apache Software Foundation (ASF) under one
+   3  * or more contributor license agreements.  See the NOTICE file
+   4  * distributed with this work for additional information
+   5  * regarding copyright ownership.  The ASF licenses this file
+   6  * to you under the Apache License, Version 2.0 (the
+   7  * &quot;License&quot;); you may not use this file except in compliance
+   8  * with the License.  You may obtain a copy of the License at
+   9  *
+  10  *     http://www.apache.org/licenses/LICENSE-2.0
+  11  *
+  12  * Unless required by applicable law or agreed to in writing, software
+  13  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15  * See the License for the specific language governing permissions and
+  16  * limitations under the License.
+  17  */
+  18 
+  19 package com.dtstack.flink.sql.format.dtnest;
+  20 
+  21 import com.dtstack.flink.sql.table.AbstractTableInfo;
+  22 import com.google.common.base.Strings;
+  23 import com.google.common.collect.Maps;
+  24 import org.apache.flink.api.common.serialization.AbstractDeserializationSchema;
+  25 import org.apache.flink.api.common.typeinfo.TypeInformation;
+  26 import org.apache.flink.api.common.typeinfo.Types;
+  27 import org.apache.flink.api.java.typeutils.ObjectArrayTypeInfo;
+  28 import org.apache.flink.api.java.typeutils.RowTypeInfo;
+  29 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.core.JsonProcessingException;
+  30 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.JsonNode;
+  31 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.ObjectMapper;
+  32 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.node.ArrayNode;
+  33 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.node.NullNode;
+  34 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.node.ObjectNode;
+  35 import org.apache.flink.types.Row;
+  36 
+  37 import java.io.IOException;
+  38 &lt;&lt;&lt;&lt;&lt;&lt;&lt; GitAnalyzerPlus_ours
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  39 import java.lang.reflect.Array;</span>
+  40 ||||||| GitAnalyzerPlus_base
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  41 import java.sql.Date;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  42 import java.sql.Time;</span>
+  43 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  44 import java.nio.charset.StandardCharsets;</span>
+  45 &gt;&gt;&gt;&gt;&gt;&gt;&gt; GitAnalyzerPlus_theirs
+  46 import java.sql.Date;
+  47 import java.sql.Time;
+  48 import java.sql.Timestamp;
+  49 import java.util.Iterator;
+  50 import java.util.List;
+  51 import java.util.Map;
+  52 
+  53 /**
+  54  * source data parse to json format
+  55  * &lt;p&gt;
+  56  * Date: 2019/12/12
+  57  * Company: www.dtstack.com
+  58  *
+  59  * @author maqi
+  60  */
+  61 public class DtNestRowDeserializationSchema extends AbstractDeserializationSchema&lt;Row&gt; {
+  62 
+  63     private final ObjectMapper objectMapper = new ObjectMapper();
+  64 
+  65     private final Map&lt;String, String&gt; rowAndFieldMapping;
+  66     private final Map&lt;String, JsonNode&gt; nodeAndJsonNodeMapping = Maps.newHashMap();
+  67 
+  68     private final String[] fieldNames;
+  69     private final TypeInformation&lt;?&gt;[] fieldTypes;
+  70     private final List&lt;AbstractTableInfo.FieldExtraInfo&gt; fieldExtraInfos;
+  71     private final String charsetName;
+  72 
+<abbr title="  73     public DtNestRowDeserializationSchema(TypeInformation&lt;Row&gt; typeInfo, Map&lt;String, String&gt; rowAndFieldMapping,">  73     public DtNestRowDeserializationSchema(TypeInformation&lt;Row&gt; typeInfo, Map&lt;String, String&gt; rowAndFieldM🔵</abbr>
+  74                                           List&lt;AbstractTableInfo.FieldExtraInfo&gt; fieldExtraInfos,
+  75                                           String charsetName) {
+  76         this.fieldNames = ((RowTypeInfo) typeInfo).getFieldNames();
+  77         this.fieldTypes = ((RowTypeInfo) typeInfo).getFieldTypes();
+  78         this.rowAndFieldMapping = rowAndFieldMapping;
+  79         this.fieldExtraInfos = fieldExtraInfos;
+  80         this.charsetName = charsetName;
+  81     }
+  82 
+  83     @Override
+  84     public Row deserialize(byte[] message) throws IOException {
+  85         String decoderStr = new String(message, charsetName);
+  86         JsonNode root = objectMapper.readTree(decoderStr);
+  87         this.parseTree(root, null);
+  88         return convertTopRow();
+  89     }
+  90 
+  91     private void parseTree(JsonNode jsonNode, String prefix) {
+  92         if (jsonNode.isArray()) {
+  93             ArrayNode array = (ArrayNode) jsonNode;
+  94             for (int i = 0; i &lt; array.size(); i++) {
+  95                 JsonNode child = array.get(i);
+  96                 String nodeKey = getNodeKey(prefix, i);
+  97 
+  98                 if (child.isValueNode()) {
+  99                     nodeAndJsonNodeMapping.put(nodeKey, child);
+ 100                 } else {
+ 101                     if (rowAndFieldMapping.containsValue(nodeKey)) {
+ 102                         nodeAndJsonNodeMapping.put(nodeKey, child);
+ 103                     }
+ 104                     parseTree(child, nodeKey);
+ 105                 }
+ 106             }
+ 107             return;
+ 108         }
+ 109         Iterator&lt;String&gt; iterator = jsonNode.fieldNames();
+ 110         while (iterator.hasNext()) {
+ 111             String next = iterator.next();
+ 112             JsonNode child = jsonNode.get(next);
+ 113             String nodeKey = getNodeKey(prefix, next);
+ 114 
+ 115             nodeAndJsonNodeMapping.put(nodeKey, child);
+ 116             if (child.isArray()) {
+ 117                 parseTree(child, nodeKey);
+ 118             } else {
+ 119                 parseTree(child, nodeKey);
+ 120             }
+ 121         }
+ 122     }
+ 123 
+ 124     private JsonNode getIgnoreCase(String key) {
+ 125         String nodeMappingKey = rowAndFieldMapping.getOrDefault(key, key);
+ 126         return nodeAndJsonNodeMapping.get(nodeMappingKey);
+ 127     }
+ 128 
+ 129     private String getNodeKey(String prefix, String nodeName) {
+ 130         if (Strings.isNullOrEmpty(prefix)) {
+ 131             return nodeName;
+ 132         }
+ 133         return prefix + &quot;.&quot; + nodeName;
+ 134     }
+ 135 
+ 136     private String getNodeKey(String prefix, int i) {
+ 137         if (Strings.isNullOrEmpty(prefix)) {
+ 138             return &quot;[&quot; + i + &quot;]&quot;;
+ 139         }
+ 140         return prefix + &quot;[&quot; + i + &quot;]&quot;;
+ 141     }
+ 142 
+ 143     private Object convert(JsonNode node, TypeInformation&lt;?&gt; info) {
+ 144         if (info.getTypeClass().equals(Types.BOOLEAN.getTypeClass())) {
+ 145             return node.asBoolean();
+ 146         } else if (info.getTypeClass().equals(Types.STRING.getTypeClass())) {
+ 147             if (node instanceof ObjectNode) {
+ 148                 return node.toString();
+ 149             } else if (node instanceof NullNode) {
+ 150                 return null;
+ 151             } else {
+ 152                 return node.asText();
+ 153             }
+ 154         } else if (info.getTypeClass().equals(Types.SQL_DATE.getTypeClass())) {
+ 155             return Date.valueOf(node.asText());
+ 156         } else if (info.getTypeClass().equals(Types.SQL_TIME.getTypeClass())) {
+ 157             // local zone
+ 158             return Time.valueOf(node.asText());
+ 159         } else if (info.getTypeClass().equals(Types.SQL_TIMESTAMP.getTypeClass())) {
+ 160             // local zone
+ 161             return Timestamp.valueOf(node.asText());
+ 162 &lt;&lt;&lt;&lt;&lt;&lt;&lt; GitAnalyzerPlus_ours
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 163         }  else if (info instanceof RowTypeInfo) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 164             return convertRow(node, (RowTypeInfo) info);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 165         } else if (info instanceof ObjectArrayTypeInfo) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 166             return convertObjectArray(node, ((ObjectArrayTypeInfo) info).getComponentInfo());</span>
+ 167 ||||||| GitAnalyzerPlus_base
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 168     }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 169 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 170     private Object convert(JsonNode node, TypeInformation&lt;?&gt; info) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 171         if (info.getTypeClass().equals(Types.BOOLEAN.getTypeClass())) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 172             return node.asBoolean();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 173         } else if (info.getTypeClass().equals(Types.STRING.getTypeClass())) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 174             if (node instanceof ObjectNode) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 175                 return node.toString();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 176             } else if (node instanceof NullNode) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 177                 return null;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 178             } else {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 179                 return node.asText();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 180             }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 181         }  else if (info.getTypeClass().equals(Types.SQL_DATE.getTypeClass())) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 182             return Date.valueOf(node.asText());</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 183         } else if (info.getTypeClass().equals(Types.SQL_TIME.getTypeClass())) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 184             // local zone</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 185             return Time.valueOf(node.asText());</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 186         } else if (info.getTypeClass().equals(Types.SQL_TIMESTAMP.getTypeClass())) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 187             // local zone</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 188             return Timestamp.valueOf(node.asText());</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 189         }  else {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 190             // for types that were specified without JSON schema</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 191             // e.g. POJOs</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 192             try {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 193                 return objectMapper.treeToValue(node, info.getTypeClass());</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 194             } catch (JsonProcessingException e) {</span>
+ 195 =======
+ 196 &gt;&gt;&gt;&gt;&gt;&gt;&gt; GitAnalyzerPlus_theirs
+ 197         } else {
+ 198             // for types that were specified without JSON schema
+ 199             // e.g. POJOs
+ 200             try {
+ 201                 return objectMapper.treeToValue(node, info.getTypeClass());
+ 202             } catch (JsonProcessingException e) {
+<abbr title=" 203                 throw new IllegalStateException(&quot;Unsupported type information &#x27;&quot; + info + &quot;&#x27; for node: &quot; + node);"> 203                 throw new IllegalStateException(&quot;Unsupported type information &#x27;&quot; + info + &quot;&#x27; for node: &quot; 🔵</abbr>
+ 204             }
+ 205         }
+ 206     }
+ 207 
+ 208     private Row convertTopRow() {
+ 209         Row row = new Row(fieldNames.length);
+ 210         try {
+ 211             for (int i = 0; i &lt; fieldNames.length; i++) {
+ 212                 JsonNode node = getIgnoreCase(fieldNames[i]);
+ 213                 AbstractTableInfo.FieldExtraInfo fieldExtraInfo = fieldExtraInfos.get(i);
+ 214 
+ 215                 if (node == null) {
+ 216                     if (fieldExtraInfo != null &amp;&amp; fieldExtraInfo.getNotNull()) {
+ 217                         throw new IllegalStateException(&quot;Failed to find field with name &#x27;&quot;
+ 218                             + fieldNames[i] + &quot;&#x27;.&quot;);
+ 219                     } else {
+ 220                         row.setField(i, null);
+ 221                     }
+ 222                 } else {
+ 223                     // Read the value as specified type
+ 224                     Object value = convert(node, fieldTypes[i]);
+ 225                     row.setField(i, value);
+ 226                 }
+ 227             }
+ 228             return row;
+ 229         } finally {
+ 230             nodeAndJsonNodeMapping.clear();
+ 231         }
+ 232     }
+ 233 
+ 234     private Row convertRow(JsonNode node, RowTypeInfo info) {
+ 235         final String[] names = info.getFieldNames();
+ 236         final TypeInformation&lt;?&gt;[] types = info.getFieldTypes();
+ 237 
+ 238         final Row row = new Row(names.length);
+ 239         for (int i = 0; i &lt; names.length; i++) {
+ 240             final String name = names[i];
+ 241             final JsonNode subNode = node.get(name);
+ 242             if (subNode == null) {
+ 243                 row.setField(i, null);
+ 244             } else {
+ 245                 row.setField(i, convert(subNode, types[i]));
+ 246             }
+ 247         }
+ 248 
+ 249         return row;
+ 250     }
+ 251 
+ 252     private Object convertObjectArray(JsonNode node, TypeInformation&lt;?&gt; elementType) {
+ 253         final Object[] array = (Object[]) Array.newInstance(elementType.getTypeClass(), node.size());
+ 254         for (int i = 0; i &lt; node.size(); i++) {
+ 255             array[i] = convert(node.get(i), elementType);
+ 256         }
+ 257         return array;
+ 258     }
+ 259 }</pre></td>
+                            <td><pre>   1 /*
+   2  * Licensed to the Apache Software Foundation (ASF) under one
+   3  * or more contributor license agreements.  See the NOTICE file
+   4  * distributed with this work for additional information
+   5  * regarding copyright ownership.  The ASF licenses this file
+   6  * to you under the Apache License, Version 2.0 (the
+   7  * &quot;License&quot;); you may not use this file except in compliance
+   8  * with the License.  You may obtain a copy of the License at
+   9  *
+  10  *     http://www.apache.org/licenses/LICENSE-2.0
+  11  *
+  12  * Unless required by applicable law or agreed to in writing, software
+  13  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15  * See the License for the specific language governing permissions and
+  16  * limitations under the License.
+  17  */
+  18 
+  19 package com.dtstack.flink.sql.format.dtnest;
+  20 
+  21 import com.dtstack.flink.sql.table.AbstractTableInfo;
+  22 import com.google.common.base.Strings;
+  23 import com.google.common.collect.Maps;
+  24 import org.apache.flink.api.common.serialization.AbstractDeserializationSchema;
+  25 import org.apache.flink.api.common.typeinfo.TypeInformation;
+  26 import org.apache.flink.api.common.typeinfo.Types;
+  27 import org.apache.flink.api.java.typeutils.ObjectArrayTypeInfo;
+  28 import org.apache.flink.api.java.typeutils.RowTypeInfo;
+  29 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.core.JsonProcessingException;
+  30 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.JsonNode;
+  31 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.ObjectMapper;
+  32 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.node.ArrayNode;
+  33 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.node.NullNode;
+  34 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.node.ObjectNode;
+  35 import org.apache.flink.types.Row;
+  36 
+  37 import java.io.IOException;
+  38 import java.lang.reflect.Array;
+  39 import java.nio.charset.StandardCharsets;
+  40 import java.sql.Date;
+  41 import java.sql.Time;
+  42 import java.sql.Timestamp;
+  43 import java.util.Iterator;
+  44 import java.util.List;
+  45 import java.util.Map;
+  46 
+  47 /**
+  48  * source data parse to json format
+  49  * &lt;p&gt;
+  50  * Date: 2019/12/12
+  51  * Company: www.dtstack.com
+  52  *
+  53  * @author maqi
+  54  */
+  55 public class DtNestRowDeserializationSchema extends AbstractDeserializationSchema&lt;Row&gt; {
+  56 
+  57     private final ObjectMapper objectMapper = new ObjectMapper();
+  58 
+  59     private final Map&lt;String, String&gt; rowAndFieldMapping;
+  60     private final Map&lt;String, JsonNode&gt; nodeAndJsonNodeMapping = Maps.newHashMap();
+  61 
+  62     private final String[] fieldNames;
+  63     private final TypeInformation&lt;?&gt;[] fieldTypes;
+  64     private final List&lt;AbstractTableInfo.FieldExtraInfo&gt; fieldExtraInfos;
+  65 
+<abbr title="  66     public DtNestRowDeserializationSchema(TypeInformation&lt;Row&gt; typeInfo, Map&lt;String, String&gt; rowAndFieldMapping,">  66     public DtNestRowDeserializationSchema(TypeInformation&lt;Row&gt; typeInfo, Map&lt;String, String&gt; rowAndFieldM🔵</abbr>
+  67                                           List&lt;AbstractTableInfo.FieldExtraInfo&gt; fieldExtraInfos,
+  68                                           String charsetName) {
+  69         this.fieldNames = ((RowTypeInfo) typeInfo).getFieldNames();
+  70         this.fieldTypes = ((RowTypeInfo) typeInfo).getFieldTypes();
+  71         this.rowAndFieldMapping = rowAndFieldMapping;
+  72         this.fieldExtraInfos = fieldExtraInfos;
+  73         this.charsetName = charsetName;
+  74     }
+  75     private final String charsetName;
+  76 
+  77     @Override
+  78     public Row deserialize(byte[] message) throws IOException {
+  79         String decoderStr = new String(message, charsetName);
+  80         JsonNode root = objectMapper.readTree(decoderStr);
+  81         this.parseTree(root, null);
+  82         return convertTopRow();
+  83     }
+  84 
+  85     private void parseTree(JsonNode jsonNode, String prefix){
+  86         if (jsonNode.isArray()) {
+  87             ArrayNode array = (ArrayNode) jsonNode;
+  88             for (int i = 0; i &lt; array.size(); i++) {
+  89                 JsonNode child = array.get(i);
+  90                 String nodeKey = getNodeKey(prefix, i);
+  91 
+  92                 if (child.isValueNode()) {
+  93                     nodeAndJsonNodeMapping.put(nodeKey, child);
+  94                 } else {
+  95                     if (rowAndFieldMapping.containsValue(nodeKey)) {
+  96                         nodeAndJsonNodeMapping.put(nodeKey, child);
+  97                     }
+  98                     parseTree(child, nodeKey);
+  99                 }
+ 100             }
+ 101             return;
+ 102         }
+ 103         Iterator&lt;String&gt; iterator = jsonNode.fieldNames();
+ 104         while (iterator.hasNext()){
+ 105             String next = iterator.next();
+ 106             JsonNode child = jsonNode.get(next);
+ 107             String nodeKey = getNodeKey(prefix, next);
+ 108 
+ 109             nodeAndJsonNodeMapping.put(nodeKey, child);
+ 110             if(child.isArray()){
+ 111                 parseTree(child, nodeKey);
+ 112             }else {
+ 113                 parseTree(child, nodeKey);
+ 114             }
+ 115         }
+ 116     }
+ 117 
+ 118     private JsonNode getIgnoreCase(String key) {
+ 119         String nodeMappingKey = rowAndFieldMapping.getOrDefault(key, key);
+ 120         return nodeAndJsonNodeMapping.get(nodeMappingKey);
+ 121     }
+ 122 
+ 123     private String getNodeKey(String prefix, String nodeName){
+ 124         if(Strings.isNullOrEmpty(prefix)){
+ 125             return nodeName;
+ 126         }
+ 127         return prefix + &quot;.&quot; + nodeName;
+ 128     }
+ 129 
+ 130     private String getNodeKey(String prefix, int i) {
+ 131         if (Strings.isNullOrEmpty(prefix)) {
+ 132             return &quot;[&quot; + i + &quot;]&quot;;
+ 133         }
+ 134         return prefix + &quot;[&quot; + i + &quot;]&quot;;
+ 135     }
+ 136 
+ 137     private Object convert(JsonNode node, TypeInformation&lt;?&gt; info) {
+ 138         if (info.getTypeClass().equals(Types.BOOLEAN.getTypeClass())) {
+ 139             return node.asBoolean();
+ 140         } else if (info.getTypeClass().equals(Types.STRING.getTypeClass())) {
+ 141             if (node instanceof ObjectNode) {
+ 142                 return node.toString();
+ 143             } else if (node instanceof NullNode) {
+ 144                 return null;
+ 145             } else {
+ 146                 return node.asText();
+ 147             }
+ 148         }  else if (info.getTypeClass().equals(Types.SQL_DATE.getTypeClass())) {
+ 149             return Date.valueOf(node.asText());
+ 150         } else if (info.getTypeClass().equals(Types.SQL_TIME.getTypeClass())) {
+ 151             // local zone
+ 152             return Time.valueOf(node.asText());
+ 153         } else if (info.getTypeClass().equals(Types.SQL_TIMESTAMP.getTypeClass())) {
+ 154             // local zone
+ 155             return Timestamp.valueOf(node.asText());
+ 156         }  else if (info instanceof RowTypeInfo) {
+ 157             return convertRow(node, (RowTypeInfo) info);
+ 158         } else if (info instanceof ObjectArrayTypeInfo) {
+ 159             return convertObjectArray(node, ((ObjectArrayTypeInfo) info).getComponentInfo());
+ 160         }  else {
+ 161             // for types that were specified without JSON schema
+ 162             // e.g. POJOs
+ 163             try {
+ 164                 return objectMapper.treeToValue(node, info.getTypeClass());
+ 165             } catch (JsonProcessingException e) {
+<abbr title=" 166                 throw new IllegalStateException(&quot;Unsupported type information &#x27;&quot; + info + &quot;&#x27; for node: &quot; + node);"> 166                 throw new IllegalStateException(&quot;Unsupported type information &#x27;&quot; + info + &quot;&#x27; for node: &quot; 🔵</abbr>
+ 167             }
+ 168         }
+ 169     }
+ 170 
+ 171     private Row convertTopRow() {
+ 172         Row row = new Row(fieldNames.length);
+ 173         try {
+ 174             for (int i = 0; i &lt; fieldNames.length; i++) {
+ 175                 JsonNode node = getIgnoreCase(fieldNames[i]);
+ 176                 AbstractTableInfo.FieldExtraInfo fieldExtraInfo = fieldExtraInfos.get(i);
+ 177 
+ 178                 if (node == null) {
+ 179                     if (fieldExtraInfo != null &amp;&amp; fieldExtraInfo.getNotNull()) {
+ 180                         throw new IllegalStateException(&quot;Failed to find field with name &#x27;&quot;
+ 181                             + fieldNames[i] + &quot;&#x27;.&quot;);
+ 182                     } else {
+ 183                         row.setField(i, null);
+ 184                     }
+ 185                 } else {
+ 186                     // Read the value as specified type
+ 187                     Object value = convert(node, fieldTypes[i]);
+ 188                     row.setField(i, value);
+ 189                 }
+ 190             }
+ 191             return row;
+ 192         } finally {
+ 193             nodeAndJsonNodeMapping.clear();
+ 194         }
+ 195     }
+ 196 
+ 197     private Row convertRow(JsonNode node, RowTypeInfo info) {
+ 198         final String[] names = info.getFieldNames();
+ 199         final TypeInformation&lt;?&gt;[] types = info.getFieldTypes();
+ 200 
+ 201         final Row row = new Row(names.length);
+ 202         for (int i = 0; i &lt; names.length; i++) {
+ 203             final String name = names[i];
+ 204             final JsonNode subNode = node.get(name);
+ 205             if (subNode == null) {
+ 206                 row.setField(i, null);
+ 207             } else {
+ 208                 row.setField(i, convert(subNode, types[i]));
+ 209             }
+ 210         }
+ 211 
+ 212         return row;
+ 213     }
+ 214 
+ 215     private Object convertObjectArray(JsonNode node, TypeInformation&lt;?&gt; elementType) {
+ 216         final Object[] array = (Object[]) Array.newInstance(elementType.getTypeClass(), node.size());
+ 217         for (int i = 0; i &lt; node.size(); i++) {
+ 218             array[i] = convert(node.get(i), elementType);
+ 219         }
+ 220         return array;
+ 221     }
+ 222 }
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ </pre></td>
+                            <td><pre>   1 /*
+   2  * Licensed to the Apache Software Foundation (ASF) under one
+   3  * or more contributor license agreements.  See the NOTICE file
+   4  * distributed with this work for additional information
+   5  * regarding copyright ownership.  The ASF licenses this file
+   6  * to you under the Apache License, Version 2.0 (the
+   7  * &quot;License&quot;); you may not use this file except in compliance
+   8  * with the License.  You may obtain a copy of the License at
+   9  *
+  10  *     http://www.apache.org/licenses/LICENSE-2.0
+  11  *
+  12  * Unless required by applicable law or agreed to in writing, software
+  13  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15  * See the License for the specific language governing permissions and
+  16  * limitations under the License.
+  17  */
+  18 package com.dtstack.flink.sql.format.dtnest;
+  19 
+  20 import com.dtstack.flink.sql.table.AbstractTableInfo;
+  21 import com.google.common.base.Strings;
+  22 import com.google.common.collect.Maps;
+  23 import java.io.IOException;
+  24 import java.lang.reflect.Array;
+  25 import java.nio.charset.StandardCharsets;
+  26 import java.sql.Date;
+  27 import java.sql.Time;
+  28 import java.sql.Timestamp;
+  29 import java.util.Iterator;
+  30 import java.util.List;
+  31 import java.util.Map;
+  32 import org.apache.flink.api.common.serialization.AbstractDeserializationSchema;
+  33 import org.apache.flink.api.common.typeinfo.TypeInformation;
+  34 import org.apache.flink.api.common.typeinfo.Types;
+  35 import org.apache.flink.api.java.typeutils.ObjectArrayTypeInfo;
+  36 import org.apache.flink.api.java.typeutils.RowTypeInfo;
+  37 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.core.JsonProcessingException;
+  38 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.JsonNode;
+  39 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.ObjectMapper;
+  40 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.node.ArrayNode;
+  41 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.node.NullNode;
+  42 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.node.ObjectNode;
+  43 import org.apache.flink.types.Row;
+  44 
+  45 
+  46 /**
+  47  * source data parse to json format
+  48  * &lt;p&gt;
+  49  * Date: 2019/12/12
+  50  * Company: www.dtstack.com
+  51  *
+  52  * @author maqi
+  53  */
+  54 public class DtNestRowDeserializationSchema extends AbstractDeserializationSchema&lt;Row&gt; {
+  55 
+  56     private final ObjectMapper objectMapper = new ObjectMapper();
+  57 
+  58     private final Map&lt;String, String&gt; rowAndFieldMapping;
+  59     private final Map&lt;String, JsonNode&gt; nodeAndJsonNodeMapping = Maps.newHashMap();
+  60 
+  61     private final String[] fieldNames;
+  62     private final TypeInformation&lt;?&gt;[] fieldTypes;
+  63     private final List&lt;AbstractTableInfo.FieldExtraInfo&gt; fieldExtraInfos;
+  64     private final String charsetName;
+  65 
+<abbr title="  66     public DtNestRowDeserializationSchema(TypeInformation&lt;Row&gt; typeInfo, Map&lt;String, String&gt; rowAndFieldMapping,">  66     public DtNestRowDeserializationSchema(TypeInformation&lt;Row&gt; typeInfo, Map&lt;String, String&gt; rowAndFieldM🔵</abbr>
+  67                                           List&lt;AbstractTableInfo.FieldExtraInfo&gt; fieldExtraInfos,
+  68                                           String charsetName) {
+  69         this.fieldNames = ((RowTypeInfo) typeInfo).getFieldNames();
+  70         this.fieldTypes = ((RowTypeInfo) typeInfo).getFieldTypes();
+  71         this.rowAndFieldMapping = rowAndFieldMapping;
+  72         this.fieldExtraInfos = fieldExtraInfos;
+  73         this.charsetName = charsetName;
+  74     }
+  75 
+  76     @Override
+  77     public Row deserialize(byte[] message) throws IOException {
+  78         String decoderStr = new String(message, charsetName);
+  79         JsonNode root = objectMapper.readTree(decoderStr);
+  80         this.parseTree(root, null);
+  81         return convertTopRow();
+  82     }
+  83 
+  84     private void parseTree(JsonNode jsonNode, String prefix) {
+  85         if (jsonNode.isArray()) {
+  86             ArrayNode array = (ArrayNode) jsonNode;
+  87             for (int i = 0; i &lt; array.size(); i++) {
+  88                 JsonNode child = array.get(i);
+  89                 String nodeKey = getNodeKey(prefix, i);
+  90 
+  91                 if (child.isValueNode()) {
+  92                     nodeAndJsonNodeMapping.put(nodeKey, child);
+  93                 } else {
+  94                     if (rowAndFieldMapping.containsValue(nodeKey)) {
+  95                         nodeAndJsonNodeMapping.put(nodeKey, child);
+  96                     }
+  97                     parseTree(child, nodeKey);
+  98                 }
+  99             }
+ 100             return;
+ 101         }
+ 102         Iterator&lt;String&gt; iterator = jsonNode.fieldNames();
+ 103         while (iterator.hasNext()) {
+ 104             String next = iterator.next();
+ 105             JsonNode child = jsonNode.get(next);
+ 106             String nodeKey = getNodeKey(prefix, next);
+ 107 
+ 108             nodeAndJsonNodeMapping.put(nodeKey, child);
+ 109             if (child.isArray()) {
+ 110                 parseTree(child, nodeKey);
+ 111             } else {
+ 112                 parseTree(child, nodeKey);
+ 113             }
+ 114         }
+ 115     }
+ 116 
+ 117     private JsonNode getIgnoreCase(String key) {
+ 118         String nodeMappingKey = rowAndFieldMapping.getOrDefault(key, key);
+ 119         return nodeAndJsonNodeMapping.get(nodeMappingKey);
+ 120     }
+ 121 
+ 122     private String getNodeKey(String prefix, String nodeName) {
+ 123         if (Strings.isNullOrEmpty(prefix)) {
+ 124             return nodeName;
+ 125         }
+ 126         return prefix + &quot;.&quot; + nodeName;
+ 127     }
+ 128 
+ 129     private String getNodeKey(String prefix, int i) {
+ 130         if (Strings.isNullOrEmpty(prefix)) {
+ 131             return &quot;[&quot; + i + &quot;]&quot;;
+ 132         }
+ 133         return prefix + &quot;[&quot; + i + &quot;]&quot;;
+ 134     }
+ 135 
+ 136     private Object convert(JsonNode node, TypeInformation&lt;?&gt; info) {
+ 137         if (info.getTypeClass().equals(Types.BOOLEAN.getTypeClass())) {
+ 138             return node.asBoolean();
+ 139         } else if (info.getTypeClass().equals(Types.STRING.getTypeClass())) {
+ 140             if (node instanceof ObjectNode) {
+ 141                 return node.toString();
+ 142             } else if (node instanceof NullNode) {
+ 143                 return null;
+ 144             } else {
+ 145                 return node.asText();
+ 146             }
+ 147         } else if (info.getTypeClass().equals(Types.SQL_DATE.getTypeClass())) {
+ 148             return Date.valueOf(node.asText());
+ 149         } else if (info.getTypeClass().equals(Types.SQL_TIME.getTypeClass())) {
+ 150             // local zone
+ 151             return Time.valueOf(node.asText());
+ 152         } else if (info.getTypeClass().equals(Types.SQL_TIMESTAMP.getTypeClass())) {
+ 153             // local zone
+ 154             return Timestamp.valueOf(node.asText());
+ 155 
+ 156 &lt;&lt;&lt;&lt;&lt;&lt;&lt; LEFT
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 157         }  else if (info instanceof RowTypeInfo) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 158             return convertRow(node, (RowTypeInfo) info);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 159         } else if (info instanceof ObjectArrayTypeInfo) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 160             return convertObjectArray(node, ((ObjectArrayTypeInfo) info).getComponentInfo());</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 161 </span>
+ 162 ||||||| BASE
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"><abbr title=" 163 /*d94z9sk0k4hf9j3ijd - note the base isn&#x27;t actually empty, spork simply doesn&#x27;t generate a base - gd930kwohrp23k5b6vdk93d3r*/"> 163 /*d94z9sk0k4hf9j3ijd - note the base isn&#x27;t actually empty, spork simply doesn&#x27;t generate a base - gd930kw🔵</abbr></span>
+ 164 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 165 </span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 166 </span>
+ 167 &gt;&gt;&gt;&gt;&gt;&gt;&gt; RIGHT
+ 168         } else {
+ 169             // for types that were specified without JSON schema
+ 170             // e.g. POJOs
+ 171             try {
+ 172                 return objectMapper.treeToValue(node, info.getTypeClass());
+ 173             } catch (JsonProcessingException e) {
+<abbr title=" 174                 throw new IllegalStateException(&quot;Unsupported type information &#x27;&quot; + info + &quot;&#x27; for node: &quot; + node);"> 174                 throw new IllegalStateException(&quot;Unsupported type information &#x27;&quot; + info + &quot;&#x27; for node: &quot; 🔵</abbr>
+ 175             }
+ 176         }
+ 177     }
+ 178 
+ 179     private Row convertTopRow() {
+ 180         Row row = new Row(fieldNames.length);
+ 181         try {
+ 182             for (int i = 0; i &lt; fieldNames.length; i++) {
+ 183                 JsonNode node = getIgnoreCase(fieldNames[i]);
+ 184                 AbstractTableInfo.FieldExtraInfo fieldExtraInfo = fieldExtraInfos.get(i);
+ 185 
+ 186                 if (node == null) {
+ 187                     if (fieldExtraInfo != null &amp;&amp; fieldExtraInfo.getNotNull()) {
+ 188                         throw new IllegalStateException(&quot;Failed to find field with name &#x27;&quot;
+ 189                             + fieldNames[i] + &quot;&#x27;.&quot;);
+ 190                     } else {
+ 191                         row.setField(i, null);
+ 192                     }
+ 193                 } else {
+ 194                     // Read the value as specified type
+ 195                     Object value = convert(node, fieldTypes[i]);
+ 196                     row.setField(i, value);
+ 197                 }
+ 198             }
+ 199             return row;
+ 200         } finally {
+ 201             nodeAndJsonNodeMapping.clear();
+ 202         }
+ 203     }
+ 204 
+ 205     private Row convertRow(JsonNode node, RowTypeInfo info) {
+ 206         final String[] names = info.getFieldNames();
+ 207         final TypeInformation&lt;?&gt;[] types = info.getFieldTypes();
+ 208 
+ 209         final Row row = new Row(names.length);
+ 210         for (int i = 0; i &lt; names.length; i++) {
+ 211             final String name = names[i];
+ 212             final JsonNode subNode = node.get(name);
+ 213             if (subNode == null) {
+ 214                 row.setField(i, null);
+ 215             } else {
+ 216                 row.setField(i, convert(subNode, types[i]));
+ 217             }
+ 218         }
+ 219 
+ 220         return row;
+ 221     }
+ 222 
+ 223     private Object convertObjectArray(JsonNode node, TypeInformation&lt;?&gt; elementType) {
+ 224         final Object[] array = (Object[]) Array.newInstance(elementType.getTypeClass(), node.size());
+ 225         for (int i = 0; i &lt; node.size(); i++) {
+ 226             array[i] = convert(node.get(i), elementType);
+ 227         }
+ 228         return array;
+ 229     }
+ 230 }
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ </pre></td>
+                        </tr>
+                    </table>
+                </div>
+                <div id="bottom">
+                    <table style="margin:auto">
+                        <tr>
+                            <th>ours vs. base</th>
+                            <th>theirs vs. base</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1  /*
+   2   * Licensed to the Apache Software Foundation (ASF) under one
+   3   * or more contributor license agreements.  See the NOTICE file
+   4   * distributed with this work for additional information
+   5   * regarding copyright ownership.  The ASF licenses this file
+   6   * to you under the Apache License, Version 2.0 (the
+   7   * &quot;License&quot;); you may not use this file except in compliance
+   8   * with the License.  You may obtain a copy of the License at
+   9   *
+  10   *     http://www.apache.org/licenses/LICENSE-2.0
+  11   *
+  12   * Unless required by applicable law or agreed to in writing, software
+  13   * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15   * See the License for the specific language governing permissions and
+  16   * limitations under the License.
+  17   */
+  18  
+  19  package com.dtstack.flink.sql.format.dtnest;
+  20  
+  21  import com.dtstack.flink.sql.table.AbstractTableInfo;
+  22  import com.google.common.base.Strings;
+  23  import com.google.common.collect.Maps;
+  24  import org.apache.flink.api.common.serialization.AbstractDeserializationSchema;
+  25  import org.apache.flink.api.common.typeinfo.TypeInformation;
+  26  import org.apache.flink.api.common.typeinfo.Types;
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  27 +import org.apache.flink.api.java.typeutils.ObjectArrayTypeInfo;</span>
+  28  import org.apache.flink.api.java.typeutils.RowTypeInfo;
+  29  import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.core.JsonProcessingException;
+  30  import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.JsonNode;
+  31  import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.ObjectMapper;
+  32  import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.node.ArrayNode;
+  33  import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.node.NullNode;
+  34  import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.node.ObjectNode;
+  35  import org.apache.flink.types.Row;
+  36  
+  37  import java.io.IOException;
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  38 +import java.lang.reflect.Array;</span>
+  39  import java.sql.Date;
+  40  import java.sql.Time;
+  41  import java.sql.Timestamp;
+  42  import java.util.Iterator;
+  43  import java.util.List;
+  44  import java.util.Map;
+  45  
+  46  /**
+  47   * source data parse to json format
+  48   *
+
+  49   * Date: 2019/12/12
+  50   * Company: www.dtstack.com
+  51   *
+  52   * @author maqi
+  53   */
+  54  public class DtNestRowDeserializationSchema extends AbstractDeserializationSchema&lt;Row&gt; {
+  55  
+  56      private final ObjectMapper objectMapper = new ObjectMapper();
+  57  
+  58      private Map&lt;String, String&gt; rowAndFieldMapping;
+  59      private Map&lt;String, JsonNode&gt; nodeAndJsonNodeMapping = Maps.newHashMap();
+
+
+  60  
+  61      private final String[] fieldNames;
+  62      private final TypeInformation&lt;?&gt;[] fieldTypes;
+  63      private List&lt;AbstractTableInfo.FieldExtraInfo&gt; fieldExtraInfos;
+
+
+  64  
+<abbr title="  65      public DtNestRowDeserializationSchema(TypeInformation&lt;Row&gt; typeInfo, Map&lt;String, String&gt; rowAndFieldMapping, List&lt;AbstractTableInfo.FieldExtraInfo&gt; fieldExtraInfos) {">  65      public DtNestRowDeserializationSchema(TypeInformation&lt;Row&gt; typeInfo, Map&lt;String, String&gt; rowAndFieldMapping, L🔵</abbr>
+
+
+
+  66          this.fieldNames = ((RowTypeInfo) typeInfo).getFieldNames();
+  67          this.fieldTypes = ((RowTypeInfo) typeInfo).getFieldTypes();
+  68          this.rowAndFieldMapping = rowAndFieldMapping;
+  69          this.fieldExtraInfos = fieldExtraInfos;
+
+  70      }
+  71  
+  72      @Override
+  73      public Row deserialize(byte[] message) throws IOException {
+  74          JsonNode root = objectMapper.readTree(message);
+
+
+  75          this.parseTree(root, null);
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  76 -        Row row = new Row(fieldNames.length);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  77 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  78 -        try {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  79 -            for (int i = 0; i &lt; fieldNames.length; i++) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  80 -                JsonNode node = getIgnoreCase(fieldNames[i]);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  81 -                AbstractTableInfo.FieldExtraInfo fieldExtraInfo = fieldExtraInfos.get(i);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  82 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  83 -                if (node == null) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  84 -                    if (fieldExtraInfo != null &amp;&amp; fieldExtraInfo.getNotNull()) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  85 -                        throw new IllegalStateException(&quot;Failed to find field with name &#x27;&quot;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  86 -                                + fieldNames[i] + &quot;&#x27;.&quot;);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  87 -                    } else {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  88 -                        row.setField(i, null);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  89 -                    }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  90 -                } else {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  91 -                    // Read the value as specified type</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  92 -                    Object value = convert(node, fieldTypes[i]);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  93 -                    row.setField(i, value);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  94 -                }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  95 -            }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  96 -            return row;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  97 -        } finally {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  98 -            nodeAndJsonNodeMapping.clear();</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  99 -        }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 100 +        return convertTopRow();</span>
+ 101      }
+ 102  
+ 103      private void parseTree(JsonNode jsonNode, String prefix){
+
+ 104          if (jsonNode.isArray()) {
+ 105              ArrayNode array = (ArrayNode) jsonNode;
+ 106              for (int i = 0; i &lt; array.size(); i++) {
+ 107                  JsonNode child = array.get(i);
+ 108                  String nodeKey = getNodeKey(prefix, i);
+ 109  
+ 110                  if (child.isValueNode()) {
+ 111                      nodeAndJsonNodeMapping.put(nodeKey, child);
+ 112                  } else {
+ 113                      if (rowAndFieldMapping.containsValue(nodeKey)) {
+ 114                          nodeAndJsonNodeMapping.put(nodeKey, child);
+ 115                      }
+ 116                      parseTree(child, nodeKey);
+ 117                  }
+ 118              }
+ 119              return;
+ 120          }
+ 121          Iterator&lt;String&gt; iterator = jsonNode.fieldNames();
+ 122          while (iterator.hasNext()){
+
+ 123              String next = iterator.next();
+ 124              JsonNode child = jsonNode.get(next);
+ 125              String nodeKey = getNodeKey(prefix, next);
+ 126  
+ 127              nodeAndJsonNodeMapping.put(nodeKey, child);
+ 128              if(child.isArray()){
+
+ 129                  parseTree(child, nodeKey);
+ 130              }else {
+
+ 131                  parseTree(child, nodeKey);
+ 132              }
+ 133          }
+ 134      }
+ 135  
+ 136      private JsonNode getIgnoreCase(String key) {
+ 137          String nodeMappingKey = rowAndFieldMapping.getOrDefault(key, key);
+ 138          return nodeAndJsonNodeMapping.get(nodeMappingKey);
+ 139      }
+ 140  
+ 141      private String getNodeKey(String prefix, String nodeName){
+ 142          if(Strings.isNullOrEmpty(prefix)){
+
+
+ 143              return nodeName;
+ 144          }
+ 145          return prefix + &quot;.&quot; + nodeName;
+ 146      }
+ 147  
+ 148      private String getNodeKey(String prefix, int i) {
+ 149          if (Strings.isNullOrEmpty(prefix)) {
+ 150              return &quot;[&quot; + i + &quot;]&quot;;
+ 151          }
+ 152          return prefix + &quot;[&quot; + i + &quot;]&quot;;
+ 153      }
+ 154  
+ 155      private Object convert(JsonNode node, TypeInformation&lt;?&gt; info) {
+ 156          if (info.getTypeClass().equals(Types.BOOLEAN.getTypeClass())) {
+ 157              return node.asBoolean();
+ 158          } else if (info.getTypeClass().equals(Types.STRING.getTypeClass())) {
+ 159              if (node instanceof ObjectNode) {
+ 160                  return node.toString();
+ 161              } else if (node instanceof NullNode) {
+ 162                  return null;
+ 163              } else {
+ 164                  return node.asText();
+ 165              }
+ 166          }  else if (info.getTypeClass().equals(Types.SQL_DATE.getTypeClass())) {
+
+ 167              return Date.valueOf(node.asText());
+ 168          } else if (info.getTypeClass().equals(Types.SQL_TIME.getTypeClass())) {
+ 169              // local zone
+ 170              return Time.valueOf(node.asText());
+ 171          } else if (info.getTypeClass().equals(Types.SQL_TIMESTAMP.getTypeClass())) {
+ 172              // local zone
+ 173              return Timestamp.valueOf(node.asText());
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 174 -        }  else {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 175 +        }  else if (info instanceof RowTypeInfo) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 176 +            return convertRow(node, (RowTypeInfo) info);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 177 +        } else if (info instanceof ObjectArrayTypeInfo) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 178 +            return convertObjectArray(node, ((ObjectArrayTypeInfo) info).getComponentInfo());</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 179 +        } else {</span>
+ 180              // for types that were specified without JSON schema
+ 181              // e.g. POJOs
+ 182              try {
+ 183                  return objectMapper.treeToValue(node, info.getTypeClass());
+ 184              } catch (JsonProcessingException e) {
+ 185                  throw new IllegalStateException(&quot;Unsupported type information &#x27;&quot; + info + &quot;&#x27; for node: &quot; + node);
+ 186              }
+ 187          }
+ 188      }
+ 189  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 190 -</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 191 +    private Row convertTopRow() {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 192 +        Row row = new Row(fieldNames.length);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 193 +        try {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 194 +            for (int i = 0; i &lt; fieldNames.length; i++) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 195 +                JsonNode node = getIgnoreCase(fieldNames[i]);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 196 +                AbstractTableInfo.FieldExtraInfo fieldExtraInfo = fieldExtraInfos.get(i);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 197 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 198 +                if (node == null) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 199 +                    if (fieldExtraInfo != null &amp;&amp; fieldExtraInfo.getNotNull()) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 200 +                        throw new IllegalStateException(&quot;Failed to find field with name &#x27;&quot;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 201 +                            + fieldNames[i] + &quot;&#x27;.&quot;);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 202 +                    } else {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 203 +                        row.setField(i, null);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 204 +                    }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 205 +                } else {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 206 +                    // Read the value as specified type</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 207 +                    Object value = convert(node, fieldTypes[i]);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 208 +                    row.setField(i, value);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 209 +                }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 210 +            }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 211 +            return row;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 212 +        } finally {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 213 +            nodeAndJsonNodeMapping.clear();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 214 +        }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 215 +    }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 216 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 217 +    private Row convertRow(JsonNode node, RowTypeInfo info) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 218 +        final String[] names = info.getFieldNames();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 219 +        final TypeInformation&lt;?&gt;[] types = info.getFieldTypes();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 220 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 221 +        final Row row = new Row(names.length);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 222 +        for (int i = 0; i &lt; names.length; i++) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 223 +            final String name = names[i];</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 224 +            final JsonNode subNode = node.get(name);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 225 +            if (subNode == null) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 226 +                row.setField(i, null);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 227 +            } else {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 228 +                row.setField(i, convert(subNode, types[i]));</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 229 +            }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 230 +        }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 231 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 232 +        return row;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 233 +    }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 234 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 235 +    private Object convertObjectArray(JsonNode node, TypeInformation&lt;?&gt; elementType) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 236 +        final Object[] array = (Object[]) Array.newInstance(elementType.getTypeClass(), node.size());</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 237 +        for (int i = 0; i &lt; node.size(); i++) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 238 +            array[i] = convert(node.get(i), elementType);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 239 +        }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 240 +        return array;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 241 +    }</span>
+ 242  }</pre></td>
+                            <td><pre>   1  /*
+   2   * Licensed to the Apache Software Foundation (ASF) under one
+   3   * or more contributor license agreements.  See the NOTICE file
+   4   * distributed with this work for additional information
+   5   * regarding copyright ownership.  The ASF licenses this file
+   6   * to you under the Apache License, Version 2.0 (the
+   7   * &quot;License&quot;); you may not use this file except in compliance
+   8   * with the License.  You may obtain a copy of the License at
+   9   *
+  10   *     http://www.apache.org/licenses/LICENSE-2.0
+  11   *
+  12   * Unless required by applicable law or agreed to in writing, software
+  13   * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15   * See the License for the specific language governing permissions and
+  16   * limitations under the License.
+  17   */
+  18  
+  19  package com.dtstack.flink.sql.format.dtnest;
+  20  
+  21  import com.dtstack.flink.sql.table.AbstractTableInfo;
+  22  import com.google.common.base.Strings;
+  23  import com.google.common.collect.Maps;
+  24  import org.apache.flink.api.common.serialization.AbstractDeserializationSchema;
+  25  import org.apache.flink.api.common.typeinfo.TypeInformation;
+  26  import org.apache.flink.api.common.typeinfo.Types;
+
+  27  import org.apache.flink.api.java.typeutils.RowTypeInfo;
+  28  import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.core.JsonProcessingException;
+  29  import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.JsonNode;
+  30  import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.ObjectMapper;
+  31  import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.node.ArrayNode;
+  32  import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.node.NullNode;
+  33  import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.node.ObjectNode;
+  34  import org.apache.flink.types.Row;
+  35  
+  36  import java.io.IOException;
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  37 +import java.nio.charset.StandardCharsets;</span>
+  38  import java.sql.Date;
+  39  import java.sql.Time;
+  40  import java.sql.Timestamp;
+  41  import java.util.Iterator;
+  42  import java.util.List;
+  43  import java.util.Map;
+  44  
+  45  /**
+  46   * source data parse to json format
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  47 - *</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  48 + * &lt;p&gt;</span>
+  49   * Date: 2019/12/12
+  50   * Company: www.dtstack.com
+  51   *
+  52   * @author maqi
+  53   */
+  54  public class DtNestRowDeserializationSchema extends AbstractDeserializationSchema&lt;Row&gt; {
+  55  
+  56      private final ObjectMapper objectMapper = new ObjectMapper();
+  57  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  58 -    private Map&lt;String, String&gt; rowAndFieldMapping;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  59 -    private Map&lt;String, JsonNode&gt; nodeAndJsonNodeMapping = Maps.newHashMap();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  60 +    private final Map&lt;String, String&gt; rowAndFieldMapping;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  61 +    private final Map&lt;String, JsonNode&gt; nodeAndJsonNodeMapping = Maps.newHashMap();</span>
+  62  
+  63      private final String[] fieldNames;
+  64      private final TypeInformation&lt;?&gt;[] fieldTypes;
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  65 -    private List&lt;AbstractTableInfo.FieldExtraInfo&gt; fieldExtraInfos;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  66 +    private final List&lt;AbstractTableInfo.FieldExtraInfo&gt; fieldExtraInfos;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  67 +    private final String charsetName;</span>
+  68  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"><abbr title="  69 -    public DtNestRowDeserializationSchema(TypeInformation&lt;Row&gt; typeInfo, Map&lt;String, String&gt; rowAndFieldMapping, List&lt;AbstractTableInfo.FieldExtraInfo&gt; fieldExtraInfos) {">  69 -    public DtNestRowDeserializationSchema(TypeInformation&lt;Row&gt; typeInfo, Map&lt;String, String&gt; rowAndFieldMapping, L🔵</abbr></span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  70 +    public DtNestRowDeserializationSchema(TypeInformation&lt;Row&gt; typeInfo, Map&lt;String, String&gt; rowAndFieldMapping,</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  71 +                                          List&lt;AbstractTableInfo.FieldExtraInfo&gt; fieldExtraInfos,</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  72 +                                          String charsetName) {</span>
+  73          this.fieldNames = ((RowTypeInfo) typeInfo).getFieldNames();
+  74          this.fieldTypes = ((RowTypeInfo) typeInfo).getFieldTypes();
+  75          this.rowAndFieldMapping = rowAndFieldMapping;
+  76          this.fieldExtraInfos = fieldExtraInfos;
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  77 +        this.charsetName = charsetName;</span>
+  78      }
+  79  
+  80      @Override
+  81      public Row deserialize(byte[] message) throws IOException {
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  82 -        JsonNode root = objectMapper.readTree(message);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  83 +        String decoderStr = new String(message, charsetName);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  84 +        JsonNode root = objectMapper.readTree(decoderStr);</span>
+  85          this.parseTree(root, null);
+  86          Row row = new Row(fieldNames.length);
+  87  
+  88          try {
+  89              for (int i = 0; i &lt; fieldNames.length; i++) {
+  90                  JsonNode node = getIgnoreCase(fieldNames[i]);
+  91                  AbstractTableInfo.FieldExtraInfo fieldExtraInfo = fieldExtraInfos.get(i);
+  92  
+  93                  if (node == null) {
+  94                      if (fieldExtraInfo != null &amp;&amp; fieldExtraInfo.getNotNull()) {
+  95                          throw new IllegalStateException(&quot;Failed to find field with name &#x27;&quot;
+  96                                  + fieldNames[i] + &quot;&#x27;.&quot;);
+  97                      } else {
+  98                          row.setField(i, null);
+  99                      }
+ 100                  } else {
+ 101                      // Read the value as specified type
+ 102                      Object value = convert(node, fieldTypes[i]);
+ 103                      row.setField(i, value);
+ 104                  }
+ 105              }
+ 106              return row;
+ 107          } finally {
+ 108              nodeAndJsonNodeMapping.clear();
+ 109          }
+
+ 110      }
+ 111  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 112 -    private void parseTree(JsonNode jsonNode, String prefix){</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 113 +    private void parseTree(JsonNode jsonNode, String prefix) {</span>
+ 114          if (jsonNode.isArray()) {
+ 115              ArrayNode array = (ArrayNode) jsonNode;
+ 116              for (int i = 0; i &lt; array.size(); i++) {
+ 117                  JsonNode child = array.get(i);
+ 118                  String nodeKey = getNodeKey(prefix, i);
+ 119  
+ 120                  if (child.isValueNode()) {
+ 121                      nodeAndJsonNodeMapping.put(nodeKey, child);
+ 122                  } else {
+ 123                      if (rowAndFieldMapping.containsValue(nodeKey)) {
+ 124                          nodeAndJsonNodeMapping.put(nodeKey, child);
+ 125                      }
+ 126                      parseTree(child, nodeKey);
+ 127                  }
+ 128              }
+ 129              return;
+ 130          }
+ 131          Iterator&lt;String&gt; iterator = jsonNode.fieldNames();
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 132 -        while (iterator.hasNext()){</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 133 +        while (iterator.hasNext()) {</span>
+ 134              String next = iterator.next();
+ 135              JsonNode child = jsonNode.get(next);
+ 136              String nodeKey = getNodeKey(prefix, next);
+ 137  
+ 138              nodeAndJsonNodeMapping.put(nodeKey, child);
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 139 -            if(child.isArray()){</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 140 +            if (child.isArray()) {</span>
+ 141                  parseTree(child, nodeKey);
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 142 -            }else {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 143 +            } else {</span>
+ 144                  parseTree(child, nodeKey);
+ 145              }
+ 146          }
+ 147      }
+ 148  
+ 149      private JsonNode getIgnoreCase(String key) {
+ 150          String nodeMappingKey = rowAndFieldMapping.getOrDefault(key, key);
+ 151          return nodeAndJsonNodeMapping.get(nodeMappingKey);
+ 152      }
+ 153  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 154 -    private String getNodeKey(String prefix, String nodeName){</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 155 -        if(Strings.isNullOrEmpty(prefix)){</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 156 +    private String getNodeKey(String prefix, String nodeName) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 157 +        if (Strings.isNullOrEmpty(prefix)) {</span>
+ 158              return nodeName;
+ 159          }
+ 160          return prefix + &quot;.&quot; + nodeName;
+ 161      }
+ 162  
+ 163      private String getNodeKey(String prefix, int i) {
+ 164          if (Strings.isNullOrEmpty(prefix)) {
+ 165              return &quot;[&quot; + i + &quot;]&quot;;
+ 166          }
+ 167          return prefix + &quot;[&quot; + i + &quot;]&quot;;
+ 168      }
+ 169  
+ 170      private Object convert(JsonNode node, TypeInformation&lt;?&gt; info) {
+ 171          if (info.getTypeClass().equals(Types.BOOLEAN.getTypeClass())) {
+ 172              return node.asBoolean();
+ 173          } else if (info.getTypeClass().equals(Types.STRING.getTypeClass())) {
+ 174              if (node instanceof ObjectNode) {
+ 175                  return node.toString();
+ 176              } else if (node instanceof NullNode) {
+ 177                  return null;
+ 178              } else {
+ 179                  return node.asText();
+ 180              }
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 181 -        }  else if (info.getTypeClass().equals(Types.SQL_DATE.getTypeClass())) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 182 +        } else if (info.getTypeClass().equals(Types.SQL_DATE.getTypeClass())) {</span>
+ 183              return Date.valueOf(node.asText());
+ 184          } else if (info.getTypeClass().equals(Types.SQL_TIME.getTypeClass())) {
+ 185              // local zone
+ 186              return Time.valueOf(node.asText());
+ 187          } else if (info.getTypeClass().equals(Types.SQL_TIMESTAMP.getTypeClass())) {
+ 188              // local zone
+ 189              return Timestamp.valueOf(node.asText());
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 190 -        }  else {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 191 +        } else {</span>
+
+
+
+
+ 192              // for types that were specified without JSON schema
+ 193              // e.g. POJOs
+ 194              try {
+ 195                  return objectMapper.treeToValue(node, info.getTypeClass());
+ 196              } catch (JsonProcessingException e) {
+ 197                  throw new IllegalStateException(&quot;Unsupported type information &#x27;&quot; + info + &quot;&#x27; for node: &quot; + node);
+ 198              }
+ 199          }
+ 200      }
+ 201  
+ 202  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 203  }</pre></td>
+                        </tr>
+                    </table>
+                </div>
+              </body>
+            </html>
+            

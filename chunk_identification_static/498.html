@@ -1,0 +1,2033 @@
+<!DOCTYPE html>
+    <html lang="en">
+              <head>
+                <meta charset="utf-8">
+                <title>498</title>
+                    <style>
+                        #top {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        #bottom {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        abbr {
+                          /* Here is the delay */
+                          transition-delay:0s;
+                        }
+                    </style>
+              </head>
+              <body>
+                <span style="height: 4vh">
+                    498
+                    <a href="497.html">prev</a>
+                    <a href="499.html">next</a>
+                    <a href="498_chunks.html">chunks</a>
+                    <a href="index.html">index</a>
+                    DTStack/flinkStreamSQL_e346a804d69c8cd0124b4eb3d35156cfb5cd0779_kudu/kudu-side/kudu-async-side/src/main/java/com/dtstack/flink/sql/side/kudu/KuduAsyncReqRow.java
+                    <textarea rows=1 onclick='navigator.clipboard.writeText(this.value)'>cd C:\studies\se\mega\git-analyzer-plus\notebooks\debug
+del /Q *
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;e346a804d69c8cd0124b4eb3d35156cfb5cd0779:kudu/kudu-side/kudu-async-side/src/main/java/com/dtstack/flink/sql/side/kudu/KuduAsyncReqRow.java&quot; &gt; committed.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;e346a804d69c8cd0124b4eb3d35156cfb5cd0779^1:kudu/kudu-side/kudu-async-side/src/main/java/com/dtstack/flink/sql/side/kudu/KuduAsyncReqRow.java&quot; &gt; ours.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;e346a804d69c8cd0124b4eb3d35156cfb5cd0779^2:kudu/kudu-side/kudu-async-side/src/main/java/com/dtstack/flink/sql/side/kudu/KuduAsyncReqRow.java&quot; &gt; theirs.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;6e351a99f6e8449c76ad55e517a5da6cbb108379:kudu/kudu-side/kudu-async-side/src/main/java/com/dtstack/flink/sql/side/kudu/KuduAsyncReqRow.java&quot; &gt; base.java
+copy ours.java 1ours.java
+copy ours.java 2ours.java
+copy theirs.java 1theirs.java
+copy theirs.java 2theirs.java
+copy base.java 1base.java
+copy base.java 2base.java
+&quot;C:\Program Files\Java\jdk1.8.0_241\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\jFSTMerge\build\libs\jFSTMerge-all.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\jfstmerge.java --show-base
+&quot;C:\Program Files\Eclipse Adoptium\jdk-17.0.11.9-hotspot\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\spork\target\spork-0.5.0-SNAPSHOT.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\spork.java
+del /Q 1*.java
+del /Q 2*.java
+del /Q jfstmerge.java.merge
+</textarea>
+                    {strict: [[b], [b], [b], [j]], subset: [[b], [b], [bj]]}
+                </span>
+                <div id="top">
+
+                    <table>
+                        <tr>
+                            <th>line based (standard git)</th>
+                            <th>jfstmerge</th>
+                            <th>spork</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1 package com.dtstack.flink.sql.side.kudu;
+   2 
+   3 import com.dtstack.flink.sql.enums.ECacheContentType;
+   4 import com.dtstack.flink.sql.side.AbstractSideTableInfo;
+   5 import com.dtstack.flink.sql.side.BaseAsyncReqRow;
+   6 import com.dtstack.flink.sql.side.CacheMissVal;
+   7 import com.dtstack.flink.sql.side.FieldInfo;
+   8 import com.dtstack.flink.sql.side.JoinInfo;
+   9 import com.dtstack.flink.sql.side.PredicateInfo;
+  10 import com.dtstack.flink.sql.side.cache.CacheObj;
+  11 import com.dtstack.flink.sql.side.kudu.table.KuduSideTableInfo;
+  12 import com.dtstack.flink.sql.side.kudu.utils.KuduUtil;
+  13 import com.google.common.collect.Lists;
+  14 import com.google.common.collect.Maps;
+  15 import com.stumbleupon.async.Callback;
+  16 import com.stumbleupon.async.Deferred;
+  17 import io.vertx.core.json.JsonArray;
+  18 import org.apache.commons.lang3.StringUtils;
+  19 import org.apache.flink.api.java.tuple.Tuple2;
+  20 import org.apache.flink.api.java.typeutils.RowTypeInfo;
+  21 import org.apache.flink.configuration.Configuration;
+  22 import org.apache.flink.streaming.api.functions.async.ResultFuture;
+  23 import org.apache.flink.types.Row;
+  24 import org.apache.flink.util.Preconditions;
+  25 import org.apache.kudu.ColumnSchema;
+  26 import org.apache.kudu.Schema;
+  27 import org.apache.kudu.client.AsyncKuduClient;
+  28 import org.apache.kudu.client.AsyncKuduScanner;
+  29 import org.apache.kudu.client.KuduException;
+  30 import org.apache.kudu.client.KuduPredicate;
+  31 import org.apache.kudu.client.KuduTable;
+  32 import org.apache.kudu.client.RowResult;
+  33 import org.apache.kudu.client.RowResultIterator;
+  34 import org.slf4j.Logger;
+  35 import org.slf4j.LoggerFactory;
+  36 
+  37 import java.util.Arrays;
+  38 import java.util.Collections;
+  39 import java.util.List;
+  40 import java.util.Map;
+  41 
+  42 public class KuduAsyncReqRow extends BaseAsyncReqRow {
+  43 
+  44     private static final Logger LOG = LoggerFactory.getLogger(KuduAsyncReqRow.class);
+  45     /**
+  46      * 获取连接的尝试次数
+  47      */
+  48     private static final int CONN_RETRY_NUM = 3;
+  49     /**
+  50      * 缓存条数
+  51      */
+  52     private static final Long FETCH_SIZE = 1000L;
+  53 
+  54     private static final long serialVersionUID = 5028583854989267753L;
+  55 
+  56 
+  57     private AsyncKuduClient asyncClient;
+  58 
+  59     private KuduTable table;
+  60 
+  61     private KuduSideTableInfo kuduSideTableInfo;
+  62 
+  63     private AsyncKuduScanner.AsyncKuduScannerBuilder scannerBuilder;
+  64 
+<abbr title="  65     public KuduAsyncReqRow(RowTypeInfo rowTypeInfo, JoinInfo joinInfo, List&lt;FieldInfo&gt; outFieldInfoList, AbstractSideTableInfo sideTableInfo) {">  65     public KuduAsyncReqRow(RowTypeInfo rowTypeInfo, JoinInfo joinInfo, List&lt;FieldInfo&gt; outFieldInfoList, 🔵</abbr>
+  66         super(new KuduAsyncSideInfo(rowTypeInfo, joinInfo, outFieldInfoList, sideTableInfo));
+  67     }
+  68 
+  69     @Override
+  70     public void open(Configuration parameters) throws Exception {
+  71         super.open(parameters);
+  72         kuduSideTableInfo = (KuduSideTableInfo) sideInfo.getSideTableInfo();
+  73         connKuDu();
+  74     }
+  75 
+  76     /**
+  77      * 连接kudu中的表
+  78      *
+  79      * @throws KuduException
+  80      */
+  81     private void connKuDu() throws KuduException {
+  82         if (null == table) {
+  83             String kuduMasters = kuduSideTableInfo.getKuduMasters();
+  84             String tableName = kuduSideTableInfo.getTableName();
+  85             Integer workerCount = kuduSideTableInfo.getWorkerCount();
+  86             Integer defaultSocketReadTimeoutMs = kuduSideTableInfo.getDefaultSocketReadTimeoutMs();
+  87             Integer defaultOperationTimeoutMs = kuduSideTableInfo.getDefaultOperationTimeoutMs();
+  88 
+  89             Preconditions.checkNotNull(kuduMasters, &quot;kuduMasters could not be null&quot;);
+  90 
+<abbr title="  91             AsyncKuduClient.AsyncKuduClientBuilder asyncKuduClientBuilder = new AsyncKuduClient.AsyncKuduClientBuilder(kuduMasters);">  91             AsyncKuduClient.AsyncKuduClientBuilder asyncKuduClientBuilder = new AsyncKuduClient.AsyncKudu🔵</abbr>
+  92             if (null != workerCount) {
+  93                 asyncKuduClientBuilder.workerCount(workerCount);
+  94             }
+  95 
+  96             if (null != defaultOperationTimeoutMs) {
+  97                 asyncKuduClientBuilder.defaultOperationTimeoutMs(defaultOperationTimeoutMs);
+  98             }
+  99             asyncClient = asyncKuduClientBuilder.build();
+ 100             if (!asyncClient.syncClient().tableExists(tableName)) {
+ 101                 throw new IllegalArgumentException(&quot;Table Open Failed , please check table exists&quot;);
+ 102             }
+ 103             table = asyncClient.syncClient().openTable(tableName);
+ 104             LOG.info(&quot;connect kudu is successed!&quot;);
+ 105         }
+ 106         scannerBuilder = asyncClient.newScannerBuilder(table);
+ 107         Integer batchSizeBytes = kuduSideTableInfo.getBatchSizeBytes();
+ 108         Long limitNum = kuduSideTableInfo.getLimitNum();
+ 109         Boolean isFaultTolerant = kuduSideTableInfo.getFaultTolerant();
+ 110         //查询需要的字段
+ 111         String[] sideFieldNames = StringUtils.split(sideInfo.getSideSelectFields(), &quot;,&quot;);
+ 112 
+ 113         if (null == limitNum || limitNum &lt;= 0) {
+ 114             scannerBuilder.limit(FETCH_SIZE);
+ 115         } else {
+ 116             scannerBuilder.limit(limitNum);
+ 117         }
+ 118         if (null != batchSizeBytes) {
+ 119             scannerBuilder.batchSizeBytes(batchSizeBytes);
+ 120         }
+ 121         if (null != isFaultTolerant) {
+ 122             scannerBuilder.setFaultTolerant(isFaultTolerant);
+ 123         }
+ 124 
+ 125         List&lt;String&gt; projectColumns = Arrays.asList(sideFieldNames);
+ 126         scannerBuilder.setProjectedColumnNames(projectColumns);
+ 127     }
+ 128 
+ 129     @Override
+ 130 &lt;&lt;&lt;&lt;&lt;&lt;&lt; GitAnalyzerPlus_ours
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"><abbr title=" 131     public void asyncInvoke(Tuple2&lt;Boolean,Row&gt; input, ResultFuture&lt;Tuple2&lt;Boolean,Row&gt;&gt; resultFuture) throws Exception {"> 131     public void asyncInvoke(Tuple2&lt;Boolean,Row&gt; input, ResultFuture&lt;Tuple2&lt;Boolean,Row&gt;&gt; resultFuture) th🔵</abbr></span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 132         Tuple2&lt;Boolean, Row&gt; inputCopy = Tuple2.of(input.f0, input.f1);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 133         //scannerBuilder 设置为null重新加载过滤条件</span>
+ 134 ||||||| GitAnalyzerPlus_base
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 135 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 136     @Override</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 137     public void asyncInvoke(CRow input, ResultFuture&lt;CRow&gt; resultFuture) throws Exception {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 138         CRow inputCopy = new CRow(input.row(), input.change());</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 139         //scannerBuilder 设置为null重新加载过滤条件</span>
+ 140 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"><abbr title=" 141     public void handleAsyncInvoke(Map&lt;String, Object&gt; inputParams, CRow input, ResultFuture&lt;CRow&gt; resultFuture) throws Exception {"> 141     public void handleAsyncInvoke(Map&lt;String, Object&gt; inputParams, CRow input, ResultFuture&lt;CRow&gt; resultF🔵</abbr></span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 142         CRow inputCopy = new CRow(input.row(), input.change());</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 143         //scannerBuilder 设置为null重新加载过滤条件,然后connkudu重新赋值</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 144         //todo:代码需要优化</span>
+ 145 &gt;&gt;&gt;&gt;&gt;&gt;&gt; GitAnalyzerPlus_theirs
+ 146         scannerBuilder = null;
+ 147         connKuDu();
+ 148         Schema schema = table.getSchema();
+ 149         //  @wenbaoup fix bug
+ 150 &lt;&lt;&lt;&lt;&lt;&lt;&lt; GitAnalyzerPlus_ours
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 151         for (int i = 0; i &lt; sideInfo.getEqualValIndex().size(); i++) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 152             Object equalObj = inputCopy.f1.getField(sideInfo.getEqualValIndex().get(i));</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 153             if (equalObj == null) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 154                 dealMissKey(inputCopy, resultFuture);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 155                 return;</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 156             }</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 157             //增加过滤条件</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"><abbr title=" 158             scannerBuilder.addPredicate(KuduPredicate.newInListPredicate(schema.getColumn(sideInfo.getEqualFieldList().get(i)), Collections.singletonList(equalObj)));"> 158             scannerBuilder.addPredicate(KuduPredicate.newInListPredicate(schema.getColumn(sideInfo.getEqu🔵</abbr></span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 159             inputParams.add(equalObj);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 160         }</span>
+ 161 ||||||| GitAnalyzerPlus_base
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 162         Schema schema = table.getSchema();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 163         //  @wenbaoup fix bug</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 164         for (int i = 0; i &lt; sideInfo.getEqualValIndex().size(); i++) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 165             Object equalObj = inputCopy.row().getField(sideInfo.getEqualValIndex().get(i));</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 166             if (equalObj == null) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 167                 dealMissKey(inputCopy, resultFuture);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 168                 return;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 169             }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 170             //增加过滤条件</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"><abbr title=" 171             scannerBuilder.addPredicate(KuduPredicate.newInListPredicate(schema.getColumn(sideInfo.getEqualFieldList().get(i)), Collections.singletonList(equalObj)));"> 171             scannerBuilder.addPredicate(KuduPredicate.newInListPredicate(schema.getColumn(sideInfo.getEqu🔵</abbr></span>
+ 172 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 173         inputParams.entrySet().forEach(e -&gt;{</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"><abbr title=" 174             scannerBuilder.addPredicate(KuduPredicate.newInListPredicate(schema.getColumn(e.getKey()), Collections.singletonList(e.getValue())));"> 174             scannerBuilder.addPredicate(KuduPredicate.newInListPredicate(schema.getColumn(e.getKey()), Co🔵</abbr></span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 175         });</span>
+ 176 &gt;&gt;&gt;&gt;&gt;&gt;&gt; GitAnalyzerPlus_theirs
+ 177 
+ 178         //  填充谓词信息
+ 179         List&lt;PredicateInfo&gt; predicateInfoes = sideInfo.getSideTableInfo().getPredicateInfoes();
+ 180         if (predicateInfoes.size() &gt; 0) {
+ 181             predicateInfoes.stream().map(info -&gt; {
+ 182                 KuduPredicate kuduPredicate = KuduUtil.buildKuduPredicate(schema, info);
+ 183                 if (null != kuduPredicate) {
+ 184                     scannerBuilder.addPredicate(kuduPredicate);
+ 185                 }
+ 186                 return info;
+ 187             }).count();
+ 188         }
+ 189 
+ 190 &lt;&lt;&lt;&lt;&lt;&lt;&lt; GitAnalyzerPlus_ours
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 191 </span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 192         String key = buildCacheKey(inputParams);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 193 </span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 194         if (openCache()) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 195             //判断数据是否已经加载到缓存中</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 196             CacheObj val = getFromCache(key);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 197             if (val != null) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 198                 if (ECacheContentType.MissVal == val.getType()) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 199                     dealMissKey(inputCopy, resultFuture);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 200                     return;</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 201                 } else if (ECacheContentType.SingleLine == val.getType()) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 202                     try {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 203                         Row row = fillData(inputCopy.f1, val);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 204                         resultFuture.complete(Collections.singleton(Tuple2.of(inputCopy.f0,row)));</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 205                     } catch (Exception e) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 206                         dealFillDataError(resultFuture, e, inputCopy);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 207                     }</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 208                 } else if (ECacheContentType.MultiLine == val.getType()) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 209                     try {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 210                         List&lt;Tuple2&lt;Boolean,Row&gt;&gt; rowList = Lists.newArrayList();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 211                         for (Object jsonArray : (List) val.getContent()) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 212                             Row row = fillData(inputCopy.f1, jsonArray);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 213                             rowList.add(Tuple2.of(inputCopy.f0, row));</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 214                         }</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 215                         resultFuture.complete(rowList);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 216                     } catch (Exception e) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 217                         dealFillDataError(resultFuture, e, inputCopy);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 218                     }</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 219                 } else {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"><abbr title=" 220                     resultFuture.completeExceptionally(new RuntimeException(&quot;not support cache obj type &quot; + val.getType()));"> 220                     resultFuture.completeExceptionally(new RuntimeException(&quot;not support cache obj type &quot;🔵</abbr></span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 221                 }</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 222                 return;</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 223             }</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 224         }</span>
+ 225 ||||||| GitAnalyzerPlus_base
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 226                 KuduPredicate kuduPredicate = KuduUtil.buildKuduPredicate(schema, info);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 227                 if (null != kuduPredicate) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 228                     scannerBuilder.addPredicate(kuduPredicate);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 229                 }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 230                 return info;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 231             }).count();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 232         }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 233 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 234 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 235         String key = buildCacheKey(inputParams);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 236 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 237         if (openCache()) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 238             //判断数据是否已经加载到缓存中</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 239             CacheObj val = getFromCache(key);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 240             if (val != null) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 241                 if (ECacheContentType.MissVal == val.getType()) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 242                     dealMissKey(inputCopy, resultFuture);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 243                     return;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 244                 } else if (ECacheContentType.SingleLine == val.getType()) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 245                     try {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 246                         Row row = fillData(inputCopy.row(), val);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 247                         resultFuture.complete(Collections.singleton(new CRow(row, inputCopy.change())));</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 248                     } catch (Exception e) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 249                         dealFillDataError(resultFuture, e, inputCopy);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 250                     }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 251                 } else if (ECacheContentType.MultiLine == val.getType()) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 252                     try {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 253                         List&lt;CRow&gt; rowList = Lists.newArrayList();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 254                         for (Object jsonArray : (List) val.getContent()) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 255                             Row row = fillData(inputCopy.row(), jsonArray);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 256                             rowList.add(new CRow(row, inputCopy.change()));</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 257                         }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 258                         resultFuture.complete(rowList);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 259                     } catch (Exception e) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 260                         dealFillDataError(resultFuture, e, inputCopy);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 261                     }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 262                 } else {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"><abbr title=" 263                     resultFuture.completeExceptionally(new RuntimeException(&quot;not support cache obj type &quot; + val.getType()));"> 263                     resultFuture.completeExceptionally(new RuntimeException(&quot;not support cache obj type &quot;🔵</abbr></span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 264                 }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 265                 return;</span>
+ 266 =======
+ 267 &gt;&gt;&gt;&gt;&gt;&gt;&gt; GitAnalyzerPlus_theirs
+ 268         List&lt;Map&lt;String, Object&gt;&gt; cacheContent = Lists.newArrayList();
+ 269         AsyncKuduScanner asyncKuduScanner = scannerBuilder.build();
+ 270         List&lt;Tuple2&lt;Boolean,Row&gt;&gt; rowList = Lists.newArrayList();
+ 271         Deferred&lt;RowResultIterator&gt; data = asyncKuduScanner.nextRows();
+ 272         //从之前的同步修改为调用异步的Callback
+<abbr title=" 273         data.addCallbackDeferring(new GetListRowCB(inputCopy, cacheContent, rowList, asyncKuduScanner, resultFuture, buildCacheKey(inputParams)));"> 273         data.addCallbackDeferring(new GetListRowCB(inputCopy, cacheContent, rowList, asyncKuduScanner, re🔵</abbr>
+ 274     }
+ 275 
+ 276     @Override
+ 277     public String buildCacheKey(Map&lt;String, Object&gt; inputParams) {
+ 278         StringBuilder sb = new StringBuilder();
+ 279         for (Object ele : inputParams.values()) {
+ 280             sb.append(ele.toString())
+ 281                     .append(&quot;_&quot;);
+ 282         }
+ 283 
+ 284         return sb.toString();
+ 285     }
+ 286 
+ 287 
+ 288     @Override
+ 289     public Row fillData(Row input, Object sideInput) {
+ 290         Map&lt;String, Object&gt; cacheInfo = (Map&lt;String, Object&gt;) sideInput;
+ 291         Row row = new Row(sideInfo.getOutFieldInfoList().size());
+ 292         for (Map.Entry&lt;Integer, Integer&gt; entry : sideInfo.getInFieldIndex().entrySet()) {
+ 293             Object obj = input.getField(entry.getValue());
+ 294             obj = convertTimeIndictorTypeInfo(entry.getValue(), obj);
+ 295             row.setField(entry.getKey(), obj);
+ 296         }
+ 297 
+ 298         for (Map.Entry&lt;Integer, String&gt; entry : sideInfo.getSideFieldNameIndex().entrySet()) {
+ 299             if (cacheInfo == null) {
+ 300                 row.setField(entry.getKey(), null);
+ 301             } else {
+ 302                 row.setField(entry.getKey(), cacheInfo.get(entry.getValue()));
+ 303             }
+ 304         }
+ 305 
+ 306         return row;
+ 307     }
+ 308 
+ 309     @Override
+ 310     public void close() throws Exception {
+ 311         super.close();
+ 312         if (null != asyncClient) {
+ 313             try {
+ 314                 asyncClient.close();
+ 315             } catch (Exception e) {
+ 316                 LOG.error(&quot;Error while closing client.&quot;, e);
+ 317             }
+ 318         }
+ 319     }
+ 320 
+ 321     class GetListRowCB implements Callback&lt;Deferred&lt;List&lt;Row&gt;&gt;, RowResultIterator&gt; {
+ 322         private Tuple2&lt;Boolean,Row&gt; input;
+ 323         private List&lt;Map&lt;String, Object&gt;&gt; cacheContent;
+ 324         private List&lt;Tuple2&lt;Boolean,Row&gt;&gt; rowList;
+ 325         private AsyncKuduScanner asyncKuduScanner;
+ 326         private ResultFuture&lt;Tuple2&lt;Boolean,Row&gt;&gt; resultFuture;
+ 327         private String key;
+ 328 
+ 329 
+ 330         public GetListRowCB() {
+ 331         }
+ 332 
+<abbr title=" 333         GetListRowCB(Tuple2&lt;Boolean,Row&gt; input, List&lt;Map&lt;String, Object&gt;&gt; cacheContent, List&lt;Tuple2&lt;Boolean,Row&gt;&gt; rowList,"> 333         GetListRowCB(Tuple2&lt;Boolean,Row&gt; input, List&lt;Map&lt;String, Object&gt;&gt; cacheContent, List&lt;Tuple2&lt;Boole🔵</abbr>
+<abbr title=" 334                      AsyncKuduScanner asyncKuduScanner, ResultFuture&lt;Tuple2&lt;Boolean,Row&gt;&gt; resultFuture, String key) {"> 334                      AsyncKuduScanner asyncKuduScanner, ResultFuture&lt;Tuple2&lt;Boolean,Row&gt;&gt; resultFuture, S🔵</abbr>
+ 335             this.input = input;
+ 336             this.cacheContent = cacheContent;
+ 337             this.rowList = rowList;
+ 338             this.asyncKuduScanner = asyncKuduScanner;
+ 339             this.resultFuture = resultFuture;
+ 340             this.key = key;
+ 341         }
+ 342 
+ 343         @Override
+ 344         public Deferred&lt;List&lt;Row&gt;&gt; call(RowResultIterator results) throws Exception {
+ 345             for (RowResult result : results) {
+ 346                 Map&lt;String, Object&gt; oneRow = Maps.newHashMap();
+ 347                 for (String sideFieldName1 : StringUtils.split(sideInfo.getSideSelectFields(), &quot;,&quot;)) {
+ 348                     String sideFieldName = sideFieldName1.trim();
+ 349                     ColumnSchema columnSchema = table.getSchema().getColumn(sideFieldName);
+ 350                     if (null != columnSchema) {
+ 351                         KuduUtil.setMapValue(columnSchema.getType(), oneRow, sideFieldName, result);
+ 352                     }
+ 353                 }
+ 354                 Row row = fillData(input.f1, oneRow);
+ 355                 if (openCache()) {
+ 356                     cacheContent.add(oneRow);
+ 357                 }
+ 358                 rowList.add(Tuple2.of(input.f0, row));
+ 359             }
+ 360             if (asyncKuduScanner.hasMoreRows()) {
+ 361                 return asyncKuduScanner.nextRows().addCallbackDeferring(this);
+ 362             }
+ 363 
+ 364             if (rowList.size() &gt; 0) {
+ 365                 if (openCache()) {
+ 366                     putCache(key, CacheObj.buildCacheObj(ECacheContentType.MultiLine, cacheContent));
+ 367                 }
+ 368                 resultFuture.complete(rowList);
+ 369             } else {
+ 370                 dealMissKey(input, resultFuture);
+ 371                 if (openCache()) {
+ 372                     //放置在putCache的Miss中 一段时间内同一个key都会直接返回
+ 373                     putCache(key, CacheMissVal.getMissKeyObj());
+ 374                 }
+ 375             }
+ 376 
+ 377             return null;
+ 378         }
+ 379     }
+ 380 
+ 381 }
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ </pre></td>
+                            <td><pre>   1 package com.dtstack.flink.sql.side.kudu;
+   2 
+   3 import com.dtstack.flink.sql.enums.ECacheContentType;
+   4 import com.dtstack.flink.sql.side.AbstractSideTableInfo;
+   5 import com.dtstack.flink.sql.side.BaseAsyncReqRow;
+   6 import com.dtstack.flink.sql.side.CacheMissVal;
+   7 import com.dtstack.flink.sql.side.FieldInfo;
+   8 import com.dtstack.flink.sql.side.JoinInfo;
+   9 import com.dtstack.flink.sql.side.PredicateInfo;
+  10 import com.dtstack.flink.sql.side.cache.CacheObj;
+  11 import com.dtstack.flink.sql.side.kudu.table.KuduSideTableInfo;
+  12 import com.dtstack.flink.sql.side.kudu.utils.KuduUtil;
+  13 import com.google.common.collect.Lists;
+  14 import com.google.common.collect.Maps;
+  15 import com.stumbleupon.async.Callback;
+  16 import com.stumbleupon.async.Deferred;
+  17 import io.vertx.core.json.JsonArray;
+  18 import org.apache.commons.lang3.StringUtils;
+  19 import org.apache.flink.api.java.tuple.Tuple2;
+  20 import org.apache.flink.api.java.typeutils.RowTypeInfo;
+  21 import org.apache.flink.configuration.Configuration;
+  22 import org.apache.flink.streaming.api.functions.async.ResultFuture;
+  23 import org.apache.flink.types.Row;
+  24 import org.apache.flink.util.Preconditions;
+  25 import org.apache.kudu.ColumnSchema;
+  26 import org.apache.kudu.Schema;
+  27 import org.apache.kudu.client.AsyncKuduClient;
+  28 import org.apache.kudu.client.AsyncKuduScanner;
+  29 import org.apache.kudu.client.KuduException;
+  30 import org.apache.kudu.client.KuduPredicate;
+  31 import org.apache.kudu.client.KuduTable;
+  32 import org.apache.kudu.client.RowResult;
+  33 import org.apache.kudu.client.RowResultIterator;
+  34 import org.slf4j.Logger;
+  35 import org.slf4j.LoggerFactory;
+  36 
+  37 import java.util.Arrays;
+  38 import java.util.Collections;
+  39 import java.util.List;
+  40 import java.util.Map;
+  41 
+  42 public class KuduAsyncReqRow extends BaseAsyncReqRow {
+  43 
+  44     private static final Logger LOG = LoggerFactory.getLogger(KuduAsyncReqRow.class);
+  45     /**
+  46      * 获取连接的尝试次数
+  47      */
+  48     private static final int CONN_RETRY_NUM = 3;
+  49     /**
+  50      * 缓存条数
+  51      */
+  52     private static final Long FETCH_SIZE = 1000L;
+  53 
+  54     private static final long serialVersionUID = 5028583854989267753L;
+  55 
+  56 
+  57     private AsyncKuduClient asyncClient;
+  58 
+  59     private KuduTable table;
+  60 
+  61     private KuduSideTableInfo kuduSideTableInfo;
+  62 
+  63     private AsyncKuduScanner.AsyncKuduScannerBuilder scannerBuilder;
+  64 
+<abbr title="  65     public KuduAsyncReqRow(RowTypeInfo rowTypeInfo, JoinInfo joinInfo, List&lt;FieldInfo&gt; outFieldInfoList, AbstractSideTableInfo sideTableInfo) {">  65     public KuduAsyncReqRow(RowTypeInfo rowTypeInfo, JoinInfo joinInfo, List&lt;FieldInfo&gt; outFieldInfoList, 🔵</abbr>
+  66         super(new KuduAsyncSideInfo(rowTypeInfo, joinInfo, outFieldInfoList, sideTableInfo));
+  67     }
+  68 
+  69     @Override
+  70     public void open(Configuration parameters) throws Exception {
+  71         super.open(parameters);
+  72         kuduSideTableInfo = (KuduSideTableInfo) sideInfo.getSideTableInfo();
+  73         connKuDu();
+  74     }
+  75 
+  76     /**
+  77      * 连接kudu中的表
+  78      *
+  79      * @throws KuduException
+  80      */
+  81     private void connKuDu() throws KuduException {
+  82         if (null == table) {
+  83             String kuduMasters = kuduSideTableInfo.getKuduMasters();
+  84             String tableName = kuduSideTableInfo.getTableName();
+  85             Integer workerCount = kuduSideTableInfo.getWorkerCount();
+  86             Integer defaultSocketReadTimeoutMs = kuduSideTableInfo.getDefaultSocketReadTimeoutMs();
+  87             Integer defaultOperationTimeoutMs = kuduSideTableInfo.getDefaultOperationTimeoutMs();
+  88 
+  89             Preconditions.checkNotNull(kuduMasters, &quot;kuduMasters could not be null&quot;);
+  90 
+<abbr title="  91             AsyncKuduClient.AsyncKuduClientBuilder asyncKuduClientBuilder = new AsyncKuduClient.AsyncKuduClientBuilder(kuduMasters);">  91             AsyncKuduClient.AsyncKuduClientBuilder asyncKuduClientBuilder = new AsyncKuduClient.AsyncKudu🔵</abbr>
+  92             if (null != workerCount) {
+  93                 asyncKuduClientBuilder.workerCount(workerCount);
+  94             }
+  95 
+  96             if (null != defaultOperationTimeoutMs) {
+  97                 asyncKuduClientBuilder.defaultOperationTimeoutMs(defaultOperationTimeoutMs);
+  98             }
+  99             asyncClient = asyncKuduClientBuilder.build();
+ 100             if (!asyncClient.syncClient().tableExists(tableName)) {
+ 101                 throw new IllegalArgumentException(&quot;Table Open Failed , please check table exists&quot;);
+ 102             }
+ 103             table = asyncClient.syncClient().openTable(tableName);
+ 104             LOG.info(&quot;connect kudu is successed!&quot;);
+ 105         }
+ 106         scannerBuilder = asyncClient.newScannerBuilder(table);
+ 107         Integer batchSizeBytes = kuduSideTableInfo.getBatchSizeBytes();
+ 108         Long limitNum = kuduSideTableInfo.getLimitNum();
+ 109         Boolean isFaultTolerant = kuduSideTableInfo.getFaultTolerant();
+ 110         //查询需要的字段
+ 111         String[] sideFieldNames = StringUtils.split(sideInfo.getSideSelectFields(), &quot;,&quot;);
+ 112 
+ 113         if (null == limitNum || limitNum &lt;= 0) {
+ 114             scannerBuilder.limit(FETCH_SIZE);
+ 115         } else {
+ 116             scannerBuilder.limit(limitNum);
+ 117         }
+ 118         if (null != batchSizeBytes) {
+ 119             scannerBuilder.batchSizeBytes(batchSizeBytes);
+ 120         }
+ 121         if (null != isFaultTolerant) {
+ 122             scannerBuilder.setFaultTolerant(isFaultTolerant);
+ 123         }
+ 124 
+ 125         List&lt;String&gt; projectColumns = Arrays.asList(sideFieldNames);
+ 126         scannerBuilder.setProjectedColumnNames(projectColumns);
+ 127     }
+ 128 
+ 129 
+ 130 &lt;&lt;&lt;&lt;&lt;&lt;&lt; MINE
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 131     @Override</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"><abbr title=" 132     public void asyncInvoke(Tuple2&lt;Boolean,Row&gt; input, ResultFuture&lt;Tuple2&lt;Boolean,Row&gt;&gt; resultFuture) throws Exception {"> 132     public void asyncInvoke(Tuple2&lt;Boolean,Row&gt; input, ResultFuture&lt;Tuple2&lt;Boolean,Row&gt;&gt; resultFuture) th🔵</abbr></span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 133         Tuple2&lt;Boolean, Row&gt; inputCopy = Tuple2.of(input.f0, input.f1);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 134         //scannerBuilder 设置为null重新加载过滤条件</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 135         scannerBuilder = null;</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 136         connKuDu();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 137         JsonArray inputParams = new JsonArray();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 138         Schema schema = table.getSchema();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 139         //  @wenbaoup fix bug</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 140         for (int i = 0; i &lt; sideInfo.getEqualValIndex().size(); i++) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 141             Object equalObj = inputCopy.f1.getField(sideInfo.getEqualValIndex().get(i));</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 142             if (equalObj == null) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 143                 dealMissKey(inputCopy, resultFuture);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 144                 return;</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 145             }</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 146             //增加过滤条件</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"><abbr title=" 147             scannerBuilder.addPredicate(KuduPredicate.newInListPredicate(schema.getColumn(sideInfo.getEqualFieldList().get(i)), Collections.singletonList(equalObj)));"> 147             scannerBuilder.addPredicate(KuduPredicate.newInListPredicate(schema.getColumn(sideInfo.getEqu🔵</abbr></span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 148             inputParams.add(equalObj);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 149         }</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 150 </span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 151         //  填充谓词信息</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 152         List&lt;PredicateInfo&gt; predicateInfoes = sideInfo.getSideTableInfo().getPredicateInfoes();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 153         if (predicateInfoes.size() &gt; 0) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 154             predicateInfoes.stream().map(info -&gt; {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 155                 KuduPredicate kuduPredicate = KuduUtil.buildKuduPredicate(schema, info);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 156                 if (null != kuduPredicate) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 157                     scannerBuilder.addPredicate(kuduPredicate);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 158                 }</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 159                 return info;</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 160             }).count();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 161         }</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 162 </span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 163 </span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 164         String key = buildCacheKey(inputParams);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 165 </span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 166         if (openCache()) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 167             //判断数据是否已经加载到缓存中</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 168             CacheObj val = getFromCache(key);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 169             if (val != null) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 170                 if (ECacheContentType.MissVal == val.getType()) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 171                     dealMissKey(inputCopy, resultFuture);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 172                     return;</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 173                 } else if (ECacheContentType.SingleLine == val.getType()) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 174                     try {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 175                         Row row = fillData(inputCopy.f1, val);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 176                         resultFuture.complete(Collections.singleton(Tuple2.of(inputCopy.f0,row)));</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 177                     } catch (Exception e) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 178                         dealFillDataError(resultFuture, e, inputCopy);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 179                     }</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 180                 } else if (ECacheContentType.MultiLine == val.getType()) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 181                     try {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 182                         List&lt;Tuple2&lt;Boolean,Row&gt;&gt; rowList = Lists.newArrayList();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 183                         for (Object jsonArray : (List) val.getContent()) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 184                             Row row = fillData(inputCopy.f1, jsonArray);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 185                             rowList.add(Tuple2.of(inputCopy.f0, row));</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 186                         }</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 187                         resultFuture.complete(rowList);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 188                     } catch (Exception e) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 189                         dealFillDataError(resultFuture, e, inputCopy);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 190                     }</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 191                 } else {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"><abbr title=" 192                     resultFuture.completeExceptionally(new RuntimeException(&quot;not support cache obj type &quot; + val.getType()));"> 192                     resultFuture.completeExceptionally(new RuntimeException(&quot;not support cache obj type &quot;🔵</abbr></span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 193                 }</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 194                 return;</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 195             }</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 196         }</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 197         List&lt;Map&lt;String, Object&gt;&gt; cacheContent = Lists.newArrayList();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 198         AsyncKuduScanner asyncKuduScanner = scannerBuilder.build();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 199         List&lt;Tuple2&lt;Boolean,Row&gt;&gt; rowList = Lists.newArrayList();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 200         Deferred&lt;RowResultIterator&gt; data = asyncKuduScanner.nextRows();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 201         //从之前的同步修改为调用异步的Callback</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"><abbr title=" 202         data.addCallbackDeferring(new GetListRowCB(inputCopy, cacheContent, rowList, asyncKuduScanner, resultFuture, key));"> 202         data.addCallbackDeferring(new GetListRowCB(inputCopy, cacheContent, rowList, asyncKuduScanner, re🔵</abbr></span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 203     }</span>
+ 204 ||||||| BASE
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 205     @Override</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 206     public void asyncInvoke(CRow input, ResultFuture&lt;CRow&gt; resultFuture) throws Exception {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 207         CRow inputCopy = new CRow(input.row(), input.change());</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 208         //scannerBuilder 设置为null重新加载过滤条件</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 209         scannerBuilder = null;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 210         connKuDu();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 211         JsonArray inputParams = new JsonArray();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 212         Schema schema = table.getSchema();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 213         //  @wenbaoup fix bug</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 214         for (int i = 0; i &lt; sideInfo.getEqualValIndex().size(); i++) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 215             Object equalObj = inputCopy.row().getField(sideInfo.getEqualValIndex().get(i));</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 216             if (equalObj == null) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 217                 dealMissKey(inputCopy, resultFuture);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 218                 return;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 219             }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 220             //增加过滤条件</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"><abbr title=" 221             scannerBuilder.addPredicate(KuduPredicate.newInListPredicate(schema.getColumn(sideInfo.getEqualFieldList().get(i)), Collections.singletonList(equalObj)));"> 221             scannerBuilder.addPredicate(KuduPredicate.newInListPredicate(schema.getColumn(sideInfo.getEqu🔵</abbr></span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 222             inputParams.add(equalObj);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 223         }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 224 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 225         //  填充谓词信息</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 226         List&lt;PredicateInfo&gt; predicateInfoes = sideInfo.getSideTableInfo().getPredicateInfoes();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 227         if (predicateInfoes.size() &gt; 0) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 228             predicateInfoes.stream().map(info -&gt; {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 229                 KuduPredicate kuduPredicate = KuduUtil.buildKuduPredicate(schema, info);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 230                 if (null != kuduPredicate) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 231                     scannerBuilder.addPredicate(kuduPredicate);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 232                 }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 233                 return info;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 234             }).count();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 235         }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 236 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 237 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 238         String key = buildCacheKey(inputParams);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 239 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 240         if (openCache()) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 241             //判断数据是否已经加载到缓存中</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 242             CacheObj val = getFromCache(key);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 243             if (val != null) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 244                 if (ECacheContentType.MissVal == val.getType()) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 245                     dealMissKey(inputCopy, resultFuture);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 246                     return;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 247                 } else if (ECacheContentType.SingleLine == val.getType()) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 248                     try {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 249                         Row row = fillData(inputCopy.row(), val);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 250                         resultFuture.complete(Collections.singleton(new CRow(row, inputCopy.change())));</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 251                     } catch (Exception e) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 252                         dealFillDataError(resultFuture, e, inputCopy);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 253                     }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 254                 } else if (ECacheContentType.MultiLine == val.getType()) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 255                     try {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 256                         List&lt;CRow&gt; rowList = Lists.newArrayList();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 257                         for (Object jsonArray : (List) val.getContent()) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 258                             Row row = fillData(inputCopy.row(), jsonArray);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 259                             rowList.add(new CRow(row, inputCopy.change()));</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 260                         }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 261                         resultFuture.complete(rowList);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 262                     } catch (Exception e) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 263                         dealFillDataError(resultFuture, e, inputCopy);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 264                     }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 265                 } else {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"><abbr title=" 266                     resultFuture.completeExceptionally(new RuntimeException(&quot;not support cache obj type &quot; + val.getType()));"> 266                     resultFuture.completeExceptionally(new RuntimeException(&quot;not support cache obj type &quot;🔵</abbr></span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 267                 }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 268                 return;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 269             }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 270         }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 271         List&lt;Map&lt;String, Object&gt;&gt; cacheContent = Lists.newArrayList();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 272         AsyncKuduScanner asyncKuduScanner = scannerBuilder.build();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 273         List&lt;CRow&gt; rowList = Lists.newArrayList();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 274         Deferred&lt;RowResultIterator&gt; data = asyncKuduScanner.nextRows();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 275         //从之前的同步修改为调用异步的Callback</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"><abbr title=" 276         data.addCallbackDeferring(new GetListRowCB(inputCopy, cacheContent, rowList, asyncKuduScanner, resultFuture, key));"> 276         data.addCallbackDeferring(new GetListRowCB(inputCopy, cacheContent, rowList, asyncKuduScanner, re🔵</abbr></span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 277     }</span>
+ 278 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 279 </span>
+ 280 &gt;&gt;&gt;&gt;&gt;&gt;&gt; YOURS
+ 281 
+ 282     @Override
+<abbr title=" 283     public void handleAsyncInvoke(Map&lt;String, Object&gt; inputParams, CRow input, ResultFuture&lt;CRow&gt; resultFuture) throws Exception {"> 283     public void handleAsyncInvoke(Map&lt;String, Object&gt; inputParams, CRow input, ResultFuture&lt;CRow&gt; resultF🔵</abbr>
+ 284         CRow inputCopy = new CRow(input.row(), input.change());
+ 285         //scannerBuilder 设置为null重新加载过滤条件,然后connkudu重新赋值
+ 286         //todo:代码需要优化
+ 287         scannerBuilder = null;
+ 288         connKuDu();
+ 289         Schema schema = table.getSchema();
+ 290         //  @wenbaoup fix bug
+ 291         inputParams.entrySet().forEach(e -&gt;{
+<abbr title=" 292             scannerBuilder.addPredicate(KuduPredicate.newInListPredicate(schema.getColumn(e.getKey()), Collections.singletonList(e.getValue())));"> 292             scannerBuilder.addPredicate(KuduPredicate.newInListPredicate(schema.getColumn(e.getKey()), Co🔵</abbr>
+ 293         });
+ 294 
+ 295         //  填充谓词信息
+ 296         List&lt;PredicateInfo&gt; predicateInfoes = sideInfo.getSideTableInfo().getPredicateInfoes();
+ 297         if (predicateInfoes.size() &gt; 0) {
+ 298             predicateInfoes.stream().map(info -&gt; {
+ 299                 KuduPredicate kuduPredicate = KuduUtil.buildKuduPredicate(schema, info);
+ 300                 if (null != kuduPredicate) {
+ 301                     scannerBuilder.addPredicate(kuduPredicate);
+ 302                 }
+ 303                 return info;
+ 304             }).count();
+ 305         }
+ 306 
+ 307         List&lt;Map&lt;String, Object&gt;&gt; cacheContent = Lists.newArrayList();
+ 308         AsyncKuduScanner asyncKuduScanner = scannerBuilder.build();
+ 309         List&lt;CRow&gt; rowList = Lists.newArrayList();
+ 310         Deferred&lt;RowResultIterator&gt; data = asyncKuduScanner.nextRows();
+ 311         //从之前的同步修改为调用异步的Callback
+<abbr title=" 312         data.addCallbackDeferring(new GetListRowCB(inputCopy, cacheContent, rowList, asyncKuduScanner, resultFuture, buildCacheKey(inputParams)));"> 312         data.addCallbackDeferring(new GetListRowCB(inputCopy, cacheContent, rowList, asyncKuduScanner, re🔵</abbr>
+ 313     }
+ 314 
+ 315 
+ 316     @Override
+ 317     public Row fillData(Row input, Object sideInput) {
+ 318         Map&lt;String, Object&gt; cacheInfo = (Map&lt;String, Object&gt;) sideInput;
+ 319         Row row = new Row(sideInfo.getOutFieldInfoList().size());
+ 320         for (Map.Entry&lt;Integer, Integer&gt; entry : sideInfo.getInFieldIndex().entrySet()) {
+ 321             Object obj = input.getField(entry.getValue());
+ 322             obj = convertTimeIndictorTypeInfo(entry.getValue(), obj);
+ 323             row.setField(entry.getKey(), obj);
+ 324         }
+ 325 
+ 326         for (Map.Entry&lt;Integer, String&gt; entry : sideInfo.getSideFieldNameIndex().entrySet()) {
+ 327             if (cacheInfo == null) {
+ 328                 row.setField(entry.getKey(), null);
+ 329             } else {
+ 330                 row.setField(entry.getKey(), cacheInfo.get(entry.getValue()));
+ 331             }
+ 332         }
+ 333 
+ 334         return row;
+ 335     }
+ 336 
+ 337     @Override
+ 338     public String buildCacheKey(Map&lt;String, Object&gt; inputParams) {
+ 339         StringBuilder sb = new StringBuilder();
+ 340         for (Object ele : inputParams.values()) {
+ 341             sb.append(ele.toString())
+ 342                     .append(&quot;_&quot;);
+ 343         }
+ 344 
+ 345         return sb.toString();
+ 346     }
+ 347 
+ 348     @Override
+ 349     public void close() throws Exception {
+ 350         super.close();
+ 351         if (null != asyncClient) {
+ 352             try {
+ 353                 asyncClient.close();
+ 354             } catch (Exception e) {
+ 355                 LOG.error(&quot;Error while closing client.&quot;, e);
+ 356             }
+ 357         }
+ 358     }
+ 359 
+ 360     class GetListRowCB implements Callback&lt;Deferred&lt;List&lt;Row&gt;&gt;, RowResultIterator&gt; {
+ 361         private Tuple2&lt;Boolean,Row&gt; input;
+ 362         private List&lt;Map&lt;String, Object&gt;&gt; cacheContent;
+ 363         private List&lt;Tuple2&lt;Boolean,Row&gt;&gt; rowList;
+ 364         private AsyncKuduScanner asyncKuduScanner;
+ 365         private ResultFuture&lt;Tuple2&lt;Boolean,Row&gt;&gt; resultFuture;
+ 366         private String key;
+ 367 
+ 368 
+ 369         public GetListRowCB() {
+ 370         }
+ 371 
+<abbr title=" 372         GetListRowCB(Tuple2&lt;Boolean,Row&gt; input, List&lt;Map&lt;String, Object&gt;&gt; cacheContent, List&lt;Tuple2&lt;Boolean,Row&gt;&gt; rowList,"> 372         GetListRowCB(Tuple2&lt;Boolean,Row&gt; input, List&lt;Map&lt;String, Object&gt;&gt; cacheContent, List&lt;Tuple2&lt;Boole🔵</abbr>
+<abbr title=" 373                      AsyncKuduScanner asyncKuduScanner, ResultFuture&lt;Tuple2&lt;Boolean,Row&gt;&gt; resultFuture, String key) {"> 373                      AsyncKuduScanner asyncKuduScanner, ResultFuture&lt;Tuple2&lt;Boolean,Row&gt;&gt; resultFuture, S🔵</abbr>
+ 374             this.input = input;
+ 375             this.cacheContent = cacheContent;
+ 376             this.rowList = rowList;
+ 377             this.asyncKuduScanner = asyncKuduScanner;
+ 378             this.resultFuture = resultFuture;
+ 379             this.key = key;
+ 380         }
+ 381 
+ 382         @Override
+ 383         public Deferred&lt;List&lt;Row&gt;&gt; call(RowResultIterator results) throws Exception {
+ 384             for (RowResult result : results) {
+ 385                 Map&lt;String, Object&gt; oneRow = Maps.newHashMap();
+ 386                 for (String sideFieldName1 : StringUtils.split(sideInfo.getSideSelectFields(), &quot;,&quot;)) {
+ 387                     String sideFieldName = sideFieldName1.trim();
+ 388                     ColumnSchema columnSchema = table.getSchema().getColumn(sideFieldName);
+ 389                     if (null != columnSchema) {
+ 390                         KuduUtil.setMapValue(columnSchema.getType(), oneRow, sideFieldName, result);
+ 391                     }
+ 392                 }
+ 393                 Row row = fillData(input.f1, oneRow);
+ 394                 if (openCache()) {
+ 395                     cacheContent.add(oneRow);
+ 396                 }
+ 397                 rowList.add(Tuple2.of(input.f0, row));
+ 398             }
+ 399             if (asyncKuduScanner.hasMoreRows()) {
+ 400                 return asyncKuduScanner.nextRows().addCallbackDeferring(this);
+ 401             }
+ 402 
+ 403             if (rowList.size() &gt; 0) {
+ 404                 if (openCache()) {
+ 405                     putCache(key, CacheObj.buildCacheObj(ECacheContentType.MultiLine, cacheContent));
+ 406                 }
+ 407                 resultFuture.complete(rowList);
+ 408             } else {
+ 409                 dealMissKey(input, resultFuture);
+ 410                 if (openCache()) {
+ 411                     //放置在putCache的Miss中 一段时间内同一个key都会直接返回
+ 412                     putCache(key, CacheMissVal.getMissKeyObj());
+ 413                 }
+ 414             }
+ 415 
+ 416             return null;
+ 417         }
+ 418     }
+ 419 
+ 420 }</pre></td>
+                            <td><pre>   1 package com.dtstack.flink.sql.side.kudu;
+   2 
+   3 import com.dtstack.flink.sql.enums.ECacheContentType;
+   4 import com.dtstack.flink.sql.side.AbstractSideTableInfo;
+   5 import com.dtstack.flink.sql.side.BaseAsyncReqRow;
+   6 import com.dtstack.flink.sql.side.CacheMissVal;
+   7 import com.dtstack.flink.sql.side.FieldInfo;
+   8 import com.dtstack.flink.sql.side.JoinInfo;
+   9 import com.dtstack.flink.sql.side.PredicateInfo;
+  10 import com.dtstack.flink.sql.side.cache.CacheObj;
+  11 import com.dtstack.flink.sql.side.kudu.table.KuduSideTableInfo;
+  12 import com.dtstack.flink.sql.side.kudu.utils.KuduUtil;
+  13 import com.google.common.collect.Lists;
+  14 import com.google.common.collect.Maps;
+  15 import com.stumbleupon.async.Callback;
+  16 import com.stumbleupon.async.Deferred;
+  17 import io.vertx.core.json.JsonArray;
+  18 import java.util.Arrays;
+  19 import java.util.Collections;
+  20 import java.util.List;
+  21 import java.util.Map;
+  22 import org.apache.commons.lang3.StringUtils;
+  23 import org.apache.flink.api.java.tuple.Tuple2;
+  24 import org.apache.flink.api.java.typeutils.RowTypeInfo;
+  25 import org.apache.flink.configuration.Configuration;
+  26 import org.apache.flink.streaming.api.functions.async.ResultFuture;
+  27 import org.apache.flink.types.Row;
+  28 import org.apache.flink.util.Preconditions;
+  29 import org.apache.kudu.ColumnSchema;
+  30 import org.apache.kudu.Schema;
+  31 import org.apache.kudu.client.AsyncKuduClient;
+  32 import org.apache.kudu.client.AsyncKuduScanner;
+  33 import org.apache.kudu.client.KuduException;
+  34 import org.apache.kudu.client.KuduPredicate;
+  35 import org.apache.kudu.client.KuduTable;
+  36 import org.apache.kudu.client.RowResult;
+  37 import org.apache.kudu.client.RowResultIterator;
+  38 import org.slf4j.Logger;
+  39 import org.slf4j.LoggerFactory;
+  40 
+  41 
+  42 public class KuduAsyncReqRow extends BaseAsyncReqRow {
+  43     private static final Logger LOG = LoggerFactory.getLogger(KuduAsyncReqRow.class);
+  44 
+  45     /**
+  46      * 获取连接的尝试次数
+  47      */
+  48     private static final int CONN_RETRY_NUM = 3;
+  49 
+  50     /**
+  51      * 缓存条数
+  52      */
+  53     private static final Long FETCH_SIZE = 1000L;
+  54 
+  55     private static final long serialVersionUID = 5028583854989267753L;
+  56 
+  57     private AsyncKuduClient asyncClient;
+  58 
+  59     private KuduTable table;
+  60 
+  61     private KuduSideTableInfo kuduSideTableInfo;
+  62 
+  63     private AsyncKuduScanner.AsyncKuduScannerBuilder scannerBuilder;
+  64 
+<abbr title="  65     public KuduAsyncReqRow(RowTypeInfo rowTypeInfo, JoinInfo joinInfo, List&lt;FieldInfo&gt; outFieldInfoList, AbstractSideTableInfo sideTableInfo) {">  65     public KuduAsyncReqRow(RowTypeInfo rowTypeInfo, JoinInfo joinInfo, List&lt;FieldInfo&gt; outFieldInfoList, 🔵</abbr>
+  66         super(new KuduAsyncSideInfo(rowTypeInfo, joinInfo, outFieldInfoList, sideTableInfo));
+  67     }
+  68 
+  69     @Override
+  70     public void open(Configuration parameters) throws Exception {
+  71         super.open(parameters);
+  72         kuduSideTableInfo = (KuduSideTableInfo) sideInfo.getSideTableInfo();
+  73         connKuDu();
+  74     }
+  75 
+  76     /**
+  77      * 连接kudu中的表
+  78      *
+  79      * @throws KuduException
+  80      */
+  81     private void connKuDu() throws KuduException {
+  82         if (null == table) {
+  83             String kuduMasters = kuduSideTableInfo.getKuduMasters();
+  84             String tableName = kuduSideTableInfo.getTableName();
+  85             Integer workerCount = kuduSideTableInfo.getWorkerCount();
+  86             Integer defaultSocketReadTimeoutMs = kuduSideTableInfo.getDefaultSocketReadTimeoutMs();
+  87             Integer defaultOperationTimeoutMs = kuduSideTableInfo.getDefaultOperationTimeoutMs();
+  88 
+  89             Preconditions.checkNotNull(kuduMasters, &quot;kuduMasters could not be null&quot;);
+  90 
+<abbr title="  91             AsyncKuduClient.AsyncKuduClientBuilder asyncKuduClientBuilder = new AsyncKuduClient.AsyncKuduClientBuilder(kuduMasters);">  91             AsyncKuduClient.AsyncKuduClientBuilder asyncKuduClientBuilder = new AsyncKuduClient.AsyncKudu🔵</abbr>
+  92             if (null != workerCount) {
+  93                 asyncKuduClientBuilder.workerCount(workerCount);
+  94             }
+  95 
+  96             if (null != defaultOperationTimeoutMs) {
+  97                 asyncKuduClientBuilder.defaultOperationTimeoutMs(defaultOperationTimeoutMs);
+  98             }
+  99             asyncClient = asyncKuduClientBuilder.build();
+ 100             if (!asyncClient.syncClient().tableExists(tableName)) {
+ 101                 throw new IllegalArgumentException(&quot;Table Open Failed , please check table exists&quot;);
+ 102             }
+ 103             table = asyncClient.syncClient().openTable(tableName);
+ 104             LOG.info(&quot;connect kudu is successed!&quot;);
+ 105         }
+ 106         scannerBuilder = asyncClient.newScannerBuilder(table);
+ 107         Integer batchSizeBytes = kuduSideTableInfo.getBatchSizeBytes();
+ 108         Long limitNum = kuduSideTableInfo.getLimitNum();
+ 109         Boolean isFaultTolerant = kuduSideTableInfo.getFaultTolerant();
+ 110         //查询需要的字段
+ 111         String[] sideFieldNames = StringUtils.split(sideInfo.getSideSelectFields(), &quot;,&quot;);
+ 112 
+ 113         if (null == limitNum || limitNum &lt;= 0) {
+ 114             scannerBuilder.limit(FETCH_SIZE);
+ 115         } else {
+ 116             scannerBuilder.limit(limitNum);
+ 117         }
+ 118         if (null != batchSizeBytes) {
+ 119             scannerBuilder.batchSizeBytes(batchSizeBytes);
+ 120         }
+ 121         if (null != isFaultTolerant) {
+ 122             scannerBuilder.setFaultTolerant(isFaultTolerant);
+ 123         }
+ 124 
+ 125         List&lt;String&gt; projectColumns = Arrays.asList(sideFieldNames);
+ 126         scannerBuilder.setProjectedColumnNames(projectColumns);
+ 127     }
+ 128 
+ 129     @Override
+<abbr title=" 130     public void handleAsyncInvoke(Map&lt;String, Object&gt; inputParams, Tuple2&lt;Boolean, Row&gt; input, ResultFuture&lt;Tuple2&lt;Boolean, Row&gt;&gt; resultFuture) throws Exception {"> 130     public void handleAsyncInvoke(Map&lt;String, Object&gt; inputParams, Tuple2&lt;Boolean, Row&gt; input, ResultFutu🔵</abbr>
+ 131         Tuple2&lt;Boolean, Row&gt; inputCopy = Tuple2.of(input.f0, input.f1);
+ 132         // scannerBuilder 设置为null重新加载过滤条件,然后connkudu重新赋值
+ 133         //todo:代码需要优化
+ 134         scannerBuilder = null;
+ 135         connKuDu();
+ 136         Schema schema = table.getSchema();
+ 137         //  @wenbaoup fix bug
+ 138         inputParams.entrySet().forEach(( e) -&gt; {
+<abbr title=" 139             scannerBuilder.addPredicate(KuduPredicate.newInListPredicate(schema.getColumn(e.getKey()), Collections.singletonList(e.getValue())));"> 139             scannerBuilder.addPredicate(KuduPredicate.newInListPredicate(schema.getColumn(e.getKey()), Co🔵</abbr>
+ 140         });
+ 141         // 填充谓词信息
+ 142         List&lt;PredicateInfo&gt; predicateInfoes = sideInfo.getSideTableInfo().getPredicateInfoes();
+ 143         if (predicateInfoes.size() &gt; 0) {
+ 144             predicateInfoes.stream().map(( info) -&gt; {
+ 145                 KuduPredicate kuduPredicate = KuduUtil.buildKuduPredicate(schema, info);
+ 146                 if (null != kuduPredicate) {
+ 147                     scannerBuilder.addPredicate(kuduPredicate);
+ 148                 }
+ 149                 return info;
+ 150             }).count();
+ 151         }
+ 152         List&lt;Map&lt;String, Object&gt;&gt; cacheContent = Lists.newArrayList();
+ 153         AsyncKuduScanner asyncKuduScanner = scannerBuilder.build();
+ 154         List&lt;Tuple2&lt;Boolean, Row&gt;&gt; rowList = Lists.newArrayList();
+ 155         Deferred&lt;RowResultIterator&gt; data = asyncKuduScanner.nextRows();
+ 156         //从之前的同步修改为调用异步的Callback
+<abbr title=" 157         data.addCallbackDeferring(new GetListRowCB(inputCopy, cacheContent, rowList, asyncKuduScanner, resultFuture, buildCacheKey(inputParams)));"> 157         data.addCallbackDeferring(new GetListRowCB(inputCopy, cacheContent, rowList, asyncKuduScanner, re🔵</abbr>
+ 158     }
+ 159 
+ 160     @Override
+ 161     public String buildCacheKey(Map&lt;String, Object&gt; inputParams) {
+ 162         StringBuilder sb = new StringBuilder();
+ 163         for (Object ele : inputParams.values()) {
+ 164             sb.append(ele.toString()).append(&quot;_&quot;);
+ 165         }
+ 166         return sb.toString();
+ 167     }
+ 168 
+ 169     @Override
+ 170     public Row fillData(Row input, Object sideInput) {
+ 171         Map&lt;String, Object&gt; cacheInfo = ((Map&lt;String, Object&gt;) (sideInput));
+ 172         Row row = new Row(sideInfo.getOutFieldInfoList().size());
+ 173         for (Map.Entry&lt;Integer, Integer&gt; entry : sideInfo.getInFieldIndex().entrySet()) {
+ 174             Object obj = input.getField(entry.getValue());
+ 175             obj = convertTimeIndictorTypeInfo(entry.getValue(), obj);
+ 176             row.setField(entry.getKey(), obj);
+ 177         }
+ 178         for (Map.Entry&lt;Integer, String&gt; entry : sideInfo.getSideFieldNameIndex().entrySet()) {
+ 179             if (cacheInfo == null) {
+ 180                 row.setField(entry.getKey(), null);
+ 181             } else {
+ 182                 row.setField(entry.getKey(), cacheInfo.get(entry.getValue()));
+ 183             }
+ 184         }
+ 185         return row;
+ 186     }
+ 187 
+ 188     @Override
+ 189     public void close() throws Exception {
+ 190         super.close();
+ 191         if (null != asyncClient) {
+ 192             try {
+ 193                 asyncClient.close();
+ 194             } catch (Exception e) {
+ 195                 LOG.error(&quot;Error while closing client.&quot;, e);
+ 196             }
+ 197         }
+ 198     }
+ 199 
+ 200     class GetListRowCB implements Callback&lt;Deferred&lt;List&lt;Row&gt;&gt;, RowResultIterator&gt; {
+ 201         private Tuple2&lt;Boolean, Row&gt; input;
+ 202 
+ 203         private List&lt;Map&lt;String, Object&gt;&gt; cacheContent;
+ 204 
+ 205         private List&lt;Tuple2&lt;Boolean, Row&gt;&gt; rowList;
+ 206 
+ 207         private AsyncKuduScanner asyncKuduScanner;
+ 208 
+ 209         private ResultFuture&lt;Tuple2&lt;Boolean, Row&gt;&gt; resultFuture;
+ 210 
+ 211         private String key;
+ 212 
+ 213         public GetListRowCB() {
+ 214         }
+ 215 
+<abbr title=" 216         GetListRowCB(Tuple2&lt;Boolean, Row&gt; input, List&lt;Map&lt;String, Object&gt;&gt; cacheContent, List&lt;Tuple2&lt;Boolean, Row&gt;&gt; rowList, AsyncKuduScanner asyncKuduScanner, ResultFuture&lt;Tuple2&lt;Boolean, Row&gt;&gt; resultFuture, String key) {"> 216         GetListRowCB(Tuple2&lt;Boolean, Row&gt; input, List&lt;Map&lt;String, Object&gt;&gt; cacheContent, List&lt;Tuple2&lt;Bool🔵</abbr>
+ 217             this.input = input;
+ 218             this.cacheContent = cacheContent;
+ 219             this.rowList = rowList;
+ 220             this.asyncKuduScanner = asyncKuduScanner;
+ 221             this.resultFuture = resultFuture;
+ 222             this.key = key;
+ 223         }
+ 224 
+ 225         @Override
+ 226         public Deferred&lt;List&lt;Row&gt;&gt; call(RowResultIterator results) throws Exception {
+ 227             for (RowResult result : results) {
+ 228                 Map&lt;String, Object&gt; oneRow = Maps.newHashMap();
+ 229                 for (String sideFieldName1 : StringUtils.split(sideInfo.getSideSelectFields(), &quot;,&quot;)) {
+ 230                     String sideFieldName = sideFieldName1.trim();
+ 231                     ColumnSchema columnSchema = table.getSchema().getColumn(sideFieldName);
+ 232                     if (null != columnSchema) {
+ 233                         KuduUtil.setMapValue(columnSchema.getType(), oneRow, sideFieldName, result);
+ 234                     }
+ 235                 }
+ 236                 Row row = fillData(input.f1, oneRow);
+ 237                 if (openCache()) {
+ 238                     cacheContent.add(oneRow);
+ 239                 }
+ 240                 rowList.add(Tuple2.of(input.f0, row));
+ 241             }
+ 242             if (asyncKuduScanner.hasMoreRows()) {
+ 243                 return asyncKuduScanner.nextRows().addCallbackDeferring(this);
+ 244             }
+ 245             if (rowList.size() &gt; 0) {
+ 246                 if (openCache()) {
+ 247                     putCache(key, CacheObj.buildCacheObj(ECacheContentType.MultiLine, cacheContent));
+ 248                 }
+ 249                 resultFuture.complete(rowList);
+ 250             } else {
+ 251                 dealMissKey(input, resultFuture);
+ 252                 if (openCache()) {
+ 253                     // 放置在putCache的Miss中 一段时间内同一个key都会直接返回
+ 254                     putCache(key, CacheMissVal.getMissKeyObj());
+ 255                 }
+ 256             }
+ 257             return null;
+ 258         }
+ 259     }
+ 260 }
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ </pre></td>
+                        </tr>
+                    </table>
+                </div>
+                <div id="bottom">
+                    <table style="margin:auto">
+                        <tr>
+                            <th>ours vs. base</th>
+                            <th>theirs vs. base</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1  package com.dtstack.flink.sql.side.kudu;
+   2  
+   3  import com.dtstack.flink.sql.enums.ECacheContentType;
+   4  import com.dtstack.flink.sql.side.AbstractSideTableInfo;
+   5  import com.dtstack.flink.sql.side.BaseAsyncReqRow;
+   6  import com.dtstack.flink.sql.side.CacheMissVal;
+   7  import com.dtstack.flink.sql.side.FieldInfo;
+   8  import com.dtstack.flink.sql.side.JoinInfo;
+   9  import com.dtstack.flink.sql.side.PredicateInfo;
+  10  import com.dtstack.flink.sql.side.cache.CacheObj;
+  11  import com.dtstack.flink.sql.side.kudu.table.KuduSideTableInfo;
+  12  import com.dtstack.flink.sql.side.kudu.utils.KuduUtil;
+  13  import com.google.common.collect.Lists;
+  14  import com.google.common.collect.Maps;
+  15  import com.stumbleupon.async.Callback;
+  16  import com.stumbleupon.async.Deferred;
+  17  import io.vertx.core.json.JsonArray;
+  18  import org.apache.commons.lang3.StringUtils;
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  19 +import org.apache.flink.api.java.tuple.Tuple2;</span>
+  20  import org.apache.flink.api.java.typeutils.RowTypeInfo;
+  21  import org.apache.flink.configuration.Configuration;
+  22  import org.apache.flink.streaming.api.functions.async.ResultFuture;
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  23 -import org.apache.flink.table.runtime.types.CRow;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  24 -import org.apache.flink.table.typeutils.TimeIndicatorTypeInfo;</span>
+  25  import org.apache.flink.types.Row;
+  26  import org.apache.flink.util.Preconditions;
+  27  import org.apache.kudu.ColumnSchema;
+  28  import org.apache.kudu.Schema;
+  29  import org.apache.kudu.client.AsyncKuduClient;
+  30  import org.apache.kudu.client.AsyncKuduScanner;
+  31  import org.apache.kudu.client.KuduException;
+  32  import org.apache.kudu.client.KuduPredicate;
+  33  import org.apache.kudu.client.KuduTable;
+  34  import org.apache.kudu.client.RowResult;
+  35  import org.apache.kudu.client.RowResultIterator;
+  36  import org.slf4j.Logger;
+  37  import org.slf4j.LoggerFactory;
+  38  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  39 -import java.sql.Timestamp;</span>
+  40  import java.util.Arrays;
+  41  import java.util.Collections;
+  42  import java.util.List;
+  43  import java.util.Map;
+  44  
+  45  public class KuduAsyncReqRow extends BaseAsyncReqRow {
+  46  
+  47      private static final Logger LOG = LoggerFactory.getLogger(KuduAsyncReqRow.class);
+  48      /**
+  49       * 获取连接的尝试次数
+  50       */
+  51      private static final int CONN_RETRY_NUM = 3;
+  52      /**
+  53       * 缓存条数
+  54       */
+  55      private static final Long FETCH_SIZE = 1000L;
+  56  
+  57      private static final long serialVersionUID = 5028583854989267753L;
+  58  
+  59  
+  60      private AsyncKuduClient asyncClient;
+  61  
+  62      private KuduTable table;
+  63  
+  64      private KuduSideTableInfo kuduSideTableInfo;
+  65  
+  66      private AsyncKuduScanner.AsyncKuduScannerBuilder scannerBuilder;
+  67  
+<abbr title="  68      public KuduAsyncReqRow(RowTypeInfo rowTypeInfo, JoinInfo joinInfo, List&lt;FieldInfo&gt; outFieldInfoList, AbstractSideTableInfo sideTableInfo) {">  68      public KuduAsyncReqRow(RowTypeInfo rowTypeInfo, JoinInfo joinInfo, List&lt;FieldInfo&gt; outFieldInfoList, AbstractS🔵</abbr>
+  69          super(new KuduAsyncSideInfo(rowTypeInfo, joinInfo, outFieldInfoList, sideTableInfo));
+  70      }
+  71  
+  72      @Override
+  73      public void open(Configuration parameters) throws Exception {
+  74          super.open(parameters);
+  75          kuduSideTableInfo = (KuduSideTableInfo) sideInfo.getSideTableInfo();
+  76          connKuDu();
+  77      }
+  78  
+  79      /**
+  80       * 连接kudu中的表
+  81       *
+  82       * @throws KuduException
+  83       */
+  84      private void connKuDu() throws KuduException {
+  85          if (null == table) {
+  86              String kuduMasters = kuduSideTableInfo.getKuduMasters();
+  87              String tableName = kuduSideTableInfo.getTableName();
+  88              Integer workerCount = kuduSideTableInfo.getWorkerCount();
+  89              Integer defaultSocketReadTimeoutMs = kuduSideTableInfo.getDefaultSocketReadTimeoutMs();
+  90              Integer defaultOperationTimeoutMs = kuduSideTableInfo.getDefaultOperationTimeoutMs();
+  91  
+  92              Preconditions.checkNotNull(kuduMasters, &quot;kuduMasters could not be null&quot;);
+  93  
+<abbr title="  94              AsyncKuduClient.AsyncKuduClientBuilder asyncKuduClientBuilder = new AsyncKuduClient.AsyncKuduClientBuilder(kuduMasters);">  94              AsyncKuduClient.AsyncKuduClientBuilder asyncKuduClientBuilder = new AsyncKuduClient.AsyncKuduClientBui🔵</abbr>
+  95              if (null != workerCount) {
+  96                  asyncKuduClientBuilder.workerCount(workerCount);
+  97              }
+  98  
+  99              if (null != defaultOperationTimeoutMs) {
+ 100                  asyncKuduClientBuilder.defaultOperationTimeoutMs(defaultOperationTimeoutMs);
+ 101              }
+ 102              asyncClient = asyncKuduClientBuilder.build();
+ 103              if (!asyncClient.syncClient().tableExists(tableName)) {
+ 104                  throw new IllegalArgumentException(&quot;Table Open Failed , please check table exists&quot;);
+ 105              }
+ 106              table = asyncClient.syncClient().openTable(tableName);
+ 107              LOG.info(&quot;connect kudu is successed!&quot;);
+ 108          }
+ 109          scannerBuilder = asyncClient.newScannerBuilder(table);
+ 110          Integer batchSizeBytes = kuduSideTableInfo.getBatchSizeBytes();
+ 111          Long limitNum = kuduSideTableInfo.getLimitNum();
+ 112          Boolean isFaultTolerant = kuduSideTableInfo.getFaultTolerant();
+ 113          //查询需要的字段
+ 114          String[] sideFieldNames = StringUtils.split(sideInfo.getSideSelectFields(), &quot;,&quot;);
+ 115  
+ 116          if (null == limitNum || limitNum &lt;= 0) {
+ 117              scannerBuilder.limit(FETCH_SIZE);
+ 118          } else {
+ 119              scannerBuilder.limit(limitNum);
+ 120          }
+ 121          if (null != batchSizeBytes) {
+ 122              scannerBuilder.batchSizeBytes(batchSizeBytes);
+ 123          }
+ 124          if (null != isFaultTolerant) {
+ 125              scannerBuilder.setFaultTolerant(isFaultTolerant);
+ 126          }
+ 127  
+ 128          List&lt;String&gt; projectColumns = Arrays.asList(sideFieldNames);
+ 129          scannerBuilder.setProjectedColumnNames(projectColumns);
+ 130      }
+ 131  
+ 132  
+ 133      @Override
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 134 -    public void asyncInvoke(CRow input, ResultFuture&lt;CRow&gt; resultFuture) throws Exception {</span>
+
+
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 135 -        CRow inputCopy = new CRow(input.row(), input.change());</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"><abbr title=" 136 +    public void asyncInvoke(Tuple2&lt;Boolean,Row&gt; input, ResultFuture&lt;Tuple2&lt;Boolean,Row&gt;&gt; resultFuture) throws Exception {"> 136 +    public void asyncInvoke(Tuple2&lt;Boolean,Row&gt; input, ResultFuture&lt;Tuple2&lt;Boolean,Row&gt;&gt; resultFuture) throws Exce🔵</abbr></span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 137 +        Tuple2&lt;Boolean, Row&gt; inputCopy = Tuple2.of(input.f0, input.f1);</span>
+ 138          //scannerBuilder 设置为null重新加载过滤条件
+
+
+ 139          scannerBuilder = null;
+ 140          connKuDu();
+ 141          JsonArray inputParams = new JsonArray();
+ 142          Schema schema = table.getSchema();
+ 143          //  @wenbaoup fix bug
+ 144          for (int i = 0; i &lt; sideInfo.getEqualValIndex().size(); i++) {
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 145 -            Object equalObj = inputCopy.row().getField(sideInfo.getEqualValIndex().get(i));</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 146 +            Object equalObj = inputCopy.f1.getField(sideInfo.getEqualValIndex().get(i));</span>
+ 147              if (equalObj == null) {
+ 148                  dealMissKey(inputCopy, resultFuture);
+ 149                  return;
+ 150              }
+ 151              //增加过滤条件
+<abbr title=" 152              scannerBuilder.addPredicate(KuduPredicate.newInListPredicate(schema.getColumn(sideInfo.getEqualFieldList().get(i)), Collections.singletonList(equalObj)));"> 152              scannerBuilder.addPredicate(KuduPredicate.newInListPredicate(schema.getColumn(sideInfo.getEqualFieldLi🔵</abbr>
+ 153              inputParams.add(equalObj);
+ 154          }
+
+
+
+ 155  
+ 156          //  填充谓词信息
+ 157          List&lt;PredicateInfo&gt; predicateInfoes = sideInfo.getSideTableInfo().getPredicateInfoes();
+ 158          if (predicateInfoes.size() &gt; 0) {
+ 159              predicateInfoes.stream().map(info -&gt; {
+ 160                  KuduPredicate kuduPredicate = KuduUtil.buildKuduPredicate(schema, info);
+ 161                  if (null != kuduPredicate) {
+ 162                      scannerBuilder.addPredicate(kuduPredicate);
+ 163                  }
+ 164                  return info;
+ 165              }).count();
+ 166          }
+ 167  
+ 168  
+ 169          String key = buildCacheKey(inputParams);
+ 170  
+ 171          if (openCache()) {
+ 172              //判断数据是否已经加载到缓存中
+ 173              CacheObj val = getFromCache(key);
+ 174              if (val != null) {
+ 175                  if (ECacheContentType.MissVal == val.getType()) {
+ 176                      dealMissKey(inputCopy, resultFuture);
+ 177                      return;
+ 178                  } else if (ECacheContentType.SingleLine == val.getType()) {
+ 179                      try {
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 180 -                        Row row = fillData(inputCopy.row(), val);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 181 -                        resultFuture.complete(Collections.singleton(new CRow(row, inputCopy.change())));</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 182 +                        Row row = fillData(inputCopy.f1, val);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 183 +                        resultFuture.complete(Collections.singleton(Tuple2.of(inputCopy.f0,row)));</span>
+ 184                      } catch (Exception e) {
+ 185                          dealFillDataError(resultFuture, e, inputCopy);
+ 186                      }
+ 187                  } else if (ECacheContentType.MultiLine == val.getType()) {
+ 188                      try {
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 189 -                        List&lt;CRow&gt; rowList = Lists.newArrayList();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 190 +                        List&lt;Tuple2&lt;Boolean,Row&gt;&gt; rowList = Lists.newArrayList();</span>
+ 191                          for (Object jsonArray : (List) val.getContent()) {
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 192 -                            Row row = fillData(inputCopy.row(), jsonArray);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 193 -                            rowList.add(new CRow(row, inputCopy.change()));</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 194 +                            Row row = fillData(inputCopy.f1, jsonArray);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 195 +                            rowList.add(Tuple2.of(inputCopy.f0, row));</span>
+ 196                          }
+ 197                          resultFuture.complete(rowList);
+ 198                      } catch (Exception e) {
+ 199                          dealFillDataError(resultFuture, e, inputCopy);
+ 200                      }
+ 201                  } else {
+<abbr title=" 202                      resultFuture.completeExceptionally(new RuntimeException(&quot;not support cache obj type &quot; + val.getType()));"> 202                      resultFuture.completeExceptionally(new RuntimeException(&quot;not support cache obj type &quot; + val.ge🔵</abbr>
+ 203                  }
+ 204                  return;
+ 205              }
+ 206          }
+ 207          List&lt;Map&lt;String, Object&gt;&gt; cacheContent = Lists.newArrayList();
+ 208          AsyncKuduScanner asyncKuduScanner = scannerBuilder.build();
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 209 -        List&lt;CRow&gt; rowList = Lists.newArrayList();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 210 +        List&lt;Tuple2&lt;Boolean,Row&gt;&gt; rowList = Lists.newArrayList();</span>
+ 211          Deferred&lt;RowResultIterator&gt; data = asyncKuduScanner.nextRows();
+ 212          //从之前的同步修改为调用异步的Callback
+<abbr title=" 213          data.addCallbackDeferring(new GetListRowCB(inputCopy, cacheContent, rowList, asyncKuduScanner, resultFuture, key));"> 213          data.addCallbackDeferring(new GetListRowCB(inputCopy, cacheContent, rowList, asyncKuduScanner, resultFutur🔵</abbr>
+
+
+
+
+
+
+
+
+
+
+
+
+ 214      }
+ 215  
+ 216  
+ 217      @Override
+ 218      public Row fillData(Row input, Object sideInput) {
+ 219          Map&lt;String, Object&gt; cacheInfo = (Map&lt;String, Object&gt;) sideInput;
+ 220          Row row = new Row(sideInfo.getOutFieldInfoList().size());
+ 221          for (Map.Entry&lt;Integer, Integer&gt; entry : sideInfo.getInFieldIndex().entrySet()) {
+ 222              Object obj = input.getField(entry.getValue());
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"><abbr title=" 223 -            boolean isTimeIndicatorTypeInfo = TimeIndicatorTypeInfo.class.isAssignableFrom(sideInfo.getRowTypeInfo().getTypeAt(entry.getValue()).getClass());"> 223 -            boolean isTimeIndicatorTypeInfo = TimeIndicatorTypeInfo.class.isAssignableFrom(sideInfo.getRowTypeInfo🔵</abbr></span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 224 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"><abbr title=" 225 -            //Type information for indicating event or processing time. However, it behaves like a regular SQL timestamp but is serialized as Long."> 225 -            //Type information for indicating event or processing time. However, it behaves like a regular SQL tim🔵</abbr></span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 226 -            if (obj instanceof Timestamp &amp;&amp; isTimeIndicatorTypeInfo) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 227 -                obj = ((Timestamp) obj).getTime();</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 228 -            }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 229 +            obj = convertTimeIndictorTypeInfo(entry.getValue(), obj);</span>
+ 230              row.setField(entry.getKey(), obj);
+ 231          }
+ 232  
+ 233          for (Map.Entry&lt;Integer, String&gt; entry : sideInfo.getSideFieldNameIndex().entrySet()) {
+ 234              if (cacheInfo == null) {
+ 235                  row.setField(entry.getKey(), null);
+ 236              } else {
+ 237                  row.setField(entry.getKey(), cacheInfo.get(entry.getValue()));
+ 238              }
+ 239          }
+ 240  
+ 241          return row;
+ 242      }
+ 243  
+ 244      public String buildCacheKey(JsonArray jsonArray) {
+ 245          StringBuilder sb = new StringBuilder();
+ 246          for (Object ele : jsonArray.getList()) {
+ 247              sb.append(ele.toString())
+ 248                      .append(&quot;_&quot;);
+ 249          }
+ 250  
+ 251          return sb.toString();
+ 252      }
+ 253  
+ 254      @Override
+ 255      public void close() throws Exception {
+ 256          super.close();
+ 257          if (null != asyncClient) {
+ 258              try {
+ 259                  asyncClient.close();
+ 260              } catch (Exception e) {
+ 261                  LOG.error(&quot;Error while closing client.&quot;, e);
+ 262              }
+ 263          }
+ 264      }
+ 265  
+ 266      class GetListRowCB implements Callback&lt;Deferred&lt;List&lt;Row&gt;&gt;, RowResultIterator&gt; {
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 267 -        private CRow input;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 268 +        private Tuple2&lt;Boolean,Row&gt; input;</span>
+ 269          private List&lt;Map&lt;String, Object&gt;&gt; cacheContent;
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 270 -        private List&lt;CRow&gt; rowList;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 271 +        private List&lt;Tuple2&lt;Boolean,Row&gt;&gt; rowList;</span>
+ 272          private AsyncKuduScanner asyncKuduScanner;
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 273 -        private ResultFuture&lt;CRow&gt; resultFuture;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 274 +        private ResultFuture&lt;Tuple2&lt;Boolean,Row&gt;&gt; resultFuture;</span>
+ 275          private String key;
+ 276  
+ 277  
+ 278          public GetListRowCB() {
+ 279          }
+ 280  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"><abbr title=" 281 -        GetListRowCB(CRow input, List&lt;Map&lt;String, Object&gt;&gt; cacheContent, List&lt;CRow&gt; rowList, AsyncKuduScanner asyncKuduScanner, ResultFuture&lt;CRow&gt; resultFuture, String key) {"> 281 -        GetListRowCB(CRow input, List&lt;Map&lt;String, Object&gt;&gt; cacheContent, List&lt;CRow&gt; rowList, AsyncKuduScanner asyn🔵</abbr></span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"><abbr title=" 282 +        GetListRowCB(Tuple2&lt;Boolean,Row&gt; input, List&lt;Map&lt;String, Object&gt;&gt; cacheContent, List&lt;Tuple2&lt;Boolean,Row&gt;&gt; rowList,"> 282 +        GetListRowCB(Tuple2&lt;Boolean,Row&gt; input, List&lt;Map&lt;String, Object&gt;&gt; cacheContent, List&lt;Tuple2&lt;Boolean,Row&gt;&gt; 🔵</abbr></span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"><abbr title=" 283 +                     AsyncKuduScanner asyncKuduScanner, ResultFuture&lt;Tuple2&lt;Boolean,Row&gt;&gt; resultFuture, String key) {"> 283 +                     AsyncKuduScanner asyncKuduScanner, ResultFuture&lt;Tuple2&lt;Boolean,Row&gt;&gt; resultFuture, String key🔵</abbr></span>
+ 284              this.input = input;
+ 285              this.cacheContent = cacheContent;
+ 286              this.rowList = rowList;
+ 287              this.asyncKuduScanner = asyncKuduScanner;
+ 288              this.resultFuture = resultFuture;
+ 289              this.key = key;
+ 290          }
+ 291  
+ 292          @Override
+ 293          public Deferred&lt;List&lt;Row&gt;&gt; call(RowResultIterator results) throws Exception {
+ 294              for (RowResult result : results) {
+ 295                  Map&lt;String, Object&gt; oneRow = Maps.newHashMap();
+ 296                  for (String sideFieldName1 : StringUtils.split(sideInfo.getSideSelectFields(), &quot;,&quot;)) {
+ 297                      String sideFieldName = sideFieldName1.trim();
+ 298                      ColumnSchema columnSchema = table.getSchema().getColumn(sideFieldName);
+ 299                      if (null != columnSchema) {
+ 300                          KuduUtil.setMapValue(columnSchema.getType(), oneRow, sideFieldName, result);
+ 301                      }
+ 302                  }
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 303 -                Row row = fillData(input.row(), oneRow);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 304 +                Row row = fillData(input.f1, oneRow);</span>
+ 305                  if (openCache()) {
+ 306                      cacheContent.add(oneRow);
+ 307                  }
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 308 -                rowList.add(new CRow(row, input.change()));</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 309 +                rowList.add(Tuple2.of(input.f0, row));</span>
+ 310              }
+ 311              if (asyncKuduScanner.hasMoreRows()) {
+ 312                  return asyncKuduScanner.nextRows().addCallbackDeferring(this);
+ 313              }
+ 314  
+ 315              if (rowList.size() &gt; 0) {
+ 316                  if (openCache()) {
+ 317                      putCache(key, CacheObj.buildCacheObj(ECacheContentType.MultiLine, cacheContent));
+ 318                  }
+ 319                  resultFuture.complete(rowList);
+ 320              } else {
+ 321                  dealMissKey(input, resultFuture);
+ 322                  if (openCache()) {
+ 323                      //放置在putCache的Miss中 一段时间内同一个key都会直接返回
+ 324                      putCache(key, CacheMissVal.getMissKeyObj());
+ 325                  }
+ 326              }
+ 327  
+ 328              return null;
+ 329          }
+ 330      }
+ 331  
+ 332  }</pre></td>
+                            <td><pre>   1  package com.dtstack.flink.sql.side.kudu;
+   2  
+   3  import com.dtstack.flink.sql.enums.ECacheContentType;
+   4  import com.dtstack.flink.sql.side.AbstractSideTableInfo;
+   5  import com.dtstack.flink.sql.side.BaseAsyncReqRow;
+   6  import com.dtstack.flink.sql.side.CacheMissVal;
+   7  import com.dtstack.flink.sql.side.FieldInfo;
+   8  import com.dtstack.flink.sql.side.JoinInfo;
+   9  import com.dtstack.flink.sql.side.PredicateInfo;
+  10  import com.dtstack.flink.sql.side.cache.CacheObj;
+  11  import com.dtstack.flink.sql.side.kudu.table.KuduSideTableInfo;
+  12  import com.dtstack.flink.sql.side.kudu.utils.KuduUtil;
+  13  import com.google.common.collect.Lists;
+  14  import com.google.common.collect.Maps;
+  15  import com.stumbleupon.async.Callback;
+  16  import com.stumbleupon.async.Deferred;
+  17  import io.vertx.core.json.JsonArray;
+  18  import org.apache.commons.lang3.StringUtils;
+
+  19  import org.apache.flink.api.java.typeutils.RowTypeInfo;
+  20  import org.apache.flink.configuration.Configuration;
+  21  import org.apache.flink.streaming.api.functions.async.ResultFuture;
+  22  import org.apache.flink.table.runtime.types.CRow;
+  23  import org.apache.flink.table.typeutils.TimeIndicatorTypeInfo;
+  24  import org.apache.flink.types.Row;
+  25  import org.apache.flink.util.Preconditions;
+  26  import org.apache.kudu.ColumnSchema;
+  27  import org.apache.kudu.Schema;
+  28  import org.apache.kudu.client.AsyncKuduClient;
+  29  import org.apache.kudu.client.AsyncKuduScanner;
+  30  import org.apache.kudu.client.KuduException;
+  31  import org.apache.kudu.client.KuduPredicate;
+  32  import org.apache.kudu.client.KuduTable;
+  33  import org.apache.kudu.client.RowResult;
+  34  import org.apache.kudu.client.RowResultIterator;
+  35  import org.slf4j.Logger;
+  36  import org.slf4j.LoggerFactory;
+  37  
+  38  import java.sql.Timestamp;
+  39  import java.util.Arrays;
+  40  import java.util.Collections;
+  41  import java.util.List;
+  42  import java.util.Map;
+  43  
+  44  public class KuduAsyncReqRow extends BaseAsyncReqRow {
+  45  
+  46      private static final Logger LOG = LoggerFactory.getLogger(KuduAsyncReqRow.class);
+  47      /**
+  48       * 获取连接的尝试次数
+  49       */
+  50      private static final int CONN_RETRY_NUM = 3;
+  51      /**
+  52       * 缓存条数
+  53       */
+  54      private static final Long FETCH_SIZE = 1000L;
+  55  
+  56      private static final long serialVersionUID = 5028583854989267753L;
+  57  
+  58  
+  59      private AsyncKuduClient asyncClient;
+  60  
+  61      private KuduTable table;
+  62  
+  63      private KuduSideTableInfo kuduSideTableInfo;
+  64  
+  65      private AsyncKuduScanner.AsyncKuduScannerBuilder scannerBuilder;
+  66  
+<abbr title="  67      public KuduAsyncReqRow(RowTypeInfo rowTypeInfo, JoinInfo joinInfo, List&lt;FieldInfo&gt; outFieldInfoList, AbstractSideTableInfo sideTableInfo) {">  67      public KuduAsyncReqRow(RowTypeInfo rowTypeInfo, JoinInfo joinInfo, List&lt;FieldInfo&gt; outFieldInfoList, AbstractS🔵</abbr>
+  68          super(new KuduAsyncSideInfo(rowTypeInfo, joinInfo, outFieldInfoList, sideTableInfo));
+  69      }
+  70  
+  71      @Override
+  72      public void open(Configuration parameters) throws Exception {
+  73          super.open(parameters);
+  74          kuduSideTableInfo = (KuduSideTableInfo) sideInfo.getSideTableInfo();
+  75          connKuDu();
+  76      }
+  77  
+  78      /**
+  79       * 连接kudu中的表
+  80       *
+  81       * @throws KuduException
+  82       */
+  83      private void connKuDu() throws KuduException {
+  84          if (null == table) {
+  85              String kuduMasters = kuduSideTableInfo.getKuduMasters();
+  86              String tableName = kuduSideTableInfo.getTableName();
+  87              Integer workerCount = kuduSideTableInfo.getWorkerCount();
+  88              Integer defaultSocketReadTimeoutMs = kuduSideTableInfo.getDefaultSocketReadTimeoutMs();
+  89              Integer defaultOperationTimeoutMs = kuduSideTableInfo.getDefaultOperationTimeoutMs();
+  90  
+  91              Preconditions.checkNotNull(kuduMasters, &quot;kuduMasters could not be null&quot;);
+  92  
+<abbr title="  93              AsyncKuduClient.AsyncKuduClientBuilder asyncKuduClientBuilder = new AsyncKuduClient.AsyncKuduClientBuilder(kuduMasters);">  93              AsyncKuduClient.AsyncKuduClientBuilder asyncKuduClientBuilder = new AsyncKuduClient.AsyncKuduClientBui🔵</abbr>
+  94              if (null != workerCount) {
+  95                  asyncKuduClientBuilder.workerCount(workerCount);
+  96              }
+  97  
+  98              if (null != defaultOperationTimeoutMs) {
+  99                  asyncKuduClientBuilder.defaultOperationTimeoutMs(defaultOperationTimeoutMs);
+ 100              }
+ 101              asyncClient = asyncKuduClientBuilder.build();
+ 102              if (!asyncClient.syncClient().tableExists(tableName)) {
+ 103                  throw new IllegalArgumentException(&quot;Table Open Failed , please check table exists&quot;);
+ 104              }
+ 105              table = asyncClient.syncClient().openTable(tableName);
+ 106              LOG.info(&quot;connect kudu is successed!&quot;);
+ 107          }
+ 108          scannerBuilder = asyncClient.newScannerBuilder(table);
+ 109          Integer batchSizeBytes = kuduSideTableInfo.getBatchSizeBytes();
+ 110          Long limitNum = kuduSideTableInfo.getLimitNum();
+ 111          Boolean isFaultTolerant = kuduSideTableInfo.getFaultTolerant();
+ 112          //查询需要的字段
+ 113          String[] sideFieldNames = StringUtils.split(sideInfo.getSideSelectFields(), &quot;,&quot;);
+ 114  
+ 115          if (null == limitNum || limitNum &lt;= 0) {
+ 116              scannerBuilder.limit(FETCH_SIZE);
+ 117          } else {
+ 118              scannerBuilder.limit(limitNum);
+ 119          }
+ 120          if (null != batchSizeBytes) {
+ 121              scannerBuilder.batchSizeBytes(batchSizeBytes);
+ 122          }
+ 123          if (null != isFaultTolerant) {
+ 124              scannerBuilder.setFaultTolerant(isFaultTolerant);
+ 125          }
+ 126  
+ 127          List&lt;String&gt; projectColumns = Arrays.asList(sideFieldNames);
+ 128          scannerBuilder.setProjectedColumnNames(projectColumns);
+ 129      }
+ 130  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 131 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 132 -    @Override</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 133 -    public void asyncInvoke(CRow input, ResultFuture&lt;CRow&gt; resultFuture) throws Exception {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 134 +    @Override</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"><abbr title=" 135 +    public void handleAsyncInvoke(Map&lt;String, Object&gt; inputParams, CRow input, ResultFuture&lt;CRow&gt; resultFuture) throws Exception {"> 135 +    public void handleAsyncInvoke(Map&lt;String, Object&gt; inputParams, CRow input, ResultFuture&lt;CRow&gt; resultFuture) th🔵</abbr></span>
+ 136          CRow inputCopy = new CRow(input.row(), input.change());
+
+
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 137 -        //scannerBuilder 设置为null重新加载过滤条件</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 138 +        //scannerBuilder 设置为null重新加载过滤条件,然后connkudu重新赋值</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 139 +        //todo:代码需要优化</span>
+ 140          scannerBuilder = null;
+ 141          connKuDu();
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 142 -        JsonArray inputParams = new JsonArray();</span>
+ 143          Schema schema = table.getSchema();
+ 144          //  @wenbaoup fix bug
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 145 -        for (int i = 0; i &lt; sideInfo.getEqualValIndex().size(); i++) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 146 -            Object equalObj = inputCopy.row().getField(sideInfo.getEqualValIndex().get(i));</span>
+
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 147 -            if (equalObj == null) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 148 -                dealMissKey(inputCopy, resultFuture);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 149 -                return;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 150 -            }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 151 -            //增加过滤条件</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"><abbr title=" 152 -            scannerBuilder.addPredicate(KuduPredicate.newInListPredicate(schema.getColumn(sideInfo.getEqualFieldList().get(i)), Collections.singletonList(equalObj)));"> 152 -            scannerBuilder.addPredicate(KuduPredicate.newInListPredicate(schema.getColumn(sideInfo.getEqualFieldLi🔵</abbr></span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 153 -            inputParams.add(equalObj);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 154 -        }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 155 +        inputParams.entrySet().forEach(e -&gt;{</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"><abbr title=" 156 +            scannerBuilder.addPredicate(KuduPredicate.newInListPredicate(schema.getColumn(e.getKey()), Collections.singletonList(e.getValue())));"> 156 +            scannerBuilder.addPredicate(KuduPredicate.newInListPredicate(schema.getColumn(e.getKey()), Collections🔵</abbr></span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 157 +        });</span>
+ 158  
+ 159          //  填充谓词信息
+ 160          List&lt;PredicateInfo&gt; predicateInfoes = sideInfo.getSideTableInfo().getPredicateInfoes();
+ 161          if (predicateInfoes.size() &gt; 0) {
+ 162              predicateInfoes.stream().map(info -&gt; {
+ 163                  KuduPredicate kuduPredicate = KuduUtil.buildKuduPredicate(schema, info);
+ 164                  if (null != kuduPredicate) {
+ 165                      scannerBuilder.addPredicate(kuduPredicate);
+ 166                  }
+ 167                  return info;
+ 168              }).count();
+ 169          }
+ 170  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 171 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 172 -        String key = buildCacheKey(inputParams);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 173 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 174 -        if (openCache()) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 175 -            //判断数据是否已经加载到缓存中</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 176 -            CacheObj val = getFromCache(key);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 177 -            if (val != null) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 178 -                if (ECacheContentType.MissVal == val.getType()) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 179 -                    dealMissKey(inputCopy, resultFuture);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 180 -                    return;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 181 -                } else if (ECacheContentType.SingleLine == val.getType()) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 182 -                    try {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 183 -                        Row row = fillData(inputCopy.row(), val);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 184 -                        resultFuture.complete(Collections.singleton(new CRow(row, inputCopy.change())));</span>
+
+
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 185 -                    } catch (Exception e) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 186 -                        dealFillDataError(resultFuture, e, inputCopy);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 187 -                    }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 188 -                } else if (ECacheContentType.MultiLine == val.getType()) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 189 -                    try {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 190 -                        List&lt;CRow&gt; rowList = Lists.newArrayList();</span>
+
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 191 -                        for (Object jsonArray : (List) val.getContent()) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 192 -                            Row row = fillData(inputCopy.row(), jsonArray);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 193 -                            rowList.add(new CRow(row, inputCopy.change()));</span>
+
+
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 194 -                        }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 195 -                        resultFuture.complete(rowList);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 196 -                    } catch (Exception e) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 197 -                        dealFillDataError(resultFuture, e, inputCopy);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 198 -                    }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 199 -                } else {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"><abbr title=" 200 -                    resultFuture.completeExceptionally(new RuntimeException(&quot;not support cache obj type &quot; + val.getType()));"> 200 -                    resultFuture.completeExceptionally(new RuntimeException(&quot;not support cache obj type &quot; + val.ge🔵</abbr></span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 201 -                }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 202 -                return;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 203 -            }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 204 -        }</span>
+ 205          List&lt;Map&lt;String, Object&gt;&gt; cacheContent = Lists.newArrayList();
+ 206          AsyncKuduScanner asyncKuduScanner = scannerBuilder.build();
+ 207          List&lt;CRow&gt; rowList = Lists.newArrayList();
+
+ 208          Deferred&lt;RowResultIterator&gt; data = asyncKuduScanner.nextRows();
+ 209          //从之前的同步修改为调用异步的Callback
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"><abbr title=" 210 -        data.addCallbackDeferring(new GetListRowCB(inputCopy, cacheContent, rowList, asyncKuduScanner, resultFuture, key));"> 210 -        data.addCallbackDeferring(new GetListRowCB(inputCopy, cacheContent, rowList, asyncKuduScanner, resultFutur🔵</abbr></span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"><abbr title=" 211 +        data.addCallbackDeferring(new GetListRowCB(inputCopy, cacheContent, rowList, asyncKuduScanner, resultFuture, buildCacheKey(inputParams)));"> 211 +        data.addCallbackDeferring(new GetListRowCB(inputCopy, cacheContent, rowList, asyncKuduScanner, resultFutur🔵</abbr></span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 212 +    }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 213 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 214 +    @Override</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 215 +    public String buildCacheKey(Map&lt;String, Object&gt; inputParams) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 216 +        StringBuilder sb = new StringBuilder();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 217 +        for (Object ele : inputParams.values()) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 218 +            sb.append(ele.toString())</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 219 +                    .append(&quot;_&quot;);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 220 +        }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 221 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 222 +        return sb.toString();</span>
+ 223      }
+ 224  
+ 225  
+ 226      @Override
+ 227      public Row fillData(Row input, Object sideInput) {
+ 228          Map&lt;String, Object&gt; cacheInfo = (Map&lt;String, Object&gt;) sideInput;
+ 229          Row row = new Row(sideInfo.getOutFieldInfoList().size());
+ 230          for (Map.Entry&lt;Integer, Integer&gt; entry : sideInfo.getInFieldIndex().entrySet()) {
+ 231              Object obj = input.getField(entry.getValue());
+<abbr title=" 232              boolean isTimeIndicatorTypeInfo = TimeIndicatorTypeInfo.class.isAssignableFrom(sideInfo.getRowTypeInfo().getTypeAt(entry.getValue()).getClass());"> 232              boolean isTimeIndicatorTypeInfo = TimeIndicatorTypeInfo.class.isAssignableFrom(sideInfo.getRowTypeInfo🔵</abbr>
+ 233  
+<abbr title=" 234              //Type information for indicating event or processing time. However, it behaves like a regular SQL timestamp but is serialized as Long."> 234              //Type information for indicating event or processing time. However, it behaves like a regular SQL tim🔵</abbr>
+ 235              if (obj instanceof Timestamp &amp;&amp; isTimeIndicatorTypeInfo) {
+ 236                  obj = ((Timestamp) obj).getTime();
+ 237              }
+
+ 238              row.setField(entry.getKey(), obj);
+ 239          }
+ 240  
+ 241          for (Map.Entry&lt;Integer, String&gt; entry : sideInfo.getSideFieldNameIndex().entrySet()) {
+ 242              if (cacheInfo == null) {
+ 243                  row.setField(entry.getKey(), null);
+ 244              } else {
+ 245                  row.setField(entry.getKey(), cacheInfo.get(entry.getValue()));
+ 246              }
+ 247          }
+ 248  
+ 249          return row;
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 250 -    }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 251 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 252 -    public String buildCacheKey(JsonArray jsonArray) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 253 -        StringBuilder sb = new StringBuilder();</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 254 -        for (Object ele : jsonArray.getList()) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 255 -            sb.append(ele.toString())</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 256 -                    .append(&quot;_&quot;);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 257 -        }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 258 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 259 -        return sb.toString();</span>
+ 260      }
+ 261  
+ 262      @Override
+ 263      public void close() throws Exception {
+ 264          super.close();
+ 265          if (null != asyncClient) {
+ 266              try {
+ 267                  asyncClient.close();
+ 268              } catch (Exception e) {
+ 269                  LOG.error(&quot;Error while closing client.&quot;, e);
+ 270              }
+ 271          }
+ 272      }
+ 273  
+ 274      class GetListRowCB implements Callback&lt;Deferred&lt;List&lt;Row&gt;&gt;, RowResultIterator&gt; {
+ 275          private CRow input;
+
+ 276          private List&lt;Map&lt;String, Object&gt;&gt; cacheContent;
+ 277          private List&lt;CRow&gt; rowList;
+
+ 278          private AsyncKuduScanner asyncKuduScanner;
+ 279          private ResultFuture&lt;CRow&gt; resultFuture;
+
+ 280          private String key;
+ 281  
+ 282  
+ 283          public GetListRowCB() {
+ 284          }
+ 285  
+<abbr title=" 286          GetListRowCB(CRow input, List&lt;Map&lt;String, Object&gt;&gt; cacheContent, List&lt;CRow&gt; rowList, AsyncKuduScanner asyncKuduScanner, ResultFuture&lt;CRow&gt; resultFuture, String key) {"> 286          GetListRowCB(CRow input, List&lt;Map&lt;String, Object&gt;&gt; cacheContent, List&lt;CRow&gt; rowList, AsyncKuduScanner asyn🔵</abbr>
+
+
+ 287              this.input = input;
+ 288              this.cacheContent = cacheContent;
+ 289              this.rowList = rowList;
+ 290              this.asyncKuduScanner = asyncKuduScanner;
+ 291              this.resultFuture = resultFuture;
+ 292              this.key = key;
+ 293          }
+ 294  
+ 295          @Override
+ 296          public Deferred&lt;List&lt;Row&gt;&gt; call(RowResultIterator results) throws Exception {
+ 297              for (RowResult result : results) {
+ 298                  Map&lt;String, Object&gt; oneRow = Maps.newHashMap();
+ 299                  for (String sideFieldName1 : StringUtils.split(sideInfo.getSideSelectFields(), &quot;,&quot;)) {
+ 300                      String sideFieldName = sideFieldName1.trim();
+ 301                      ColumnSchema columnSchema = table.getSchema().getColumn(sideFieldName);
+ 302                      if (null != columnSchema) {
+ 303                          KuduUtil.setMapValue(columnSchema.getType(), oneRow, sideFieldName, result);
+ 304                      }
+ 305                  }
+ 306                  Row row = fillData(input.row(), oneRow);
+
+ 307                  if (openCache()) {
+ 308                      cacheContent.add(oneRow);
+ 309                  }
+ 310                  rowList.add(new CRow(row, input.change()));
+
+ 311              }
+ 312              if (asyncKuduScanner.hasMoreRows()) {
+ 313                  return asyncKuduScanner.nextRows().addCallbackDeferring(this);
+ 314              }
+ 315  
+ 316              if (rowList.size() &gt; 0) {
+ 317                  if (openCache()) {
+ 318                      putCache(key, CacheObj.buildCacheObj(ECacheContentType.MultiLine, cacheContent));
+ 319                  }
+ 320                  resultFuture.complete(rowList);
+ 321              } else {
+ 322                  dealMissKey(input, resultFuture);
+ 323                  if (openCache()) {
+ 324                      //放置在putCache的Miss中 一段时间内同一个key都会直接返回
+ 325                      putCache(key, CacheMissVal.getMissKeyObj());
+ 326                  }
+ 327              }
+ 328  
+ 329              return null;
+ 330          }
+ 331      }
+ 332  
+ 333  }</pre></td>
+                        </tr>
+                    </table>
+                </div>
+              </body>
+            </html>
+            

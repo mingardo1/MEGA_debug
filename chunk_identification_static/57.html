@@ -1,0 +1,1802 @@
+<!DOCTYPE html>
+    <html lang="en">
+              <head>
+                <meta charset="utf-8">
+                <title>57</title>
+                    <style>
+                        #top {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        #bottom {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        abbr {
+                          /* Here is the delay */
+                          transition-delay:0s;
+                        }
+                    </style>
+              </head>
+              <body>
+                <span style="height: 4vh">
+                    57
+                    <a href="56.html">prev</a>
+                    <a href="58.html">next</a>
+                    <a href="57_chunks.html">chunks</a>
+                    <a href="index.html">index</a>
+                    Automattic/simplenote-android_4f0f2c150b7e7afe5be6fb45e754ad9035e86e2b_Simplenote/src/main/java/com/automattic/simplenote/Simplenote.java
+                    <textarea rows=1 onclick='navigator.clipboard.writeText(this.value)'>cd C:\studies\se\mega\git-analyzer-plus\notebooks\debug
+del /Q *
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\Automattic\simplenote-android show &quot;4f0f2c150b7e7afe5be6fb45e754ad9035e86e2b:Simplenote/src/main/java/com/automattic/simplenote/Simplenote.java&quot; &gt; committed.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\Automattic\simplenote-android show &quot;4f0f2c150b7e7afe5be6fb45e754ad9035e86e2b^1:Simplenote/src/main/java/com/automattic/simplenote/Simplenote.java&quot; &gt; ours.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\Automattic\simplenote-android show &quot;4f0f2c150b7e7afe5be6fb45e754ad9035e86e2b^2:Simplenote/src/main/java/com/automattic/simplenote/Simplenote.java&quot; &gt; theirs.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\Automattic\simplenote-android show &quot;bc8b6d38d364e8d072f78e6e6788a301ec4895f8:Simplenote/src/main/java/com/automattic/simplenote/Simplenote.java&quot; &gt; base.java
+copy ours.java 1ours.java
+copy ours.java 2ours.java
+copy theirs.java 1theirs.java
+copy theirs.java 2theirs.java
+copy base.java 1base.java
+copy base.java 2base.java
+&quot;C:\Program Files\Java\jdk1.8.0_241\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\jFSTMerge\build\libs\jFSTMerge-all.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\jfstmerge.java --show-base
+&quot;C:\Program Files\Eclipse Adoptium\jdk-17.0.11.9-hotspot\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\spork\target\spork-0.5.0-SNAPSHOT.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\spork.java
+del /Q 1*.java
+del /Q 2*.java
+del /Q jfstmerge.java.merge
+</textarea>
+                    {strict: [[b], [b], [b], [b], [b], [b], [j]], subset: [[b], [b], [bj], [b], [b], [b]]}
+                </span>
+                <div id="top">
+
+                    <table>
+                        <tr>
+                            <th>line based (standard git)</th>
+                            <th>jfstmerge</th>
+                            <th>spork</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1 package com.automattic.simplenote;
+   2 
+   3 import android.annotation.SuppressLint;
+   4 import android.app.Activity;
+   5 import android.app.Application;
+   6 import android.content.ComponentCallbacks2;
+   7 import android.content.res.Configuration;
+   8 import android.os.Build;
+   9 import android.os.Bundle;
+  10 import android.os.Handler;
+  11 import android.util.Log;
+  12 
+  13 import androidx.annotation.NonNull;
+  14 import androidx.appcompat.app.AppCompatDelegate;
+  15 import androidx.work.BackoffPolicy;
+  16 import androidx.work.Constraints;
+  17 import androidx.work.ExistingPeriodicWorkPolicy;
+  18 import androidx.work.NetworkType;
+  19 import androidx.work.PeriodicWorkRequest;
+  20 import androidx.work.WorkManager;
+  21 
+  22 import com.automattic.simplenote.analytics.AnalyticsTracker;
+  23 import com.automattic.simplenote.analytics.AnalyticsTrackerNosara;
+  24 import com.automattic.simplenote.models.Note;
+  25 import com.automattic.simplenote.models.NoteCountIndexer;
+  26 import com.automattic.simplenote.models.NoteTagger;
+  27 import com.automattic.simplenote.models.Preferences;
+  28 import com.automattic.simplenote.models.Tag;
+  29 import com.automattic.simplenote.utils.AppLog;
+  30 import com.automattic.simplenote.utils.AppLog.Type;
+  31 import com.automattic.simplenote.utils.CrashUtils;
+  32 import com.automattic.simplenote.utils.DisplayUtils;
+  33 import com.automattic.simplenote.utils.PrefUtils;
+  34 import com.automattic.simplenote.utils.SyncWorker;
+  35 import com.simperium.Simperium;
+  36 import com.simperium.client.Bucket;
+  37 import com.simperium.client.BucketNameInvalid;
+  38 import com.simperium.client.BucketObjectMissingException;
+  39 
+  40 import org.wordpress.passcodelock.AppLockManager;
+  41 
+  42 import java.util.concurrent.TimeUnit;
+  43 
+  44 import static com.automattic.simplenote.models.Preferences.PREFERENCES_OBJECT_KEY;
+  45 
+  46 public class Simplenote extends Application {
+  47     public static final String DELETED_NOTE_ID = &quot;deletedNoteId&quot;;
+  48     public static final String SELECTED_NOTE_ID = &quot;selectedNoteId&quot;;
+  49     public static final String TAG = &quot;Simplenote&quot;;
+  50     public static final int INTENT_EDIT_NOTE = 2;
+  51     public static final int INTENT_PREFERENCES = 1;
+  52     public static final int ONE_MINUTE_MILLIS = 60 * 1000;  // 60 seconds
+  53     public static final int TEN_SECONDS_MILLIS = 10 * 1000;  // 10 seconds
+  54 
+  55     private static final String AUTH_PROVIDER = &quot;simplenote.com&quot;;
+  56     private static final String TAG_SYNC = &quot;sync&quot;;
+  57 
+  58     private static Bucket&lt;Preferences&gt; mPreferencesBucket;
+  59 
+  60     private Bucket&lt;Note&gt; mNotesBucket;
+  61     private Bucket&lt;Tag&gt; mTagsBucket;
+  62     private Simperium mSimperium;
+  63     private boolean mIsInBackground = true;
+  64 
+  65     public void onCreate() {
+  66         super.onCreate();
+  67 
+  68         CrashUtils.initWithContext(this);
+  69         AppLockManager.getInstance().enableDefaultAppLockIfAvailable(this);
+  70 
+  71         mSimperium = Simperium.newClient(
+  72                 BuildConfig.SIMPERIUM_APP_ID,
+  73                 BuildConfig.SIMPERIUM_APP_KEY,
+  74                 this
+  75         );
+  76 
+  77         mSimperium.setAuthProvider(AUTH_PROVIDER);
+  78 
+  79         try {
+  80             mNotesBucket = mSimperium.bucket(new Note.Schema());
+  81             Tag.Schema tagSchema = new Tag.Schema();
+  82             tagSchema.addIndex(new NoteCountIndexer(mNotesBucket));
+  83             mTagsBucket = mSimperium.bucket(tagSchema);
+  84             mPreferencesBucket = mSimperium.bucket(new Preferences.Schema());
+  85             // Every time a note changes or is deleted we need to reindex the tag counts
+  86             mNotesBucket.addListener(new NoteTagger(mTagsBucket));
+  87         } catch (BucketNameInvalid e) {
+  88             throw new RuntimeException(&quot;Could not create bucket&quot;, e);
+  89         }
+  90 
+  91         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
+  92 
+  93         ApplicationLifecycleMonitor applicationLifecycleMonitor = new ApplicationLifecycleMonitor();
+  94         registerComponentCallbacks(applicationLifecycleMonitor);
+  95         registerActivityLifecycleCallbacks(applicationLifecycleMonitor);
+  96 
+  97         AnalyticsTracker.registerTracker(new AnalyticsTrackerNosara(this));
+  98         AnalyticsTracker.refreshMetadata(mSimperium.getUser().getEmail());
+  99         CrashUtils.setCurrentUser(mSimperium.getUser());
+ 100 
+ 101         AppLog.add(Type.DEVICE, getDeviceInfo());
+ 102         AppLog.add(Type.ACCOUNT, getAccountInfo());
+ 103         AppLog.add(Type.LAYOUT, DisplayUtils.getDisplaySizeAndOrientation(Simplenote.this));
+ 104     }
+ 105 
+ 106     @SuppressWarnings(&quot;unused&quot;)
+ 107     private boolean isFirstLaunch() {
+ 108         // NotesActivity sets this pref to false after first launch
+ 109         return PrefUtils.getBoolPref(this, PrefUtils.PREF_FIRST_LAUNCH, true);
+ 110     }
+ 111 
+ 112     public static boolean analyticsIsEnabled() {
+ 113         if (mPreferencesBucket == null) {
+ 114             return true;
+ 115         }
+ 116 
+ 117         try {
+ 118             Preferences prefs = mPreferencesBucket.get(PREFERENCES_OBJECT_KEY);
+ 119             return prefs.getAnalyticsEnabled();
+ 120         } catch (BucketObjectMissingException e) {
+ 121             return true;
+ 122         }
+ 123     }
+ 124 
+ 125     private String getAccountInfo() {
+<abbr title=" 126         String email = &quot;Email: &quot; + (mSimperium != null &amp;&amp; mSimperium.getUser() != null ? mSimperium.getUser().getEmail() : &quot;?&quot;);"> 126         String email = &quot;Email: &quot; + (mSimperium != null &amp;&amp; mSimperium.getUser() != null ? mSimperium.getUs🔵</abbr>
+ 127         String notes = &quot;Notes: &quot; + (mNotesBucket != null ? mNotesBucket.count() : &quot;?&quot;);
+ 128         String tags = &quot;Tags: &quot; + (mTagsBucket != null ? mTagsBucket.count() : &quot;?&quot;);
+ 129         return email + &quot;\n&quot; + notes + &quot;\n&quot; + tags + &quot;\n\n&quot;;
+ 130     }
+ 131 
+ 132     private String getDeviceInfo() {
+<abbr title=" 133         String architecture = Build.DEVICE != null &amp;&amp; Build.DEVICE.matches(&quot;.+_cheets|cheets_.+&quot;) ? &quot;Chrome OS &quot; : &quot;Android &quot;;"> 133         String architecture = Build.DEVICE != null &amp;&amp; Build.DEVICE.matches(&quot;.+_cheets|cheets_.+&quot;) ? &quot;Chro🔵</abbr>
+ 134         String device = &quot;Device: &quot; + Build.MANUFACTURER + &quot; &quot; + Build.MODEL + &quot; (&quot; + Build.DEVICE + &quot;)&quot;;
+<abbr title=" 135         String system = &quot;System: &quot; + architecture + Build.VERSION.RELEASE + &quot; (&quot; + Build.VERSION.SDK_INT + &quot;)&quot;;"> 135         String system = &quot;System: &quot; + architecture + Build.VERSION.RELEASE + &quot; (&quot; + Build.VERSION.SDK_INT 🔵</abbr>
+ 136         String app = &quot;App: Simplenote &quot; + PrefUtils.versionInfo();
+ 137         return device + &quot;\n&quot; + system + &quot;\n&quot; + app + &quot;\n\n&quot;;
+ 138     }
+ 139 
+ 140     public Simperium getSimperium() {
+ 141         return mSimperium;
+ 142     }
+ 143 
+ 144     public Bucket&lt;Note&gt; getNotesBucket() {
+ 145         return mNotesBucket;
+ 146     }
+ 147 
+ 148     public Bucket&lt;Tag&gt; getTagsBucket() {
+ 149         return mTagsBucket;
+ 150     }
+ 151 
+ 152     public Bucket&lt;Preferences&gt; getPreferencesBucket() {
+ 153         return mPreferencesBucket;
+ 154     }
+ 155 
+ 156 &lt;&lt;&lt;&lt;&lt;&lt;&lt; GitAnalyzerPlus_ours
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 157     public boolean isInBackground() {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 158         return mIsInBackground;</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 159     }</span>
+ 160 ||||||| GitAnalyzerPlus_base
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 161     private class ApplicationLifecycleMonitor implements Application.ActivityLifecycleCallbacks,</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 162             ComponentCallbacks2 {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 163         private boolean mIsInBackground = true;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 164 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 165         // ComponentCallbacks</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 166         @Override</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 167         public void onTrimMemory(int level) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 168             if (level == ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 169                 mIsInBackground = true;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 170 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 171                 // Give the buckets some time to finish sync, then stop them</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 172                 new Handler().postDelayed(new Runnable() {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 173                     @Override</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 174                     public void run() {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 175                         if (!mIsInBackground) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 176                             return;</span>
+ 177 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"><abbr title=" 178     private class ApplicationLifecycleMonitor implements Application.ActivityLifecycleCallbacks, ComponentCallbacks2 {"> 178     private class ApplicationLifecycleMonitor implements Application.ActivityLifecycleCallbacks, Componen🔵</abbr></span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 179         private boolean mIsInBackground = true;</span>
+ 180 &gt;&gt;&gt;&gt;&gt;&gt;&gt; GitAnalyzerPlus_theirs
+ 181 
+<abbr title=" 182     private class ApplicationLifecycleMonitor implements Application.ActivityLifecycleCallbacks, ComponentCallbacks2 {"> 182     private class ApplicationLifecycleMonitor implements Application.ActivityLifecycleCallbacks, Componen🔵</abbr>
+ 183         // ComponentCallbacks
+ 184         @Override
+ 185         public void onTrimMemory(int level) {
+ 186             if (level == ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN) {
+ 187                 mIsInBackground = true;
+ 188 
+ 189                 // Give the buckets some time to finish sync, then stop them
+ 190                 new Handler().postDelayed(new Runnable() {
+ 191                     @Override
+ 192                     public void run() {
+ 193                         if (!mIsInBackground) {
+ 194                             return;
+ 195                         }
+ 196 
+ 197                         if (mNotesBucket != null) {
+ 198                             mNotesBucket.stop();
+ 199                             AppLog.add(Type.SYNC, &quot;Stopped note bucket (Simplenote)&quot;);
+ 200                         }
+ 201 
+ 202                         if (mTagsBucket != null) {
+ 203                             mTagsBucket.stop();
+ 204                             AppLog.add(Type.SYNC, &quot;Stopped tag bucket (Simplenote)&quot;);
+ 205                         }
+ 206 
+ 207                         if (mPreferencesBucket != null) {
+ 208                             mPreferencesBucket.stop();
+ 209                             AppLog.add(Type.SYNC, &quot;Stopped preference bucket (Simplenote)&quot;);
+ 210                         }
+ 211                     }
+ 212                 }, TEN_SECONDS_MILLIS);
+ 213 
+ 214                 // Send analytics if app is in the background
+ 215                 AnalyticsTracker.track(
+ 216                         AnalyticsTracker.Stat.APPLICATION_CLOSED,
+ 217                         AnalyticsTracker.CATEGORY_USER,
+ 218                         &quot;application_closed&quot;
+ 219                 );
+ 220                 AnalyticsTracker.flush();
+ 221                 AppLog.add(Type.ACTION, &quot;App closed&quot;);
+ 222             } else {
+ 223                 mIsInBackground = false;
+ 224             }
+ 225         }
+ 226 
+ 227         @Override
+ 228         public void onConfigurationChanged(@NonNull Configuration newConfig) {
+ 229             AppLog.add(Type.LAYOUT, DisplayUtils.getDisplaySizeAndOrientation(Simplenote.this));
+ 230         }
+ 231 
+ 232         @Override
+ 233         public void onLowMemory() {
+ 234         }
+ 235 
+ 236 &lt;&lt;&lt;&lt;&lt;&lt;&lt; GitAnalyzerPlus_ours
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 237         // ActivityLifeCycle callbacks</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 238         @SuppressLint(&quot;LongLogTag&quot;)</span>
+ 239 ||||||| GitAnalyzerPlus_base
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 240         // ActivityLifeCycle callbacks</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 241         @Override</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 242         public void onActivityResumed(Activity activity) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 243             if (mIsInBackground) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 244                 AnalyticsTracker.track(</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 245                         AnalyticsTracker.Stat.APPLICATION_OPENED,</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 246                         AnalyticsTracker.CATEGORY_USER,</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 247                         &quot;application_opened&quot;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 248                 );</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 249 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 250                 mIsInBackground = false;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 251                 AppLog.add(Type.ACTION, &quot;App opened&quot;);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 252             }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 253         }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 254 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 255         @Override</span>
+ 256 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 257         // ActivityLifecycleCallbacks</span>
+ 258 &gt;&gt;&gt;&gt;&gt;&gt;&gt; GitAnalyzerPlus_theirs
+ 259         @Override
+ 260         public void onActivityResumed(@NonNull Activity activity) {
+ 261             if (mIsInBackground) {
+ 262                 AnalyticsTracker.track(
+ 263                         AnalyticsTracker.Stat.APPLICATION_OPENED,
+ 264                         AnalyticsTracker.CATEGORY_USER,
+ 265                         &quot;application_opened&quot;
+ 266                 );
+ 267 
+ 268                 mIsInBackground = false;
+ 269                 AppLog.add(Type.ACTION, &quot;App opened&quot;);
+ 270                 WorkManager.getInstance(getApplicationContext()).cancelUniqueWork(TAG_SYNC);
+ 271                 Log.d(&quot;Simplenote.onActivityResumed&quot;, &quot;Stopped worker&quot;);
+ 272             }
+ 273 
+ 274             String activitySimpleName = activity.getClass().getSimpleName();
+ 275 
+ 276             mPreferencesBucket.start();
+ 277             AppLog.add(Type.SYNC, &quot;Started preference bucket (&quot; + activitySimpleName + &quot;)&quot;);
+ 278             mNotesBucket.start();
+ 279             AppLog.add(Type.SYNC, &quot;Started note bucket (&quot; + activitySimpleName + &quot;)&quot;);
+ 280             mTagsBucket.start();
+ 281             AppLog.add(Type.SYNC, &quot;Started tag bucket (&quot; + activitySimpleName + &quot;)&quot;);
+ 282         }
+ 283 
+ 284         @Override
+ 285         public void onActivityCreated(@NonNull Activity activity, Bundle savedInstanceState) {
+ 286         }
+ 287 
+ 288         @Override
+ 289         public void onActivityStarted(@NonNull Activity activity) {
+ 290 &lt;&lt;&lt;&lt;&lt;&lt;&lt; GitAnalyzerPlus_ours
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 291         }</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 292 </span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 293         @SuppressLint(&quot;LongLogTag&quot;)</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 294         @Override</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 295         public void onActivityPaused(@NonNull Activity activity) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 296             PeriodicWorkRequest syncWorkRequest = new PeriodicWorkRequest.Builder(</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 297                 SyncWorker.class,</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 298                 PeriodicWorkRequest.MIN_PERIODIC_INTERVAL_MILLIS,</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 299                 TimeUnit.MILLISECONDS</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 300             )</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"><abbr title=" 301                 .setConstraints(new Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build())"> 301                 .setConstraints(new Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).b🔵</abbr></span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 302                 .setBackoffCriteria(BackoffPolicy.LINEAR, ONE_MINUTE_MILLIS, TimeUnit.MILLISECONDS)</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 303                 .setInitialDelay(TEN_SECONDS_MILLIS, TimeUnit.MILLISECONDS)</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 304                 .addTag(TAG_SYNC)</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 305                 .build();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 306             WorkManager.getInstance(getApplicationContext()).enqueueUniquePeriodicWork(</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 307                 TAG_SYNC,</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 308                 ExistingPeriodicWorkPolicy.REPLACE,</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 309                 syncWorkRequest</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 310             );</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 311             Log.d(&quot;Simplenote.onActivityPaused&quot;, &quot;Started worker&quot;);</span>
+ 312 ||||||| GitAnalyzerPlus_base
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 313 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 314         @Override</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 315         public void onActivitySaveInstanceState(Activity activity, Bundle outState) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 316         }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 317 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 318         @Override</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 319         public void onActivityDestroyed(Activity activity) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 320         }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 321     }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 322 }</span>
+ 323 =======
+ 324 &gt;&gt;&gt;&gt;&gt;&gt;&gt; GitAnalyzerPlus_theirs
+ 325         }
+ 326 
+ 327         @Override
+ 328 &lt;&lt;&lt;&lt;&lt;&lt;&lt; GitAnalyzerPlus_ours
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 329         public void onActivityStopped(@NonNull Activity activity) {</span>
+ 330 ||||||| GitAnalyzerPlus_base
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 331         }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 332 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 333         @Override</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 334         public void onActivityDestroyed(Activity activity) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 335         }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 336     }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 337 }</span>
+ 338 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 339         public void onActivityPaused(@NonNull Activity activity) {</span>
+ 340 &gt;&gt;&gt;&gt;&gt;&gt;&gt; GitAnalyzerPlus_theirs
+ 341         }
+ 342 
+ 343         @Override
+ 344 &lt;&lt;&lt;&lt;&lt;&lt;&lt; GitAnalyzerPlus_ours
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 345         public void onActivitySaveInstanceState(@NonNull Activity activity, @NonNull Bundle outState) {</span>
+ 346 ||||||| GitAnalyzerPlus_base
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 347         }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 348     }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 349 }</span>
+ 350 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 351         public void onActivityStopped(@NonNull Activity activity) {</span>
+ 352 &gt;&gt;&gt;&gt;&gt;&gt;&gt; GitAnalyzerPlus_theirs
+ 353         }
+ 354 
+ 355         @Override
+ 356 &lt;&lt;&lt;&lt;&lt;&lt;&lt; GitAnalyzerPlus_ours
+ 357 ||||||| GitAnalyzerPlus_base
+ 358 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 359         public void onActivitySaveInstanceState(@NonNull Activity activity, @NonNull Bundle outState) {</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 360         }</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 361 </span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 362         @Override</span>
+ 363 &gt;&gt;&gt;&gt;&gt;&gt;&gt; GitAnalyzerPlus_theirs
+ 364         public void onActivityDestroyed(@NonNull Activity activity) {
+ 365         }
+ 366     }
+ 367 }</pre></td>
+                            <td><pre>   1 package com.automattic.simplenote;
+   2 
+   3 import android.annotation.SuppressLint;
+   4 import android.app.Activity;
+   5 import android.app.Application;
+   6 import android.content.ComponentCallbacks2;
+   7 import android.content.res.Configuration;
+   8 import android.os.Build;
+   9 import android.os.Bundle;
+  10 import android.os.Handler;
+  11 import android.util.Log;
+  12 
+  13 import androidx.annotation.NonNull;
+  14 import androidx.appcompat.app.AppCompatDelegate;
+  15 import androidx.work.BackoffPolicy;
+  16 import androidx.work.Constraints;
+  17 import androidx.work.ExistingPeriodicWorkPolicy;
+  18 import androidx.work.NetworkType;
+  19 import androidx.work.PeriodicWorkRequest;
+  20 import androidx.work.WorkManager;
+  21 
+  22 import com.automattic.simplenote.analytics.AnalyticsTracker;
+  23 import com.automattic.simplenote.analytics.AnalyticsTrackerNosara;
+  24 import com.automattic.simplenote.models.Note;
+  25 import com.automattic.simplenote.models.NoteCountIndexer;
+  26 import com.automattic.simplenote.models.NoteTagger;
+  27 import com.automattic.simplenote.models.Preferences;
+  28 import com.automattic.simplenote.models.Tag;
+  29 import com.automattic.simplenote.utils.AppLog;
+  30 import com.automattic.simplenote.utils.AppLog.Type;
+  31 import com.automattic.simplenote.utils.CrashUtils;
+  32 import com.automattic.simplenote.utils.DisplayUtils;
+  33 import com.automattic.simplenote.utils.PrefUtils;
+  34 import com.automattic.simplenote.utils.SyncWorker;
+  35 import com.simperium.Simperium;
+  36 import com.simperium.client.Bucket;
+  37 import com.simperium.client.BucketNameInvalid;
+  38 import com.simperium.client.BucketObjectMissingException;
+  39 
+  40 import org.wordpress.passcodelock.AppLockManager;
+  41 
+  42 import java.util.concurrent.TimeUnit;
+  43 
+  44 import static com.automattic.simplenote.models.Preferences.PREFERENCES_OBJECT_KEY;
+  45 
+  46 public class Simplenote extends Application {  // 60 seconds
+  47     public static final int TEN_SECONDS_MILLIS = 10 * 1000;
+  48     public static final String TAG = &quot;Simplenote&quot;;
+  49     public static final int INTENT_PREFERENCES = 1;
+  50     public static final int ONE_MINUTE_MILLIS = 60 * 1000;
+  51     public static final int INTENT_EDIT_NOTE = 2;
+  52     public static final String DELETED_NOTE_ID = &quot;deletedNoteId&quot;;
+  53     public static final String SELECTED_NOTE_ID = &quot;selectedNoteId&quot;;  // 10 seconds
+  54 
+  55     private static final String AUTH_PROVIDER = &quot;simplenote.com&quot;;
+  56     private static final String TAG_SYNC = &quot;sync&quot;;
+  57     private Simperium mSimperium;
+  58     private boolean mIsInBackground = true;
+  59 
+  60     private Bucket&lt;Note&gt; mNotesBucket;
+  61     private Bucket&lt;Tag&gt; mTagsBucket;
+  62 
+  63     private static Bucket&lt;Preferences&gt; mPreferencesBucket;
+  64 
+  65     public void onCreate() {
+  66         super.onCreate();
+  67 
+  68         CrashUtils.initWithContext(this);
+  69         AppLockManager.getInstance().enableDefaultAppLockIfAvailable(this);
+  70 
+  71         mSimperium = Simperium.newClient(
+  72                 BuildConfig.SIMPERIUM_APP_ID,
+  73                 BuildConfig.SIMPERIUM_APP_KEY,
+  74                 this
+  75         );
+  76 
+  77         mSimperium.setAuthProvider(AUTH_PROVIDER);
+  78 
+  79         try {
+  80             mNotesBucket = mSimperium.bucket(new Note.Schema());
+  81             Tag.Schema tagSchema = new Tag.Schema();
+  82             tagSchema.addIndex(new NoteCountIndexer(mNotesBucket));
+  83             mTagsBucket = mSimperium.bucket(tagSchema);
+  84             mPreferencesBucket = mSimperium.bucket(new Preferences.Schema());
+  85             // Every time a note changes or is deleted we need to reindex the tag counts
+  86             mNotesBucket.addListener(new NoteTagger(mTagsBucket));
+  87         } catch (BucketNameInvalid e) {
+  88             throw new RuntimeException(&quot;Could not create bucket&quot;, e);
+  89         }
+  90 
+  91         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
+  92 
+  93         ApplicationLifecycleMonitor applicationLifecycleMonitor = new ApplicationLifecycleMonitor();
+  94         registerComponentCallbacks(applicationLifecycleMonitor);
+  95         registerActivityLifecycleCallbacks(applicationLifecycleMonitor);
+  96 
+  97         AnalyticsTracker.registerTracker(new AnalyticsTrackerNosara(this));
+  98         AnalyticsTracker.refreshMetadata(mSimperium.getUser().getEmail());
+  99         CrashUtils.setCurrentUser(mSimperium.getUser());
+ 100 
+ 101         AppLog.add(Type.DEVICE, getDeviceInfo());
+ 102         AppLog.add(Type.ACCOUNT, getAccountInfo());
+ 103         AppLog.add(Type.LAYOUT, DisplayUtils.getDisplaySizeAndOrientation(Simplenote.this));
+ 104     }
+ 105 
+ 106     @SuppressWarnings(&quot;unused&quot;)
+ 107     private boolean isFirstLaunch() {
+ 108         // NotesActivity sets this pref to false after first launch
+ 109         return PrefUtils.getBoolPref(this, PrefUtils.PREF_FIRST_LAUNCH, true);
+ 110     }
+ 111 
+ 112     public static boolean analyticsIsEnabled() {
+ 113         if (mPreferencesBucket == null) {
+ 114             return true;
+ 115         }
+ 116 
+ 117         try {
+ 118             Preferences prefs = mPreferencesBucket.get(PREFERENCES_OBJECT_KEY);
+ 119             return prefs.getAnalyticsEnabled();
+ 120         } catch (BucketObjectMissingException e) {
+ 121             return true;
+ 122         }
+ 123     }
+ 124 
+ 125     private String getAccountInfo() {
+<abbr title=" 126         String email = &quot;Email: &quot; + (mSimperium != null &amp;&amp; mSimperium.getUser() != null ? mSimperium.getUser().getEmail() : &quot;?&quot;);"> 126         String email = &quot;Email: &quot; + (mSimperium != null &amp;&amp; mSimperium.getUser() != null ? mSimperium.getUs🔵</abbr>
+ 127         String notes = &quot;Notes: &quot; + (mNotesBucket != null ? mNotesBucket.count() : &quot;?&quot;);
+ 128         String tags = &quot;Tags: &quot; + (mTagsBucket != null ? mTagsBucket.count() : &quot;?&quot;);
+ 129         return email + &quot;\n&quot; + notes + &quot;\n&quot; + tags + &quot;\n\n&quot;;
+ 130     }
+ 131 
+ 132     private String getDeviceInfo() {
+<abbr title=" 133         String architecture = Build.DEVICE != null &amp;&amp; Build.DEVICE.matches(&quot;.+_cheets|cheets_.+&quot;) ? &quot;Chrome OS &quot; : &quot;Android &quot;;"> 133         String architecture = Build.DEVICE != null &amp;&amp; Build.DEVICE.matches(&quot;.+_cheets|cheets_.+&quot;) ? &quot;Chro🔵</abbr>
+ 134         String device = &quot;Device: &quot; + Build.MANUFACTURER + &quot; &quot; + Build.MODEL + &quot; (&quot; + Build.DEVICE + &quot;)&quot;;
+<abbr title=" 135         String system = &quot;System: &quot; + architecture + Build.VERSION.RELEASE + &quot; (&quot; + Build.VERSION.SDK_INT + &quot;)&quot;;"> 135         String system = &quot;System: &quot; + architecture + Build.VERSION.RELEASE + &quot; (&quot; + Build.VERSION.SDK_INT 🔵</abbr>
+ 136         String app = &quot;App: Simplenote &quot; + PrefUtils.versionInfo();
+ 137         return device + &quot;\n&quot; + system + &quot;\n&quot; + app + &quot;\n\n&quot;;
+ 138     }
+ 139 
+ 140     public Simperium getSimperium() {
+ 141         return mSimperium;
+ 142     }
+ 143 
+ 144     public Bucket&lt;Note&gt; getNotesBucket() {
+ 145         return mNotesBucket;
+ 146     }
+ 147 
+ 148     public Bucket&lt;Tag&gt; getTagsBucket() {
+ 149         return mTagsBucket;
+ 150     }
+ 151 
+ 152     public Bucket&lt;Preferences&gt; getPreferencesBucket() {
+ 153         return mPreferencesBucket;
+ 154     }
+ 155 
+ 156     public boolean isInBackground() {
+ 157         return mIsInBackground;
+ 158     }
+ 159 
+<abbr title=" 160     private class ApplicationLifecycleMonitor implements Application.ActivityLifecycleCallbacks, ComponentCallbacks2 {"> 160     private class ApplicationLifecycleMonitor implements Application.ActivityLifecycleCallbacks, Componen🔵</abbr>
+ 161         // ComponentCallbacks
+ 162         @Override
+ 163         public void onTrimMemory(int level) {
+ 164             if (level == ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN) {
+ 165                 mIsInBackground = true;
+ 166 
+ 167                 // Give the buckets some time to finish sync, then stop them
+ 168                 new Handler().postDelayed(new Runnable() {
+ 169                     @Override
+ 170                     public void run() {
+ 171                         if (!mIsInBackground) {
+ 172                             return;
+ 173                         }
+ 174 
+ 175                         if (mNotesBucket != null) {
+ 176                             mNotesBucket.stop();
+ 177                             AppLog.add(Type.SYNC, &quot;Stopped note bucket (Simplenote)&quot;);
+ 178                         }
+ 179 
+ 180                         if (mTagsBucket != null) {
+ 181                             mTagsBucket.stop();
+ 182                             AppLog.add(Type.SYNC, &quot;Stopped tag bucket (Simplenote)&quot;);
+ 183                         }
+ 184 
+ 185                         if (mPreferencesBucket != null) {
+ 186                             mPreferencesBucket.stop();
+ 187                             AppLog.add(Type.SYNC, &quot;Stopped preference bucket (Simplenote)&quot;);
+ 188                         }
+ 189                     }
+ 190                 }, TEN_SECONDS_MILLIS);
+ 191 
+ 192                 // Send analytics if app is in the background
+ 193                 AnalyticsTracker.track(
+ 194                         AnalyticsTracker.Stat.APPLICATION_CLOSED,
+ 195                         AnalyticsTracker.CATEGORY_USER,
+ 196                         &quot;application_closed&quot;
+ 197                 );
+ 198                 AnalyticsTracker.flush();
+ 199                 AppLog.add(Type.ACTION, &quot;App closed&quot;);
+ 200             } else {
+ 201                 mIsInBackground = false;
+ 202             }
+ 203         }
+ 204 
+ 205         @Override
+ 206         public void onConfigurationChanged(@NonNull Configuration newConfig) {
+ 207             AppLog.add(Type.LAYOUT, DisplayUtils.getDisplaySizeAndOrientation(Simplenote.this));
+ 208         }
+ 209 
+ 210         @Override
+ 211         public void onLowMemory() {
+ 212         }
+ 213 
+ 214         // ActivityLifecycleCallbacks
+ 215         @SuppressLint(&quot;LongLogTag&quot;)
+ 216 @Override
+ 217         public void onActivityResumed(@NonNull Activity activity) {
+ 218             if (mIsInBackground) {
+ 219                 AnalyticsTracker.track(
+ 220                         AnalyticsTracker.Stat.APPLICATION_OPENED,
+ 221                         AnalyticsTracker.CATEGORY_USER,
+ 222                         &quot;application_opened&quot;
+ 223                 );
+ 224 
+ 225                 mIsInBackground = false;
+ 226                 AppLog.add(Type.ACTION, &quot;App opened&quot;);
+ 227                 WorkManager.getInstance(getApplicationContext()).cancelUniqueWork(TAG_SYNC);
+ 228                 Log.d(&quot;Simplenote.onActivityResumed&quot;, &quot;Stopped worker&quot;);
+ 229             }
+ 230 
+ 231             String activitySimpleName = activity.getClass().getSimpleName();
+ 232 
+ 233             mPreferencesBucket.start();
+ 234             AppLog.add(Type.SYNC, &quot;Started preference bucket (&quot; + activitySimpleName + &quot;)&quot;);
+ 235             mNotesBucket.start();
+ 236             AppLog.add(Type.SYNC, &quot;Started note bucket (&quot; + activitySimpleName + &quot;)&quot;);
+ 237             mTagsBucket.start();
+ 238             AppLog.add(Type.SYNC, &quot;Started tag bucket (&quot; + activitySimpleName + &quot;)&quot;);
+ 239         }
+ 240 
+ 241         @Override
+ 242         public void onActivityCreated(@NonNull Activity activity, Bundle savedInstanceState) {
+ 243         }
+ 244 
+ 245         @Override
+ 246         public void onActivityStarted(@NonNull Activity activity) {
+ 247         }
+ 248 
+ 249         @SuppressLint(&quot;LongLogTag&quot;)
+ 250 @Override
+ 251         public void onActivityPaused(@NonNull Activity activity) {
+ 252 &lt;&lt;&lt;&lt;&lt;&lt;&lt; MINE
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 253             PeriodicWorkRequest syncWorkRequest = new PeriodicWorkRequest.Builder(</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 254                 SyncWorker.class,</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 255                 PeriodicWorkRequest.MIN_PERIODIC_INTERVAL_MILLIS,</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 256                 TimeUnit.MILLISECONDS</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 257             )</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"><abbr title=" 258                 .setConstraints(new Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build())"> 258                 .setConstraints(new Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).b🔵</abbr></span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 259                 .setBackoffCriteria(BackoffPolicy.LINEAR, ONE_MINUTE_MILLIS, TimeUnit.MILLISECONDS)</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 260                 .setInitialDelay(TEN_SECONDS_MILLIS, TimeUnit.MILLISECONDS)</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 261                 .addTag(TAG_SYNC)</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 262                 .build();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 263             WorkManager.getInstance(getApplicationContext()).enqueueUniquePeriodicWork(</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 264                 TAG_SYNC,</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 265                 ExistingPeriodicWorkPolicy.REPLACE,</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 266                 syncWorkRequest</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 267             );</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 268             Log.d(&quot;Simplenote.onActivityPaused&quot;, &quot;Started worker&quot;);</span>
+ 269 ||||||| BASE
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 270         }</span>
+ 271 =======
+ 272 &gt;&gt;&gt;&gt;&gt;&gt;&gt; YOURS
+ 273         }
+ 274 
+ 275         @Override
+ 276         public void onActivityStopped(@NonNull Activity activity) {
+ 277         }
+ 278 
+ 279         @Override
+ 280         public void onActivitySaveInstanceState(@NonNull Activity activity, @NonNull Bundle outState) {
+ 281         }
+ 282 
+ 283         @Override
+ 284         public void onActivityDestroyed(@NonNull Activity activity) {
+ 285         }
+ 286     }
+ 287 }
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ </pre></td>
+                            <td><pre>   1 package com.automattic.simplenote;
+   2 
+   3 import android.annotation.SuppressLint;
+   4 import android.app.Activity;
+   5 import android.app.Application;
+   6 import android.content.ComponentCallbacks2;
+   7 import android.content.res.Configuration;
+   8 import android.os.Build;
+   9 import android.os.Bundle;
+  10 import android.os.Handler;
+  11 import android.util.Log;
+  12 import androidx.annotation.NonNull;
+  13 import androidx.appcompat.app.AppCompatDelegate;
+  14 import androidx.work.BackoffPolicy;
+  15 import androidx.work.Constraints;
+  16 import androidx.work.ExistingPeriodicWorkPolicy;
+  17 import androidx.work.NetworkType;
+  18 import androidx.work.PeriodicWorkRequest;
+  19 import androidx.work.WorkManager;
+  20 import com.automattic.simplenote.analytics.AnalyticsTracker;
+  21 import com.automattic.simplenote.analytics.AnalyticsTrackerNosara;
+  22 import com.automattic.simplenote.models.Note;
+  23 import com.automattic.simplenote.models.NoteCountIndexer;
+  24 import com.automattic.simplenote.models.NoteTagger;
+  25 import com.automattic.simplenote.models.Preferences;
+  26 import com.automattic.simplenote.models.Tag;
+  27 import com.automattic.simplenote.utils.AppLog.Type;
+  28 import com.automattic.simplenote.utils.AppLog;
+  29 import com.automattic.simplenote.utils.CrashUtils;
+  30 import com.automattic.simplenote.utils.DisplayUtils;
+  31 import com.automattic.simplenote.utils.PrefUtils;
+  32 import com.automattic.simplenote.utils.SyncWorker;
+  33 import com.simperium.Simperium;
+  34 import com.simperium.client.Bucket;
+  35 import com.simperium.client.BucketNameInvalid;
+  36 import com.simperium.client.BucketObjectMissingException;
+  37 import java.util.concurrent.TimeUnit;
+  38 import org.wordpress.passcodelock.AppLockManager;
+  39 import static com.automattic.simplenote.models.Preferences.PREFERENCES_OBJECT_KEY;
+  40 
+  41 
+  42 public class Simplenote extends Application {
+  43     public static final String DELETED_NOTE_ID = &quot;deletedNoteId&quot;;
+  44 
+  45     public static final String SELECTED_NOTE_ID = &quot;selectedNoteId&quot;;
+  46 
+  47     public static final String TAG = &quot;Simplenote&quot;;
+  48 
+  49     public static final int INTENT_EDIT_NOTE = 2;
+  50 
+  51     public static final int INTENT_PREFERENCES = 1;
+  52 
+  53     // 60 seconds
+  54     public static final int ONE_MINUTE_MILLIS = 60 * 1000;  // 60 seconds
+  55 
+  56     // 10 seconds
+  57     public static final int TEN_SECONDS_MILLIS = 10 * 1000;  // 10 seconds
+  58 
+  59     private static final String AUTH_PROVIDER = &quot;simplenote.com&quot;;
+  60 
+  61     private static final String TAG_SYNC = &quot;sync&quot;;
+  62 
+  63     private static Bucket&lt;Preferences&gt; mPreferencesBucket;
+  64 
+  65     private Bucket&lt;Note&gt; mNotesBucket;
+  66 
+  67     private Bucket&lt;Tag&gt; mTagsBucket;
+  68 
+  69     private Simperium mSimperium;
+  70 
+  71         private boolean mIsInBackground = true;
+  72 
+  73     public void onCreate() {
+  74         super.onCreate();
+  75         CrashUtils.initWithContext(this);
+  76         AppLockManager.getInstance().enableDefaultAppLockIfAvailable(this);
+<abbr title="  77         mSimperium = Simperium.newClient(BuildConfig.SIMPERIUM_APP_ID, BuildConfig.SIMPERIUM_APP_KEY, this);">  77         mSimperium = Simperium.newClient(BuildConfig.SIMPERIUM_APP_ID, BuildConfig.SIMPERIUM_APP_KEY, thi🔵</abbr>
+  78         mSimperium.setAuthProvider(AUTH_PROVIDER);
+  79         try {
+  80             mNotesBucket = mSimperium.bucket(new Note.Schema());
+  81             Tag.Schema tagSchema = new Tag.Schema();
+  82             tagSchema.addIndex(new NoteCountIndexer(mNotesBucket));
+  83             mTagsBucket = mSimperium.bucket(tagSchema);
+  84             mPreferencesBucket = mSimperium.bucket(new Preferences.Schema());
+  85             // Every time a note changes or is deleted we need to reindex the tag counts
+  86             mNotesBucket.addListener(new NoteTagger(mTagsBucket));
+  87         } catch (BucketNameInvalid e) {
+  88             throw new RuntimeException(&quot;Could not create bucket&quot;, e);
+  89         }
+  90         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
+  91         ApplicationLifecycleMonitor applicationLifecycleMonitor = new ApplicationLifecycleMonitor();
+  92         registerComponentCallbacks(applicationLifecycleMonitor);
+  93         registerActivityLifecycleCallbacks(applicationLifecycleMonitor);
+  94         AnalyticsTracker.registerTracker(new AnalyticsTrackerNosara(this));
+  95         AnalyticsTracker.refreshMetadata(mSimperium.getUser().getEmail());
+  96         CrashUtils.setCurrentUser(mSimperium.getUser());
+  97         AppLog.add(Type.DEVICE, getDeviceInfo());
+  98         AppLog.add(Type.ACCOUNT, getAccountInfo());
+  99         AppLog.add(Type.LAYOUT, DisplayUtils.getDisplaySizeAndOrientation(this));
+ 100     }
+ 101 
+ 102     @SuppressWarnings(&quot;unused&quot;)
+ 103     private boolean isFirstLaunch() {
+ 104         // NotesActivity sets this pref to false after first launch
+ 105         return PrefUtils.getBoolPref(this, PrefUtils.PREF_FIRST_LAUNCH, true);
+ 106     }
+ 107 
+ 108     public static boolean analyticsIsEnabled() {
+ 109         if (mPreferencesBucket == null) {
+ 110             return true;
+ 111         }
+ 112 
+ 113         try {
+ 114             Preferences prefs = mPreferencesBucket.get(PREFERENCES_OBJECT_KEY);
+ 115             return prefs.getAnalyticsEnabled();
+ 116         } catch (BucketObjectMissingException e) {
+ 117             return true;
+ 118         }
+ 119     }
+ 120 
+ 121     private String getAccountInfo() {
+<abbr title=" 122         String email = &quot;Email: &quot; + (mSimperium != null &amp;&amp; mSimperium.getUser() != null ? mSimperium.getUser().getEmail() : &quot;?&quot;);"> 122         String email = &quot;Email: &quot; + (mSimperium != null &amp;&amp; mSimperium.getUser() != null ? mSimperium.getUs🔵</abbr>
+ 123         String notes = &quot;Notes: &quot; + (mNotesBucket != null ? mNotesBucket.count() : &quot;?&quot;);
+ 124         String tags = &quot;Tags: &quot; + (mTagsBucket != null ? mTagsBucket.count() : &quot;?&quot;);
+ 125         return email + &quot;\n&quot; + notes + &quot;\n&quot; + tags + &quot;\n\n&quot;;
+ 126     }
+ 127 
+ 128     private String getDeviceInfo() {
+<abbr title=" 129         String architecture = Build.DEVICE != null &amp;&amp; Build.DEVICE.matches(&quot;.+_cheets|cheets_.+&quot;) ? &quot;Chrome OS &quot; : &quot;Android &quot;;"> 129         String architecture = Build.DEVICE != null &amp;&amp; Build.DEVICE.matches(&quot;.+_cheets|cheets_.+&quot;) ? &quot;Chro🔵</abbr>
+ 130         String device = &quot;Device: &quot; + Build.MANUFACTURER + &quot; &quot; + Build.MODEL + &quot; (&quot; + Build.DEVICE + &quot;)&quot;;
+<abbr title=" 131         String system = &quot;System: &quot; + architecture + Build.VERSION.RELEASE + &quot; (&quot; + Build.VERSION.SDK_INT + &quot;)&quot;;"> 131         String system = &quot;System: &quot; + architecture + Build.VERSION.RELEASE + &quot; (&quot; + Build.VERSION.SDK_INT 🔵</abbr>
+ 132         String app = &quot;App: Simplenote &quot; + PrefUtils.versionInfo();
+ 133         return device + &quot;\n&quot; + system + &quot;\n&quot; + app + &quot;\n\n&quot;;
+ 134     }
+ 135 
+ 136     public Simperium getSimperium() {
+ 137         return mSimperium;
+ 138     }
+ 139 
+ 140     public Bucket&lt;Note&gt; getNotesBucket() {
+ 141         return mNotesBucket;
+ 142     }
+ 143 
+ 144     public Bucket&lt;Tag&gt; getTagsBucket() {
+ 145         return mTagsBucket;
+ 146     }
+ 147 
+ 148     public Bucket&lt;Preferences&gt; getPreferencesBucket() {
+ 149         return mPreferencesBucket;
+ 150     }
+ 151 
+ 152     public boolean isInBackground() {
+ 153         return mIsInBackground;
+ 154     }
+ 155 
+<abbr title=" 156     private class ApplicationLifecycleMonitor implements Application.ActivityLifecycleCallbacks , ComponentCallbacks2 {"> 156     private class ApplicationLifecycleMonitor implements Application.ActivityLifecycleCallbacks , Compone🔵</abbr>
+ 157         // ComponentCallbacks
+ 158         @Override
+ 159         public void onTrimMemory(int level) {
+ 160             if (level == ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN) {
+ 161                 mIsInBackground = true;
+ 162                 // Give the buckets some time to finish sync, then stop them
+ 163                 new Handler().postDelayed(new Runnable() {
+ 164                     @Override
+ 165                     public void run() {
+ 166                         if (!mIsInBackground) {
+ 167                             return;
+ 168                         }
+ 169                         if (mNotesBucket != null) {
+ 170                             mNotesBucket.stop();
+ 171                             AppLog.add(Type.SYNC, &quot;Stopped note bucket (Simplenote)&quot;);
+ 172                         }
+ 173                         if (mTagsBucket != null) {
+ 174                             mTagsBucket.stop();
+ 175                             AppLog.add(Type.SYNC, &quot;Stopped tag bucket (Simplenote)&quot;);
+ 176                         }
+ 177                         if (mPreferencesBucket != null) {
+ 178                             mPreferencesBucket.stop();
+ 179                             AppLog.add(Type.SYNC, &quot;Stopped preference bucket (Simplenote)&quot;);
+ 180                         }
+ 181                     }
+ 182                 }, TEN_SECONDS_MILLIS);
+ 183                 // Send analytics if app is in the background
+<abbr title=" 184                 AnalyticsTracker.track(AnalyticsTracker.Stat.APPLICATION_CLOSED, AnalyticsTracker.CATEGORY_USER, &quot;application_closed&quot;);"> 184                 AnalyticsTracker.track(AnalyticsTracker.Stat.APPLICATION_CLOSED, AnalyticsTracker.CATEGOR🔵</abbr>
+ 185                 AnalyticsTracker.flush();
+ 186                 AppLog.add(Type.ACTION, &quot;App closed&quot;);
+ 187             } else {
+ 188                 mIsInBackground = false;
+ 189             }
+ 190         }
+ 191 
+ 192         @Override
+ 193         public void onConfigurationChanged(@NonNull
+ 194         Configuration newConfig) {
+ 195             AppLog.add(Type.LAYOUT, DisplayUtils.getDisplaySizeAndOrientation(Simplenote.this));
+ 196         }
+ 197 
+ 198         @Override
+ 199         public void onLowMemory() {
+ 200         }
+ 201 
+ 202         // ActivityLifecycleCallbacks
+ 203         @SuppressLint(&quot;LongLogTag&quot;)
+ 204         @Override
+ 205         public void onActivityResumed(@NonNull
+ 206         Activity activity) {
+ 207             if (mIsInBackground) {
+<abbr title=" 208                 AnalyticsTracker.track(AnalyticsTracker.Stat.APPLICATION_OPENED, AnalyticsTracker.CATEGORY_USER, &quot;application_opened&quot;);"> 208                 AnalyticsTracker.track(AnalyticsTracker.Stat.APPLICATION_OPENED, AnalyticsTracker.CATEGOR🔵</abbr>
+ 209                 mIsInBackground = false;
+ 210                 AppLog.add(Type.ACTION, &quot;App opened&quot;);
+ 211                 WorkManager.getInstance(getApplicationContext()).cancelUniqueWork(TAG_SYNC);
+ 212                 Log.d(&quot;Simplenote.onActivityResumed&quot;, &quot;Stopped worker&quot;);
+ 213             }
+ 214             String activitySimpleName = activity.getClass().getSimpleName();
+ 215             mPreferencesBucket.start();
+ 216             AppLog.add(Type.SYNC, (&quot;Started preference bucket (&quot; + activitySimpleName) + &quot;)&quot;);
+ 217             mNotesBucket.start();
+ 218             AppLog.add(Type.SYNC, (&quot;Started note bucket (&quot; + activitySimpleName) + &quot;)&quot;);
+ 219             mTagsBucket.start();
+ 220             AppLog.add(Type.SYNC, (&quot;Started tag bucket (&quot; + activitySimpleName) + &quot;)&quot;);
+ 221         }
+ 222 
+ 223         @Override
+ 224         public void onActivityCreated(@NonNull
+ 225         Activity activity, Bundle savedInstanceState) {
+ 226         }
+ 227 
+ 228         @Override
+ 229         public void onActivityStarted(@NonNull
+ 230         Activity activity) {
+ 231         }
+ 232 
+ 233         @SuppressLint(&quot;LongLogTag&quot;)
+ 234         @Override
+ 235         public void onActivityPaused(@NonNull
+ 236         Activity activity) {
+<abbr title=" 237             PeriodicWorkRequest syncWorkRequest = new PeriodicWorkRequest.Builder(SyncWorker.class, PeriodicWorkRequest.MIN_PERIODIC_INTERVAL_MILLIS, TimeUnit.MILLISECONDS).setConstraints(new Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build()).setBackoffCriteria(BackoffPolicy.LINEAR, ONE_MINUTE_MILLIS, TimeUnit.MILLISECONDS).setInitialDelay(TEN_SECONDS_MILLIS, TimeUnit.MILLISECONDS).addTag(TAG_SYNC).build();"> 237             PeriodicWorkRequest syncWorkRequest = new PeriodicWorkRequest.Builder(SyncWorker.class, Perio🔵</abbr>
+<abbr title=" 238             WorkManager.getInstance(getApplicationContext()).enqueueUniquePeriodicWork(TAG_SYNC, ExistingPeriodicWorkPolicy.REPLACE, syncWorkRequest);"> 238             WorkManager.getInstance(getApplicationContext()).enqueueUniquePeriodicWork(TAG_SYNC, Existing🔵</abbr>
+ 239             Log.d(&quot;Simplenote.onActivityPaused&quot;, &quot;Started worker&quot;);
+ 240         }
+ 241 
+ 242         @Override
+ 243         public void onActivityStopped(@NonNull
+ 244         Activity activity) {
+ 245         }
+ 246 
+ 247         @Override
+ 248         public void onActivitySaveInstanceState(@NonNull
+ 249         Activity activity, @NonNull
+ 250         Bundle outState) {
+ 251         }
+ 252 
+ 253         @Override
+ 254         public void onActivityDestroyed(@NonNull
+ 255         Activity activity) {
+ 256         }
+ 257     }
+ 258 }
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ </pre></td>
+                        </tr>
+                    </table>
+                </div>
+                <div id="bottom">
+                    <table style="margin:auto">
+                        <tr>
+                            <th>ours vs. base</th>
+                            <th>theirs vs. base</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1  package com.automattic.simplenote;
+   2  
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">   3 +import android.annotation.SuppressLint;</span>
+   4  import android.app.Activity;
+   5  import android.app.Application;
+   6  import android.content.ComponentCallbacks2;
+   7  import android.content.res.Configuration;
+   8  import android.os.Build;
+   9  import android.os.Bundle;
+  10  import android.os.Handler;
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  11 -</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  12 +import android.util.Log;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  13 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  14 +import androidx.annotation.NonNull;</span>
+  15  import androidx.appcompat.app.AppCompatDelegate;
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  16 +import androidx.work.BackoffPolicy;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  17 +import androidx.work.Constraints;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  18 +import androidx.work.ExistingPeriodicWorkPolicy;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  19 +import androidx.work.NetworkType;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  20 +import androidx.work.PeriodicWorkRequest;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  21 +import androidx.work.WorkManager;</span>
+  22  
+  23  import com.automattic.simplenote.analytics.AnalyticsTracker;
+  24  import com.automattic.simplenote.analytics.AnalyticsTrackerNosara;
+  25  import com.automattic.simplenote.models.Note;
+  26  import com.automattic.simplenote.models.NoteCountIndexer;
+  27  import com.automattic.simplenote.models.NoteTagger;
+  28  import com.automattic.simplenote.models.Preferences;
+  29  import com.automattic.simplenote.models.Tag;
+  30  import com.automattic.simplenote.utils.AppLog;
+  31  import com.automattic.simplenote.utils.AppLog.Type;
+  32  import com.automattic.simplenote.utils.CrashUtils;
+  33  import com.automattic.simplenote.utils.DisplayUtils;
+  34  import com.automattic.simplenote.utils.PrefUtils;
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  35 +import com.automattic.simplenote.utils.SyncWorker;</span>
+  36  import com.simperium.Simperium;
+  37  import com.simperium.client.Bucket;
+  38  import com.simperium.client.BucketNameInvalid;
+  39  import com.simperium.client.BucketObjectMissingException;
+  40  
+  41  import org.wordpress.passcodelock.AppLockManager;
+  42  
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  43 +import java.util.concurrent.TimeUnit;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  44 +</span>
+  45  import static com.automattic.simplenote.models.Preferences.PREFERENCES_OBJECT_KEY;
+  46  
+  47  public class Simplenote extends Application {
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  48 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  49 -    private static final int TEN_SECONDS_MILLIS = 10000;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  50 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  51 -    // log tag</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  52 -    public static final String TAG = &quot;Simplenote&quot;;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  53 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  54 -    // intent IDs</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  55 -    public static final int INTENT_PREFERENCES = 1;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  56 -    public static final int INTENT_EDIT_NOTE = 2;</span>
+  57      public static final String DELETED_NOTE_ID = &quot;deletedNoteId&quot;;
+  58      public static final String SELECTED_NOTE_ID = &quot;selectedNoteId&quot;;
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  59 +    public static final String TAG = &quot;Simplenote&quot;;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  60 +    public static final int INTENT_EDIT_NOTE = 2;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  61 +    public static final int INTENT_PREFERENCES = 1;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  62 +    public static final int ONE_MINUTE_MILLIS = 60 * 1000;  // 60 seconds</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  63 +    public static final int TEN_SECONDS_MILLIS = 10 * 1000;  // 10 seconds</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  64 +</span>
+  65      private static final String AUTH_PROVIDER = &quot;simplenote.com&quot;;
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  66 -    private Simperium mSimperium;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  67 +    private static final String TAG_SYNC = &quot;sync&quot;;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  68 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  69 +    private static Bucket&lt;Preferences&gt; mPreferencesBucket;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  70 +</span>
+  71      private Bucket&lt;Note&gt; mNotesBucket;
+  72      private Bucket&lt;Tag&gt; mTagsBucket;
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  73 -    private static Bucket&lt;Preferences&gt; mPreferencesBucket;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  74 +    private Simperium mSimperium;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  75 +    private boolean mIsInBackground = true;</span>
+  76  
+  77      public void onCreate() {
+  78          super.onCreate();
+  79  
+  80          CrashUtils.initWithContext(this);
+  81          AppLockManager.getInstance().enableDefaultAppLockIfAvailable(this);
+  82  
+  83          mSimperium = Simperium.newClient(
+  84                  BuildConfig.SIMPERIUM_APP_ID,
+  85                  BuildConfig.SIMPERIUM_APP_KEY,
+  86                  this
+  87          );
+  88  
+  89          mSimperium.setAuthProvider(AUTH_PROVIDER);
+  90  
+  91          try {
+  92              mNotesBucket = mSimperium.bucket(new Note.Schema());
+  93              Tag.Schema tagSchema = new Tag.Schema();
+  94              tagSchema.addIndex(new NoteCountIndexer(mNotesBucket));
+  95              mTagsBucket = mSimperium.bucket(tagSchema);
+  96              mPreferencesBucket = mSimperium.bucket(new Preferences.Schema());
+  97              mPreferencesBucket.start();
+  98              // Every time a note changes or is deleted we need to reindex the tag counts
+  99              mNotesBucket.addListener(new NoteTagger(mTagsBucket));
+ 100          } catch (BucketNameInvalid e) {
+ 101              throw new RuntimeException(&quot;Could not create bucket&quot;, e);
+ 102          }
+ 103  
+ 104          AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
+ 105  
+ 106          ApplicationLifecycleMonitor applicationLifecycleMonitor = new ApplicationLifecycleMonitor();
+ 107          registerComponentCallbacks(applicationLifecycleMonitor);
+ 108          registerActivityLifecycleCallbacks(applicationLifecycleMonitor);
+ 109  
+ 110          AnalyticsTracker.registerTracker(new AnalyticsTrackerNosara(this));
+ 111          AnalyticsTracker.refreshMetadata(mSimperium.getUser().getEmail());
+ 112          CrashUtils.setCurrentUser(mSimperium.getUser());
+ 113  
+ 114          AppLog.add(Type.DEVICE, getDeviceInfo());
+ 115          AppLog.add(Type.ACCOUNT, getAccountInfo());
+ 116          AppLog.add(Type.LAYOUT, DisplayUtils.getDisplaySizeAndOrientation(Simplenote.this));
+ 117      }
+ 118  
+ 119      @SuppressWarnings(&quot;unused&quot;)
+ 120      private boolean isFirstLaunch() {
+ 121          // NotesActivity sets this pref to false after first launch
+ 122          return PrefUtils.getBoolPref(this, PrefUtils.PREF_FIRST_LAUNCH, true);
+ 123      }
+ 124  
+ 125      public static boolean analyticsIsEnabled() {
+ 126          if (mPreferencesBucket == null) {
+ 127              return true;
+ 128          }
+ 129  
+ 130          try {
+ 131              Preferences prefs = mPreferencesBucket.get(PREFERENCES_OBJECT_KEY);
+ 132              return prefs.getAnalyticsEnabled();
+ 133          } catch (BucketObjectMissingException e) {
+ 134              return true;
+ 135          }
+ 136      }
+ 137  
+ 138      private String getAccountInfo() {
+<abbr title=" 139          String email = &quot;Email: &quot; + (mSimperium != null &amp;&amp; mSimperium.getUser() != null ? mSimperium.getUser().getEmail() : &quot;?&quot;);"> 139          String email = &quot;Email: &quot; + (mSimperium != null &amp;&amp; mSimperium.getUser() != null ? mSimperium.getUser().getE🔵</abbr>
+ 140          String notes = &quot;Notes: &quot; + (mNotesBucket != null ? mNotesBucket.count() : &quot;?&quot;);
+ 141          String tags = &quot;Tags: &quot; + (mTagsBucket != null ? mTagsBucket.count() : &quot;?&quot;);
+ 142          return email + &quot;\n&quot; + notes + &quot;\n&quot; + tags + &quot;\n\n&quot;;
+ 143      }
+ 144  
+ 145      private String getDeviceInfo() {
+<abbr title=" 146          String architecture = Build.DEVICE != null &amp;&amp; Build.DEVICE.matches(&quot;.+_cheets|cheets_.+&quot;) ? &quot;Chrome OS &quot; : &quot;Android &quot;;"> 146          String architecture = Build.DEVICE != null &amp;&amp; Build.DEVICE.matches(&quot;.+_cheets|cheets_.+&quot;) ? &quot;Chrome OS &quot; :🔵</abbr>
+ 147          String device = &quot;Device: &quot; + Build.MANUFACTURER + &quot; &quot; + Build.MODEL + &quot; (&quot; + Build.DEVICE + &quot;)&quot;;
+ 148          String system = &quot;System: &quot; + architecture + Build.VERSION.RELEASE + &quot; (&quot; + Build.VERSION.SDK_INT + &quot;)&quot;;
+ 149          String app = &quot;App: Simplenote &quot; + PrefUtils.versionInfo();
+ 150          return device + &quot;\n&quot; + system + &quot;\n&quot; + app + &quot;\n\n&quot;;
+ 151      }
+ 152  
+ 153      public Simperium getSimperium() {
+ 154          return mSimperium;
+ 155      }
+ 156  
+ 157      public Bucket&lt;Note&gt; getNotesBucket() {
+ 158          return mNotesBucket;
+ 159      }
+ 160  
+ 161      public Bucket&lt;Tag&gt; getTagsBucket() {
+ 162          return mTagsBucket;
+ 163      }
+ 164  
+ 165      public Bucket&lt;Preferences&gt; getPreferencesBucket() {
+ 166          return mPreferencesBucket;
+ 167      }
+ 168  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 169 -    private class ApplicationLifecycleMonitor implements Application.ActivityLifecycleCallbacks,</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 170 -            ComponentCallbacks2 {</span>
+
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 171 -        private boolean mIsInBackground = true;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 172 -</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 173 +    public boolean isInBackground() {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 174 +        return mIsInBackground;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 175 +    }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 176 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"><abbr title=" 177 +    private class ApplicationLifecycleMonitor implements Application.ActivityLifecycleCallbacks, ComponentCallbacks2 {"> 177 +    private class ApplicationLifecycleMonitor implements Application.ActivityLifecycleCallbacks, ComponentCallback🔵</abbr></span>
+ 178          // ComponentCallbacks
+ 179          @Override
+ 180          public void onTrimMemory(int level) {
+ 181              if (level == ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN) {
+ 182                  mIsInBackground = true;
+ 183  
+ 184                  // Give the buckets some time to finish sync, then stop them
+ 185                  new Handler().postDelayed(new Runnable() {
+ 186                      @Override
+ 187                      public void run() {
+ 188                          if (!mIsInBackground) {
+ 189                              return;
+ 190                          }
+ 191  
+ 192                          if (mNotesBucket != null) {
+ 193                              mNotesBucket.stop();
+ 194                              AppLog.add(Type.SYNC, &quot;Stopped note bucket (Simplenote)&quot;);
+ 195                          }
+ 196  
+ 197                          if (mTagsBucket != null) {
+ 198                              mTagsBucket.stop();
+ 199                              AppLog.add(Type.SYNC, &quot;Stopped tag bucket (Simplenote)&quot;);
+ 200                          }
+ 201  
+ 202                          if (mPreferencesBucket != null) {
+ 203                              mPreferencesBucket.stop();
+
+ 204                          }
+ 205                      }
+ 206                  }, TEN_SECONDS_MILLIS);
+ 207  
+ 208                  // Send analytics if app is in the background
+ 209                  AnalyticsTracker.track(
+ 210                          AnalyticsTracker.Stat.APPLICATION_CLOSED,
+ 211                          AnalyticsTracker.CATEGORY_USER,
+ 212                          &quot;application_closed&quot;
+ 213                  );
+ 214                  AnalyticsTracker.flush();
+ 215                  AppLog.add(Type.ACTION, &quot;App closed&quot;);
+ 216              } else {
+ 217                  mIsInBackground = false;
+ 218              }
+ 219          }
+ 220  
+ 221          @Override
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 222 -        public void onConfigurationChanged(Configuration newConfig) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 223 +        public void onConfigurationChanged(@NonNull Configuration newConfig) {</span>
+ 224              AppLog.add(Type.LAYOUT, DisplayUtils.getDisplaySizeAndOrientation(Simplenote.this));
+ 225          }
+ 226  
+ 227          @Override
+ 228          public void onLowMemory() {
+ 229          }
+ 230  
+ 231          // ActivityLifeCycle callbacks
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 232 -        @Override</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 233 -        public void onActivityResumed(Activity activity) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 234 +        @SuppressLint(&quot;LongLogTag&quot;)</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 235 +        @Override</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 236 +        public void onActivityResumed(@NonNull Activity activity) {</span>
+ 237              if (mIsInBackground) {
+ 238                  AnalyticsTracker.track(
+ 239                          AnalyticsTracker.Stat.APPLICATION_OPENED,
+ 240                          AnalyticsTracker.CATEGORY_USER,
+ 241                          &quot;application_opened&quot;
+ 242                  );
+ 243  
+ 244                  mIsInBackground = false;
+ 245                  AppLog.add(Type.ACTION, &quot;App opened&quot;);
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 246 +                WorkManager.getInstance(getApplicationContext()).cancelUniqueWork(TAG_SYNC);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 247 +                Log.d(&quot;Simplenote.onActivityResumed&quot;, &quot;Stopped worker&quot;);</span>
+ 248              }
+ 249          }
+ 250  
+ 251          @Override
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 252 -        public void onActivityCreated(Activity activity, Bundle savedInstanceState) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 253 -        }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 254 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 255 -        @Override</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 256 -        public void onActivityStarted(Activity activity) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 257 -        }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 258 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 259 -        @Override</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 260 -        public void onActivityPaused(Activity activity) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 261 -        }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 262 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 263 -        @Override</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 264 -        public void onActivityStopped(Activity activity) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 265 -        }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 266 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 267 -        @Override</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 268 -        public void onActivitySaveInstanceState(Activity activity, Bundle outState) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 269 -        }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 270 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 271 -        @Override</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 272 -        public void onActivityDestroyed(Activity activity) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 273 +        public void onActivityCreated(@NonNull Activity activity, Bundle savedInstanceState) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 274 +        }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 275 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 276 +        @Override</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 277 +        public void onActivityStarted(@NonNull Activity activity) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 278 +        }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 279 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 280 +        @SuppressLint(&quot;LongLogTag&quot;)</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 281 +        @Override</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 282 +        public void onActivityPaused(@NonNull Activity activity) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 283 +            PeriodicWorkRequest syncWorkRequest = new PeriodicWorkRequest.Builder(</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 284 +                SyncWorker.class,</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 285 +                PeriodicWorkRequest.MIN_PERIODIC_INTERVAL_MILLIS,</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 286 +                TimeUnit.MILLISECONDS</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 287 +            )</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 288 +                .setConstraints(new Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build())</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 289 +                .setBackoffCriteria(BackoffPolicy.LINEAR, ONE_MINUTE_MILLIS, TimeUnit.MILLISECONDS)</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 290 +                .setInitialDelay(TEN_SECONDS_MILLIS, TimeUnit.MILLISECONDS)</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 291 +                .addTag(TAG_SYNC)</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 292 +                .build();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 293 +            WorkManager.getInstance(getApplicationContext()).enqueueUniquePeriodicWork(</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 294 +                TAG_SYNC,</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 295 +                ExistingPeriodicWorkPolicy.REPLACE,</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 296 +                syncWorkRequest</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 297 +            );</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 298 +            Log.d(&quot;Simplenote.onActivityPaused&quot;, &quot;Started worker&quot;);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 299 +        }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 300 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 301 +        @Override</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 302 +        public void onActivityStopped(@NonNull Activity activity) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 303 +        }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 304 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 305 +        @Override</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 306 +        public void onActivitySaveInstanceState(@NonNull Activity activity, @NonNull Bundle outState) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 307 +        }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 308 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 309 +        @Override</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 310 +        public void onActivityDestroyed(@NonNull Activity activity) {</span>
+ 311          }
+ 312      }
+ 313  }</pre></td>
+                            <td><pre>   1  package com.automattic.simplenote;
+   2  
+
+   3  import android.app.Activity;
+   4  import android.app.Application;
+   5  import android.content.ComponentCallbacks2;
+   6  import android.content.res.Configuration;
+   7  import android.os.Build;
+   8  import android.os.Bundle;
+   9  import android.os.Handler;
+  10  
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  11 +import androidx.annotation.NonNull;</span>
+
+
+  12  import androidx.appcompat.app.AppCompatDelegate;
+
+
+
+
+
+
+  13  
+  14  import com.automattic.simplenote.analytics.AnalyticsTracker;
+  15  import com.automattic.simplenote.analytics.AnalyticsTrackerNosara;
+  16  import com.automattic.simplenote.models.Note;
+  17  import com.automattic.simplenote.models.NoteCountIndexer;
+  18  import com.automattic.simplenote.models.NoteTagger;
+  19  import com.automattic.simplenote.models.Preferences;
+  20  import com.automattic.simplenote.models.Tag;
+  21  import com.automattic.simplenote.utils.AppLog;
+  22  import com.automattic.simplenote.utils.AppLog.Type;
+  23  import com.automattic.simplenote.utils.CrashUtils;
+  24  import com.automattic.simplenote.utils.DisplayUtils;
+  25  import com.automattic.simplenote.utils.PrefUtils;
+
+  26  import com.simperium.Simperium;
+  27  import com.simperium.client.Bucket;
+  28  import com.simperium.client.BucketNameInvalid;
+  29  import com.simperium.client.BucketObjectMissingException;
+  30  
+  31  import org.wordpress.passcodelock.AppLockManager;
+  32  
+
+
+  33  import static com.automattic.simplenote.models.Preferences.PREFERENCES_OBJECT_KEY;
+  34  
+  35  public class Simplenote extends Application {
+  36  
+  37      private static final int TEN_SECONDS_MILLIS = 10000;
+  38  
+  39      // log tag
+  40      public static final String TAG = &quot;Simplenote&quot;;
+  41  
+  42      // intent IDs
+  43      public static final int INTENT_PREFERENCES = 1;
+  44      public static final int INTENT_EDIT_NOTE = 2;
+  45      public static final String DELETED_NOTE_ID = &quot;deletedNoteId&quot;;
+  46      public static final String SELECTED_NOTE_ID = &quot;selectedNoteId&quot;;
+
+
+
+
+
+
+  47      private static final String AUTH_PROVIDER = &quot;simplenote.com&quot;;
+  48      private Simperium mSimperium;
+
+
+
+
+  49      private Bucket&lt;Note&gt; mNotesBucket;
+  50      private Bucket&lt;Tag&gt; mTagsBucket;
+  51      private static Bucket&lt;Preferences&gt; mPreferencesBucket;
+
+
+  52  
+  53      public void onCreate() {
+  54          super.onCreate();
+  55  
+  56          CrashUtils.initWithContext(this);
+  57          AppLockManager.getInstance().enableDefaultAppLockIfAvailable(this);
+  58  
+  59          mSimperium = Simperium.newClient(
+  60                  BuildConfig.SIMPERIUM_APP_ID,
+  61                  BuildConfig.SIMPERIUM_APP_KEY,
+  62                  this
+  63          );
+  64  
+  65          mSimperium.setAuthProvider(AUTH_PROVIDER);
+  66  
+  67          try {
+  68              mNotesBucket = mSimperium.bucket(new Note.Schema());
+  69              Tag.Schema tagSchema = new Tag.Schema();
+  70              tagSchema.addIndex(new NoteCountIndexer(mNotesBucket));
+  71              mTagsBucket = mSimperium.bucket(tagSchema);
+  72              mPreferencesBucket = mSimperium.bucket(new Preferences.Schema());
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  73 -            mPreferencesBucket.start();</span>
+  74              // Every time a note changes or is deleted we need to reindex the tag counts
+  75              mNotesBucket.addListener(new NoteTagger(mTagsBucket));
+  76          } catch (BucketNameInvalid e) {
+  77              throw new RuntimeException(&quot;Could not create bucket&quot;, e);
+  78          }
+  79  
+  80          AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
+  81  
+  82          ApplicationLifecycleMonitor applicationLifecycleMonitor = new ApplicationLifecycleMonitor();
+  83          registerComponentCallbacks(applicationLifecycleMonitor);
+  84          registerActivityLifecycleCallbacks(applicationLifecycleMonitor);
+  85  
+  86          AnalyticsTracker.registerTracker(new AnalyticsTrackerNosara(this));
+  87          AnalyticsTracker.refreshMetadata(mSimperium.getUser().getEmail());
+  88          CrashUtils.setCurrentUser(mSimperium.getUser());
+  89  
+  90          AppLog.add(Type.DEVICE, getDeviceInfo());
+  91          AppLog.add(Type.ACCOUNT, getAccountInfo());
+  92          AppLog.add(Type.LAYOUT, DisplayUtils.getDisplaySizeAndOrientation(Simplenote.this));
+  93      }
+  94  
+  95      @SuppressWarnings(&quot;unused&quot;)
+  96      private boolean isFirstLaunch() {
+  97          // NotesActivity sets this pref to false after first launch
+  98          return PrefUtils.getBoolPref(this, PrefUtils.PREF_FIRST_LAUNCH, true);
+  99      }
+ 100  
+ 101      public static boolean analyticsIsEnabled() {
+ 102          if (mPreferencesBucket == null) {
+ 103              return true;
+ 104          }
+ 105  
+ 106          try {
+ 107              Preferences prefs = mPreferencesBucket.get(PREFERENCES_OBJECT_KEY);
+ 108              return prefs.getAnalyticsEnabled();
+ 109          } catch (BucketObjectMissingException e) {
+ 110              return true;
+ 111          }
+ 112      }
+ 113  
+ 114      private String getAccountInfo() {
+<abbr title=" 115          String email = &quot;Email: &quot; + (mSimperium != null &amp;&amp; mSimperium.getUser() != null ? mSimperium.getUser().getEmail() : &quot;?&quot;);"> 115          String email = &quot;Email: &quot; + (mSimperium != null &amp;&amp; mSimperium.getUser() != null ? mSimperium.getUser().getE🔵</abbr>
+ 116          String notes = &quot;Notes: &quot; + (mNotesBucket != null ? mNotesBucket.count() : &quot;?&quot;);
+ 117          String tags = &quot;Tags: &quot; + (mTagsBucket != null ? mTagsBucket.count() : &quot;?&quot;);
+ 118          return email + &quot;\n&quot; + notes + &quot;\n&quot; + tags + &quot;\n\n&quot;;
+ 119      }
+ 120  
+ 121      private String getDeviceInfo() {
+<abbr title=" 122          String architecture = Build.DEVICE != null &amp;&amp; Build.DEVICE.matches(&quot;.+_cheets|cheets_.+&quot;) ? &quot;Chrome OS &quot; : &quot;Android &quot;;"> 122          String architecture = Build.DEVICE != null &amp;&amp; Build.DEVICE.matches(&quot;.+_cheets|cheets_.+&quot;) ? &quot;Chrome OS &quot; :🔵</abbr>
+ 123          String device = &quot;Device: &quot; + Build.MANUFACTURER + &quot; &quot; + Build.MODEL + &quot; (&quot; + Build.DEVICE + &quot;)&quot;;
+ 124          String system = &quot;System: &quot; + architecture + Build.VERSION.RELEASE + &quot; (&quot; + Build.VERSION.SDK_INT + &quot;)&quot;;
+ 125          String app = &quot;App: Simplenote &quot; + PrefUtils.versionInfo();
+ 126          return device + &quot;\n&quot; + system + &quot;\n&quot; + app + &quot;\n\n&quot;;
+ 127      }
+ 128  
+ 129      public Simperium getSimperium() {
+ 130          return mSimperium;
+ 131      }
+ 132  
+ 133      public Bucket&lt;Note&gt; getNotesBucket() {
+ 134          return mNotesBucket;
+ 135      }
+ 136  
+ 137      public Bucket&lt;Tag&gt; getTagsBucket() {
+ 138          return mTagsBucket;
+ 139      }
+ 140  
+ 141      public Bucket&lt;Preferences&gt; getPreferencesBucket() {
+ 142          return mPreferencesBucket;
+ 143      }
+ 144  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 145 -    private class ApplicationLifecycleMonitor implements Application.ActivityLifecycleCallbacks,</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 146 -            ComponentCallbacks2 {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"><abbr title=" 147 +    private class ApplicationLifecycleMonitor implements Application.ActivityLifecycleCallbacks, ComponentCallbacks2 {"> 147 +    private class ApplicationLifecycleMonitor implements Application.ActivityLifecycleCallbacks, ComponentCallback🔵</abbr></span>
+ 148          private boolean mIsInBackground = true;
+ 149  
+
+
+
+
+
+ 150          // ComponentCallbacks
+ 151          @Override
+ 152          public void onTrimMemory(int level) {
+ 153              if (level == ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN) {
+ 154                  mIsInBackground = true;
+ 155  
+ 156                  // Give the buckets some time to finish sync, then stop them
+ 157                  new Handler().postDelayed(new Runnable() {
+ 158                      @Override
+ 159                      public void run() {
+ 160                          if (!mIsInBackground) {
+ 161                              return;
+ 162                          }
+ 163  
+ 164                          if (mNotesBucket != null) {
+ 165                              mNotesBucket.stop();
+ 166                              AppLog.add(Type.SYNC, &quot;Stopped note bucket (Simplenote)&quot;);
+ 167                          }
+ 168  
+ 169                          if (mTagsBucket != null) {
+ 170                              mTagsBucket.stop();
+ 171                              AppLog.add(Type.SYNC, &quot;Stopped tag bucket (Simplenote)&quot;);
+ 172                          }
+ 173  
+ 174                          if (mPreferencesBucket != null) {
+ 175                              mPreferencesBucket.stop();
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 176 +                            AppLog.add(Type.SYNC, &quot;Stopped preference bucket (Simplenote)&quot;);</span>
+ 177                          }
+ 178                      }
+ 179                  }, TEN_SECONDS_MILLIS);
+ 180  
+ 181                  // Send analytics if app is in the background
+ 182                  AnalyticsTracker.track(
+ 183                          AnalyticsTracker.Stat.APPLICATION_CLOSED,
+ 184                          AnalyticsTracker.CATEGORY_USER,
+ 185                          &quot;application_closed&quot;
+ 186                  );
+ 187                  AnalyticsTracker.flush();
+ 188                  AppLog.add(Type.ACTION, &quot;App closed&quot;);
+ 189              } else {
+ 190                  mIsInBackground = false;
+ 191              }
+ 192          }
+ 193  
+ 194          @Override
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 195 -        public void onConfigurationChanged(Configuration newConfig) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 196 +        public void onConfigurationChanged(@NonNull Configuration newConfig) {</span>
+ 197              AppLog.add(Type.LAYOUT, DisplayUtils.getDisplaySizeAndOrientation(Simplenote.this));
+ 198          }
+ 199  
+ 200          @Override
+ 201          public void onLowMemory() {
+ 202          }
+ 203  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 204 -        // ActivityLifeCycle callbacks</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 205 -        @Override</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 206 -        public void onActivityResumed(Activity activity) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 207 +        // ActivityLifecycleCallbacks</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 208 +        @Override</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 209 +        public void onActivityResumed(@NonNull Activity activity) {</span>
+ 210              if (mIsInBackground) {
+ 211                  AnalyticsTracker.track(
+ 212                          AnalyticsTracker.Stat.APPLICATION_OPENED,
+ 213                          AnalyticsTracker.CATEGORY_USER,
+ 214                          &quot;application_opened&quot;
+ 215                  );
+ 216  
+ 217                  mIsInBackground = false;
+ 218                  AppLog.add(Type.ACTION, &quot;App opened&quot;);
+
+
+ 219              }
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 220 -        }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 221 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 222 -        @Override</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 223 -        public void onActivityCreated(Activity activity, Bundle savedInstanceState) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 224 -        }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 225 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 226 -        @Override</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 227 -        public void onActivityStarted(Activity activity) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 228 -        }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 229 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 230 -        @Override</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 231 -        public void onActivityPaused(Activity activity) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 232 -        }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 233 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 234 -        @Override</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 235 -        public void onActivityStopped(Activity activity) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 236 -        }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 237 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 238 -        @Override</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 239 -        public void onActivitySaveInstanceState(Activity activity, Bundle outState) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 240 -        }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 241 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 242 -        @Override</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 243 -        public void onActivityDestroyed(Activity activity) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 244 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 245 +            String activitySimpleName = activity.getClass().getSimpleName();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 246 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 247 +            mPreferencesBucket.start();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 248 +            AppLog.add(Type.SYNC, &quot;Started preference bucket (&quot; + activitySimpleName + &quot;)&quot;);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 249 +            mNotesBucket.start();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 250 +            AppLog.add(Type.SYNC, &quot;Started note bucket (&quot; + activitySimpleName + &quot;)&quot;);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 251 +            mTagsBucket.start();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 252 +            AppLog.add(Type.SYNC, &quot;Started tag bucket (&quot; + activitySimpleName + &quot;)&quot;);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 253 +        }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 254 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 255 +        @Override</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 256 +        public void onActivityCreated(@NonNull Activity activity, Bundle savedInstanceState) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 257 +        }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 258 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 259 +        @Override</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 260 +        public void onActivityStarted(@NonNull Activity activity) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 261 +        }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 262 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 263 +        @Override</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 264 +        public void onActivityPaused(@NonNull Activity activity) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 265 +        }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 266 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 267 +        @Override</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 268 +        public void onActivityStopped(@NonNull Activity activity) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 269 +        }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 270 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 271 +        @Override</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 272 +        public void onActivitySaveInstanceState(@NonNull Activity activity, @NonNull Bundle outState) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 273 +        }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 274 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 275 +        @Override</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 276 +        public void onActivityDestroyed(@NonNull Activity activity) {</span>
+
+
+
+
+
+ 277          }
+ 278      }
+ 279  }</pre></td>
+                        </tr>
+                    </table>
+                </div>
+              </body>
+            </html>
+            

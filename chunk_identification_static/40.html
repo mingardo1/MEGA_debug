@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+    <html lang="en">
+              <head>
+                <meta charset="utf-8">
+                <title>40</title>
+                    <style>
+                        #top {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        #bottom {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        abbr {
+                          /* Here is the delay */
+                          transition-delay:0s;
+                        }
+                    </style>
+              </head>
+              <body>
+                <span style="height: 4vh">
+                    40
+                    <a href="39.html">prev</a>
+                    <a href="41.html">next</a>
+                    <a href="40_chunks.html">chunks</a>
+                    <a href="index.html">index</a>
+                    AriaLyy/Aria_ec1b504309d78f4ff275a5e6a6f08a5e0022f44b_Aria/src/main/java/com/arialyy/aria/core/download/downloader/FtpDirDownloadUtil.java
+                    <textarea rows=1 onclick='navigator.clipboard.writeText(this.value)'>cd C:\studies\se\mega\git-analyzer-plus\notebooks\debug
+del /Q *
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\AriaLyy\Aria show &quot;ec1b504309d78f4ff275a5e6a6f08a5e0022f44b:Aria/src/main/java/com/arialyy/aria/core/download/downloader/FtpDirDownloadUtil.java&quot; &gt; committed.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\AriaLyy\Aria show &quot;ec1b504309d78f4ff275a5e6a6f08a5e0022f44b^1:Aria/src/main/java/com/arialyy/aria/core/download/downloader/FtpDirDownloadUtil.java&quot; &gt; ours.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\AriaLyy\Aria show &quot;ec1b504309d78f4ff275a5e6a6f08a5e0022f44b^2:Aria/src/main/java/com/arialyy/aria/core/download/downloader/FtpDirDownloadUtil.java&quot; &gt; theirs.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\AriaLyy\Aria show &quot;cd587dd212fe20c8c7e9d44c6b009614eae38bef:Aria/src/main/java/com/arialyy/aria/core/download/downloader/FtpDirDownloadUtil.java&quot; &gt; base.java
+copy ours.java 1ours.java
+copy ours.java 2ours.java
+copy theirs.java 1theirs.java
+copy theirs.java 2theirs.java
+copy base.java 1base.java
+copy base.java 2base.java
+&quot;C:\Program Files\Java\jdk1.8.0_241\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\jFSTMerge\build\libs\jFSTMerge-all.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\jfstmerge.java --show-base
+&quot;C:\Program Files\Eclipse Adoptium\jdk-17.0.11.9-hotspot\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\spork\target\spork-0.5.0-SNAPSHOT.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\spork.java
+del /Q 1*.java
+del /Q 2*.java
+del /Q jfstmerge.java.merge
+</textarea>
+                    {strict: [[bj]], subset: [[bj]]}
+                </span>
+                <div id="top">
+
+                    <table>
+                        <tr>
+                            <th>line based (standard git)</th>
+                            <th>jfstmerge</th>
+                            <th>spork</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1 /*
+   2  * Copyright (C) 2016 AriaLyy(https://github.com/AriaLyy/Aria)
+   3  *
+   4  * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+   5  * you may not use this file except in compliance with the License.
+   6  * You may obtain a copy of the License at
+   7  *
+   8  *      http://www.apache.org/licenses/LICENSE-2.0
+   9  *
+  10  * Unless required by applicable law or agreed to in writing, software
+  11  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  12  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  13  * See the License for the specific language governing permissions and
+  14  * limitations under the License.
+  15  */
+  16 package com.arialyy.aria.core.download.downloader;
+  17 
+  18 import com.arialyy.aria.core.common.OnFileInfoCallback;
+  19 import com.arialyy.aria.core.download.DownloadEntity;
+  20 import com.arialyy.aria.core.download.DownloadGroupTaskEntity;
+  21 import com.arialyy.aria.core.download.DownloadTaskEntity;
+  22 import com.arialyy.aria.util.ErrorHelp;
+  23 import java.util.Set;
+  24 
+  25 /**
+  26  * Created by Aria.Lao on 2017/7/27.
+  27  * ftp文件夹下载工具
+  28  */
+  29 public class FtpDirDownloadUtil extends AbsGroupUtil {
+  30   public FtpDirDownloadUtil(IDownloadGroupListener listener, DownloadGroupTaskEntity taskEntity) {
+  31     super(listener, taskEntity);
+  32   }
+  33 
+  34   @Override int getTaskType() {
+  35     return FTP_DIR;
+  36   }
+  37 
+  38   @Override protected void onStart() {
+  39     super.onStart();
+  40     if (mGTEntity.getEntity().getFileSize() &gt; 1) {
+  41       startDownload();
+  42     } else {
+  43       new FtpDirInfoThread(mGTEntity, new OnFileInfoCallback() {
+  44         @Override public void onComplete(String url, int code) {
+  45           if (code &gt;= 200 &amp;&amp; code &lt; 300) {
+  46             for (DownloadEntity entity : mGTEntity.entity.getSubTask()) {
+  47               mExeMap.put(entity.getUrl(), createChildDownloadTask(entity));
+  48             }
+  49             mActualTaskNum = mGTEntity.entity.getSubTask().size();
+  50             mGroupSize = mActualTaskNum;
+  51             mTotalLen = mGTEntity.entity.getFileSize();
+  52             startDownload();
+  53           }
+  54         }
+  55 
+  56 &lt;&lt;&lt;&lt;&lt;&lt;&lt; GitAnalyzerPlus_ours
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  57         @Override public void onFail(String url, String errorMsg, boolean needRetry) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  58           mListener.onFail(needRetry);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  59           ErrorHelp.saveError(&quot;FTP_DIR&quot;, mGTEntity.getEntity(), &quot;&quot;, errorMsg);</span>
+  60 ||||||| GitAnalyzerPlus_base
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  61         @Override public void onFail(String url, String errorMsg) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  62           mListener.onFail(true);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  63           ErrorHelp.saveError(&quot;FTP_DIR&quot;, mTaskEntity.getEntity(), &quot;&quot;, errorMsg);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  64         }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  65       }).start();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  66     }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  67   }</span>
+  68 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  69         @Override public void onFail(String url, String errorMsg) {</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  70           mListener.onFail(true);</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  71           ErrorHelp.saveError(&quot;D_FTP_DIR&quot;, mTaskEntity.getEntity(), &quot;&quot;, errorMsg);</span>
+  72 &gt;&gt;&gt;&gt;&gt;&gt;&gt; GitAnalyzerPlus_theirs
+  73         }
+  74       }).start();
+  75     }
+  76   }
+  77 
+  78   private void startDownload() {
+  79     int i = 0;
+  80     Set&lt;String&gt; keys = mExeMap.keySet();
+  81     for (String key : keys) {
+  82       DownloadTaskEntity taskEntity = mExeMap.get(key);
+  83       if (taskEntity != null) {
+  84         createChildDownload(taskEntity);
+  85         i++;
+  86       }
+  87     }
+  88     if (i == mExeMap.size()) startRunningFlow();
+  89   }
+  90 }</pre></td>
+                            <td><pre>   1 /*
+   2  * Copyright (C) 2016 AriaLyy(https://github.com/AriaLyy/Aria)
+   3  *
+   4  * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+   5  * you may not use this file except in compliance with the License.
+   6  * You may obtain a copy of the License at
+   7  *
+   8  *      http://www.apache.org/licenses/LICENSE-2.0
+   9  *
+  10  * Unless required by applicable law or agreed to in writing, software
+  11  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  12  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  13  * See the License for the specific language governing permissions and
+  14  * limitations under the License.
+  15  */
+  16 package com.arialyy.aria.core.download.downloader;
+  17 
+  18 import com.arialyy.aria.core.common.OnFileInfoCallback;
+  19 import com.arialyy.aria.core.download.DownloadEntity;
+  20 import com.arialyy.aria.core.download.DownloadGroupTaskEntity;
+  21 import com.arialyy.aria.core.download.DownloadTaskEntity;
+  22 import com.arialyy.aria.util.ErrorHelp;
+  23 import java.util.Set;
+  24 
+  25 /**
+  26  * Created by Aria.Lao on 2017/7/27.
+  27  * ftp文件夹下载工具
+  28  */
+  29 public class FtpDirDownloadUtil extends AbsGroupUtil {
+  30   public FtpDirDownloadUtil(IDownloadGroupListener listener, DownloadGroupTaskEntity taskEntity) {
+  31     super(listener, taskEntity);
+  32   }
+  33 
+  34   @Override int getTaskType() {
+  35     return FTP_DIR;
+  36   }
+  37 
+  38   @Override protected void onStart() {
+  39     super.onStart();
+  40     if (mGTEntity.getEntity().getFileSize() &gt; 1) {
+  41       startDownload();
+  42     } else {
+  43       new FtpDirInfoThread(mGTEntity, new OnFileInfoCallback() {
+  44         @Override public void onComplete(String url, int code) {
+  45           if (code &gt;= 200 &amp;&amp; code &lt; 300) {
+  46             for (DownloadEntity entity : mGTEntity.entity.getSubTask()) {
+  47               mExeMap.put(entity.getUrl(), createChildDownloadTask(entity));
+  48             }
+  49             mActualTaskNum = mGTEntity.entity.getSubTask().size();
+  50             mGroupSize = mActualTaskNum;
+  51             mTotalLen = mGTEntity.entity.getFileSize();
+  52             startDownload();
+  53           }
+  54         }
+  55 
+  56 &lt;&lt;&lt;&lt;&lt;&lt;&lt; MINE
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  57         @Override public void onFail(String url, String errorMsg, boolean needRetry) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  58           mListener.onFail(needRetry);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  59           ErrorHelp.saveError(&quot;FTP_DIR&quot;, mGTEntity.getEntity(), &quot;&quot;, errorMsg);</span>
+  60 ||||||| BASE
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  61         @Override public void onFail(String url, String errorMsg) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  62           mListener.onFail(true);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  63           ErrorHelp.saveError(&quot;FTP_DIR&quot;, mTaskEntity.getEntity(), &quot;&quot;, errorMsg);</span>
+  64 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  65         @Override public void onFail(String url, String errorMsg) {</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  66           mListener.onFail(true);</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  67           ErrorHelp.saveError(&quot;D_FTP_DIR&quot;, mTaskEntity.getEntity(), &quot;&quot;, errorMsg);</span>
+  68 &gt;&gt;&gt;&gt;&gt;&gt;&gt; YOURS
+  69         }
+  70       }).start();
+  71     }
+  72   }
+  73 
+  74   private void startDownload() {
+  75     int i = 0;
+  76     Set&lt;String&gt; keys = mExeMap.keySet();
+  77     for (String key : keys) {
+  78       DownloadTaskEntity taskEntity = mExeMap.get(key);
+  79       if (taskEntity != null) {
+  80         createChildDownload(taskEntity);
+  81         i++;
+  82       }
+  83     }
+  84     if (i == mExeMap.size()) startRunningFlow();
+  85   }
+  86 }
+ 
+ 
+ </pre></td>
+                            <td><pre>   1 /*
+   2  * Copyright (C) 2016 AriaLyy(https://github.com/AriaLyy/Aria)
+   3  *
+   4  * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+   5  * you may not use this file except in compliance with the License.
+   6  * You may obtain a copy of the License at
+   7  *
+   8  *      http://www.apache.org/licenses/LICENSE-2.0
+   9  *
+  10  * Unless required by applicable law or agreed to in writing, software
+  11  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  12  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  13  * See the License for the specific language governing permissions and
+  14  * limitations under the License.
+  15  */
+  16 package com.arialyy.aria.core.download.downloader;
+  17 
+  18 import com.arialyy.aria.core.common.OnFileInfoCallback;
+  19 import com.arialyy.aria.core.download.DownloadEntity;
+  20 import com.arialyy.aria.core.download.DownloadGroupTaskEntity;
+  21 import com.arialyy.aria.core.download.DownloadTaskEntity;
+  22 import com.arialyy.aria.util.ErrorHelp;
+  23 import java.util.Set;
+  24 
+  25 
+  26 /**
+  27  * Created by Aria.Lao on 2017/7/27.
+  28  * ftp文件夹下载工具
+  29  */
+  30 public class FtpDirDownloadUtil extends AbsGroupUtil {
+  31   public FtpDirDownloadUtil(IDownloadGroupListener listener, DownloadGroupTaskEntity taskEntity) {
+  32     super(listener, taskEntity);
+  33   }
+  34 
+  35   @Override int getTaskType() {
+  36     return FTP_DIR;
+  37   }
+  38 
+  39   @Override
+  40   protected void onStart() {
+  41     super.onStart();
+  42     if (mGTEntity.getEntity().getFileSize() &gt; 1) {
+  43       startDownload();
+  44     } else {
+  45       new FtpDirInfoThread(mGTEntity, new OnFileInfoCallback() {
+  46         @Override
+  47         public void onComplete(String url, int code) {
+  48           if ((code &gt;= 200) &amp;&amp; (code &lt; 300)) {
+  49             for (DownloadEntity entity : mGTEntity.entity.getSubTask()) {
+  50               mExeMap.put(entity.getUrl(), createChildDownloadTask(entity));
+  51             }
+  52             mActualTaskNum = mGTEntity.entity.getSubTask().size();
+  53             mGroupSize = mActualTaskNum;
+  54             mTotalLen = mGTEntity.entity.getFileSize();
+  55             startDownload();
+  56           }
+  57         }
+  58 
+  59         @Override
+  60         public void onFail(String url, String errorMsg, boolean needRetry) {
+  61           mListener.onFail(needRetry);
+  62           ErrorHelp.saveError(&quot;D_FTP_DIR&quot;, mGTEntity.getEntity(), &quot;&quot;, errorMsg);
+  63         }
+  64       }).start();
+  65     }
+  66   }
+  67 
+  68   private void startDownload() {
+  69     int i = 0;
+  70     Set&lt;String&gt; keys = mExeMap.keySet();
+  71     for (String key : keys) {
+  72       DownloadTaskEntity taskEntity = mExeMap.get(key);
+  73       if (taskEntity != null) {
+  74         createChildDownload(taskEntity);
+  75         i++;
+  76       }
+  77     }
+  78     if (i == mExeMap.size()) startRunningFlow();
+  79   }
+  80 }
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ </pre></td>
+                        </tr>
+                    </table>
+                </div>
+                <div id="bottom">
+                    <table style="margin:auto">
+                        <tr>
+                            <th>ours vs. base</th>
+                            <th>theirs vs. base</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1  /*
+   2   * Copyright (C) 2016 AriaLyy(https://github.com/AriaLyy/Aria)
+   3   *
+   4   * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+   5   * you may not use this file except in compliance with the License.
+   6   * You may obtain a copy of the License at
+   7   *
+   8   *      http://www.apache.org/licenses/LICENSE-2.0
+   9   *
+  10   * Unless required by applicable law or agreed to in writing, software
+  11   * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  12   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  13   * See the License for the specific language governing permissions and
+  14   * limitations under the License.
+  15   */
+  16  package com.arialyy.aria.core.download.downloader;
+  17  
+  18  import com.arialyy.aria.core.common.OnFileInfoCallback;
+  19  import com.arialyy.aria.core.download.DownloadEntity;
+  20  import com.arialyy.aria.core.download.DownloadGroupTaskEntity;
+  21  import com.arialyy.aria.core.download.DownloadTaskEntity;
+  22  import com.arialyy.aria.util.ErrorHelp;
+  23  import java.util.Set;
+  24  
+  25  /**
+  26   * Created by Aria.Lao on 2017/7/27.
+  27   * ftp文件夹下载工具
+  28   */
+  29  public class FtpDirDownloadUtil extends AbsGroupUtil {
+  30    public FtpDirDownloadUtil(IDownloadGroupListener listener, DownloadGroupTaskEntity taskEntity) {
+  31      super(listener, taskEntity);
+  32    }
+  33  
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  34 +  @Override int getTaskType() {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  35 +    return FTP_DIR;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  36 +  }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  37 +</span>
+  38    @Override protected void onStart() {
+  39      super.onStart();
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  40 -    if (mTaskEntity.getEntity().getFileSize() &gt; 1) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  41 +    if (mGTEntity.getEntity().getFileSize() &gt; 1) {</span>
+  42        startDownload();
+  43      } else {
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  44 -      new FtpDirInfoThread(mTaskEntity, new OnFileInfoCallback() {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  45 +      new FtpDirInfoThread(mGTEntity, new OnFileInfoCallback() {</span>
+  46          @Override public void onComplete(String url, int code) {
+  47            if (code &gt;= 200 &amp;&amp; code &lt; 300) {
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  48 -            for (DownloadEntity entity : mTaskEntity.entity.getSubTask()) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  49 +            for (DownloadEntity entity : mGTEntity.entity.getSubTask()) {</span>
+  50                mExeMap.put(entity.getUrl(), createChildDownloadTask(entity));
+  51              }
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  52 -            mActualTaskNum = mTaskEntity.entity.getSubTask().size();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  53 +            mActualTaskNum = mGTEntity.entity.getSubTask().size();</span>
+  54              mGroupSize = mActualTaskNum;
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  55 -            mTotalLen = mTaskEntity.entity.getFileSize();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  56 +            mTotalLen = mGTEntity.entity.getFileSize();</span>
+  57              startDownload();
+  58            }
+  59          }
+  60  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  61 -        @Override public void onFail(String url, String errorMsg) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  62 -          mListener.onFail(true);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  63 -          ErrorHelp.saveError(&quot;FTP_DIR&quot;, mTaskEntity.getEntity(), &quot;&quot;, errorMsg);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  64 +        @Override public void onFail(String url, String errorMsg, boolean needRetry) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  65 +          mListener.onFail(needRetry);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  66 +          ErrorHelp.saveError(&quot;FTP_DIR&quot;, mGTEntity.getEntity(), &quot;&quot;, errorMsg);</span>
+  67          }
+  68        }).start();
+  69      }
+  70    }
+  71  
+  72    private void startDownload() {
+  73      int i = 0;
+  74      Set&lt;String&gt; keys = mExeMap.keySet();
+  75      for (String key : keys) {
+  76        DownloadTaskEntity taskEntity = mExeMap.get(key);
+  77        if (taskEntity != null) {
+  78          createChildDownload(taskEntity);
+  79          i++;
+  80        }
+  81      }
+  82      if (i == mExeMap.size()) startRunningFlow();
+  83    }
+  84  }</pre></td>
+                            <td><pre>   1  /*
+   2   * Copyright (C) 2016 AriaLyy(https://github.com/AriaLyy/Aria)
+   3   *
+   4   * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+   5   * you may not use this file except in compliance with the License.
+   6   * You may obtain a copy of the License at
+   7   *
+   8   *      http://www.apache.org/licenses/LICENSE-2.0
+   9   *
+  10   * Unless required by applicable law or agreed to in writing, software
+  11   * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  12   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  13   * See the License for the specific language governing permissions and
+  14   * limitations under the License.
+  15   */
+  16  package com.arialyy.aria.core.download.downloader;
+  17  
+  18  import com.arialyy.aria.core.common.OnFileInfoCallback;
+  19  import com.arialyy.aria.core.download.DownloadEntity;
+  20  import com.arialyy.aria.core.download.DownloadGroupTaskEntity;
+  21  import com.arialyy.aria.core.download.DownloadTaskEntity;
+  22  import com.arialyy.aria.util.ErrorHelp;
+  23  import java.util.Set;
+  24  
+  25  /**
+  26   * Created by Aria.Lao on 2017/7/27.
+  27   * ftp文件夹下载工具
+  28   */
+  29  public class FtpDirDownloadUtil extends AbsGroupUtil {
+  30    public FtpDirDownloadUtil(IDownloadGroupListener listener, DownloadGroupTaskEntity taskEntity) {
+  31      super(listener, taskEntity);
+  32    }
+  33  
+
+
+
+
+  34    @Override protected void onStart() {
+  35      super.onStart();
+  36      if (mTaskEntity.getEntity().getFileSize() &gt; 1) {
+
+  37        startDownload();
+  38      } else {
+  39        new FtpDirInfoThread(mTaskEntity, new OnFileInfoCallback() {
+
+  40          @Override public void onComplete(String url, int code) {
+  41            if (code &gt;= 200 &amp;&amp; code &lt; 300) {
+  42              for (DownloadEntity entity : mTaskEntity.entity.getSubTask()) {
+
+  43                mExeMap.put(entity.getUrl(), createChildDownloadTask(entity));
+  44              }
+  45              mActualTaskNum = mTaskEntity.entity.getSubTask().size();
+
+  46              mGroupSize = mActualTaskNum;
+  47              mTotalLen = mTaskEntity.entity.getFileSize();
+
+  48              startDownload();
+  49            }
+  50          }
+  51  
+  52          @Override public void onFail(String url, String errorMsg) {
+  53            mListener.onFail(true);
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  54 -          ErrorHelp.saveError(&quot;FTP_DIR&quot;, mTaskEntity.getEntity(), &quot;&quot;, errorMsg);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  55 +          ErrorHelp.saveError(&quot;D_FTP_DIR&quot;, mTaskEntity.getEntity(), &quot;&quot;, errorMsg);</span>
+
+
+  56          }
+  57        }).start();
+  58      }
+  59    }
+  60  
+  61    private void startDownload() {
+  62      int i = 0;
+  63      Set&lt;String&gt; keys = mExeMap.keySet();
+  64      for (String key : keys) {
+  65        DownloadTaskEntity taskEntity = mExeMap.get(key);
+  66        if (taskEntity != null) {
+  67          createChildDownload(taskEntity);
+  68          i++;
+  69        }
+  70      }
+  71      if (i == mExeMap.size()) startRunningFlow();
+  72    }
+  73  }</pre></td>
+                        </tr>
+                    </table>
+                </div>
+              </body>
+            </html>
+            

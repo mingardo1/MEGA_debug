@@ -1,0 +1,1470 @@
+<!DOCTYPE html>
+    <html lang="en">
+              <head>
+                <meta charset="utf-8">
+                <title>324</title>
+                    <style>
+                        #top {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        #bottom {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        abbr {
+                          /* Here is the delay */
+                          transition-delay:0s;
+                        }
+                    </style>
+              </head>
+              <body>
+                <span style="height: 4vh">
+                    324
+                    <a href="323.html">prev</a>
+                    <a href="325.html">next</a>
+                    <a href="324_chunks.html">chunks</a>
+                    <a href="index.html">index</a>
+                    CyanogenMod/android_packages_apps_Trebuchet_d223b88f0dbff7cd66876e691345df5c1ede242b_src/com/android/launcher3/ShortcutInfo.java
+                    <textarea rows=1 onclick='navigator.clipboard.writeText(this.value)'>cd C:\studies\se\mega\git-analyzer-plus\notebooks\debug
+del /Q *
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\CyanogenMod\android_packages_apps_Trebuchet show &quot;d223b88f0dbff7cd66876e691345df5c1ede242b:src/com/android/launcher3/ShortcutInfo.java&quot; &gt; committed.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\CyanogenMod\android_packages_apps_Trebuchet show &quot;d223b88f0dbff7cd66876e691345df5c1ede242b^1:src/com/android/launcher3/ShortcutInfo.java&quot; &gt; ours.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\CyanogenMod\android_packages_apps_Trebuchet show &quot;d223b88f0dbff7cd66876e691345df5c1ede242b^2:src/com/android/launcher3/ShortcutInfo.java&quot; &gt; theirs.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\CyanogenMod\android_packages_apps_Trebuchet show &quot;9c114bb76edd1fe6bb0cc94b9e413495b7962887:src/com/android/launcher3/ShortcutInfo.java&quot; &gt; base.java
+copy ours.java 1ours.java
+copy ours.java 2ours.java
+copy theirs.java 1theirs.java
+copy theirs.java 2theirs.java
+copy base.java 1base.java
+copy base.java 2base.java
+&quot;C:\Program Files\Java\jdk1.8.0_241\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\jFSTMerge\build\libs\jFSTMerge-all.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\jfstmerge.java --show-base
+&quot;C:\Program Files\Eclipse Adoptium\jdk-17.0.11.9-hotspot\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\spork\target\spork-0.5.0-SNAPSHOT.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\spork.java
+del /Q 1*.java
+del /Q 2*.java
+del /Q jfstmerge.java.merge
+</textarea>
+                    {strict: [[b], [b]], subset: [[b], [b]]}
+                </span>
+                <div id="top">
+
+                    <table>
+                        <tr>
+                            <th>line based (standard git)</th>
+                            <th>jfstmerge</th>
+                            <th>spork</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1 /*
+   2  * Copyright (C) 2008 The Android Open Source Project
+   3  *
+   4  * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+   5  * you may not use this file except in compliance with the License.
+   6  * You may obtain a copy of the License at
+   7  *
+   8  *      http://www.apache.org/licenses/LICENSE-2.0
+   9  *
+  10  * Unless required by applicable law or agreed to in writing, software
+  11  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  12  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  13  * See the License for the specific language governing permissions and
+  14  * limitations under the License.
+  15  */
+  16 
+  17 package com.android.launcher3;
+  18 
+  19 import android.content.ComponentName;
+  20 import android.content.ContentValues;
+  21 import android.content.Context;
+  22 import android.content.Intent;
+  23 import android.graphics.Bitmap;
+  24 import android.util.Log;
+  25 
+  26 import com.android.launcher3.compat.UserHandleCompat;
+  27 
+  28 import java.util.ArrayList;
+  29 import java.util.Arrays;
+  30 
+  31 /**
+  32  * Represents a launchable icon on the workspaces and in folders.
+  33  */
+  34 public class ShortcutInfo extends ItemInfo {
+  35 
+  36     public static final int DEFAULT = 0;
+  37 
+  38     /**
+  39      * The shortcut was restored from a backup and it not ready to be used. This is automatically
+  40      * set during backup/restore
+  41      */
+  42     public static final int FLAG_RESTORED_ICON = 1;
+  43 
+  44     /**
+  45      * The icon was added as an auto-install app, and is not ready to be used. This flag can&#x27;t
+  46      * be present along with {@link #FLAG_RESTORED_ICON}, and is set during default layout
+  47      * parsing.
+  48      */
+  49     public static final int FLAG_AUTOINTALL_ICON = 2;
+  50 
+  51     /**
+  52      * The icon is being installed. If {@link FLAG_RESTORED_ICON} or {@link FLAG_AUTOINTALL_ICON}
+  53      * is set, then the icon is either being installed or is in a broken state.
+  54      */
+  55     public static final int FLAG_INSTALL_SESSION_ACTIVE = 4;
+  56 
+  57     /**
+  58      * Indicates that the widget restore has started.
+  59      */
+  60     public static final int FLAG_RESTORE_STARTED = 8;
+  61 
+  62     /**
+  63      * The intent used to start the application.
+  64      */
+  65     Intent intent;
+  66 
+  67     /**
+  68      * Indicates whether the icon comes from an application&#x27;s resource (if false)
+  69      * or from a custom Bitmap (if true.)
+  70      */
+  71     boolean customIcon;
+  72 
+  73     /**
+  74      * Indicates whether we&#x27;re using the default fallback icon instead of something from the
+  75      * app.
+  76      */
+  77     boolean usingFallbackIcon;
+  78 
+  79     /**
+  80      * If isShortcut=true and customIcon=false, this contains a reference to the
+  81      * shortcut icon as an application&#x27;s resource.
+  82      */
+  83     Intent.ShortcutIconResource iconResource;
+  84 
+  85     /**
+  86      * The application icon.
+  87      */
+  88     private Bitmap mIcon;
+  89 
+  90     /**
+  91      * Could be disabled, if the the app is installed but unavailable (eg. in safe mode or when
+  92      * sd-card is not available).
+  93      */
+  94     boolean isDisabled = false;
+  95 
+  96     int status;
+  97 
+  98     /**
+  99      * The installation progress [0-100] of the package that this shortcut represents.
+ 100      */
+ 101     private int mInstallProgress;
+ 102 
+ 103     /**
+ 104      * Refer {@link AppInfo#firstInstallTime}.
+ 105      */
+ 106     long firstInstallTime;
+ 107 
+ 108     /**
+ 109      * TODO move this to {@link status}
+ 110      */
+ 111     int flags = 0;
+ 112 
+ 113 &lt;&lt;&lt;&lt;&lt;&lt;&lt; GitAnalyzerPlus_ours
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 114     /**</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 115      * If this shortcut is a placeholder, then intent will be a market intent for the package, and</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 116      * this will hold the original intent from the database.  Otherwise, null.</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 117      * Refer {@link #FLAG_RESTORE_PENDING}, {@link #FLAG_INSTALL_PENDING}</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 118      */</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 119     Intent promisedIntent;</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 120 </span>
+ 121 ||||||| GitAnalyzerPlus_base
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 122     /**</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 123      * If this shortcut is a placeholder, then intent will be a market intent for the package, and</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 124      * this will hold the original intent from the database.  Otherwise, null.</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 125      */</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 126     Intent restoredIntent;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 127 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 128     ShortcutInfo() {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 129         itemType = LauncherSettings.BaseLauncherColumns.ITEM_TYPE_SHORTCUT;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 130     }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 131 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 132     protected Intent getIntent() {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 133         return intent;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 134     }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 135 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 136     protected Intent getRestoredIntent() {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 137         return restoredIntent;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 138     }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 139 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 140     /**</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 141      * Overwrite placeholder data with restored data, or do nothing if this is not a placeholder.</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 142      */</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 143     public void restore() {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 144         if (restoredIntent != null) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 145             intent = restoredIntent;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 146             restoredIntent = null;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 147         }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 148     }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 149 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 150 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 151     ShortcutInfo(Intent intent, CharSequence title, Bitmap icon) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 152         this();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 153         this.intent = intent;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 154         this.title = title;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 155         mIcon = icon;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 156     }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 157 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 158     public ShortcutInfo(Context context, ShortcutInfo info) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 159         super(info);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 160         title = info.title.toString();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 161         intent = new Intent(info.intent);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 162         if (info.iconResource != null) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 163             iconResource = new Intent.ShortcutIconResource();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 164             iconResource.packageName = info.iconResource.packageName;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 165             iconResource.resourceName = info.iconResource.resourceName;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 166         }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 167         mIcon = info.mIcon; // TODO: should make a copy here.  maybe we don&#x27;t need this ctor at all</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 168         customIcon = info.customIcon;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 169         initFlagsAndFirstInstallTime(</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 170                 getPackageInfo(context, intent.getComponent().getPackageName()));</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 171     }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 172 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 173     /** TODO: Remove this.  It&#x27;s only called by ApplicationInfo.makeShortcut. */</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 174     public ShortcutInfo(AppInfo info) {</span>
+ 175 =======
+ 176 &gt;&gt;&gt;&gt;&gt;&gt;&gt; GitAnalyzerPlus_theirs
+ 177     ShortcutInfo() {
+ 178         itemType = LauncherSettings.BaseLauncherColumns.ITEM_TYPE_SHORTCUT;
+ 179     }
+ 180 
+ 181     public Intent getIntent() {
+ 182         return intent;
+ 183     }
+ 184 
+ 185 &lt;&lt;&lt;&lt;&lt;&lt;&lt; GitAnalyzerPlus_ours
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 186     ShortcutInfo(Intent intent, CharSequence title, CharSequence contentDescription,</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 187             Bitmap icon, UserHandleCompat user) {</span>
+ 188 ||||||| GitAnalyzerPlus_base
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 189     }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 190 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 191     protected Intent getIntent() {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 192         return intent;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 193     }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 194 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 195     protected Intent getRestoredIntent() {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 196         return restoredIntent;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 197     }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 198 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 199     /**</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 200      * Overwrite placeholder data with restored data, or do nothing if this is not a placeholder.</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 201      */</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 202     public void restore() {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 203         if (restoredIntent != null) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 204             intent = restoredIntent;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 205             restoredIntent = null;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 206         }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 207     }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 208 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 209 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 210     ShortcutInfo(Intent intent, CharSequence title, Bitmap icon) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 211         this();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 212         this.intent = intent;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 213         this.title = title;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 214         mIcon = icon;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 215     }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 216 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 217     public ShortcutInfo(Context context, ShortcutInfo info) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 218         super(info);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 219         title = info.title.toString();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 220         intent = new Intent(info.intent);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 221         if (info.iconResource != null) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 222             iconResource = new Intent.ShortcutIconResource();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 223             iconResource.packageName = info.iconResource.packageName;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 224             iconResource.resourceName = info.iconResource.resourceName;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 225         }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 226         mIcon = info.mIcon; // TODO: should make a copy here.  maybe we don&#x27;t need this ctor at all</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 227         customIcon = info.customIcon;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 228         initFlagsAndFirstInstallTime(</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 229                 getPackageInfo(context, intent.getComponent().getPackageName()));</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 230     }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 231 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 232     /** TODO: Remove this.  It&#x27;s only called by ApplicationInfo.makeShortcut. */</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 233     public ShortcutInfo(AppInfo info) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 234         super(info);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 235         title = info.title.toString();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 236         intent = new Intent(info.intent);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 237         customIcon = false;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 238         flags = info.flags;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 239         firstInstallTime = info.firstInstallTime;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 240     }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 241 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 242     public static PackageInfo getPackageInfo(Context context, String packageName) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 243         PackageInfo pi = null;</span>
+ 244 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 245     ShortcutInfo(Intent intent, CharSequence title, Bitmap icon) {</span>
+ 246 &gt;&gt;&gt;&gt;&gt;&gt;&gt; GitAnalyzerPlus_theirs
+ 247         this();
+ 248         this.intent = intent;
+ 249         this.title = title;
+ 250         this.contentDescription = contentDescription;
+ 251         mIcon = icon;
+ 252         this.user = user;
+ 253     }
+ 254 
+ 255     public ShortcutInfo(Context context, ShortcutInfo info) {
+ 256         super(info);
+ 257         title = info.title.toString();
+ 258         intent = new Intent(info.intent);
+ 259         if (info.iconResource != null) {
+ 260             iconResource = new Intent.ShortcutIconResource();
+ 261             iconResource.packageName = info.iconResource.packageName;
+ 262             iconResource.resourceName = info.iconResource.resourceName;
+ 263         }
+ 264         mIcon = info.mIcon; // TODO: should make a copy here.  maybe we don&#x27;t need this ctor at all
+ 265         customIcon = info.customIcon;
+ 266         flags = info.flags;
+ 267         firstInstallTime = info.firstInstallTime;
+ 268         user = info.user;
+ 269         status = info.status;
+ 270     }
+ 271 
+ 272     /** TODO: Remove this.  It&#x27;s only called by ApplicationInfo.makeShortcut. */
+ 273     public ShortcutInfo(AppInfo info) {
+ 274         super(info);
+ 275         title = info.title.toString();
+ 276         intent = new Intent(info.intent);
+ 277         customIcon = false;
+ 278         flags = info.flags;
+ 279         firstInstallTime = info.firstInstallTime;
+ 280     }
+ 281 
+ 282     public void setIcon(Bitmap b) {
+ 283         mIcon = b;
+ 284     }
+ 285 
+ 286     public Bitmap getIcon(IconCache iconCache) {
+ 287         if (mIcon == null) {
+ 288             updateIcon(iconCache);
+ 289         }
+ 290         return mIcon;
+ 291     }
+ 292 
+ 293     public void updateIcon(IconCache iconCache) {
+ 294         mIcon = iconCache.getIcon(promisedIntent != null ? promisedIntent : intent, user);
+ 295         usingFallbackIcon = iconCache.isDefaultIcon(mIcon, user);
+ 296     }
+ 297 
+ 298     @Override
+ 299     void onAddToDatabase(Context context, ContentValues values) {
+ 300         super.onAddToDatabase(context, values);
+ 301 
+ 302         String titleStr = title != null ? title.toString() : null;
+ 303         values.put(LauncherSettings.BaseLauncherColumns.TITLE, titleStr);
+ 304 
+ 305         String uri = promisedIntent != null ? promisedIntent.toUri(0)
+ 306                 : (intent != null ? intent.toUri(0) : null);
+ 307         values.put(LauncherSettings.BaseLauncherColumns.INTENT, uri);
+ 308 
+ 309         if (customIcon) {
+ 310             values.put(LauncherSettings.BaseLauncherColumns.ICON_TYPE,
+ 311                     LauncherSettings.BaseLauncherColumns.ICON_TYPE_BITMAP);
+ 312             writeBitmap(values, mIcon);
+ 313         } else {
+ 314             if (!usingFallbackIcon) {
+ 315                 writeBitmap(values, mIcon);
+ 316             }
+ 317             values.put(LauncherSettings.BaseLauncherColumns.ICON_TYPE,
+ 318                     LauncherSettings.BaseLauncherColumns.ICON_TYPE_RESOURCE);
+ 319             if (iconResource != null) {
+ 320                 values.put(LauncherSettings.BaseLauncherColumns.ICON_PACKAGE,
+ 321                         iconResource.packageName);
+ 322                 values.put(LauncherSettings.BaseLauncherColumns.ICON_RESOURCE,
+ 323                         iconResource.resourceName);
+ 324             }
+ 325         }
+ 326     }
+ 327 
+ 328     @Override
+ 329     public String toString() {
+ 330         return &quot;ShortcutInfo(title=&quot; + title + &quot;intent=&quot; + intent + &quot;id=&quot; + this.id
+ 331                 + &quot; type=&quot; + this.itemType + &quot; container=&quot; + this.container + &quot; screen=&quot; + screenId
+ 332                 + &quot; cellX=&quot; + cellX + &quot; cellY=&quot; + cellY + &quot; spanX=&quot; + spanX + &quot; spanY=&quot; + spanY
+ 333                 + &quot; dropPos=&quot; + Arrays.toString(dropPos) + &quot; user=&quot; + user + &quot;)&quot;;
+ 334     }
+ 335 
+ 336     public static void dumpShortcutInfoList(String tag, String label,
+ 337             ArrayList&lt;ShortcutInfo&gt; list) {
+ 338         Log.d(tag, label + &quot; size=&quot; + list.size());
+ 339         for (ShortcutInfo info: list) {
+ 340             Log.d(tag, &quot;   title=\&quot;&quot; + info.title + &quot; icon=&quot; + info.mIcon
+ 341                     + &quot; customIcon=&quot; + info.customIcon);
+ 342         }
+ 343     }
+ 344 
+ 345     public ComponentName getTargetComponent() {
+ 346         return promisedIntent != null ? promisedIntent.getComponent() : intent.getComponent();
+ 347     }
+ 348 
+ 349     public boolean hasStatusFlag(int flag) {
+ 350         return (status &amp; flag) != 0;
+ 351     }
+ 352 
+ 353 
+ 354     public final boolean isPromise() {
+ 355         return hasStatusFlag(FLAG_RESTORED_ICON | FLAG_AUTOINTALL_ICON);
+ 356     }
+ 357 
+ 358     public int getInstallProgress() {
+ 359         return mInstallProgress;
+ 360     }
+ 361 
+ 362     public void setInstallProgress(int progress) {
+ 363         mInstallProgress = progress;
+ 364         status |= FLAG_INSTALL_SESSION_ACTIVE;
+ 365     }
+ 366 }
+ 367 </pre></td>
+                            <td><pre>   1 /*
+   2  * Copyright (C) 2008 The Android Open Source Project
+   3  *
+   4  * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+   5  * you may not use this file except in compliance with the License.
+   6  * You may obtain a copy of the License at
+   7  *
+   8  *      http://www.apache.org/licenses/LICENSE-2.0
+   9  *
+  10  * Unless required by applicable law or agreed to in writing, software
+  11  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  12  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  13  * See the License for the specific language governing permissions and
+  14  * limitations under the License.
+  15  */
+  16 
+  17 package com.android.launcher3;
+  18 
+  19 import android.content.ComponentName;
+  20 import android.content.ContentValues;
+  21 import android.content.Context;
+  22 import android.content.Intent;
+  23 import android.graphics.Bitmap;
+  24 import android.util.Log;
+  25 
+  26 import com.android.launcher3.compat.UserHandleCompat;
+  27 
+  28 import java.util.ArrayList;
+  29 import java.util.Arrays;
+  30 
+  31 /**
+  32  * Represents a launchable icon on the workspaces and in folders.
+  33  */
+  34 public class ShortcutInfo extends ItemInfo {
+  35 
+  36     public static final int DEFAULT = 0;
+  37 
+  38     /**
+  39      * The shortcut was restored from a backup and it not ready to be used. This is automatically
+  40      * set during backup/restore
+  41      */
+  42     public static final int FLAG_RESTORED_ICON = 1;
+  43 
+  44     /**
+  45      * The icon was added as an auto-install app, and is not ready to be used. This flag can&#x27;t
+  46      * be present along with {@link #FLAG_RESTORED_ICON}, and is set during default layout
+  47      * parsing.
+  48      */
+  49     public static final int FLAG_AUTOINTALL_ICON = 2;
+  50 
+  51     /**
+  52      * The icon is being installed. If {@link FLAG_RESTORED_ICON} or {@link FLAG_AUTOINTALL_ICON}
+  53      * is set, then the icon is either being installed or is in a broken state.
+  54      */
+  55     public static final int FLAG_INSTALL_SESSION_ACTIVE = 4;
+  56 
+  57     /**
+  58      * Indicates that the widget restore has started.
+  59      */
+  60     public static final int FLAG_RESTORE_STARTED = 8;
+  61 
+  62     /**
+  63      * The intent used to start the application.
+  64      */
+  65     Intent intent;
+  66 
+  67     /**
+  68      * Indicates whether the icon comes from an application&#x27;s resource (if false)
+  69      * or from a custom Bitmap (if true.)
+  70      */
+  71     boolean customIcon;
+  72 
+  73     /**
+  74      * Indicates whether we&#x27;re using the default fallback icon instead of something from the
+  75      * app.
+  76      */
+  77     boolean usingFallbackIcon;
+  78 
+  79     /**
+  80      * If isShortcut=true and customIcon=false, this contains a reference to the
+  81      * shortcut icon as an application&#x27;s resource.
+  82      */
+  83     Intent.ShortcutIconResource iconResource;
+  84 
+  85     /**
+  86      * The application icon.
+  87      */
+  88     private Bitmap mIcon;
+  89 
+  90     /**
+  91      * Could be disabled, if the the app is installed but unavailable (eg. in safe mode or when
+  92      * sd-card is not available).
+  93      */
+  94     boolean isDisabled = false;
+  95 
+  96     int status;
+  97 
+  98     /**
+  99      * The installation progress [0-100] of the package that this shortcut represents.
+ 100      */
+ 101     private int mInstallProgress;
+ 102 
+ 103     /**
+ 104      * Refer {@link AppInfo#firstInstallTime}.
+ 105      */
+ 106     long firstInstallTime;
+ 107 
+ 108     /**
+ 109      * TODO move this to {@link status}
+ 110      */
+ 111     int flags = 0;
+ 112 
+ 113     /**
+ 114      * If this shortcut is a placeholder, then intent will be a market intent for the package, and
+ 115      * this will hold the original intent from the database.  Otherwise, null.
+ 116      * Refer {@link #FLAG_RESTORE_PENDING}, {@link #FLAG_INSTALL_PENDING}
+ 117      */
+ 118     Intent promisedIntent;
+ 119 
+ 120     ShortcutInfo() {
+ 121         itemType = LauncherSettings.BaseLauncherColumns.ITEM_TYPE_SHORTCUT;
+ 122     }
+ 123 
+ 124     public Intent getIntent() {
+ 125         return intent;
+ 126     }
+ 127 
+ 128     ShortcutInfo(Intent intent, CharSequence title, CharSequence contentDescription,
+ 129             Bitmap icon, UserHandleCompat user) {
+ 130         this();
+ 131         this.intent = intent;
+ 132         this.title = title;
+ 133         this.contentDescription = contentDescription;
+ 134         mIcon = icon;
+ 135         this.user = user;
+ 136     }
+ 137 
+ 138     public ShortcutInfo(Context context, ShortcutInfo info) {
+ 139         super(info);
+ 140         title = info.title.toString();
+ 141         intent = new Intent(info.intent);
+ 142         if (info.iconResource != null) {
+ 143             iconResource = new Intent.ShortcutIconResource();
+ 144             iconResource.packageName = info.iconResource.packageName;
+ 145             iconResource.resourceName = info.iconResource.resourceName;
+ 146         }
+ 147         mIcon = info.mIcon; // TODO: should make a copy here.  maybe we don&#x27;t need this ctor at all
+ 148         customIcon = info.customIcon;
+ 149         flags = info.flags;
+ 150         firstInstallTime = info.firstInstallTime;
+ 151         user = info.user;
+ 152         status = info.status;
+ 153     }
+ 154 
+ 155     /** TODO: Remove this.  It&#x27;s only called by ApplicationInfo.makeShortcut. */
+ 156     public ShortcutInfo(AppInfo info) {
+ 157         super(info);
+ 158         title = info.title.toString();
+ 159         intent = new Intent(info.intent);
+ 160         customIcon = false;
+ 161         flags = info.flags;
+ 162         firstInstallTime = info.firstInstallTime;
+ 163     }
+ 164 
+ 165     public void setIcon(Bitmap b) {
+ 166         mIcon = b;
+ 167     }
+ 168 
+ 169     public Bitmap getIcon(IconCache iconCache) {
+ 170         if (mIcon == null) {
+ 171             updateIcon(iconCache);
+ 172         }
+ 173         return mIcon;
+ 174     }
+ 175 
+ 176     public void updateIcon(IconCache iconCache) {
+ 177         mIcon = iconCache.getIcon(promisedIntent != null ? promisedIntent : intent, user);
+ 178         usingFallbackIcon = iconCache.isDefaultIcon(mIcon, user);
+ 179     }
+ 180 
+ 181     @Override
+ 182     void onAddToDatabase(Context context, ContentValues values) {
+ 183         super.onAddToDatabase(context, values);
+ 184 
+ 185         String titleStr = title != null ? title.toString() : null;
+ 186         values.put(LauncherSettings.BaseLauncherColumns.TITLE, titleStr);
+ 187 
+ 188         String uri = promisedIntent != null ? promisedIntent.toUri(0)
+ 189                 : (intent != null ? intent.toUri(0) : null);
+ 190         values.put(LauncherSettings.BaseLauncherColumns.INTENT, uri);
+ 191 
+ 192         if (customIcon) {
+ 193             values.put(LauncherSettings.BaseLauncherColumns.ICON_TYPE,
+ 194                     LauncherSettings.BaseLauncherColumns.ICON_TYPE_BITMAP);
+ 195             writeBitmap(values, mIcon);
+ 196         } else {
+ 197             if (!usingFallbackIcon) {
+ 198                 writeBitmap(values, mIcon);
+ 199             }
+ 200             values.put(LauncherSettings.BaseLauncherColumns.ICON_TYPE,
+ 201                     LauncherSettings.BaseLauncherColumns.ICON_TYPE_RESOURCE);
+ 202             if (iconResource != null) {
+ 203                 values.put(LauncherSettings.BaseLauncherColumns.ICON_PACKAGE,
+ 204                         iconResource.packageName);
+ 205                 values.put(LauncherSettings.BaseLauncherColumns.ICON_RESOURCE,
+ 206                         iconResource.resourceName);
+ 207             }
+ 208         }
+ 209     }
+ 210 
+ 211     @Override
+ 212     public String toString() {
+ 213         return &quot;ShortcutInfo(title=&quot; + title + &quot;intent=&quot; + intent + &quot;id=&quot; + this.id
+ 214                 + &quot; type=&quot; + this.itemType + &quot; container=&quot; + this.container + &quot; screen=&quot; + screenId
+ 215                 + &quot; cellX=&quot; + cellX + &quot; cellY=&quot; + cellY + &quot; spanX=&quot; + spanX + &quot; spanY=&quot; + spanY
+ 216                 + &quot; dropPos=&quot; + Arrays.toString(dropPos) + &quot; user=&quot; + user + &quot;)&quot;;
+ 217     }
+ 218 
+ 219     public static void dumpShortcutInfoList(String tag, String label,
+ 220             ArrayList&lt;ShortcutInfo&gt; list) {
+ 221         Log.d(tag, label + &quot; size=&quot; + list.size());
+ 222         for (ShortcutInfo info: list) {
+ 223             Log.d(tag, &quot;   title=\&quot;&quot; + info.title + &quot; icon=&quot; + info.mIcon
+ 224                     + &quot; customIcon=&quot; + info.customIcon);
+ 225         }
+ 226     }
+ 227 
+ 228     public ComponentName getTargetComponent() {
+ 229         return promisedIntent != null ? promisedIntent.getComponent() : intent.getComponent();
+ 230     }
+ 231 
+ 232     public boolean hasStatusFlag(int flag) {
+ 233         return (status &amp; flag) != 0;
+ 234     }
+ 235 
+ 236 
+ 237     public final boolean isPromise() {
+ 238         return hasStatusFlag(FLAG_RESTORED_ICON | FLAG_AUTOINTALL_ICON);
+ 239     }
+ 240 
+ 241     public int getInstallProgress() {
+ 242         return mInstallProgress;
+ 243     }
+ 244 
+ 245     public void setInstallProgress(int progress) {
+ 246         mInstallProgress = progress;
+ 247         status |= FLAG_INSTALL_SESSION_ACTIVE;
+ 248     }
+ 249 }
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ </pre></td>
+                            <td><pre>   1 /*
+   2  * Copyright (C) 2008 The Android Open Source Project
+   3  *
+   4  * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+   5  * you may not use this file except in compliance with the License.
+   6  * You may obtain a copy of the License at
+   7  *
+   8  *      http://www.apache.org/licenses/LICENSE-2.0
+   9  *
+  10  * Unless required by applicable law or agreed to in writing, software
+  11  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  12  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  13  * See the License for the specific language governing permissions and
+  14  * limitations under the License.
+  15  */
+  16 package com.android.launcher3;
+  17 
+  18 import android.content.ComponentName;
+  19 import android.content.ContentValues;
+  20 import android.content.Context;
+  21 import android.content.Intent;
+  22 import android.graphics.Bitmap;
+  23 import android.util.Log;
+  24 import com.android.launcher3.compat.UserHandleCompat;
+  25 import java.util.ArrayList;
+  26 import java.util.Arrays;
+  27 
+  28 
+  29 /**
+  30  * Represents a launchable icon on the workspaces and in folders.
+  31  */
+  32 public class ShortcutInfo extends ItemInfo {
+  33     public static final int DEFAULT = 0;
+  34 
+  35     /**
+  36      * The shortcut was restored from a backup and it not ready to be used. This is automatically
+  37      * set during backup/restore
+  38      */
+  39     public static final int FLAG_RESTORED_ICON = 1;
+  40 
+  41     /**
+  42      * The icon was added as an auto-install app, and is not ready to be used. This flag can&#x27;t
+  43      * be present along with {@link #FLAG_RESTORED_ICON}, and is set during default layout
+  44      * parsing.
+  45      */
+  46     public static final int FLAG_AUTOINTALL_ICON = 2;
+  47 
+  48     /**
+  49      * The icon is being installed. If {@link FLAG_RESTORED_ICON} or {@link FLAG_AUTOINTALL_ICON}
+  50      * is set, then the icon is either being installed or is in a broken state.
+  51      */
+  52     public static final int FLAG_INSTALL_SESSION_ACTIVE = 4;
+  53 
+  54     /**
+  55      * Indicates that the widget restore has started.
+  56      */
+  57     public static final int FLAG_RESTORE_STARTED = 8;
+  58 
+  59     /**
+  60      * The intent used to start the application.
+  61      */
+  62     Intent intent;
+  63 
+  64     /**
+  65      * Indicates whether the icon comes from an application&#x27;s resource (if false)
+  66      * or from a custom Bitmap (if true.)
+  67      */
+  68     boolean customIcon;
+  69 
+  70     /**
+  71      * Indicates whether we&#x27;re using the default fallback icon instead of something from the
+  72      * app.
+  73      */
+  74     boolean usingFallbackIcon;
+  75 
+  76     /**
+  77      * If isShortcut=true and customIcon=false, this contains a reference to the
+  78      * shortcut icon as an application&#x27;s resource.
+  79      */
+  80     Intent.ShortcutIconResource iconResource;
+  81 
+  82     /**
+  83      * The application icon.
+  84      */
+  85     private Bitmap mIcon;
+  86 
+  87     /**
+  88      * Could be disabled, if the the app is installed but unavailable (eg. in safe mode or when
+  89      * sd-card is not available).
+  90      */
+  91     boolean isDisabled = false;
+  92 
+  93     int status;
+  94 
+  95     /**
+  96      * The installation progress [0-100] of the package that this shortcut represents.
+  97      */
+  98     private int mInstallProgress;
+  99 
+ 100     /**
+ 101      * Refer {@link AppInfo#firstInstallTime}.
+ 102      */
+ 103     long firstInstallTime;
+ 104 
+ 105     /**
+ 106      * TODO move this to {@link status}
+ 107      */
+ 108     int flags = 0;
+ 109 
+ 110     /**
+ 111      * If this shortcut is a placeholder, then intent will be a market intent for the package, and
+ 112      * this will hold the original intent from the database.  Otherwise, null.
+ 113      * Refer {@link #FLAG_RESTORE_PENDING}, {@link #FLAG_INSTALL_PENDING}
+ 114      */
+ 115     Intent promisedIntent;
+ 116 
+ 117     ShortcutInfo() {
+ 118         itemType = LauncherSettings.BaseLauncherColumns.ITEM_TYPE_SHORTCUT;
+ 119     }
+ 120 
+ 121     public Intent getIntent() {
+ 122         return intent;
+ 123     }
+ 124 
+<abbr title=" 125     ShortcutInfo(Intent intent, CharSequence title, CharSequence contentDescription, Bitmap icon, UserHandleCompat user) {"> 125     ShortcutInfo(Intent intent, CharSequence title, CharSequence contentDescription, Bitmap icon, UserHan🔵</abbr>
+ 126         this();
+ 127         this.intent = intent;
+ 128         this.title = title;
+ 129         this.contentDescription = contentDescription;
+ 130         mIcon = icon;
+ 131         this.user = user;
+ 132     }
+ 133 
+ 134     public ShortcutInfo(Context context, ShortcutInfo info) {
+ 135         super(info);
+ 136         title = info.title.toString();
+ 137         intent = new Intent(info.intent);
+ 138         if (info.iconResource != null) {
+ 139             iconResource = new Intent.ShortcutIconResource();
+ 140             iconResource.packageName = info.iconResource.packageName;
+ 141             iconResource.resourceName = info.iconResource.resourceName;
+ 142         }
+ 143         mIcon = info.mIcon;// TODO: should make a copy here.  maybe we don&#x27;t need this ctor at all
+ 144 
+ 145         customIcon = info.customIcon;
+ 146         flags = info.flags;
+ 147         firstInstallTime = info.firstInstallTime;
+ 148         user = info.user;
+ 149         status = info.status;
+ 150     }
+ 151 
+ 152     /**
+ 153      * TODO: Remove this.  It&#x27;s only called by ApplicationInfo.makeShortcut.
+ 154      */
+ 155     public ShortcutInfo(AppInfo info) {
+ 156         super(info);
+ 157         title = info.title.toString();
+ 158         intent = new Intent(info.intent);
+ 159         customIcon = false;
+ 160         flags = info.flags;
+ 161         firstInstallTime = info.firstInstallTime;
+ 162     }
+ 163 
+ 164     public void setIcon(Bitmap b) {
+ 165         mIcon = b;
+ 166     }
+ 167 
+ 168     public Bitmap getIcon(IconCache iconCache) {
+ 169         if (mIcon == null) {
+ 170             updateIcon(iconCache);
+ 171         }
+ 172         return mIcon;
+ 173     }
+ 174 
+ 175     public void updateIcon(IconCache iconCache) {
+ 176         mIcon = iconCache.getIcon(promisedIntent != null ? promisedIntent : intent, user);
+ 177         usingFallbackIcon = iconCache.isDefaultIcon(mIcon, user);
+ 178     }
+ 179 
+ 180     @Override
+ 181     void onAddToDatabase(Context context, ContentValues values) {
+ 182         super.onAddToDatabase(context, values);
+ 183         String titleStr = (title != null) ? title.toString() : null;
+ 184         values.put(LauncherSettings.BaseLauncherColumns.TITLE, titleStr);
+<abbr title=" 185         String uri = (promisedIntent != null) ? promisedIntent.toUri(0) : intent != null ? intent.toUri(0) : null;"> 185         String uri = (promisedIntent != null) ? promisedIntent.toUri(0) : intent != null ? intent.toUri(0🔵</abbr>
+ 186         values.put(LauncherSettings.BaseLauncherColumns.INTENT, uri);
+ 187         if (customIcon) {
+<abbr title=" 188             values.put(LauncherSettings.BaseLauncherColumns.ICON_TYPE, LauncherSettings.BaseLauncherColumns.ICON_TYPE_BITMAP);"> 188             values.put(LauncherSettings.BaseLauncherColumns.ICON_TYPE, LauncherSettings.BaseLauncherColum🔵</abbr>
+ 189             writeBitmap(values, mIcon);
+ 190         } else {
+ 191             if (!usingFallbackIcon) {
+ 192                 writeBitmap(values, mIcon);
+ 193             }
+<abbr title=" 194             values.put(LauncherSettings.BaseLauncherColumns.ICON_TYPE, LauncherSettings.BaseLauncherColumns.ICON_TYPE_RESOURCE);"> 194             values.put(LauncherSettings.BaseLauncherColumns.ICON_TYPE, LauncherSettings.BaseLauncherColum🔵</abbr>
+ 195             if (iconResource != null) {
+ 196                 values.put(LauncherSettings.BaseLauncherColumns.ICON_PACKAGE, iconResource.packageName);
+<abbr title=" 197                 values.put(LauncherSettings.BaseLauncherColumns.ICON_RESOURCE, iconResource.resourceName);"> 197                 values.put(LauncherSettings.BaseLauncherColumns.ICON_RESOURCE, iconResource.resourceName)🔵</abbr>
+ 198             }
+ 199         }
+ 200     }
+ 201 
+ 202     @Override
+ 203     public String toString() {
+<abbr title=" 204         return (((((((((((((((((((((((&quot;ShortcutInfo(title=&quot; + title) + &quot;intent=&quot;) + intent) + &quot;id=&quot;) + this.id) + &quot; type=&quot;) + this.itemType) + &quot; container=&quot;) + this.container) + &quot; screen=&quot;) + screenId) + &quot; cellX=&quot;) + cellX) + &quot; cellY=&quot;) + cellY) + &quot; spanX=&quot;) + spanX) + &quot; spanY=&quot;) + spanY) + &quot; dropPos=&quot;) + Arrays.toString(dropPos)) + &quot; user=&quot;) + user) + &quot;)&quot;;"> 204         return (((((((((((((((((((((((&quot;ShortcutInfo(title=&quot; + title) + &quot;intent=&quot;) + intent) + &quot;id=&quot;) + th🔵</abbr>
+ 205     }
+ 206 
+ 207     public static void dumpShortcutInfoList(String tag, String label,
+ 208             ArrayList&lt;ShortcutInfo&gt; list) {
+ 209         Log.d(tag, label + &quot; size=&quot; + list.size());
+ 210         for (ShortcutInfo info: list) {
+ 211             Log.d(tag, &quot;   title=\&quot;&quot; + info.title + &quot; icon=&quot; + info.mIcon
+ 212                     + &quot; customIcon=&quot; + info.customIcon);
+ 213         }
+ 214     }
+ 215 
+ 216     public ComponentName getTargetComponent() {
+ 217         return promisedIntent != null ? promisedIntent.getComponent() : intent.getComponent();
+ 218     }
+ 219 
+ 220     public boolean hasStatusFlag(int flag) {
+ 221         return (status &amp; flag) != 0;
+ 222     }
+ 223 
+ 224     public final boolean isPromise() {
+ 225         return hasStatusFlag(FLAG_RESTORED_ICON | FLAG_AUTOINTALL_ICON);
+ 226     }
+ 227 
+ 228     public int getInstallProgress() {
+ 229         return mInstallProgress;
+ 230     }
+ 231 
+ 232     public void setInstallProgress(int progress) {
+ 233         mInstallProgress = progress;
+ 234         status |= FLAG_INSTALL_SESSION_ACTIVE;
+ 235     }
+ 236 }
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ </pre></td>
+                        </tr>
+                    </table>
+                </div>
+                <div id="bottom">
+                    <table style="margin:auto">
+                        <tr>
+                            <th>ours vs. base</th>
+                            <th>theirs vs. base</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1  /*
+   2   * Copyright (C) 2008 The Android Open Source Project
+   3   *
+   4   * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+   5   * you may not use this file except in compliance with the License.
+   6   * You may obtain a copy of the License at
+   7   *
+   8   *      http://www.apache.org/licenses/LICENSE-2.0
+   9   *
+  10   * Unless required by applicable law or agreed to in writing, software
+  11   * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  12   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  13   * See the License for the specific language governing permissions and
+  14   * limitations under the License.
+  15   */
+  16  
+  17  package com.android.launcher3;
+  18  
+  19  import android.content.ComponentName;
+  20  import android.content.ContentValues;
+  21  import android.content.Context;
+  22  import android.content.Intent;
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  23 -import android.content.pm.PackageInfo;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  24 -import android.content.pm.PackageManager;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  25 -import android.content.pm.PackageManager.NameNotFoundException;</span>
+  26  import android.graphics.Bitmap;
+  27  import android.util.Log;
+  28  
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  29 +import com.android.launcher3.compat.UserHandleCompat;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  30 +</span>
+  31  import java.util.ArrayList;
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  32 +import java.util.Arrays;</span>
+  33  
+  34  /**
+  35   * Represents a launchable icon on the workspaces and in folders.
+  36   */
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  37 -class ShortcutInfo extends ItemInfo {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  38 +public class ShortcutInfo extends ItemInfo {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  39 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  40 +    public static final int DEFAULT = 0;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  41 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  42 +    /**</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  43 +     * The shortcut was restored from a backup and it not ready to be used. This is automatically</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  44 +     * set during backup/restore</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  45 +     */</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  46 +    public static final int FLAG_RESTORED_ICON = 1;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  47 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  48 +    /**</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  49 +     * The icon was added as an auto-install app, and is not ready to be used. This flag can&#x27;t</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  50 +     * be present along with {@link #FLAG_RESTORED_ICON}, and is set during default layout</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  51 +     * parsing.</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  52 +     */</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  53 +    public static final int FLAG_AUTOINTALL_ICON = 2;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  54 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  55 +    /**</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  56 +     * The icon is being installed. If {@link FLAG_RESTORED_ICON} or {@link FLAG_AUTOINTALL_ICON}</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  57 +     * is set, then the icon is either being installed or is in a broken state.</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  58 +     */</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  59 +    public static final int FLAG_INSTALL_SESSION_ACTIVE = 4;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  60 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  61 +    /**</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  62 +     * Indicates that the widget restore has started.</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  63 +     */</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  64 +    public static final int FLAG_RESTORE_STARTED = 8;</span>
+  65  
+  66      /**
+  67       * The intent used to start the application.
+  68       */
+  69      Intent intent;
+  70  
+  71      /**
+  72       * Indicates whether the icon comes from an application&#x27;s resource (if false)
+  73       * or from a custom Bitmap (if true.)
+  74       */
+  75      boolean customIcon;
+  76  
+  77      /**
+  78       * Indicates whether we&#x27;re using the default fallback icon instead of something from the
+  79       * app.
+  80       */
+  81      boolean usingFallbackIcon;
+  82  
+  83      /**
+  84       * If isShortcut=true and customIcon=false, this contains a reference to the
+  85       * shortcut icon as an application&#x27;s resource.
+  86       */
+  87      Intent.ShortcutIconResource iconResource;
+  88  
+  89      /**
+  90       * The application icon.
+  91       */
+  92      private Bitmap mIcon;
+  93  
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  94 +    /**</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  95 +     * Could be disabled, if the the app is installed but unavailable (eg. in safe mode or when</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  96 +     * sd-card is not available).</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  97 +     */</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  98 +    boolean isDisabled = false;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  99 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 100 +    int status;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 101 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 102 +    /**</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 103 +     * The installation progress [0-100] of the package that this shortcut represents.</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 104 +     */</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 105 +    private int mInstallProgress;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 106 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 107 +    /**</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 108 +     * Refer {@link AppInfo#firstInstallTime}.</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 109 +     */</span>
+ 110      long firstInstallTime;
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 111 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 112 +    /**</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 113 +     * TODO move this to {@link status}</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 114 +     */</span>
+ 115      int flags = 0;
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 116 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 117 +    /**</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 118 +     * If this shortcut is a placeholder, then intent will be a market intent for the package, and</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 119 +     * this will hold the original intent from the database.  Otherwise, null.</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 120 +     * Refer {@link #FLAG_RESTORE_PENDING}, {@link #FLAG_INSTALL_PENDING}</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 121 +     */</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 122 +    Intent promisedIntent;</span>
+ 123  
+ 124      ShortcutInfo() {
+ 125          itemType = LauncherSettings.BaseLauncherColumns.ITEM_TYPE_SHORTCUT;
+ 126      }
+ 127  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 128 -    protected Intent getIntent() {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 129 +    public Intent getIntent() {</span>
+ 130          return intent;
+ 131      }
+ 132  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 133 -    ShortcutInfo(Intent intent, CharSequence title, Bitmap icon) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 134 +    ShortcutInfo(Intent intent, CharSequence title, CharSequence contentDescription,</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 135 +            Bitmap icon, UserHandleCompat user) {</span>
+ 136          this();
+ 137          this.intent = intent;
+ 138          this.title = title;
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 139 +        this.contentDescription = contentDescription;</span>
+ 140          mIcon = icon;
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 141 +        this.user = user;</span>
+ 142      }
+ 143  
+ 144      public ShortcutInfo(Context context, ShortcutInfo info) {
+ 145          super(info);
+ 146          title = info.title.toString();
+ 147          intent = new Intent(info.intent);
+ 148          if (info.iconResource != null) {
+ 149              iconResource = new Intent.ShortcutIconResource();
+ 150              iconResource.packageName = info.iconResource.packageName;
+ 151              iconResource.resourceName = info.iconResource.resourceName;
+ 152          }
+ 153          mIcon = info.mIcon; // TODO: should make a copy here.  maybe we don&#x27;t need this ctor at all
+ 154          customIcon = info.customIcon;
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 155 -        initFlagsAndFirstInstallTime(</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 156 -                getPackageInfo(context, intent.getComponent().getPackageName()));</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 157 +        flags = info.flags;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 158 +        firstInstallTime = info.firstInstallTime;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 159 +        user = info.user;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 160 +        status = info.status;</span>
+ 161      }
+ 162  
+ 163      /** TODO: Remove this.  It&#x27;s only called by ApplicationInfo.makeShortcut. */
+ 164      public ShortcutInfo(AppInfo info) {
+ 165          super(info);
+ 166          title = info.title.toString();
+ 167          intent = new Intent(info.intent);
+ 168          customIcon = false;
+ 169          flags = info.flags;
+ 170          firstInstallTime = info.firstInstallTime;
+ 171      }
+ 172  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 173 -    public static PackageInfo getPackageInfo(Context context, String packageName) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 174 -        PackageInfo pi = null;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 175 -        try {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 176 -            PackageManager pm = context.getPackageManager();</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 177 -            pi = pm.getPackageInfo(packageName, 0);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 178 -        } catch (NameNotFoundException e) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 179 -            Log.d(&quot;ShortcutInfo&quot;, &quot;PackageManager.getPackageInfo failed for &quot; + packageName);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 180 -        }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 181 -        return pi;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 182 -    }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 183 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 184 -    void initFlagsAndFirstInstallTime(PackageInfo pi) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 185 -        flags = AppInfo.initFlags(pi);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 186 -        firstInstallTime = AppInfo.initFirstInstallTime(pi);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 187 -    }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 188 -</span>
+ 189      public void setIcon(Bitmap b) {
+ 190          mIcon = b;
+ 191      }
+ 192  
+ 193      public Bitmap getIcon(IconCache iconCache) {
+ 194          if (mIcon == null) {
+ 195              updateIcon(iconCache);
+ 196          }
+ 197          return mIcon;
+ 198      }
+ 199  
+ 200      public void updateIcon(IconCache iconCache) {
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 201 -        mIcon = iconCache.getIcon(intent);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 202 -        usingFallbackIcon = iconCache.isDefaultIcon(mIcon);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 203 -    }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 204 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 205 -    /**</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 206 -     * Creates the application intent based on a component name and various launch flags.</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 207 -     * Sets {@link #itemType} to {@link LauncherSettings.BaseLauncherColumns#ITEM_TYPE_APPLICATION}.</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 208 -     *</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 209 -     * @param className the class name of the component representing the intent</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 210 -     * @param launchFlags the launch flags</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 211 -     */</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 212 -    final void setActivity(Context context, ComponentName className, int launchFlags) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 213 -        intent = new Intent(Intent.ACTION_MAIN);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 214 -        intent.addCategory(Intent.CATEGORY_LAUNCHER);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 215 -        intent.setComponent(className);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 216 -        intent.setFlags(launchFlags);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 217 -        itemType = LauncherSettings.BaseLauncherColumns.ITEM_TYPE_APPLICATION;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 218 -        initFlagsAndFirstInstallTime(</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 219 -                getPackageInfo(context, intent.getComponent().getPackageName()));</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 220 +        mIcon = iconCache.getIcon(promisedIntent != null ? promisedIntent : intent, user);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 221 +        usingFallbackIcon = iconCache.isDefaultIcon(mIcon, user);</span>
+ 222      }
+ 223  
+ 224      @Override
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 225 -    void onAddToDatabase(ContentValues values) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 226 -        super.onAddToDatabase(values);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 227 +    void onAddToDatabase(Context context, ContentValues values) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 228 +        super.onAddToDatabase(context, values);</span>
+ 229  
+ 230          String titleStr = title != null ? title.toString() : null;
+ 231          values.put(LauncherSettings.BaseLauncherColumns.TITLE, titleStr);
+ 232  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 233 -        String uri = intent != null ? intent.toUri(0) : null;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 234 +        String uri = promisedIntent != null ? promisedIntent.toUri(0)</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 235 +                : (intent != null ? intent.toUri(0) : null);</span>
+ 236          values.put(LauncherSettings.BaseLauncherColumns.INTENT, uri);
+ 237  
+ 238          if (customIcon) {
+ 239              values.put(LauncherSettings.BaseLauncherColumns.ICON_TYPE,
+ 240                      LauncherSettings.BaseLauncherColumns.ICON_TYPE_BITMAP);
+ 241              writeBitmap(values, mIcon);
+ 242          } else {
+ 243              if (!usingFallbackIcon) {
+ 244                  writeBitmap(values, mIcon);
+ 245              }
+ 246              values.put(LauncherSettings.BaseLauncherColumns.ICON_TYPE,
+ 247                      LauncherSettings.BaseLauncherColumns.ICON_TYPE_RESOURCE);
+ 248              if (iconResource != null) {
+ 249                  values.put(LauncherSettings.BaseLauncherColumns.ICON_PACKAGE,
+ 250                          iconResource.packageName);
+ 251                  values.put(LauncherSettings.BaseLauncherColumns.ICON_RESOURCE,
+ 252                          iconResource.resourceName);
+ 253              }
+ 254          }
+ 255      }
+ 256  
+ 257      @Override
+ 258      public String toString() {
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 259 -        return &quot;ShortcutInfo(title=&quot; + title.toString() + &quot;intent=&quot; + intent + &quot;id=&quot; + this.id</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 260 +        return &quot;ShortcutInfo(title=&quot; + title + &quot;intent=&quot; + intent + &quot;id=&quot; + this.id</span>
+ 261                  + &quot; type=&quot; + this.itemType + &quot; container=&quot; + this.container + &quot; screen=&quot; + screenId
+ 262                  + &quot; cellX=&quot; + cellX + &quot; cellY=&quot; + cellY + &quot; spanX=&quot; + spanX + &quot; spanY=&quot; + spanY
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 263 -                + &quot; dropPos=&quot; + dropPos + &quot;)&quot;;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 264 +                + &quot; dropPos=&quot; + Arrays.toString(dropPos) + &quot; user=&quot; + user + &quot;)&quot;;</span>
+ 265      }
+ 266  
+ 267      public static void dumpShortcutInfoList(String tag, String label,
+ 268              ArrayList&lt;ShortcutInfo&gt; list) {
+ 269          Log.d(tag, label + &quot; size=&quot; + list.size());
+ 270          for (ShortcutInfo info: list) {
+ 271              Log.d(tag, &quot;   title=\&quot;&quot; + info.title + &quot; icon=&quot; + info.mIcon
+ 272                      + &quot; customIcon=&quot; + info.customIcon);
+ 273          }
+ 274      }
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 275 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 276 +    public ComponentName getTargetComponent() {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 277 +        return promisedIntent != null ? promisedIntent.getComponent() : intent.getComponent();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 278 +    }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 279 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 280 +    public boolean hasStatusFlag(int flag) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 281 +        return (status &amp; flag) != 0;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 282 +    }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 283 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 284 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 285 +    public final boolean isPromise() {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 286 +        return hasStatusFlag(FLAG_RESTORED_ICON | FLAG_AUTOINTALL_ICON);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 287 +    }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 288 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 289 +    public int getInstallProgress() {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 290 +        return mInstallProgress;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 291 +    }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 292 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 293 +    public void setInstallProgress(int progress) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 294 +        mInstallProgress = progress;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 295 +        status |= FLAG_INSTALL_SESSION_ACTIVE;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 296 +    }</span>
+ 297  }</pre></td>
+                            <td><pre></pre></td>
+                        </tr>
+                    </table>
+                </div>
+              </body>
+            </html>
+            

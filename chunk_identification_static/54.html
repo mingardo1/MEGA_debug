@@ -1,0 +1,1202 @@
+<!DOCTYPE html>
+    <html lang="en">
+              <head>
+                <meta charset="utf-8">
+                <title>54</title>
+                    <style>
+                        #top {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        #bottom {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        abbr {
+                          /* Here is the delay */
+                          transition-delay:0s;
+                        }
+                    </style>
+              </head>
+              <body>
+                <span style="height: 4vh">
+                    54
+                    <a href="53.html">prev</a>
+                    <a href="55.html">next</a>
+                    <a href="54_chunks.html">chunks</a>
+                    <a href="index.html">index</a>
+                    Automattic/simplenote-android_6020f2a3c2babcb562f1c4f882a7bf72bc791743_Simplenote/src/main/java/com/automattic/simplenote/TagDialogFragment.java
+                    <textarea rows=1 onclick='navigator.clipboard.writeText(this.value)'>cd C:\studies\se\mega\git-analyzer-plus\notebooks\debug
+del /Q *
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\Automattic\simplenote-android show &quot;6020f2a3c2babcb562f1c4f882a7bf72bc791743:Simplenote/src/main/java/com/automattic/simplenote/TagDialogFragment.java&quot; &gt; committed.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\Automattic\simplenote-android show &quot;6020f2a3c2babcb562f1c4f882a7bf72bc791743^1:Simplenote/src/main/java/com/automattic/simplenote/TagDialogFragment.java&quot; &gt; ours.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\Automattic\simplenote-android show &quot;6020f2a3c2babcb562f1c4f882a7bf72bc791743^2:Simplenote/src/main/java/com/automattic/simplenote/TagDialogFragment.java&quot; &gt; theirs.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\Automattic\simplenote-android show &quot;5266af6a72f7c0d45cea79dfbb0a05758c02acad:Simplenote/src/main/java/com/automattic/simplenote/TagDialogFragment.java&quot; &gt; base.java
+copy ours.java 1ours.java
+copy ours.java 2ours.java
+copy theirs.java 1theirs.java
+copy theirs.java 2theirs.java
+copy base.java 1base.java
+copy base.java 2base.java
+&quot;C:\Program Files\Java\jdk1.8.0_241\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\jFSTMerge\build\libs\jFSTMerge-all.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\jfstmerge.java --show-base
+&quot;C:\Program Files\Eclipse Adoptium\jdk-17.0.11.9-hotspot\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\spork\target\spork-0.5.0-SNAPSHOT.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\spork.java
+del /Q 1*.java
+del /Q 2*.java
+del /Q jfstmerge.java.merge
+</textarea>
+                    {strict: [[bj], [b]], subset: [[bj], [b]]}
+                </span>
+                <div id="top">
+
+                    <table>
+                        <tr>
+                            <th>line based (standard git)</th>
+                            <th>jfstmerge</th>
+                            <th>spork</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1 package com.automattic.simplenote;
+   2 
+   3 import android.app.Dialog;
+   4 import android.content.Context;
+   5 import android.content.DialogInterface;
+   6 import android.content.DialogInterface.OnShowListener;
+   7 import android.os.Bundle;
+   8 import android.text.Editable;
+   9 import android.text.TextWatcher;
+  10 import android.util.Log;
+  11 import android.view.ContextThemeWrapper;
+  12 import android.view.LayoutInflater;
+  13 import android.view.View;
+  14 import android.widget.Button;
+  15 
+  16 import androidx.annotation.NonNull;
+  17 import androidx.appcompat.app.AlertDialog;
+  18 import androidx.appcompat.app.AppCompatDialogFragment;
+  19 
+  20 import com.automattic.simplenote.analytics.AnalyticsTracker;
+  21 import com.automattic.simplenote.models.Note;
+  22 import com.automattic.simplenote.models.Tag;
+  23 import com.automattic.simplenote.utils.DialogUtils;
+  24 import com.automattic.simplenote.utils.TagUtils;
+  25 import com.google.android.material.textfield.TextInputEditText;
+  26 import com.google.android.material.textfield.TextInputLayout;
+  27 import com.simperium.client.Bucket;
+  28 import com.simperium.client.BucketObjectNameInvalid;
+  29 
+  30 public class TagDialogFragment extends AppCompatDialogFragment implements TextWatcher, OnShowListener {
+  31     public static String DIALOG_TAG = &quot;dialog_tag&quot;;
+  32 
+  33     private AlertDialog mDialogEditTag;
+  34     private Bucket&lt;Note&gt; mBucketNote;
+  35     private Bucket&lt;Tag&gt; mBucketTag;
+  36     private Button mButtonPositive;
+  37     private String mTagOld;
+  38     private Tag mTag;
+  39     private TextInputEditText mEditTextTag;
+  40     private TextInputLayout mEditTextLayout;
+  41 
+  42     public TagDialogFragment(Tag tag, Bucket&lt;Note&gt; bucketNote, Bucket&lt;Tag&gt; bucketTag) {
+  43         mTag = tag;
+  44         mBucketNote = bucketNote;
+  45         mBucketTag = bucketTag;
+  46     }
+  47 
+  48     @NonNull
+  49     @Override
+  50     public Dialog onCreateDialog(Bundle savedInstanceState) {
+  51         Context context = new ContextThemeWrapper(requireContext(), R.style.Dialog);
+  52         AlertDialog.Builder builder = new AlertDialog.Builder(context);
+  53         builder.setTitle(R.string.rename_tag);
+  54         builder.setNegativeButton(R.string.cancel, null);
+  55         builder.setPositiveButton(
+  56             R.string.save,
+  57             new DialogInterface.OnClickListener() {
+  58                 public void onClick(DialogInterface dialog, int whichButton) {
+<abbr title="  59                     String tagNew = mEditTextTag.getText() != null ? mEditTextTag.getText().toString().trim() : &quot;&quot;;">  59                     String tagNew = mEditTextTag.getText() != null ? mEditTextTag.getText().toString().tr🔵</abbr>
+  60 
+  61 &lt;&lt;&lt;&lt;&lt;&lt;&lt; GitAnalyzerPlus_ours
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  62                     try {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  63                         mTag.renameTo(mTagOld, tagNew, index, mBucketNote);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  64                         AnalyticsTracker.track(</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  65                             AnalyticsTracker.Stat.TAG_EDITOR_ACCESSED,</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  66                             AnalyticsTracker.CATEGORY_TAG,</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  67                             &quot;tag_alert_edit_box&quot;</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  68                         );</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  69                     } catch (BucketObjectNameInvalid e) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  70                         Log.e(Simplenote.TAG, &quot;Unable to rename tag&quot;, e);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  71                         DialogUtils.showDialogWithEmail(</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  72                             requireContext(),</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  73                             getString(R.string.error),</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  74                             getString(R.string.rename_tag_message)</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  75                         );</span>
+  76 ||||||| GitAnalyzerPlus_base
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  77             new DialogInterface.OnClickListener() {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  78                 public void onClick(DialogInterface dialog, int whichButton) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"><abbr title="  79                     String tagNew = mEditTextTag.getText() != null ? mEditTextTag.getText().toString().trim() : &quot;&quot;;">  79                     String tagNew = mEditTextTag.getText() != null ? mEditTextTag.getText().toString().tr🔵</abbr></span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  80                     int index = mTag.hasIndex() ? mTag.getIndex() : mBucketTag.count();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  81 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  82                     try {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  83                         mTag.renameTo(mTagOld, tagNew, index, mBucketNote);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  84                         AnalyticsTracker.track(</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  85                             AnalyticsTracker.Stat.TAG_EDITOR_ACCESSED,</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  86                             AnalyticsTracker.CATEGORY_TAG,</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  87                             &quot;tag_alert_edit_box&quot;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  88                         );</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  89                     } catch (BucketObjectNameInvalid e) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  90                         Log.e(Simplenote.TAG, &quot;Unable to rename tag&quot;, e);</span>
+  91 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  92                     if (tagNew.equals(mTagOld)) {</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  93                         return;</span>
+  94 &gt;&gt;&gt;&gt;&gt;&gt;&gt; GitAnalyzerPlus_theirs
+  95                     }
+  96 
+  97                     int index = mTag.hasIndex() ? mTag.getIndex() : mBucketTag.count();
+<abbr title="  98                     boolean isRenamingToLexicalTag = TagUtils.hashTag(tagNew).equals(TagUtils.hashTag(mTagOld));">  98                     boolean isRenamingToLexicalTag = TagUtils.hashTag(tagNew).equals(TagUtils.hashTag(mTa🔵</abbr>
+  99                     boolean hasCanonicalTag = TagUtils.hasCanonicalOfLexical(mBucketTag, tagNew);
+ 100 
+ 101                     if (hasCanonicalTag &amp;&amp; !isRenamingToLexicalTag) {
+ 102                         String tagCanonical = TagUtils.getCanonicalFromLexical(mBucketTag, tagNew);
+ 103                         showDialogErrorConflict(tagCanonical, mTagOld, tagNew, index);
+ 104                         return;
+ 105                     }
+ 106 
+ 107                     tryToRenameTag(tagNew, index);
+ 108                 }
+ 109             }
+ 110         );
+ 111         View view = LayoutInflater.from(context).inflate(R.layout.edit_tag, null);
+ 112         mEditTextLayout = view.findViewById(R.id.input_tag_name);
+ 113         mEditTextTag = (TextInputEditText) mEditTextLayout.getEditText();
+ 114 
+ 115         if (mEditTextTag != null) {
+ 116             mEditTextTag.addTextChangedListener(this);
+ 117         }
+ 118 
+ 119         builder.setView(view);
+ 120         mDialogEditTag = builder.create();
+ 121         mDialogEditTag.setOnShowListener(this);
+ 122         return mDialogEditTag;
+ 123     }
+ 124 
+ 125     @Override
+ 126     public void onShow(DialogInterface dialog) {
+ 127         mButtonPositive = mDialogEditTag.getButton(DialogInterface.BUTTON_POSITIVE);
+ 128         mEditTextTag.setText(mTag.getName());
+ 129         mTagOld = mEditTextTag.getText() != null ? mEditTextTag.getText().toString() : &quot;&quot;;
+ 130     }
+ 131 
+ 132     @Override
+ 133     public void afterTextChanged(Editable s) {
+ 134         if (isTagNameValid()) {
+ 135             mButtonPositive.setEnabled(true);
+ 136             mEditTextLayout.setError(null);
+ 137         } else if (isTagNameInvalidEmpty()) {
+ 138             mButtonPositive.setEnabled(false);
+ 139             mEditTextLayout.setError(getString(R.string.rename_tag_error_empty));
+ 140         } else if (isTagNameInvalidLength()) {
+ 141             mButtonPositive.setEnabled(false);
+ 142             mEditTextLayout.setError(getString(R.string.rename_tag_error_length));
+ 143         } else if (isTagNameInvalidSpaces()) {
+ 144             mButtonPositive.setEnabled(false);
+ 145             mEditTextLayout.setError(getString(R.string.rename_tag_error_spaces));
+ 146         }
+ 147     }
+ 148 
+ 149     @Override
+ 150     public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+ 151     }
+ 152 
+ 153     @Override
+ 154     public void onTextChanged(CharSequence s, int start, int before, int count) {
+ 155     }
+ 156 
+ 157     private boolean isTagNameValid() {
+ 158         return !isTagNameInvalidSpaces() &amp;&amp; !isTagNameInvalidLength() &amp;&amp; !isTagNameInvalidEmpty();
+ 159     }
+ 160 
+ 161     private boolean isTagNameInvalidEmpty() {
+ 162         return mEditTextTag.getText() != null &amp;&amp; mEditTextTag.getText().toString().isEmpty();
+ 163     }
+ 164 
+ 165     private boolean isTagNameInvalidLength() {
+<abbr title=" 166         return mEditTextTag.getText() != null &amp;&amp; !TagUtils.hashTagValid(mEditTextTag.getText().toString());"> 166         return mEditTextTag.getText() != null &amp;&amp; !TagUtils.hashTagValid(mEditTextTag.getText().toString()🔵</abbr>
+ 167     }
+ 168 
+ 169     private boolean isTagNameInvalidSpaces() {
+ 170         return mEditTextTag.getText() != null &amp;&amp; mEditTextTag.getText().toString().contains(&quot; &quot;);
+ 171     }
+ 172 &lt;&lt;&lt;&lt;&lt;&lt;&lt; GitAnalyzerPlus_ours
+ 173 ||||||| GitAnalyzerPlus_base
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 174     }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 175 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 176     private void showDialogErrorRename() {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"><abbr title=" 177         final AlertDialog dialog = new AlertDialog.Builder(new ContextThemeWrapper(requireContext(), R.style.Dialog))"> 177         final AlertDialog dialog = new AlertDialog.Builder(new ContextThemeWrapper(requireContext(), R.st🔵</abbr></span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 178             .setTitle(R.string.error)</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 179             .setMessage(HtmlCompat.fromHtml(String.format(</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 180                 getString(R.string.rename_tag_message),</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 181                 getString(R.string.rename_tag_message_email),</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 182                 &quot;&lt;span style=\&quot;color:#&quot;,</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"><abbr title=" 183                 Integer.toHexString(ThemeUtils.getColorFromAttribute(requireContext(), R.attr.colorAccent) &amp; 0xffffff),"> 183                 Integer.toHexString(ThemeUtils.getColorFromAttribute(requireContext(), R.attr.colorAccent🔵</abbr></span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 184                 &quot;\&quot;&gt;&quot;,</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 185                 &quot;&lt;/span&gt;&quot;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 186             )))</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 187             .setPositiveButton(android.R.string.ok, null)</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 188             .show();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"><abbr title=" 189         ((TextView) Objects.requireNonNull(dialog.findViewById(android.R.id.message))).setMovementMethod(LinkMovementMethod.getInstance());"> 189         ((TextView) Objects.requireNonNull(dialog.findViewById(android.R.id.message))).setMovementMethod(🔵</abbr></span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 190     }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 191 }</span>
+ 192 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 193 </span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"><abbr title=" 194     private void showDialogErrorConflict(String canonical, String tagOld, final String tagNew, final int index) {"> 194     private void showDialogErrorConflict(String canonical, String tagOld, final String tagNew, final int 🔵</abbr></span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 195         new AlertDialog.Builder(new ContextThemeWrapper(requireContext(), R.style.Dialog))</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 196             .setTitle(R.string.dialog_tag_conflict_title)</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 197             .setMessage(getString(R.string.dialog_tag_conflict_message, canonical, tagOld, canonical))</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 198             .setNegativeButton(R.string.cancel, null)</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 199             .setPositiveButton(</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 200                 R.string.dialog_tag_conflict_button_positive,</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 201                 new DialogInterface.OnClickListener() {</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 202                     @Override</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 203                     public void onClick(DialogInterface dialog, int which) {</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 204                         tryToRenameTag(tagNew, index);</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 205                     }</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 206                 }</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 207             )</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 208             .show();</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 209     }</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 210 </span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 211     private void showDialogErrorRename() {</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"><abbr title=" 212         final AlertDialog dialog = new AlertDialog.Builder(new ContextThemeWrapper(requireContext(), R.style.Dialog))"> 212         final AlertDialog dialog = new AlertDialog.Builder(new ContextThemeWrapper(requireContext(), R.st🔵</abbr></span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 213             .setTitle(R.string.error)</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 214             .setMessage(HtmlCompat.fromHtml(String.format(</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 215                 getString(R.string.rename_tag_message),</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 216                 getString(R.string.rename_tag_message_email),</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 217                 &quot;&lt;span style=\&quot;color:#&quot;,</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"><abbr title=" 218                 Integer.toHexString(ThemeUtils.getColorFromAttribute(requireContext(), R.attr.colorAccent) &amp; 0xffffff),"> 218                 Integer.toHexString(ThemeUtils.getColorFromAttribute(requireContext(), R.attr.colorAccent🔵</abbr></span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 219                 &quot;\&quot;&gt;&quot;,</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 220                 &quot;&lt;/span&gt;&quot;</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 221             )))</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 222             .setPositiveButton(android.R.string.ok, null)</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 223             .show();</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"><abbr title=" 224         ((TextView) Objects.requireNonNull(dialog.findViewById(android.R.id.message))).setMovementMethod(LinkMovementMethod.getInstance());"> 224         ((TextView) Objects.requireNonNull(dialog.findViewById(android.R.id.message))).setMovementMethod(🔵</abbr></span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 225     }</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 226 </span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 227     private void tryToRenameTag(String tagNew, int index) {</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 228         try {</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 229             mTag.renameTo(mTagOld, tagNew, index, mBucketNote);</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 230             AnalyticsTracker.track(</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 231                 AnalyticsTracker.Stat.TAG_EDITOR_ACCESSED,</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 232                 AnalyticsTracker.CATEGORY_TAG,</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 233                 &quot;tag_alert_edit_box&quot;</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 234             );</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 235         } catch (BucketObjectNameInvalid e) {</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 236             Log.e(Simplenote.TAG, &quot;Unable to rename tag&quot;, e);</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 237             showDialogErrorRename();</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 238         }</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 239     }</span>
+ 240 &gt;&gt;&gt;&gt;&gt;&gt;&gt; GitAnalyzerPlus_theirs
+ 241 }</pre></td>
+                            <td><pre>   1 package com.automattic.simplenote;
+   2 
+   3 import android.app.Dialog;
+   4 import android.content.Context;
+   5 import android.content.DialogInterface;
+   6 import android.content.DialogInterface.OnShowListener;
+   7 import android.os.Bundle;
+   8 import android.text.Editable;
+   9 import android.text.TextWatcher;
+  10 import android.util.Log;
+  11 import android.view.ContextThemeWrapper;
+  12 import android.view.LayoutInflater;
+  13 import android.view.View;
+  14 import android.widget.Button;
+  15 
+  16 import androidx.annotation.NonNull;
+  17 import androidx.appcompat.app.AlertDialog;
+  18 import androidx.appcompat.app.AppCompatDialogFragment;
+  19 
+  20 import com.automattic.simplenote.analytics.AnalyticsTracker;
+  21 import com.automattic.simplenote.models.Note;
+  22 import com.automattic.simplenote.models.Tag;
+  23 import com.automattic.simplenote.utils.DialogUtils;
+  24 import com.automattic.simplenote.utils.TagUtils;
+  25 import com.google.android.material.textfield.TextInputEditText;
+  26 import com.google.android.material.textfield.TextInputLayout;
+  27 import com.simperium.client.Bucket;
+  28 import com.simperium.client.BucketObjectNameInvalid;
+  29 
+  30 public class TagDialogFragment extends AppCompatDialogFragment implements TextWatcher, OnShowListener {
+  31     public static String DIALOG_TAG = &quot;dialog_tag&quot;;
+  32 
+  33     private AlertDialog mDialogEditTag;
+  34     private Bucket&lt;Note&gt; mBucketNote;
+  35     private Bucket&lt;Tag&gt; mBucketTag;
+  36     private Button mButtonPositive;
+  37     private String mTagOld;
+  38     private Tag mTag;
+  39     private TextInputEditText mEditTextTag;
+  40     private TextInputLayout mEditTextLayout;
+  41 
+  42     public TagDialogFragment(Tag tag, Bucket&lt;Note&gt; bucketNote, Bucket&lt;Tag&gt; bucketTag) {
+  43         mTag = tag;
+  44         mBucketNote = bucketNote;
+  45         mBucketTag = bucketTag;
+  46     }
+  47 
+  48     @NonNull
+  49     @Override
+  50     public Dialog onCreateDialog(Bundle savedInstanceState) {
+  51         Context context = new ContextThemeWrapper(requireContext(), R.style.Dialog);
+  52         AlertDialog.Builder builder = new AlertDialog.Builder(context);
+  53         builder.setTitle(R.string.rename_tag);
+  54         builder.setNegativeButton(R.string.cancel, null);
+  55         builder.setPositiveButton(
+  56             R.string.save,
+  57             new DialogInterface.OnClickListener() {
+  58                 public void onClick(DialogInterface dialog, int whichButton) {
+<abbr title="  59                     String tagNew = mEditTextTag.getText() != null ? mEditTextTag.getText().toString().trim() : &quot;&quot;;">  59                     String tagNew = mEditTextTag.getText() != null ? mEditTextTag.getText().toString().tr🔵</abbr>
+  60 
+  61 &lt;&lt;&lt;&lt;&lt;&lt;&lt; MINE
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  62                     try {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  63                         mTag.renameTo(mTagOld, tagNew, index, mBucketNote);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  64                         AnalyticsTracker.track(</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  65                             AnalyticsTracker.Stat.TAG_EDITOR_ACCESSED,</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  66                             AnalyticsTracker.CATEGORY_TAG,</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  67                             &quot;tag_alert_edit_box&quot;</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  68                         );</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  69                     } catch (BucketObjectNameInvalid e) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  70                         Log.e(Simplenote.TAG, &quot;Unable to rename tag&quot;, e);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  71                         DialogUtils.showDialogWithEmail(</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  72                             requireContext(),</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  73                             getString(R.string.error),</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  74                             getString(R.string.rename_tag_message)</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  75                         );</span>
+  76 ||||||| BASE
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  77 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  78                     try {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  79                         mTag.renameTo(mTagOld, tagNew, index, mBucketNote);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  80                         AnalyticsTracker.track(</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  81                             AnalyticsTracker.Stat.TAG_EDITOR_ACCESSED,</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  82                             AnalyticsTracker.CATEGORY_TAG,</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  83                             &quot;tag_alert_edit_box&quot;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  84                         );</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  85                     } catch (BucketObjectNameInvalid e) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  86                         Log.e(Simplenote.TAG, &quot;Unable to rename tag&quot;, e);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  87                         showDialogErrorRename();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  88                     }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  89                 }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  90             }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  91         );</span>
+  92 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  93                     if (tagNew.equals(mTagOld)) {</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  94                         return;</span>
+  95 &gt;&gt;&gt;&gt;&gt;&gt;&gt; YOURS
+  96                     }
+  97 
+  98                     int index = mTag.hasIndex() ? mTag.getIndex() : mBucketTag.count();
+<abbr title="  99                     boolean isRenamingToLexicalTag = TagUtils.hashTag(tagNew).equals(TagUtils.hashTag(mTagOld));">  99                     boolean isRenamingToLexicalTag = TagUtils.hashTag(tagNew).equals(TagUtils.hashTag(mTa🔵</abbr>
+ 100                     boolean hasCanonicalTag = TagUtils.hasCanonicalOfLexical(mBucketTag, tagNew);
+ 101 
+ 102                     if (hasCanonicalTag &amp;&amp; !isRenamingToLexicalTag) {
+ 103                         String tagCanonical = TagUtils.getCanonicalFromLexical(mBucketTag, tagNew);
+ 104                         showDialogErrorConflict(tagCanonical, mTagOld, tagNew, index);
+ 105                         return;
+ 106                     }
+ 107 
+ 108                     tryToRenameTag(tagNew, index);
+ 109                 }
+ 110             }
+ 111         );
+ 112         View view = LayoutInflater.from(context).inflate(R.layout.edit_tag, null);
+ 113         mEditTextLayout = view.findViewById(R.id.input_tag_name);
+ 114         mEditTextTag = (TextInputEditText) mEditTextLayout.getEditText();
+ 115 
+ 116         if (mEditTextTag != null) {
+ 117             mEditTextTag.addTextChangedListener(this);
+ 118         }
+ 119 
+ 120         builder.setView(view);
+ 121         mDialogEditTag = builder.create();
+ 122         mDialogEditTag.setOnShowListener(this);
+ 123         return mDialogEditTag;
+ 124     }
+ 125 
+ 126     @Override
+ 127     public void onShow(DialogInterface dialog) {
+ 128         mButtonPositive = mDialogEditTag.getButton(DialogInterface.BUTTON_POSITIVE);
+ 129         mEditTextTag.setText(mTag.getName());
+ 130         mTagOld = mEditTextTag.getText() != null ? mEditTextTag.getText().toString() : &quot;&quot;;
+ 131     }
+ 132 
+ 133     @Override
+ 134     public void afterTextChanged(Editable s) {
+ 135         if (isTagNameValid()) {
+ 136             mButtonPositive.setEnabled(true);
+ 137             mEditTextLayout.setError(null);
+ 138         } else if (isTagNameInvalidEmpty()) {
+ 139             mButtonPositive.setEnabled(false);
+ 140             mEditTextLayout.setError(getString(R.string.rename_tag_error_empty));
+ 141         } else if (isTagNameInvalidLength()) {
+ 142             mButtonPositive.setEnabled(false);
+ 143             mEditTextLayout.setError(getString(R.string.rename_tag_error_length));
+ 144         } else if (isTagNameInvalidSpaces()) {
+ 145             mButtonPositive.setEnabled(false);
+ 146             mEditTextLayout.setError(getString(R.string.rename_tag_error_spaces));
+ 147         }
+ 148     }
+ 149 
+ 150     @Override
+ 151     public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+ 152     }
+ 153 
+ 154     @Override
+ 155     public void onTextChanged(CharSequence s, int start, int before, int count) {
+ 156     }
+ 157 
+ 158     private boolean isTagNameValid() {
+ 159         return !isTagNameInvalidSpaces() &amp;&amp; !isTagNameInvalidLength() &amp;&amp; !isTagNameInvalidEmpty();
+ 160     }
+ 161 
+ 162     private boolean isTagNameInvalidEmpty() {
+ 163         return mEditTextTag.getText() != null &amp;&amp; mEditTextTag.getText().toString().isEmpty();
+ 164     }
+ 165 
+ 166     private boolean isTagNameInvalidLength() {
+<abbr title=" 167         return mEditTextTag.getText() != null &amp;&amp; !TagUtils.hashTagValid(mEditTextTag.getText().toString());"> 167         return mEditTextTag.getText() != null &amp;&amp; !TagUtils.hashTagValid(mEditTextTag.getText().toString()🔵</abbr>
+ 168     }
+ 169 
+ 170     private boolean isTagNameInvalidSpaces() {
+ 171         return mEditTextTag.getText() != null &amp;&amp; mEditTextTag.getText().toString().contains(&quot; &quot;);
+ 172     }
+ 173 
+<abbr title=" 174     private void showDialogErrorConflict(String canonical, String tagOld, final String tagNew, final int index) {"> 174     private void showDialogErrorConflict(String canonical, String tagOld, final String tagNew, final int 🔵</abbr>
+ 175         new AlertDialog.Builder(new ContextThemeWrapper(requireContext(), R.style.Dialog))
+ 176             .setTitle(R.string.dialog_tag_conflict_title)
+ 177             .setMessage(getString(R.string.dialog_tag_conflict_message, canonical, tagOld, canonical))
+ 178             .setNegativeButton(R.string.cancel, null)
+ 179             .setPositiveButton(
+ 180                 R.string.dialog_tag_conflict_button_positive,
+ 181                 new DialogInterface.OnClickListener() {
+ 182                     @Override
+ 183                     public void onClick(DialogInterface dialog, int which) {
+ 184                         tryToRenameTag(tagNew, index);
+ 185                     }
+ 186                 }
+ 187             )
+ 188             .show();
+ 189     }
+ 190 
+ 191     private void tryToRenameTag(String tagNew, int index) {
+ 192         try {
+ 193             mTag.renameTo(mTagOld, tagNew, index, mBucketNote);
+ 194             AnalyticsTracker.track(
+ 195                 AnalyticsTracker.Stat.TAG_EDITOR_ACCESSED,
+ 196                 AnalyticsTracker.CATEGORY_TAG,
+ 197                 &quot;tag_alert_edit_box&quot;
+ 198             );
+ 199         } catch (BucketObjectNameInvalid e) {
+ 200             Log.e(Simplenote.TAG, &quot;Unable to rename tag&quot;, e);
+ 201             showDialogErrorRename();
+ 202         }
+ 203     }
+ 204 }
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ </pre></td>
+                            <td><pre>   1 package com.automattic.simplenote;
+   2 
+   3 import android.app.Dialog;
+   4 import android.content.Context;
+   5 import android.content.DialogInterface.OnShowListener;
+   6 import android.content.DialogInterface;
+   7 import android.os.Bundle;
+   8 import android.text.Editable;
+   9 import android.text.TextWatcher;
+  10 import android.util.Log;
+  11 import android.view.ContextThemeWrapper;
+  12 import android.view.LayoutInflater;
+  13 import android.view.View;
+  14 import android.widget.Button;
+  15 import androidx.annotation.NonNull;
+  16 import androidx.appcompat.app.AlertDialog;
+  17 import androidx.appcompat.app.AppCompatDialogFragment;
+  18 import com.automattic.simplenote.analytics.AnalyticsTracker;
+  19 import com.automattic.simplenote.models.Note;
+  20 import com.automattic.simplenote.models.Tag;
+  21 import com.automattic.simplenote.utils.DialogUtils;
+  22 import com.automattic.simplenote.utils.TagUtils;
+  23 import com.google.android.material.textfield.TextInputEditText;
+  24 import com.google.android.material.textfield.TextInputLayout;
+  25 import com.simperium.client.Bucket;
+  26 import com.simperium.client.BucketObjectNameInvalid;
+  27 
+  28 
+  29 public class TagDialogFragment extends AppCompatDialogFragment implements TextWatcher , OnShowListener {
+  30     public static String DIALOG_TAG = &quot;dialog_tag&quot;;
+  31 
+  32     private AlertDialog mDialogEditTag;
+  33 
+  34     private Bucket&lt;Note&gt; mBucketNote;
+  35 
+  36     private Bucket&lt;Tag&gt; mBucketTag;
+  37 
+  38     private Button mButtonPositive;
+  39 
+  40     private String mTagOld;
+  41 
+  42     private Tag mTag;
+  43 
+  44     private TextInputEditText mEditTextTag;
+  45 
+  46     private TextInputLayout mEditTextLayout;
+  47 
+  48     public TagDialogFragment(Tag tag, Bucket&lt;Note&gt; bucketNote, Bucket&lt;Tag&gt; bucketTag) {
+  49         mTag = tag;
+  50         mBucketNote = bucketNote;
+  51         mBucketTag = bucketTag;
+  52     }
+  53 
+  54     @NonNull
+  55     @Override
+  56     public Dialog onCreateDialog(Bundle savedInstanceState) {
+  57         Context context = new ContextThemeWrapper(requireContext(), R.style.Dialog);
+  58         AlertDialog.Builder builder = new AlertDialog.Builder(context);
+  59         builder.setTitle(R.string.rename_tag);
+  60         builder.setNegativeButton(R.string.cancel, null);
+  61         builder.setPositiveButton(R.string.save, new DialogInterface.OnClickListener() {
+  62             public void onClick(DialogInterface dialog, int whichButton) {
+<abbr title="  63                 String tagNew = (mEditTextTag.getText() != null) ? mEditTextTag.getText().toString().trim() : &quot;&quot;;">  63                 String tagNew = (mEditTextTag.getText() != null) ? mEditTextTag.getText().toString().trim🔵</abbr>
+  64                 if (tagNew.equals(mTagOld)) {
+  65                     return;
+  66                 }
+  67                 int index = (mTag.hasIndex()) ? mTag.getIndex() : mBucketTag.count();
+<abbr title="  68                 boolean isRenamingToLexicalTag = TagUtils.hashTag(tagNew).equals(TagUtils.hashTag(mTagOld));">  68                 boolean isRenamingToLexicalTag = TagUtils.hashTag(tagNew).equals(TagUtils.hashTag(mTagOld🔵</abbr>
+  69                 boolean hasCanonicalTag = TagUtils.hasCanonicalOfLexical(mBucketTag, tagNew);
+  70                 if (hasCanonicalTag &amp;&amp; (!isRenamingToLexicalTag)) {
+  71                     String tagCanonical = TagUtils.getCanonicalFromLexical(mBucketTag, tagNew);
+  72                     showDialogErrorConflict(tagCanonical, mTagOld, tagNew, index);
+  73                     return;
+  74                 }
+  75                 tryToRenameTag(tagNew, index);
+  76             }
+  77         });
+  78         View view = LayoutInflater.from(context).inflate(R.layout.edit_tag, null);
+  79         mEditTextLayout = view.findViewById(R.id.input_tag_name);
+  80         mEditTextTag = ((TextInputEditText) (mEditTextLayout.getEditText()));
+  81         if (mEditTextTag != null) {
+  82             mEditTextTag.addTextChangedListener(this);
+  83         }
+  84         builder.setView(view);
+  85         mDialogEditTag = builder.create();
+  86         mDialogEditTag.setOnShowListener(this);
+  87         return mDialogEditTag;
+  88     }
+  89 
+  90     @Override
+  91     public void onShow(DialogInterface dialog) {
+  92         mButtonPositive = mDialogEditTag.getButton(DialogInterface.BUTTON_POSITIVE);
+  93         mEditTextTag.setText(mTag.getName());
+  94         mTagOld = mEditTextTag.getText() != null ? mEditTextTag.getText().toString() : &quot;&quot;;
+  95     }
+  96 
+  97     @Override
+  98     public void afterTextChanged(Editable s) {
+  99         if (isTagNameValid()) {
+ 100             mButtonPositive.setEnabled(true);
+ 101             mEditTextLayout.setError(null);
+ 102         } else if (isTagNameInvalidEmpty()) {
+ 103             mButtonPositive.setEnabled(false);
+ 104             mEditTextLayout.setError(getString(R.string.rename_tag_error_empty));
+ 105         } else if (isTagNameInvalidLength()) {
+ 106             mButtonPositive.setEnabled(false);
+ 107             mEditTextLayout.setError(getString(R.string.rename_tag_error_length));
+ 108         } else if (isTagNameInvalidSpaces()) {
+ 109             mButtonPositive.setEnabled(false);
+ 110             mEditTextLayout.setError(getString(R.string.rename_tag_error_spaces));
+ 111         }
+ 112     }
+ 113 
+ 114     @Override
+ 115     public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+ 116     }
+ 117 
+ 118     @Override
+ 119     public void onTextChanged(CharSequence s, int start, int before, int count) {
+ 120     }
+ 121 
+ 122     private boolean isTagNameValid() {
+ 123         return !isTagNameInvalidSpaces() &amp;&amp; !isTagNameInvalidLength() &amp;&amp; !isTagNameInvalidEmpty();
+ 124     }
+ 125 
+ 126     private boolean isTagNameInvalidEmpty() {
+ 127         return mEditTextTag.getText() != null &amp;&amp; mEditTextTag.getText().toString().isEmpty();
+ 128     }
+ 129 
+ 130     private boolean isTagNameInvalidLength() {
+<abbr title=" 131         return mEditTextTag.getText() != null &amp;&amp; !TagUtils.hashTagValid(mEditTextTag.getText().toString());"> 131         return mEditTextTag.getText() != null &amp;&amp; !TagUtils.hashTagValid(mEditTextTag.getText().toString()🔵</abbr>
+ 132     }
+ 133 
+ 134     private boolean isTagNameInvalidSpaces() {
+ 135         return mEditTextTag.getText() != null &amp;&amp; mEditTextTag.getText().toString().contains(&quot; &quot;);
+ 136     }
+ 137 
+<abbr title=" 138     private void showDialogErrorConflict(String canonical, String tagOld, final String tagNew, final int index) {"> 138     private void showDialogErrorConflict(String canonical, String tagOld, final String tagNew, final int 🔵</abbr>
+ 139         new AlertDialog.Builder(new ContextThemeWrapper(requireContext(), R.style.Dialog))
+ 140             .setTitle(R.string.dialog_tag_conflict_title)
+ 141             .setMessage(getString(R.string.dialog_tag_conflict_message, canonical, tagOld, canonical))
+ 142             .setNegativeButton(R.string.cancel, null)
+ 143             .setPositiveButton(
+ 144                 R.string.dialog_tag_conflict_button_positive,
+ 145                 new DialogInterface.OnClickListener() {
+ 146                     @Override
+ 147                     public void onClick(DialogInterface dialog, int which) {
+ 148                         tryToRenameTag(tagNew, index);
+ 149                     }
+ 150                 }
+ 151             )
+ 152             .show();
+ 153     }
+ 154 
+ 155     private void showDialogErrorRename() {
+<abbr title=" 156         final AlertDialog dialog = new AlertDialog.Builder(new ContextThemeWrapper(requireContext(), R.style.Dialog))"> 156         final AlertDialog dialog = new AlertDialog.Builder(new ContextThemeWrapper(requireContext(), R.st🔵</abbr>
+ 157             .setTitle(R.string.error)
+ 158             .setMessage(HtmlCompat.fromHtml(String.format(
+ 159                 getString(R.string.rename_tag_message),
+ 160                 getString(R.string.rename_tag_message_email),
+ 161                 &quot;&lt;span style=\&quot;color:#&quot;,
+<abbr title=" 162                 Integer.toHexString(ThemeUtils.getColorFromAttribute(requireContext(), R.attr.colorAccent) &amp; 0xffffff),"> 162                 Integer.toHexString(ThemeUtils.getColorFromAttribute(requireContext(), R.attr.colorAccent🔵</abbr>
+ 163                 &quot;\&quot;&gt;&quot;,
+ 164                 &quot;&lt;/span&gt;&quot;
+ 165             )))
+ 166             .setPositiveButton(android.R.string.ok, null)
+ 167             .show();
+<abbr title=" 168         ((TextView) Objects.requireNonNull(dialog.findViewById(android.R.id.message))).setMovementMethod(LinkMovementMethod.getInstance());"> 168         ((TextView) Objects.requireNonNull(dialog.findViewById(android.R.id.message))).setMovementMethod(🔵</abbr>
+ 169     }
+ 170 
+ 171     private void tryToRenameTag(String tagNew, int index) {
+ 172         try {
+ 173             mTag.renameTo(mTagOld, tagNew, index, mBucketNote);
+<abbr title=" 174             AnalyticsTracker.track(AnalyticsTracker.Stat.TAG_EDITOR_ACCESSED, AnalyticsTracker.CATEGORY_TAG, &quot;tag_alert_edit_box&quot;);"> 174             AnalyticsTracker.track(AnalyticsTracker.Stat.TAG_EDITOR_ACCESSED, AnalyticsTracker.CATEGORY_T🔵</abbr>
+ 175         } catch (BucketObjectNameInvalid e) {
+ 176             Log.e(Simplenote.TAG, &quot;Unable to rename tag&quot;, e);
+<abbr title=" 177             DialogUtils.showDialogWithEmail(requireContext(), getString(R.string.error), getString(R.string.rename_tag_message));"> 177             DialogUtils.showDialogWithEmail(requireContext(), getString(R.string.error), getString(R.stri🔵</abbr>
+ 178         }
+ 179     }
+ 180 }
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ </pre></td>
+                        </tr>
+                    </table>
+                </div>
+                <div id="bottom">
+                    <table style="margin:auto">
+                        <tr>
+                            <th>ours vs. base</th>
+                            <th>theirs vs. base</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1  package com.automattic.simplenote;
+   2  
+   3  import android.app.Dialog;
+   4  import android.content.Context;
+   5  import android.content.DialogInterface;
+   6  import android.content.DialogInterface.OnShowListener;
+   7  import android.os.Bundle;
+   8  import android.text.Editable;
+   9  import android.text.TextWatcher;
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  10 -import android.text.method.LinkMovementMethod;</span>
+  11  import android.util.Log;
+  12  import android.view.ContextThemeWrapper;
+  13  import android.view.LayoutInflater;
+  14  import android.view.View;
+  15  import android.widget.Button;
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  16 -import android.widget.TextView;</span>
+  17  
+  18  import androidx.annotation.NonNull;
+  19  import androidx.appcompat.app.AlertDialog;
+  20  import androidx.appcompat.app.AppCompatDialogFragment;
+  21  
+  22  import com.automattic.simplenote.analytics.AnalyticsTracker;
+  23  import com.automattic.simplenote.models.Note;
+  24  import com.automattic.simplenote.models.Tag;
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  25 -import com.automattic.simplenote.utils.HtmlCompat;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  26 +import com.automattic.simplenote.utils.DialogUtils;</span>
+  27  import com.automattic.simplenote.utils.TagUtils;
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  28 -import com.automattic.simplenote.utils.ThemeUtils;</span>
+  29  import com.google.android.material.textfield.TextInputEditText;
+  30  import com.google.android.material.textfield.TextInputLayout;
+  31  import com.simperium.client.Bucket;
+  32  import com.simperium.client.BucketObjectNameInvalid;
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  33 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  34 -import java.util.Objects;</span>
+  35  
+  36  public class TagDialogFragment extends AppCompatDialogFragment implements TextWatcher, OnShowListener {
+  37      public static String DIALOG_TAG = &quot;dialog_tag&quot;;
+  38  
+  39      private AlertDialog mDialogEditTag;
+  40      private Bucket&lt;Note&gt; mBucketNote;
+  41      private Bucket&lt;Tag&gt; mBucketTag;
+  42      private Button mButtonPositive;
+  43      private String mTagOld;
+  44      private Tag mTag;
+  45      private TextInputEditText mEditTextTag;
+  46      private TextInputLayout mEditTextLayout;
+  47  
+  48      public TagDialogFragment(Tag tag, Bucket&lt;Note&gt; bucketNote, Bucket&lt;Tag&gt; bucketTag) {
+  49          mTag = tag;
+  50          mBucketNote = bucketNote;
+  51          mBucketTag = bucketTag;
+  52      }
+  53  
+  54      @NonNull
+  55      @Override
+  56      public Dialog onCreateDialog(Bundle savedInstanceState) {
+  57          Context context = new ContextThemeWrapper(requireContext(), R.style.Dialog);
+  58          AlertDialog.Builder builder = new AlertDialog.Builder(context);
+  59          builder.setTitle(R.string.rename_tag);
+  60          builder.setNegativeButton(R.string.cancel, null);
+  61          builder.setPositiveButton(
+  62              R.string.save,
+  63              new DialogInterface.OnClickListener() {
+  64                  public void onClick(DialogInterface dialog, int whichButton) {
+<abbr title="  65                      String tagNew = mEditTextTag.getText() != null ? mEditTextTag.getText().toString().trim() : &quot;&quot;;">  65                      String tagNew = mEditTextTag.getText() != null ? mEditTextTag.getText().toString().trim() : &quot;&quot;🔵</abbr>
+
+
+
+
+
+  66                      int index = mTag.hasIndex() ? mTag.getIndex() : mBucketTag.count();
+
+
+  67  
+  68                      try {
+  69                          mTag.renameTo(mTagOld, tagNew, index, mBucketNote);
+  70                          AnalyticsTracker.track(
+  71                              AnalyticsTracker.Stat.TAG_EDITOR_ACCESSED,
+  72                              AnalyticsTracker.CATEGORY_TAG,
+  73                              &quot;tag_alert_edit_box&quot;
+  74                          );
+  75                      } catch (BucketObjectNameInvalid e) {
+  76                          Log.e(Simplenote.TAG, &quot;Unable to rename tag&quot;, e);
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  77 -                        showDialogErrorRename();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  78 +                        DialogUtils.showDialogWithEmail(</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  79 +                            requireContext(),</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  80 +                            getString(R.string.error),</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  81 +                            getString(R.string.rename_tag_message)</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  82 +                        );</span>
+  83                      }
+
+
+  84                  }
+  85              }
+  86          );
+  87          View view = LayoutInflater.from(context).inflate(R.layout.edit_tag, null);
+  88          mEditTextLayout = view.findViewById(R.id.input_tag_name);
+  89          mEditTextTag = (TextInputEditText) mEditTextLayout.getEditText();
+  90  
+  91          if (mEditTextTag != null) {
+  92              mEditTextTag.addTextChangedListener(this);
+  93          }
+  94  
+  95          builder.setView(view);
+  96          mDialogEditTag = builder.create();
+  97          mDialogEditTag.setOnShowListener(this);
+  98          return mDialogEditTag;
+  99      }
+ 100  
+ 101      @Override
+ 102      public void onShow(DialogInterface dialog) {
+ 103          mButtonPositive = mDialogEditTag.getButton(DialogInterface.BUTTON_POSITIVE);
+ 104          mEditTextTag.setText(mTag.getName());
+ 105          mTagOld = mEditTextTag.getText() != null ? mEditTextTag.getText().toString() : &quot;&quot;;
+ 106      }
+ 107  
+ 108      @Override
+ 109      public void afterTextChanged(Editable s) {
+ 110          if (isTagNameValid()) {
+ 111              mButtonPositive.setEnabled(true);
+ 112              mEditTextLayout.setError(null);
+ 113          } else if (isTagNameInvalidEmpty()) {
+ 114              mButtonPositive.setEnabled(false);
+ 115              mEditTextLayout.setError(getString(R.string.rename_tag_error_empty));
+ 116          } else if (isTagNameInvalidLength()) {
+ 117              mButtonPositive.setEnabled(false);
+ 118              mEditTextLayout.setError(getString(R.string.rename_tag_error_length));
+ 119          } else if (isTagNameInvalidSpaces()) {
+ 120              mButtonPositive.setEnabled(false);
+ 121              mEditTextLayout.setError(getString(R.string.rename_tag_error_spaces));
+ 122          }
+ 123      }
+ 124  
+ 125      @Override
+ 126      public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+ 127      }
+ 128  
+ 129      @Override
+ 130      public void onTextChanged(CharSequence s, int start, int before, int count) {
+ 131      }
+ 132  
+ 133      private boolean isTagNameValid() {
+ 134          return !isTagNameInvalidSpaces() &amp;&amp; !isTagNameInvalidLength() &amp;&amp; !isTagNameInvalidEmpty();
+ 135      }
+ 136  
+ 137      private boolean isTagNameInvalidEmpty() {
+ 138          return mEditTextTag.getText() != null &amp;&amp; mEditTextTag.getText().toString().isEmpty();
+ 139      }
+ 140  
+ 141      private boolean isTagNameInvalidLength() {
+ 142          return mEditTextTag.getText() != null &amp;&amp; !TagUtils.hashTagValid(mEditTextTag.getText().toString());
+ 143      }
+ 144  
+ 145      private boolean isTagNameInvalidSpaces() {
+ 146          return mEditTextTag.getText() != null &amp;&amp; mEditTextTag.getText().toString().contains(&quot; &quot;);
+ 147      }
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 148 -</span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 149 -    private void showDialogErrorRename() {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"><abbr title=" 150 -        final AlertDialog dialog = new AlertDialog.Builder(new ContextThemeWrapper(requireContext(), R.style.Dialog))"> 150 -        final AlertDialog dialog = new AlertDialog.Builder(new ContextThemeWrapper(requireContext(), R.style.Dialo🔵</abbr></span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 151 -            .setTitle(R.string.error)</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 152 -            .setMessage(HtmlCompat.fromHtml(String.format(</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 153 -                getString(R.string.rename_tag_message),</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 154 -                getString(R.string.rename_tag_message_email),</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 155 -                &quot;&lt;span style=\&quot;color:#&quot;,</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"><abbr title=" 156 -                Integer.toHexString(ThemeUtils.getColorFromAttribute(requireContext(), R.attr.colorAccent) &amp; 0xffffff),"> 156 -                Integer.toHexString(ThemeUtils.getColorFromAttribute(requireContext(), R.attr.colorAccent) &amp; 0xfff🔵</abbr></span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 157 -                &quot;\&quot;&gt;&quot;,</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 158 -                &quot;&lt;/span&gt;&quot;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 159 -            )))</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 160 -            .setPositiveButton(android.R.string.ok, null)</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 161 -            .show();</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"><abbr title=" 162 -        ((TextView) Objects.requireNonNull(dialog.findViewById(android.R.id.message))).setMovementMethod(LinkMovementMethod.getInstance());"> 162 -        ((TextView) Objects.requireNonNull(dialog.findViewById(android.R.id.message))).setMovementMethod(LinkMovem🔵</abbr></span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 163 -    }</span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 164  }</pre></td>
+                            <td><pre>   1  package com.automattic.simplenote;
+   2  
+   3  import android.app.Dialog;
+   4  import android.content.Context;
+   5  import android.content.DialogInterface;
+   6  import android.content.DialogInterface.OnShowListener;
+   7  import android.os.Bundle;
+   8  import android.text.Editable;
+   9  import android.text.TextWatcher;
+  10  import android.text.method.LinkMovementMethod;
+  11  import android.util.Log;
+  12  import android.view.ContextThemeWrapper;
+  13  import android.view.LayoutInflater;
+  14  import android.view.View;
+  15  import android.widget.Button;
+  16  import android.widget.TextView;
+  17  
+  18  import androidx.annotation.NonNull;
+  19  import androidx.appcompat.app.AlertDialog;
+  20  import androidx.appcompat.app.AppCompatDialogFragment;
+  21  
+  22  import com.automattic.simplenote.analytics.AnalyticsTracker;
+  23  import com.automattic.simplenote.models.Note;
+  24  import com.automattic.simplenote.models.Tag;
+  25  import com.automattic.simplenote.utils.HtmlCompat;
+
+  26  import com.automattic.simplenote.utils.TagUtils;
+  27  import com.automattic.simplenote.utils.ThemeUtils;
+  28  import com.google.android.material.textfield.TextInputEditText;
+  29  import com.google.android.material.textfield.TextInputLayout;
+  30  import com.simperium.client.Bucket;
+  31  import com.simperium.client.BucketObjectNameInvalid;
+  32  
+  33  import java.util.Objects;
+  34  
+  35  public class TagDialogFragment extends AppCompatDialogFragment implements TextWatcher, OnShowListener {
+  36      public static String DIALOG_TAG = &quot;dialog_tag&quot;;
+  37  
+  38      private AlertDialog mDialogEditTag;
+  39      private Bucket&lt;Note&gt; mBucketNote;
+  40      private Bucket&lt;Tag&gt; mBucketTag;
+  41      private Button mButtonPositive;
+  42      private String mTagOld;
+  43      private Tag mTag;
+  44      private TextInputEditText mEditTextTag;
+  45      private TextInputLayout mEditTextLayout;
+  46  
+  47      public TagDialogFragment(Tag tag, Bucket&lt;Note&gt; bucketNote, Bucket&lt;Tag&gt; bucketTag) {
+  48          mTag = tag;
+  49          mBucketNote = bucketNote;
+  50          mBucketTag = bucketTag;
+  51      }
+  52  
+  53      @NonNull
+  54      @Override
+  55      public Dialog onCreateDialog(Bundle savedInstanceState) {
+  56          Context context = new ContextThemeWrapper(requireContext(), R.style.Dialog);
+  57          AlertDialog.Builder builder = new AlertDialog.Builder(context);
+  58          builder.setTitle(R.string.rename_tag);
+  59          builder.setNegativeButton(R.string.cancel, null);
+  60          builder.setPositiveButton(
+  61              R.string.save,
+  62              new DialogInterface.OnClickListener() {
+  63                  public void onClick(DialogInterface dialog, int whichButton) {
+<abbr title="  64                      String tagNew = mEditTextTag.getText() != null ? mEditTextTag.getText().toString().trim() : &quot;&quot;;">  64                      String tagNew = mEditTextTag.getText() != null ? mEditTextTag.getText().toString().trim() : &quot;&quot;🔵</abbr>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  65 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  66 +                    if (tagNew.equals(mTagOld)) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  67 +                        return;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  68 +                    }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  69 +</span>
+  70                      int index = mTag.hasIndex() ? mTag.getIndex() : mBucketTag.count();
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  71 +                    boolean isRenamingToLexicalTag = TagUtils.hashTag(tagNew).equals(TagUtils.hashTag(mTagOld));</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  72 +                    boolean hasCanonicalTag = TagUtils.hasCanonicalOfLexical(mBucketTag, tagNew);</span>
+  73  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  74 -                    try {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  75 -                        mTag.renameTo(mTagOld, tagNew, index, mBucketNote);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  76 -                        AnalyticsTracker.track(</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  77 -                            AnalyticsTracker.Stat.TAG_EDITOR_ACCESSED,</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  78 -                            AnalyticsTracker.CATEGORY_TAG,</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  79 -                            &quot;tag_alert_edit_box&quot;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  80 -                        );</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  81 -                    } catch (BucketObjectNameInvalid e) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  82 -                        Log.e(Simplenote.TAG, &quot;Unable to rename tag&quot;, e);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  83 -                        showDialogErrorRename();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  84 +                    if (hasCanonicalTag &amp;&amp; !isRenamingToLexicalTag) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  85 +                        String tagCanonical = TagUtils.getCanonicalFromLexical(mBucketTag, tagNew);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  86 +                        showDialogErrorConflict(tagCanonical, mTagOld, tagNew, index);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  87 +                        return;</span>
+
+  88                      }
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  89 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  90 +                    tryToRenameTag(tagNew, index);</span>
+  91                  }
+  92              }
+  93          );
+  94          View view = LayoutInflater.from(context).inflate(R.layout.edit_tag, null);
+  95          mEditTextLayout = view.findViewById(R.id.input_tag_name);
+  96          mEditTextTag = (TextInputEditText) mEditTextLayout.getEditText();
+  97  
+  98          if (mEditTextTag != null) {
+  99              mEditTextTag.addTextChangedListener(this);
+ 100          }
+ 101  
+ 102          builder.setView(view);
+ 103          mDialogEditTag = builder.create();
+ 104          mDialogEditTag.setOnShowListener(this);
+ 105          return mDialogEditTag;
+ 106      }
+ 107  
+ 108      @Override
+ 109      public void onShow(DialogInterface dialog) {
+ 110          mButtonPositive = mDialogEditTag.getButton(DialogInterface.BUTTON_POSITIVE);
+ 111          mEditTextTag.setText(mTag.getName());
+ 112          mTagOld = mEditTextTag.getText() != null ? mEditTextTag.getText().toString() : &quot;&quot;;
+ 113      }
+ 114  
+ 115      @Override
+ 116      public void afterTextChanged(Editable s) {
+ 117          if (isTagNameValid()) {
+ 118              mButtonPositive.setEnabled(true);
+ 119              mEditTextLayout.setError(null);
+ 120          } else if (isTagNameInvalidEmpty()) {
+ 121              mButtonPositive.setEnabled(false);
+ 122              mEditTextLayout.setError(getString(R.string.rename_tag_error_empty));
+ 123          } else if (isTagNameInvalidLength()) {
+ 124              mButtonPositive.setEnabled(false);
+ 125              mEditTextLayout.setError(getString(R.string.rename_tag_error_length));
+ 126          } else if (isTagNameInvalidSpaces()) {
+ 127              mButtonPositive.setEnabled(false);
+ 128              mEditTextLayout.setError(getString(R.string.rename_tag_error_spaces));
+ 129          }
+ 130      }
+ 131  
+ 132      @Override
+ 133      public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+ 134      }
+ 135  
+ 136      @Override
+ 137      public void onTextChanged(CharSequence s, int start, int before, int count) {
+ 138      }
+ 139  
+ 140      private boolean isTagNameValid() {
+ 141          return !isTagNameInvalidSpaces() &amp;&amp; !isTagNameInvalidLength() &amp;&amp; !isTagNameInvalidEmpty();
+ 142      }
+ 143  
+ 144      private boolean isTagNameInvalidEmpty() {
+ 145          return mEditTextTag.getText() != null &amp;&amp; mEditTextTag.getText().toString().isEmpty();
+ 146      }
+ 147  
+ 148      private boolean isTagNameInvalidLength() {
+ 149          return mEditTextTag.getText() != null &amp;&amp; !TagUtils.hashTagValid(mEditTextTag.getText().toString());
+ 150      }
+ 151  
+ 152      private boolean isTagNameInvalidSpaces() {
+ 153          return mEditTextTag.getText() != null &amp;&amp; mEditTextTag.getText().toString().contains(&quot; &quot;);
+ 154      }
+ 155  
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 156 +    private void showDialogErrorConflict(String canonical, String tagOld, final String tagNew, final int index) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 157 +        new AlertDialog.Builder(new ContextThemeWrapper(requireContext(), R.style.Dialog))</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 158 +            .setTitle(R.string.dialog_tag_conflict_title)</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 159 +            .setMessage(getString(R.string.dialog_tag_conflict_message, canonical, tagOld, canonical))</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 160 +            .setNegativeButton(R.string.cancel, null)</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 161 +            .setPositiveButton(</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 162 +                R.string.dialog_tag_conflict_button_positive,</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 163 +                new DialogInterface.OnClickListener() {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 164 +                    @Override</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 165 +                    public void onClick(DialogInterface dialog, int which) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 166 +                        tryToRenameTag(tagNew, index);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 167 +                    }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 168 +                }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 169 +            )</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 170 +            .show();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 171 +    }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 172 +</span>
+ 173      private void showDialogErrorRename() {
+<abbr title=" 174          final AlertDialog dialog = new AlertDialog.Builder(new ContextThemeWrapper(requireContext(), R.style.Dialog))"> 174          final AlertDialog dialog = new AlertDialog.Builder(new ContextThemeWrapper(requireContext(), R.style.Dialo🔵</abbr>
+ 175              .setTitle(R.string.error)
+ 176              .setMessage(HtmlCompat.fromHtml(String.format(
+ 177                  getString(R.string.rename_tag_message),
+ 178                  getString(R.string.rename_tag_message_email),
+ 179                  &quot;&lt;span style=\&quot;color:#&quot;,
+<abbr title=" 180                  Integer.toHexString(ThemeUtils.getColorFromAttribute(requireContext(), R.attr.colorAccent) &amp; 0xffffff),"> 180                  Integer.toHexString(ThemeUtils.getColorFromAttribute(requireContext(), R.attr.colorAccent) &amp; 0xfff🔵</abbr>
+ 181                  &quot;\&quot;&gt;&quot;,
+ 182                  &quot;&lt;/span&gt;&quot;
+ 183              )))
+ 184              .setPositiveButton(android.R.string.ok, null)
+ 185              .show();
+<abbr title=" 186          ((TextView) Objects.requireNonNull(dialog.findViewById(android.R.id.message))).setMovementMethod(LinkMovementMethod.getInstance());"> 186          ((TextView) Objects.requireNonNull(dialog.findViewById(android.R.id.message))).setMovementMethod(LinkMovem🔵</abbr>
+ 187      }
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 188 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 189 +    private void tryToRenameTag(String tagNew, int index) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 190 +        try {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 191 +            mTag.renameTo(mTagOld, tagNew, index, mBucketNote);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 192 +            AnalyticsTracker.track(</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 193 +                AnalyticsTracker.Stat.TAG_EDITOR_ACCESSED,</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 194 +                AnalyticsTracker.CATEGORY_TAG,</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 195 +                &quot;tag_alert_edit_box&quot;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 196 +            );</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 197 +        } catch (BucketObjectNameInvalid e) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 198 +            Log.e(Simplenote.TAG, &quot;Unable to rename tag&quot;, e);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 199 +            showDialogErrorRename();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 200 +        }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 201 +    }</span>
+ 202  }</pre></td>
+                        </tr>
+                    </table>
+                </div>
+              </body>
+            </html>
+            

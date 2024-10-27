@@ -1,0 +1,1431 @@
+<!DOCTYPE html>
+    <html lang="en">
+              <head>
+                <meta charset="utf-8">
+                <title>272</title>
+                    <style>
+                        #top {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        #bottom {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        abbr {
+                          /* Here is the delay */
+                          transition-delay:0s;
+                        }
+                    </style>
+              </head>
+              <body>
+                <span style="height: 4vh">
+                    272
+                    <a href="271.html">prev</a>
+                    <a href="273.html">next</a>
+                    <a href="272_chunks.html">chunks</a>
+                    <a href="index.html">index</a>
+                    DTStack/flinkStreamSQL_0cfc63701619ac9b451fb7c9bb7297277ef510ed_core/src/main/java/com/dtstack/flink/sql/table/AbstractTableInfo.java
+                    <textarea rows=1 onclick='navigator.clipboard.writeText(this.value)'>cd C:\studies\se\mega\git-analyzer-plus\notebooks\debug
+del /Q *
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;0cfc63701619ac9b451fb7c9bb7297277ef510ed:core/src/main/java/com/dtstack/flink/sql/table/AbstractTableInfo.java&quot; &gt; committed.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;0cfc63701619ac9b451fb7c9bb7297277ef510ed^1:core/src/main/java/com/dtstack/flink/sql/table/AbstractTableInfo.java&quot; &gt; ours.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;0cfc63701619ac9b451fb7c9bb7297277ef510ed^2:core/src/main/java/com/dtstack/flink/sql/table/AbstractTableInfo.java&quot; &gt; theirs.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;7c2555f3a66c08dfdc593e0a812b12393dabcd0d:core/src/main/java/com/dtstack/flink/sql/table/AbstractTableInfo.java&quot; &gt; base.java
+copy ours.java 1ours.java
+copy ours.java 2ours.java
+copy theirs.java 1theirs.java
+copy theirs.java 2theirs.java
+copy base.java 1base.java
+copy base.java 2base.java
+&quot;C:\Program Files\Java\jdk1.8.0_241\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\jFSTMerge\build\libs\jFSTMerge-all.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\jfstmerge.java --show-base
+&quot;C:\Program Files\Eclipse Adoptium\jdk-17.0.11.9-hotspot\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\spork\target\spork-0.5.0-SNAPSHOT.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\spork.java
+del /Q 1*.java
+del /Q 2*.java
+del /Q jfstmerge.java.merge
+</textarea>
+                    {strict: [[b], [j]], subset: [[bj]]}
+                </span>
+                <div id="top">
+
+                    <table>
+                        <tr>
+                            <th>line based (standard git)</th>
+                            <th>jfstmerge</th>
+                            <th>spork</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1 /*
+   2  * Licensed to the Apache Software Foundation (ASF) under one
+   3  * or more contributor license agreements.  See the NOTICE file
+   4  * distributed with this work for additional information
+   5  * regarding copyright ownership.  The ASF licenses this file
+   6  * to you under the Apache License, Version 2.0 (the
+   7  * &quot;License&quot;); you may not use this file except in compliance
+   8  * with the License.  You may obtain a copy of the License at
+   9  *
+  10  *     http://www.apache.org/licenses/LICENSE-2.0
+  11  *
+  12  * Unless required by applicable law or agreed to in writing, software
+  13  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15  * See the License for the specific language governing permissions and
+  16  * limitations under the License.
+  17  */
+  18 
+  19 package com.dtstack.flink.sql.table;
+  20 
+  21 import com.dtstack.flink.sql.dirtyManager.manager.DirtyKeys;
+  22 import com.dtstack.flink.sql.outputformat.AbstractDtRichOutputFormat;
+  23 import com.dtstack.flink.sql.side.AbstractSideTableInfo;
+  24 import com.google.common.collect.Lists;
+  25 import com.google.common.collect.Maps;
+  26 
+  27 import java.io.Serializable;
+  28 import java.util.List;
+  29 import java.util.Map;
+  30 import java.util.Objects;
+  31 
+  32 /**
+  33  * Reason:
+  34  * Date: 2018/6/22
+  35  * Company: www.dtstack.com
+  36  *
+  37  * @author xuchao
+  38  */
+  39 
+  40 public abstract class AbstractTableInfo implements Serializable {
+  41 
+  42     public static final String PARALLELISM_KEY = &quot;parallelism&quot;;
+  43     public static final String ERROR_LIMIT = &quot;errorLimit&quot;;
+  44     private final List&lt;String&gt; fieldList = Lists.newArrayList();
+  45     private final List&lt;String&gt; fieldTypeList = Lists.newArrayList();
+  46     private final List&lt;Class&gt; fieldClassList = Lists.newArrayList();
+  47     private final List&lt;FieldExtraInfo&gt; fieldExtraInfoList = Lists.newArrayList();
+  48     private String name;
+  49     private String type;
+  50     private String[] fields;
+  51     private String[] fieldTypes;
+  52     private Class&lt;?&gt;[] fieldClasses;
+  53     /**
+  54      * key:别名, value: realField
+  55      */
+  56     private Map&lt;String, String&gt; physicalFields = Maps.newLinkedHashMap();
+  57     private List&lt;String&gt; primaryKeys;
+  58 
+  59     private Integer parallelism = -1;
+  60     private Map&lt;String, String&gt; checkProperties;
+  61 
+  62     /**
+  63      * 构建脏数据插件的相关信息
+  64      */
+  65     private Map&lt;String, Object&gt; dirtyProperties;
+  66 
+  67     /**
+  68      * error data limit. Task will failed once {@link AbstractDtRichOutputFormat#outDirtyRecords}
+  69      * count over limit. Default 1000L;
+  70      */
+  71 &lt;&lt;&lt;&lt;&lt;&lt;&lt; GitAnalyzerPlus_ours
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  72     private Long errorLimit = Long.MAX_VALUE;</span>
+  73 ||||||| GitAnalyzerPlus_base
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  74     private Long errorLimit = 0L;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  75 </span>
+  76 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  77     // TODO: 暂时默认值设置为10000，后面排期支持在产品上设置</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  78     private Long errorLimit = 10000L;</span>
+  79 &gt;&gt;&gt;&gt;&gt;&gt;&gt; GitAnalyzerPlus_theirs
+  80 
+  81     public String[] getFieldTypes() {
+  82         return fieldTypes;
+  83     }
+  84 
+  85     public void setFieldTypes(String[] fieldTypes) {
+  86         this.fieldTypes = fieldTypes;
+  87     }
+  88 
+  89     public abstract boolean check();
+  90 
+  91     public String getType() {
+  92         return type;
+  93     }
+  94 
+  95     public void setType(String type) {
+  96         this.type = type;
+  97     }
+  98 
+  99     public String[] getFields() {
+ 100         return fields;
+ 101     }
+ 102 
+ 103     public void setFields(String[] fields) {
+ 104         this.fields = fields;
+ 105     }
+ 106 
+ 107     public Class&lt;?&gt;[] getFieldClasses() {
+ 108         return fieldClasses;
+ 109     }
+ 110 
+ 111     public void setFieldClasses(Class&lt;?&gt;[] fieldClasses) {
+ 112         this.fieldClasses = fieldClasses;
+ 113     }
+ 114 
+ 115     public List&lt;String&gt; getPrimaryKeys() {
+ 116         if (this instanceof AbstractSideTableInfo &amp;&amp;
+ 117             Objects.isNull(primaryKeys)) {
+ 118             throw new IllegalArgumentException(&quot;Side table must contain [primary key]!&quot;);
+ 119         }
+ 120         return primaryKeys;
+ 121     }
+ 122 
+ 123     public void setPrimaryKeys(List&lt;String&gt; primaryKeys) {
+ 124         this.primaryKeys = primaryKeys;
+ 125     }
+ 126 
+ 127     public String getName() {
+ 128         return name;
+ 129     }
+ 130 
+ 131     public void setName(String name) {
+ 132         this.name = name;
+ 133     }
+ 134 
+ 135     public Integer getParallelism() {
+ 136         return parallelism;
+ 137     }
+ 138 
+ 139     public void setParallelism(Integer parallelism) {
+ 140         if (parallelism == null) {
+ 141             return;
+ 142         }
+ 143 
+ 144         if (parallelism &lt;= 0) {
+ 145             throw new RuntimeException(&quot;Abnormal parameter settings: parallelism &gt; 0&quot;);
+ 146         }
+ 147 
+ 148         this.parallelism = parallelism;
+ 149     }
+ 150 
+ 151     public void addField(String fieldName) {
+ 152         if (fieldList.contains(fieldName)) {
+ 153             throw new RuntimeException(&quot;redundancy field name &quot; + fieldName + &quot; in table &quot; + getName());
+ 154         }
+ 155 
+ 156         fieldList.add(fieldName);
+ 157     }
+ 158 
+ 159     public void addPhysicalMappings(String aliasName, String physicalFieldName) {
+ 160         physicalFields.put(aliasName, physicalFieldName);
+ 161     }
+ 162 
+ 163     public void addFieldClass(Class fieldClass) {
+ 164         fieldClassList.add(fieldClass);
+ 165     }
+ 166 
+ 167     public void addFieldType(String fieldType) {
+ 168         fieldTypeList.add(fieldType);
+ 169     }
+ 170 
+ 171     public void addFieldExtraInfo(FieldExtraInfo extraInfo) {
+ 172         fieldExtraInfoList.add(extraInfo);
+ 173     }
+ 174 
+ 175     public List&lt;String&gt; getFieldList() {
+ 176         return fieldList;
+ 177     }
+ 178 
+ 179     public List&lt;String&gt; getFieldTypeList() {
+ 180         return fieldTypeList;
+ 181     }
+ 182 
+ 183     public List&lt;Class&gt; getFieldClassList() {
+ 184         return fieldClassList;
+ 185     }
+ 186 
+ 187     public Map&lt;String, String&gt; getPhysicalFields() {
+ 188         return physicalFields;
+ 189     }
+ 190 
+ 191     public void setPhysicalFields(Map&lt;String, String&gt; physicalFields) {
+ 192         this.physicalFields = physicalFields;
+ 193     }
+ 194 
+ 195     public List&lt;FieldExtraInfo&gt; getFieldExtraInfoList() {
+ 196         return fieldExtraInfoList;
+ 197     }
+ 198 
+ 199     public Map&lt;String, String&gt; getCheckProperties() {
+ 200         return checkProperties;
+ 201     }
+ 202 
+ 203     public void setCheckProperties() {
+ 204         this.checkProperties = buildCheckProperties();
+ 205     }
+ 206 
+ 207     public Map&lt;String, String&gt; buildCheckProperties() {
+ 208         return Maps.newHashMap();
+ 209     }
+ 210 
+ 211     public Map&lt;String, Object&gt; getDirtyProperties() {
+ 212         dirtyProperties.put(DirtyKeys.TABLE_NAME, this.name);
+ 213         return dirtyProperties;
+ 214     }
+ 215 
+ 216     public void setDirtyProperties(Map&lt;String, Object&gt; dirtyProperties) {
+ 217         this.dirtyProperties = dirtyProperties;
+ 218     }
+ 219 
+ 220     public Long getErrorLimit() {
+ 221         return errorLimit;
+ 222     }
+ 223 
+ 224     public void setErrorLimit(Long errorLimit) {
+ 225         this.errorLimit = errorLimit;
+ 226     }
+ 227 
+ 228     public void finish() {
+ 229         this.fields = fieldList.toArray(new String[0]);
+ 230         this.fieldClasses = fieldClassList.toArray(new Class[0]);
+ 231         this.fieldTypes = fieldTypeList.toArray(new String[0]);
+ 232     }
+ 233 
+ 234     /**
+ 235      * field extra info，used to store `not null` `default 0`...，
+ 236      * &lt;p&gt;
+ 237      * now, only support not null
+ 238      */
+ 239     public static class FieldExtraInfo implements Serializable {
+ 240 
+ 241         /**
+ 242          * default false：allow field is null
+ 243          */
+ 244         boolean notNull = false;
+ 245         /**
+ 246          * field length,eg.char(4)
+ 247          */
+ 248         int length;
+ 249 
+ 250         public int getLength() {
+ 251             return length;
+ 252         }
+ 253 
+ 254         public void setLength(int length) {
+ 255             this.length = length;
+ 256         }
+ 257 
+ 258         public boolean getNotNull() {
+ 259             return notNull;
+ 260         }
+ 261 
+ 262         public void setNotNull(boolean notNull) {
+ 263             this.notNull = notNull;
+ 264         }
+ 265 
+ 266         @Override
+ 267         public String toString() {
+ 268             return &quot;FieldExtraInfo{&quot; +
+ 269                     &quot;notNull=&quot; + notNull +
+ 270                     &quot;, length=&quot; + length +
+ 271                     &#x27;}&#x27;;
+ 272         }
+ 273     }
+ 274 }</pre></td>
+                            <td><pre>   1 /*
+   2  * Licensed to the Apache Software Foundation (ASF) under one
+   3  * or more contributor license agreements.  See the NOTICE file
+   4  * distributed with this work for additional information
+   5  * regarding copyright ownership.  The ASF licenses this file
+   6  * to you under the Apache License, Version 2.0 (the
+   7  * &quot;License&quot;); you may not use this file except in compliance
+   8  * with the License.  You may obtain a copy of the License at
+   9  *
+  10  *     http://www.apache.org/licenses/LICENSE-2.0
+  11  *
+  12  * Unless required by applicable law or agreed to in writing, software
+  13  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15  * See the License for the specific language governing permissions and
+  16  * limitations under the License.
+  17  */
+  18 
+  19 package com.dtstack.flink.sql.table;
+  20 
+  21 import com.dtstack.flink.sql.dirtyManager.manager.DirtyKeys;
+  22 import com.dtstack.flink.sql.outputformat.AbstractDtRichOutputFormat;
+  23 import com.dtstack.flink.sql.side.AbstractSideTableInfo;
+  24 import com.google.common.collect.Lists;
+  25 import com.google.common.collect.Maps;
+  26 
+  27 import java.io.Serializable;
+  28 import java.util.List;
+  29 import java.util.Map;
+  30 import java.util.Objects;
+  31 
+  32 /**
+  33  * Reason:
+  34  * Date: 2018/6/22
+  35  * Company: www.dtstack.com
+  36  *
+  37  * @author xuchao
+  38  */
+  39 
+  40 public abstract class AbstractTableInfo implements Serializable {
+  41 
+  42     public static final String PARALLELISM_KEY = &quot;parallelism&quot;;
+  43     public static final String ERROR_LIMIT = &quot;errorLimit&quot;;
+  44     private final List&lt;String&gt; fieldList = Lists.newArrayList();
+  45     private final List&lt;String&gt; fieldTypeList = Lists.newArrayList();
+  46     private final List&lt;Class&gt; fieldClassList = Lists.newArrayList();
+  47     private final List&lt;FieldExtraInfo&gt; fieldExtraInfoList = Lists.newArrayList();
+  48     private String name;
+  49     private String type;
+  50     private String[] fields;
+  51     private String[] fieldTypes;
+  52     private Class&lt;?&gt;[] fieldClasses;
+  53     /**
+  54      * key:别名, value: realField
+  55      */
+  56     private Map&lt;String, String&gt; physicalFields = Maps.newLinkedHashMap();
+  57     private List&lt;String&gt; primaryKeys;
+  58 
+  59     private Integer parallelism = -1;
+  60     private Map&lt;String, String&gt; checkProperties;
+  61 
+  62     /**
+  63      * 构建脏数据插件的相关信息
+  64      */
+  65     private Map&lt;String, Object&gt; dirtyProperties;
+  66 
+  67     /**
+  68      * error data limit. Task will failed once {@link AbstractDtRichOutputFormat#outDirtyRecords}
+  69      * count over limit. Default 1000L;
+  70      */
+  71     // TODO: 暂时默认值设置为10000，后面排期支持在产品上设置
+  72 &lt;&lt;&lt;&lt;&lt;&lt;&lt; MINE
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  73 private Long errorLimit = Long.MAX_VALUE;</span>
+  74 ||||||| BASE
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  75 private Long errorLimit = 0L;</span>
+  76 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  77 private Long errorLimit = 10000L;</span>
+  78 &gt;&gt;&gt;&gt;&gt;&gt;&gt; YOURS
+  79 
+  80 
+  81     public String[] getFieldTypes() {
+  82         return fieldTypes;
+  83     }
+  84 
+  85     public void setFieldTypes(String[] fieldTypes) {
+  86         this.fieldTypes = fieldTypes;
+  87     }
+  88 
+  89     public abstract boolean check();
+  90 
+  91     public String getType() {
+  92         return type;
+  93     }
+  94 
+  95     public void setType(String type) {
+  96         this.type = type;
+  97     }
+  98 
+  99     public String[] getFields() {
+ 100         return fields;
+ 101     }
+ 102 
+ 103     public void setFields(String[] fields) {
+ 104         this.fields = fields;
+ 105     }
+ 106 
+ 107     public Class&lt;?&gt;[] getFieldClasses() {
+ 108         return fieldClasses;
+ 109     }
+ 110 
+ 111     public void setFieldClasses(Class&lt;?&gt;[] fieldClasses) {
+ 112         this.fieldClasses = fieldClasses;
+ 113     }
+ 114 
+ 115     public List&lt;String&gt; getPrimaryKeys() {
+ 116         if (this instanceof AbstractSideTableInfo &amp;&amp;
+ 117             Objects.isNull(primaryKeys)) {
+ 118             throw new IllegalArgumentException(&quot;Side table must contain [primary key]!&quot;);
+ 119         }
+ 120         return primaryKeys;
+ 121     }
+ 122 
+ 123     public void setPrimaryKeys(List&lt;String&gt; primaryKeys) {
+ 124         this.primaryKeys = primaryKeys;
+ 125     }
+ 126 
+ 127     public String getName() {
+ 128         return name;
+ 129     }
+ 130 
+ 131     public void setName(String name) {
+ 132         this.name = name;
+ 133     }
+ 134 
+ 135     public Integer getParallelism() {
+ 136         return parallelism;
+ 137     }
+ 138 
+ 139     public void setParallelism(Integer parallelism) {
+ 140         if (parallelism == null) {
+ 141             return;
+ 142         }
+ 143 
+ 144         if (parallelism &lt;= 0) {
+ 145             throw new RuntimeException(&quot;Abnormal parameter settings: parallelism &gt; 0&quot;);
+ 146         }
+ 147 
+ 148         this.parallelism = parallelism;
+ 149     }
+ 150 
+ 151     public void addField(String fieldName) {
+ 152         if (fieldList.contains(fieldName)) {
+ 153             throw new RuntimeException(&quot;redundancy field name &quot; + fieldName + &quot; in table &quot; + getName());
+ 154         }
+ 155 
+ 156         fieldList.add(fieldName);
+ 157     }
+ 158 
+ 159     public void addPhysicalMappings(String aliasName, String physicalFieldName) {
+ 160         physicalFields.put(aliasName, physicalFieldName);
+ 161     }
+ 162 
+ 163     public void addFieldClass(Class fieldClass) {
+ 164         fieldClassList.add(fieldClass);
+ 165     }
+ 166 
+ 167     public void addFieldType(String fieldType) {
+ 168         fieldTypeList.add(fieldType);
+ 169     }
+ 170 
+ 171     public void addFieldExtraInfo(FieldExtraInfo extraInfo) {
+ 172         fieldExtraInfoList.add(extraInfo);
+ 173     }
+ 174 
+ 175     public List&lt;String&gt; getFieldList() {
+ 176         return fieldList;
+ 177     }
+ 178 
+ 179     public List&lt;String&gt; getFieldTypeList() {
+ 180         return fieldTypeList;
+ 181     }
+ 182 
+ 183     public List&lt;Class&gt; getFieldClassList() {
+ 184         return fieldClassList;
+ 185     }
+ 186 
+ 187     public Map&lt;String, String&gt; getPhysicalFields() {
+ 188         return physicalFields;
+ 189     }
+ 190 
+ 191     public void setPhysicalFields(Map&lt;String, String&gt; physicalFields) {
+ 192         this.physicalFields = physicalFields;
+ 193     }
+ 194 
+ 195     public List&lt;FieldExtraInfo&gt; getFieldExtraInfoList() {
+ 196         return fieldExtraInfoList;
+ 197     }
+ 198 
+ 199     public Map&lt;String, String&gt; getCheckProperties() {
+ 200         return checkProperties;
+ 201     }
+ 202 
+ 203     public void setCheckProperties() {
+ 204         this.checkProperties = buildCheckProperties();
+ 205     }
+ 206 
+ 207     public Map&lt;String, String&gt; buildCheckProperties() {
+ 208         return Maps.newHashMap();
+ 209     }
+ 210 
+ 211     public Map&lt;String, Object&gt; getDirtyProperties() {
+ 212         dirtyProperties.put(DirtyKeys.TABLE_NAME, this.name);
+ 213         return dirtyProperties;
+ 214     }
+ 215 
+ 216     public void setDirtyProperties(Map&lt;String, Object&gt; dirtyProperties) {
+ 217         this.dirtyProperties = dirtyProperties;
+ 218     }
+ 219 
+ 220     public Long getErrorLimit() {
+ 221         return errorLimit;
+ 222     }
+ 223 
+ 224     public void setErrorLimit(Long errorLimit) {
+ 225         this.errorLimit = errorLimit;
+ 226     }
+ 227 
+ 228     public void finish() {
+ 229         this.fields = fieldList.toArray(new String[0]);
+ 230         this.fieldClasses = fieldClassList.toArray(new Class[0]);
+ 231         this.fieldTypes = fieldTypeList.toArray(new String[0]);
+ 232     }
+ 233 
+ 234     /**
+ 235      * field extra info，used to store `not null` `default 0`...，
+ 236      * &lt;p&gt;
+ 237      * now, only support not null
+ 238      */
+ 239     public static class FieldExtraInfo implements Serializable {
+ 240 
+ 241         /**
+ 242          * default false：allow field is null
+ 243          */
+ 244         boolean notNull = false;
+ 245         /**
+ 246          * field length,eg.char(4)
+ 247          */
+ 248         int length;
+ 249 
+ 250         public int getLength() {
+ 251             return length;
+ 252         }
+ 253 
+ 254         public void setLength(int length) {
+ 255             this.length = length;
+ 256         }
+ 257 
+ 258         public boolean getNotNull() {
+ 259             return notNull;
+ 260         }
+ 261 
+ 262         public void setNotNull(boolean notNull) {
+ 263             this.notNull = notNull;
+ 264         }
+ 265 
+ 266         @Override
+ 267         public String toString() {
+ 268             return &quot;FieldExtraInfo{&quot; +
+ 269                     &quot;notNull=&quot; + notNull +
+ 270                     &quot;, length=&quot; + length +
+ 271                     &#x27;}&#x27;;
+ 272         }
+ 273     }
+ 274 }</pre></td>
+                            <td><pre>   1 /*
+   2  * Licensed to the Apache Software Foundation (ASF) under one
+   3  * or more contributor license agreements.  See the NOTICE file
+   4  * distributed with this work for additional information
+   5  * regarding copyright ownership.  The ASF licenses this file
+   6  * to you under the Apache License, Version 2.0 (the
+   7  * &quot;License&quot;); you may not use this file except in compliance
+   8  * with the License.  You may obtain a copy of the License at
+   9  *
+  10  *     http://www.apache.org/licenses/LICENSE-2.0
+  11  *
+  12  * Unless required by applicable law or agreed to in writing, software
+  13  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15  * See the License for the specific language governing permissions and
+  16  * limitations under the License.
+  17  */
+  18 package com.dtstack.flink.sql.table;
+  19 
+  20 import com.dtstack.flink.sql.dirtyManager.manager.DirtyKeys;
+  21 import com.dtstack.flink.sql.outputformat.AbstractDtRichOutputFormat;
+  22 import com.dtstack.flink.sql.side.AbstractSideTableInfo;
+  23 import com.google.common.collect.Lists;
+  24 import com.google.common.collect.Maps;
+  25 import java.io.Serializable;
+  26 import java.util.List;
+  27 import java.util.Map;
+  28 import java.util.Objects;
+  29 
+  30 
+  31 /**
+  32  * Reason:
+  33  * Date: 2018/6/22
+  34  * Company: www.dtstack.com
+  35  *
+  36  * @author xuchao
+  37  */
+  38 public abstract class AbstractTableInfo implements Serializable {
+  39     public static final String PARALLELISM_KEY = &quot;parallelism&quot;;
+  40 
+  41     public static final String ERROR_LIMIT = &quot;errorLimit&quot;;
+  42 
+  43     private final List&lt;String&gt; fieldList = Lists.newArrayList();
+  44 
+  45     private final List&lt;String&gt; fieldTypeList = Lists.newArrayList();
+  46 
+  47     private final List&lt;Class&gt; fieldClassList = Lists.newArrayList();
+  48 
+  49     private final List&lt;FieldExtraInfo&gt; fieldExtraInfoList = Lists.newArrayList();
+  50 
+  51     private String name;
+  52 
+  53     private String type;
+  54 
+  55     private String[] fields;
+  56 
+  57     private String[] fieldTypes;
+  58 
+  59     private Class&lt;?&gt;[] fieldClasses;
+  60 
+  61     /**
+  62      * key:别名, value: realField
+  63      */
+  64     private Map&lt;String, String&gt; physicalFields = Maps.newLinkedHashMap();
+  65 
+  66     private List&lt;String&gt; primaryKeys;
+  67 
+  68     private Integer parallelism = -1;
+  69 
+  70     private Map&lt;String, String&gt; checkProperties;
+  71 
+  72     /**
+  73      * 构建脏数据插件的相关信息
+  74      */
+  75     private Map&lt;String, Object&gt; dirtyProperties;
+  76 
+  77     /**
+  78      * error data limit. Task will failed once {@link AbstractDtRichOutputFormat#outDirtyRecords}
+  79      * count over limit. Default 1000L;
+  80      */
+  81     // TODO: 暂时默认值设置为10000，后面排期支持在产品上设置
+  82     private Long errorLimit = Long.MAX_VALUE;
+  83 
+  84     public String[] getFieldTypes() {
+  85         return fieldTypes;
+  86     }
+  87 
+  88     public void setFieldTypes(String[] fieldTypes) {
+  89         this.fieldTypes = fieldTypes;
+  90     }
+  91 
+  92     public abstract boolean check();
+  93 
+  94     public String getType() {
+  95         return type;
+  96     }
+  97 
+  98     public void setType(String type) {
+  99         this.type = type;
+ 100     }
+ 101 
+ 102     public String[] getFields() {
+ 103         return fields;
+ 104     }
+ 105 
+ 106     public void setFields(String[] fields) {
+ 107         this.fields = fields;
+ 108     }
+ 109 
+ 110     public Class&lt;?&gt;[] getFieldClasses() {
+ 111         return fieldClasses;
+ 112     }
+ 113 
+ 114     public void setFieldClasses(Class&lt;?&gt;[] fieldClasses) {
+ 115         this.fieldClasses = fieldClasses;
+ 116     }
+ 117 
+ 118     public List&lt;String&gt; getPrimaryKeys() {
+ 119         if (this instanceof AbstractSideTableInfo &amp;&amp;
+ 120             Objects.isNull(primaryKeys)) {
+ 121             throw new IllegalArgumentException(&quot;Side table must contain [primary key]!&quot;);
+ 122         }
+ 123         return primaryKeys;
+ 124     }
+ 125 
+ 126     public void setPrimaryKeys(List&lt;String&gt; primaryKeys) {
+ 127         this.primaryKeys = primaryKeys;
+ 128     }
+ 129 
+ 130     public String getName() {
+ 131         return name;
+ 132     }
+ 133 
+ 134     public void setName(String name) {
+ 135         this.name = name;
+ 136     }
+ 137 
+ 138     public Integer getParallelism() {
+ 139         return parallelism;
+ 140     }
+ 141 
+ 142     public void setParallelism(Integer parallelism) {
+ 143         if (parallelism == null) {
+ 144             return;
+ 145         }
+ 146 
+ 147         if (parallelism &lt;= 0) {
+ 148             throw new RuntimeException(&quot;Abnormal parameter settings: parallelism &gt; 0&quot;);
+ 149         }
+ 150 
+ 151         this.parallelism = parallelism;
+ 152     }
+ 153 
+ 154     public void addField(String fieldName) {
+ 155         if (fieldList.contains(fieldName)) {
+ 156             throw new RuntimeException(&quot;redundancy field name &quot; + fieldName + &quot; in table &quot; + getName());
+ 157         }
+ 158 
+ 159         fieldList.add(fieldName);
+ 160     }
+ 161 
+ 162     public void addPhysicalMappings(String aliasName, String physicalFieldName) {
+ 163         physicalFields.put(aliasName, physicalFieldName);
+ 164     }
+ 165 
+ 166     public void addFieldClass(Class fieldClass) {
+ 167         fieldClassList.add(fieldClass);
+ 168     }
+ 169 
+ 170     public void addFieldType(String fieldType) {
+ 171         fieldTypeList.add(fieldType);
+ 172     }
+ 173 
+ 174     public void addFieldExtraInfo(FieldExtraInfo extraInfo) {
+ 175         fieldExtraInfoList.add(extraInfo);
+ 176     }
+ 177 
+ 178     public List&lt;String&gt; getFieldList() {
+ 179         return fieldList;
+ 180     }
+ 181 
+ 182     public List&lt;String&gt; getFieldTypeList() {
+ 183         return fieldTypeList;
+ 184     }
+ 185 
+ 186     public List&lt;Class&gt; getFieldClassList() {
+ 187         return fieldClassList;
+ 188     }
+ 189 
+ 190     public Map&lt;String, String&gt; getPhysicalFields() {
+ 191         return physicalFields;
+ 192     }
+ 193 
+ 194     public void setPhysicalFields(Map&lt;String, String&gt; physicalFields) {
+ 195         this.physicalFields = physicalFields;
+ 196     }
+ 197 
+ 198     public List&lt;FieldExtraInfo&gt; getFieldExtraInfoList() {
+ 199         return fieldExtraInfoList;
+ 200     }
+ 201 
+ 202     public Map&lt;String, String&gt; getCheckProperties() {
+ 203         return checkProperties;
+ 204     }
+ 205 
+ 206     public void setCheckProperties() {
+ 207         this.checkProperties = buildCheckProperties();
+ 208     }
+ 209 
+ 210     public Map&lt;String, String&gt; buildCheckProperties() {
+ 211         return Maps.newHashMap();
+ 212     }
+ 213 
+ 214     public Map&lt;String, Object&gt; getDirtyProperties() {
+ 215         dirtyProperties.put(DirtyKeys.TABLE_NAME, this.name);
+ 216         return dirtyProperties;
+ 217     }
+ 218 
+ 219     public void setDirtyProperties(Map&lt;String, Object&gt; dirtyProperties) {
+ 220         this.dirtyProperties = dirtyProperties;
+ 221     }
+ 222 
+ 223     public Long getErrorLimit() {
+ 224         return errorLimit;
+ 225     }
+ 226 
+ 227     public void setErrorLimit(Long errorLimit) {
+ 228         this.errorLimit = errorLimit;
+ 229     }
+ 230 
+ 231     public void finish() {
+ 232         this.fields = fieldList.toArray(new String[0]);
+ 233         this.fieldClasses = fieldClassList.toArray(new Class[0]);
+ 234         this.fieldTypes = fieldTypeList.toArray(new String[0]);
+ 235     }
+ 236 
+ 237     /**
+ 238      * field extra info，used to store `not null` `default 0`...，
+ 239      * &lt;p&gt;
+ 240      * now, only support not null
+ 241      */
+ 242     public static class FieldExtraInfo implements Serializable {
+ 243         /**
+ 244          * default false：allow field is null
+ 245          */
+ 246         boolean notNull = false;
+ 247 
+ 248         /**
+ 249          * field length,eg.char(4)
+ 250          */
+ 251         int length;
+ 252 
+ 253         public int getLength() {
+ 254             return length;
+ 255         }
+ 256 
+ 257         public void setLength(int length) {
+ 258             this.length = length;
+ 259         }
+ 260 
+ 261         public boolean getNotNull() {
+ 262             return notNull;
+ 263         }
+ 264 
+ 265         public void setNotNull(boolean notNull) {
+ 266             this.notNull = notNull;
+ 267         }
+ 268 
+ 269         @Override
+ 270         public String toString() {
+ 271             return ((((&quot;FieldExtraInfo{&quot; + &quot;notNull=&quot;) + notNull) + &quot;, length=&quot;) + length) + &#x27;}&#x27;;
+ 272         }
+ 273     }
+ 274 }</pre></td>
+                        </tr>
+                    </table>
+                </div>
+                <div id="bottom">
+                    <table style="margin:auto">
+                        <tr>
+                            <th>ours vs. base</th>
+                            <th>theirs vs. base</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1  /*
+   2   * Licensed to the Apache Software Foundation (ASF) under one
+   3   * or more contributor license agreements.  See the NOTICE file
+   4   * distributed with this work for additional information
+   5   * regarding copyright ownership.  The ASF licenses this file
+   6   * to you under the Apache License, Version 2.0 (the
+   7   * &quot;License&quot;); you may not use this file except in compliance
+   8   * with the License.  You may obtain a copy of the License at
+   9   *
+  10   *     http://www.apache.org/licenses/LICENSE-2.0
+  11   *
+  12   * Unless required by applicable law or agreed to in writing, software
+  13   * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15   * See the License for the specific language governing permissions and
+  16   * limitations under the License.
+  17   */
+  18  
+  19  package com.dtstack.flink.sql.table;
+  20  
+  21  import com.dtstack.flink.sql.dirtyManager.manager.DirtyKeys;
+  22  import com.dtstack.flink.sql.outputformat.AbstractDtRichOutputFormat;
+  23  import com.dtstack.flink.sql.side.AbstractSideTableInfo;
+  24  import com.google.common.collect.Lists;
+  25  import com.google.common.collect.Maps;
+  26  
+  27  import java.io.Serializable;
+  28  import java.util.List;
+  29  import java.util.Map;
+  30  import java.util.Objects;
+  31  
+  32  /**
+  33   * Reason:
+  34   * Date: 2018/6/22
+  35   * Company: www.dtstack.com
+  36   *
+  37   * @author xuchao
+  38   */
+  39  
+  40  public abstract class AbstractTableInfo implements Serializable {
+  41  
+  42      public static final String PARALLELISM_KEY = &quot;parallelism&quot;;
+  43      public static final String ERROR_LIMIT = &quot;errorLimit&quot;;
+  44      private final List&lt;String&gt; fieldList = Lists.newArrayList();
+  45      private final List&lt;String&gt; fieldTypeList = Lists.newArrayList();
+  46      private final List&lt;Class&gt; fieldClassList = Lists.newArrayList();
+  47      private final List&lt;FieldExtraInfo&gt; fieldExtraInfoList = Lists.newArrayList();
+  48      private String name;
+  49      private String type;
+  50      private String[] fields;
+  51      private String[] fieldTypes;
+  52      private Class&lt;?&gt;[] fieldClasses;
+  53      /**
+  54       * key:别名, value: realField
+  55       */
+  56      private Map&lt;String, String&gt; physicalFields = Maps.newLinkedHashMap();
+  57      private List&lt;String&gt; primaryKeys;
+  58  
+  59      private Integer parallelism = -1;
+  60      private Map&lt;String, String&gt; checkProperties;
+  61  
+  62      /**
+  63       * 构建脏数据插件的相关信息
+  64       */
+  65      private Map&lt;String, Object&gt; dirtyProperties;
+  66  
+  67      /**
+  68       * error data limit. Task will failed once {@link AbstractDtRichOutputFormat#outDirtyRecords}
+  69       * count over limit. Default 1000L;
+  70       */
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  71 -    private Long errorLimit = 0L;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  72 +    private Long errorLimit = Long.MAX_VALUE;</span>
+
+  73  
+  74      public String[] getFieldTypes() {
+  75          return fieldTypes;
+  76      }
+  77  
+  78      public void setFieldTypes(String[] fieldTypes) {
+  79          this.fieldTypes = fieldTypes;
+  80      }
+  81  
+  82      public abstract boolean check();
+  83  
+  84      public String getType() {
+  85          return type;
+  86      }
+  87  
+  88      public void setType(String type) {
+  89          this.type = type;
+  90      }
+  91  
+  92      public String[] getFields() {
+  93          return fields;
+  94      }
+  95  
+  96      public void setFields(String[] fields) {
+  97          this.fields = fields;
+  98      }
+  99  
+ 100      public Class&lt;?&gt;[] getFieldClasses() {
+ 101          return fieldClasses;
+ 102      }
+ 103  
+ 104      public void setFieldClasses(Class&lt;?&gt;[] fieldClasses) {
+ 105          this.fieldClasses = fieldClasses;
+ 106      }
+ 107  
+ 108      public List&lt;String&gt; getPrimaryKeys() {
+ 109          if (this instanceof AbstractSideTableInfo &amp;&amp;
+ 110              Objects.isNull(primaryKeys)) {
+ 111              throw new IllegalArgumentException(&quot;Side table must contain [primary key]!&quot;);
+ 112          }
+ 113          return primaryKeys;
+ 114      }
+ 115  
+ 116      public void setPrimaryKeys(List&lt;String&gt; primaryKeys) {
+ 117          this.primaryKeys = primaryKeys;
+ 118      }
+ 119  
+ 120      public String getName() {
+ 121          return name;
+ 122      }
+ 123  
+ 124      public void setName(String name) {
+ 125          this.name = name;
+ 126      }
+ 127  
+ 128      public Integer getParallelism() {
+ 129          return parallelism;
+ 130      }
+ 131  
+ 132      public void setParallelism(Integer parallelism) {
+ 133          if (parallelism == null) {
+ 134              return;
+ 135          }
+ 136  
+ 137          if (parallelism &lt;= 0) {
+ 138              throw new RuntimeException(&quot;Abnormal parameter settings: parallelism &gt; 0&quot;);
+ 139          }
+ 140  
+ 141          this.parallelism = parallelism;
+ 142      }
+ 143  
+ 144      public void addField(String fieldName) {
+ 145          if (fieldList.contains(fieldName)) {
+ 146              throw new RuntimeException(&quot;redundancy field name &quot; + fieldName + &quot; in table &quot; + getName());
+ 147          }
+ 148  
+ 149          fieldList.add(fieldName);
+ 150      }
+ 151  
+ 152      public void addPhysicalMappings(String aliasName, String physicalFieldName) {
+ 153          physicalFields.put(aliasName, physicalFieldName);
+ 154      }
+ 155  
+ 156      public void addFieldClass(Class fieldClass) {
+ 157          fieldClassList.add(fieldClass);
+ 158      }
+ 159  
+ 160      public void addFieldType(String fieldType) {
+ 161          fieldTypeList.add(fieldType);
+ 162      }
+ 163  
+ 164      public void addFieldExtraInfo(FieldExtraInfo extraInfo) {
+ 165          fieldExtraInfoList.add(extraInfo);
+ 166      }
+ 167  
+ 168      public List&lt;String&gt; getFieldList() {
+ 169          return fieldList;
+ 170      }
+ 171  
+ 172      public List&lt;String&gt; getFieldTypeList() {
+ 173          return fieldTypeList;
+ 174      }
+ 175  
+ 176      public List&lt;Class&gt; getFieldClassList() {
+ 177          return fieldClassList;
+ 178      }
+ 179  
+ 180      public Map&lt;String, String&gt; getPhysicalFields() {
+ 181          return physicalFields;
+ 182      }
+ 183  
+ 184      public void setPhysicalFields(Map&lt;String, String&gt; physicalFields) {
+ 185          this.physicalFields = physicalFields;
+ 186      }
+ 187  
+ 188      public List&lt;FieldExtraInfo&gt; getFieldExtraInfoList() {
+ 189          return fieldExtraInfoList;
+ 190      }
+ 191  
+ 192      public Map&lt;String, String&gt; getCheckProperties() {
+ 193          return checkProperties;
+ 194      }
+ 195  
+ 196      public void setCheckProperties() {
+ 197          this.checkProperties = buildCheckProperties();
+ 198      }
+ 199  
+ 200      public Map&lt;String, String&gt; buildCheckProperties() {
+ 201          return Maps.newHashMap();
+ 202      }
+ 203  
+ 204      public Map&lt;String, Object&gt; getDirtyProperties() {
+ 205          dirtyProperties.put(DirtyKeys.TABLE_NAME, this.name);
+ 206          return dirtyProperties;
+ 207      }
+ 208  
+ 209      public void setDirtyProperties(Map&lt;String, Object&gt; dirtyProperties) {
+ 210          this.dirtyProperties = dirtyProperties;
+ 211      }
+ 212  
+ 213      public Long getErrorLimit() {
+ 214          return errorLimit;
+ 215      }
+ 216  
+ 217      public void setErrorLimit(Long errorLimit) {
+ 218          this.errorLimit = errorLimit;
+ 219      }
+ 220  
+ 221      public void finish() {
+ 222          this.fields = fieldList.toArray(new String[0]);
+ 223          this.fieldClasses = fieldClassList.toArray(new Class[0]);
+ 224          this.fieldTypes = fieldTypeList.toArray(new String[0]);
+ 225      }
+ 226  
+ 227      /**
+ 228       * field extra info，used to store `not null` `default 0`...，
+ 229       * &lt;p&gt;
+ 230       * now, only support not null
+ 231       */
+ 232      public static class FieldExtraInfo implements Serializable {
+ 233  
+ 234          /**
+ 235           * default false：allow field is null
+ 236           */
+ 237          boolean notNull = false;
+ 238          /**
+ 239           * field length,eg.char(4)
+ 240           */
+ 241          int length;
+ 242  
+ 243          public int getLength() {
+ 244              return length;
+ 245          }
+ 246  
+ 247          public void setLength(int length) {
+ 248              this.length = length;
+ 249          }
+ 250  
+ 251          public boolean getNotNull() {
+ 252              return notNull;
+ 253          }
+ 254  
+ 255          public void setNotNull(boolean notNull) {
+ 256              this.notNull = notNull;
+ 257          }
+ 258  
+ 259          @Override
+ 260          public String toString() {
+ 261              return &quot;FieldExtraInfo{&quot; +
+ 262                      &quot;notNull=&quot; + notNull +
+ 263                      &quot;, length=&quot; + length +
+ 264                      &#x27;}&#x27;;
+ 265          }
+ 266      }
+ 267  }</pre></td>
+                            <td><pre>   1  /*
+   2   * Licensed to the Apache Software Foundation (ASF) under one
+   3   * or more contributor license agreements.  See the NOTICE file
+   4   * distributed with this work for additional information
+   5   * regarding copyright ownership.  The ASF licenses this file
+   6   * to you under the Apache License, Version 2.0 (the
+   7   * &quot;License&quot;); you may not use this file except in compliance
+   8   * with the License.  You may obtain a copy of the License at
+   9   *
+  10   *     http://www.apache.org/licenses/LICENSE-2.0
+  11   *
+  12   * Unless required by applicable law or agreed to in writing, software
+  13   * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15   * See the License for the specific language governing permissions and
+  16   * limitations under the License.
+  17   */
+  18  
+  19  package com.dtstack.flink.sql.table;
+  20  
+  21  import com.dtstack.flink.sql.dirtyManager.manager.DirtyKeys;
+  22  import com.dtstack.flink.sql.outputformat.AbstractDtRichOutputFormat;
+  23  import com.dtstack.flink.sql.side.AbstractSideTableInfo;
+  24  import com.google.common.collect.Lists;
+  25  import com.google.common.collect.Maps;
+  26  
+  27  import java.io.Serializable;
+  28  import java.util.List;
+  29  import java.util.Map;
+  30  import java.util.Objects;
+  31  
+  32  /**
+  33   * Reason:
+  34   * Date: 2018/6/22
+  35   * Company: www.dtstack.com
+  36   *
+  37   * @author xuchao
+  38   */
+  39  
+  40  public abstract class AbstractTableInfo implements Serializable {
+  41  
+  42      public static final String PARALLELISM_KEY = &quot;parallelism&quot;;
+  43      public static final String ERROR_LIMIT = &quot;errorLimit&quot;;
+  44      private final List&lt;String&gt; fieldList = Lists.newArrayList();
+  45      private final List&lt;String&gt; fieldTypeList = Lists.newArrayList();
+  46      private final List&lt;Class&gt; fieldClassList = Lists.newArrayList();
+  47      private final List&lt;FieldExtraInfo&gt; fieldExtraInfoList = Lists.newArrayList();
+  48      private String name;
+  49      private String type;
+  50      private String[] fields;
+  51      private String[] fieldTypes;
+  52      private Class&lt;?&gt;[] fieldClasses;
+  53      /**
+  54       * key:别名, value: realField
+  55       */
+  56      private Map&lt;String, String&gt; physicalFields = Maps.newLinkedHashMap();
+  57      private List&lt;String&gt; primaryKeys;
+  58  
+  59      private Integer parallelism = -1;
+  60      private Map&lt;String, String&gt; checkProperties;
+  61  
+  62      /**
+  63       * 构建脏数据插件的相关信息
+  64       */
+  65      private Map&lt;String, Object&gt; dirtyProperties;
+  66  
+  67      /**
+  68       * error data limit. Task will failed once {@link AbstractDtRichOutputFormat#outDirtyRecords}
+  69       * count over limit. Default 1000L;
+  70       */
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  71 -    private Long errorLimit = 0L;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  72 +    // TODO: 暂时默认值设置为10000，后面排期支持在产品上设置</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  73 +    private Long errorLimit = 10000L;</span>
+  74  
+  75      public String[] getFieldTypes() {
+  76          return fieldTypes;
+  77      }
+  78  
+  79      public void setFieldTypes(String[] fieldTypes) {
+  80          this.fieldTypes = fieldTypes;
+  81      }
+  82  
+  83      public abstract boolean check();
+  84  
+  85      public String getType() {
+  86          return type;
+  87      }
+  88  
+  89      public void setType(String type) {
+  90          this.type = type;
+  91      }
+  92  
+  93      public String[] getFields() {
+  94          return fields;
+  95      }
+  96  
+  97      public void setFields(String[] fields) {
+  98          this.fields = fields;
+  99      }
+ 100  
+ 101      public Class&lt;?&gt;[] getFieldClasses() {
+ 102          return fieldClasses;
+ 103      }
+ 104  
+ 105      public void setFieldClasses(Class&lt;?&gt;[] fieldClasses) {
+ 106          this.fieldClasses = fieldClasses;
+ 107      }
+ 108  
+ 109      public List&lt;String&gt; getPrimaryKeys() {
+ 110          if (this instanceof AbstractSideTableInfo &amp;&amp;
+ 111              Objects.isNull(primaryKeys)) {
+ 112              throw new IllegalArgumentException(&quot;Side table must contain [primary key]!&quot;);
+ 113          }
+ 114          return primaryKeys;
+ 115      }
+ 116  
+ 117      public void setPrimaryKeys(List&lt;String&gt; primaryKeys) {
+ 118          this.primaryKeys = primaryKeys;
+ 119      }
+ 120  
+ 121      public String getName() {
+ 122          return name;
+ 123      }
+ 124  
+ 125      public void setName(String name) {
+ 126          this.name = name;
+ 127      }
+ 128  
+ 129      public Integer getParallelism() {
+ 130          return parallelism;
+ 131      }
+ 132  
+ 133      public void setParallelism(Integer parallelism) {
+ 134          if (parallelism == null) {
+ 135              return;
+ 136          }
+ 137  
+ 138          if (parallelism &lt;= 0) {
+ 139              throw new RuntimeException(&quot;Abnormal parameter settings: parallelism &gt; 0&quot;);
+ 140          }
+ 141  
+ 142          this.parallelism = parallelism;
+ 143      }
+ 144  
+ 145      public void addField(String fieldName) {
+ 146          if (fieldList.contains(fieldName)) {
+ 147              throw new RuntimeException(&quot;redundancy field name &quot; + fieldName + &quot; in table &quot; + getName());
+ 148          }
+ 149  
+ 150          fieldList.add(fieldName);
+ 151      }
+ 152  
+ 153      public void addPhysicalMappings(String aliasName, String physicalFieldName) {
+ 154          physicalFields.put(aliasName, physicalFieldName);
+ 155      }
+ 156  
+ 157      public void addFieldClass(Class fieldClass) {
+ 158          fieldClassList.add(fieldClass);
+ 159      }
+ 160  
+ 161      public void addFieldType(String fieldType) {
+ 162          fieldTypeList.add(fieldType);
+ 163      }
+ 164  
+ 165      public void addFieldExtraInfo(FieldExtraInfo extraInfo) {
+ 166          fieldExtraInfoList.add(extraInfo);
+ 167      }
+ 168  
+ 169      public List&lt;String&gt; getFieldList() {
+ 170          return fieldList;
+ 171      }
+ 172  
+ 173      public List&lt;String&gt; getFieldTypeList() {
+ 174          return fieldTypeList;
+ 175      }
+ 176  
+ 177      public List&lt;Class&gt; getFieldClassList() {
+ 178          return fieldClassList;
+ 179      }
+ 180  
+ 181      public Map&lt;String, String&gt; getPhysicalFields() {
+ 182          return physicalFields;
+ 183      }
+ 184  
+ 185      public void setPhysicalFields(Map&lt;String, String&gt; physicalFields) {
+ 186          this.physicalFields = physicalFields;
+ 187      }
+ 188  
+ 189      public List&lt;FieldExtraInfo&gt; getFieldExtraInfoList() {
+ 190          return fieldExtraInfoList;
+ 191      }
+ 192  
+ 193      public Map&lt;String, String&gt; getCheckProperties() {
+ 194          return checkProperties;
+ 195      }
+ 196  
+ 197      public void setCheckProperties() {
+ 198          this.checkProperties = buildCheckProperties();
+ 199      }
+ 200  
+ 201      public Map&lt;String, String&gt; buildCheckProperties() {
+ 202          return Maps.newHashMap();
+ 203      }
+ 204  
+ 205      public Map&lt;String, Object&gt; getDirtyProperties() {
+ 206          dirtyProperties.put(DirtyKeys.TABLE_NAME, this.name);
+ 207          return dirtyProperties;
+ 208      }
+ 209  
+ 210      public void setDirtyProperties(Map&lt;String, Object&gt; dirtyProperties) {
+ 211          this.dirtyProperties = dirtyProperties;
+ 212      }
+ 213  
+ 214      public Long getErrorLimit() {
+ 215          return errorLimit;
+ 216      }
+ 217  
+ 218      public void setErrorLimit(Long errorLimit) {
+ 219          this.errorLimit = errorLimit;
+ 220      }
+ 221  
+ 222      public void finish() {
+ 223          this.fields = fieldList.toArray(new String[0]);
+ 224          this.fieldClasses = fieldClassList.toArray(new Class[0]);
+ 225          this.fieldTypes = fieldTypeList.toArray(new String[0]);
+ 226      }
+ 227  
+ 228      /**
+ 229       * field extra info，used to store `not null` `default 0`...，
+ 230       * &lt;p&gt;
+ 231       * now, only support not null
+ 232       */
+ 233      public static class FieldExtraInfo implements Serializable {
+ 234  
+ 235          /**
+ 236           * default false：allow field is null
+ 237           */
+ 238          boolean notNull = false;
+ 239          /**
+ 240           * field length,eg.char(4)
+ 241           */
+ 242          int length;
+ 243  
+ 244          public int getLength() {
+ 245              return length;
+ 246          }
+ 247  
+ 248          public void setLength(int length) {
+ 249              this.length = length;
+ 250          }
+ 251  
+ 252          public boolean getNotNull() {
+ 253              return notNull;
+ 254          }
+ 255  
+ 256          public void setNotNull(boolean notNull) {
+ 257              this.notNull = notNull;
+ 258          }
+ 259  
+ 260          @Override
+ 261          public String toString() {
+ 262              return &quot;FieldExtraInfo{&quot; +
+ 263                      &quot;notNull=&quot; + notNull +
+ 264                      &quot;, length=&quot; + length +
+ 265                      &#x27;}&#x27;;
+ 266          }
+ 267      }
+ 268  }</pre></td>
+                        </tr>
+                    </table>
+                </div>
+              </body>
+            </html>
+            

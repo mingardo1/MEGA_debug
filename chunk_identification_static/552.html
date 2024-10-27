@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+    <html lang="en">
+              <head>
+                <meta charset="utf-8">
+                <title>552</title>
+                    <style>
+                        #top {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        #bottom {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        abbr {
+                          /* Here is the delay */
+                          transition-delay:0s;
+                        }
+                    </style>
+              </head>
+              <body>
+                <span style="height: 4vh">
+                    552
+                    <a href="551.html">prev</a>
+                    <a href="553.html">next</a>
+                    <a href="552_chunks.html">chunks</a>
+                    <a href="index.html">index</a>
+                    DTStack/flinkStreamSQL_480cc75b1cb442e73c527d4143197bb30c9b53c5_kafka-base/kafka-base-sink/src/main/java/com/dtstack/flink/sql/sink/kafka/AbstractKafkaProducerFactory.java
+                    <textarea rows=1 onclick='navigator.clipboard.writeText(this.value)'>cd C:\studies\se\mega\git-analyzer-plus\notebooks\debug
+del /Q *
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;480cc75b1cb442e73c527d4143197bb30c9b53c5:kafka-base/kafka-base-sink/src/main/java/com/dtstack/flink/sql/sink/kafka/AbstractKafkaProducerFactory.java&quot; &gt; committed.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;480cc75b1cb442e73c527d4143197bb30c9b53c5^1:kafka-base/kafka-base-sink/src/main/java/com/dtstack/flink/sql/sink/kafka/AbstractKafkaProducerFactory.java&quot; &gt; ours.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;480cc75b1cb442e73c527d4143197bb30c9b53c5^2:kafka-base/kafka-base-sink/src/main/java/com/dtstack/flink/sql/sink/kafka/AbstractKafkaProducerFactory.java&quot; &gt; theirs.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;cf3543519ddfe6db5473b2b15766ed32bc95d5cf:kafka-base/kafka-base-sink/src/main/java/com/dtstack/flink/sql/sink/kafka/AbstractKafkaProducerFactory.java&quot; &gt; base.java
+copy ours.java 1ours.java
+copy ours.java 2ours.java
+copy theirs.java 1theirs.java
+copy theirs.java 2theirs.java
+copy base.java 1base.java
+copy base.java 2base.java
+&quot;C:\Program Files\Java\jdk1.8.0_241\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\jFSTMerge\build\libs\jFSTMerge-all.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\jfstmerge.java --show-base
+&quot;C:\Program Files\Eclipse Adoptium\jdk-17.0.11.9-hotspot\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\spork\target\spork-0.5.0-SNAPSHOT.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\spork.java
+del /Q 1*.java
+del /Q 2*.java
+del /Q jfstmerge.java.merge
+</textarea>
+                    {strict: [[bj], [bj], [s]], subset: [[sbj], [bj]]}
+                </span>
+                <div id="top">
+
+                    <table>
+                        <tr>
+                            <th>line based (standard git)</th>
+                            <th>jfstmerge</th>
+                            <th>spork</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1 /*
+   2  * Licensed to the Apache Software Foundation (ASF) under one
+   3  * or more contributor license agreements.  See the NOTICE file
+   4  * distributed with this work for additional information
+   5  * regarding copyright ownership.  The ASF licenses this file
+   6  * to you under the Apache License, Version 2.0 (the
+   7  * &quot;License&quot;); you may not use this file except in compliance
+   8  * with the License.  You may obtain a copy of the License at
+   9  *
+  10  *     http://www.apache.org/licenses/LICENSE-2.0
+  11  *
+  12  * Unless required by applicable law or agreed to in writing, software
+  13  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15  * See the License for the specific language governing permissions and
+  16  * limitations under the License.
+  17  */
+  18 package com.dtstack.flink.sql.sink.kafka;
+  19 
+  20 import com.dtstack.flink.sql.format.FormatType;
+  21 import com.dtstack.flink.sql.format.SerializationMetricWrapper;
+  22 import com.dtstack.flink.sql.sink.kafka.serialization.AvroCRowSerializationSchema;
+  23 import com.dtstack.flink.sql.sink.kafka.serialization.CsvCRowSerializationSchema;
+  24 import com.dtstack.flink.sql.sink.kafka.serialization.JsonCRowSerializationSchema;
+  25 import com.dtstack.flink.sql.sink.kafka.table.KafkaSinkTableInfo;
+  26 import org.apache.commons.lang3.StringUtils;
+  27 import org.apache.flink.api.common.serialization.SerializationSchema;
+  28 import org.apache.flink.api.common.typeinfo.TypeInformation;
+  29 import org.apache.flink.streaming.api.functions.sink.RichSinkFunction;
+  30 import org.apache.flink.streaming.connectors.kafka.partitioner.FlinkKafkaPartitioner;
+  31 import org.apache.flink.table.runtime.types.CRow;
+  32 
+  33 import java.util.Optional;
+  34 import java.util.Properties;
+  35 
+  36 /**
+  37  * 抽象的kafka producer 的工厂类
+  38  * 包括序统一的序列化工具的构造
+  39  * company: www.dtstack.com
+  40  * @author: toutian
+  41  * create: 2019/12/26
+  42  */
+  43 public abstract class AbstractKafkaProducerFactory {
+  44 
+  45     /**
+  46      *  获取具体的KafkaProducer
+  47      * eg create KafkaProducer010
+  48      * @param kafkaSinkTableInfo
+  49      * @param typeInformation
+  50      * @param properties
+  51      * @param partitioner
+  52      * @return
+  53      */
+<abbr title="  54     public abstract RichSinkFunction&lt;CRow&gt; createKafkaProducer(KafkaSinkTableInfo kafkaSinkTableInfo, TypeInformation&lt;CRow&gt; typeInformation, Properties properties, Optional&lt;FlinkKafkaPartitioner&lt;CRow&gt;&gt; partitioner, String[] partitionKeys);">  54     public abstract RichSinkFunction&lt;CRow&gt; createKafkaProducer(KafkaSinkTableInfo kafkaSinkTableInfo, Typ🔵</abbr>
+  55 
+<abbr title="  56     protected SerializationMetricWrapper createSerializationMetricWrapper(KafkaSinkTableInfo kafkaSinkTableInfo, TypeInformation&lt;CRow&gt; typeInformation) {">  56     protected SerializationMetricWrapper createSerializationMetricWrapper(KafkaSinkTableInfo kafkaSinkTab🔵</abbr>
+<abbr title="  57         SerializationSchema&lt;CRow&gt; serializationSchema = createSerializationSchema(kafkaSinkTableInfo, typeInformation);">  57         SerializationSchema&lt;CRow&gt; serializationSchema = createSerializationSchema(kafkaSinkTableInfo, typ🔵</abbr>
+  58         return new SerializationMetricWrapper(serializationSchema);
+  59     }
+  60 
+<abbr title="  61     private SerializationSchema&lt;CRow&gt; createSerializationSchema(KafkaSinkTableInfo kafkaSinkTableInfo, TypeInformation&lt;CRow&gt; typeInformation) {">  61     private SerializationSchema&lt;CRow&gt; createSerializationSchema(KafkaSinkTableInfo kafkaSinkTableInfo, Ty🔵</abbr>
+  62         SerializationSchema&lt;CRow&gt; serializationSchema = null;
+  63         if (FormatType.JSON.name().equalsIgnoreCase(kafkaSinkTableInfo.getSinkDataType())) {
+  64             if (StringUtils.isNotBlank(kafkaSinkTableInfo.getSchemaString())) {
+  65 &lt;&lt;&lt;&lt;&lt;&lt;&lt; GitAnalyzerPlus_ours
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"><abbr title="  66                 serializationSchema = new JsonRowSerializationSchema.Builder(kafkaSinkTableInfo.getSchemaString()).build();">  66                 serializationSchema = new JsonRowSerializationSchema.Builder(kafkaSinkTableInfo.getSchema🔵</abbr></span>
+  67 ||||||| GitAnalyzerPlus_base
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"><abbr title="  68                 serializationSchema = new JsonRowSerializationSchema(kafkaSinkTableInfo.getSchemaString());">  68                 serializationSchema = new JsonRowSerializationSchema(kafkaSinkTableInfo.getSchemaString()🔵</abbr></span>
+  69 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"><abbr title="  70                 serializationSchema = new JsonCRowSerializationSchema(kafkaSinkTableInfo.getSchemaString(), kafkaSinkTableInfo.getUpdateMode());">  70                 serializationSchema = new JsonCRowSerializationSchema(kafkaSinkTableInfo.getSchemaString(🔵</abbr></span>
+  71 &gt;&gt;&gt;&gt;&gt;&gt;&gt; GitAnalyzerPlus_theirs
+  72             } else if (typeInformation != null &amp;&amp; typeInformation.getArity() != 0) {
+  73 &lt;&lt;&lt;&lt;&lt;&lt;&lt; GitAnalyzerPlus_ours
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  74                 serializationSchema = new JsonRowSerializationSchema.Builder(typeInformation).build();</span>
+  75 ||||||| GitAnalyzerPlus_base
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  76                 serializationSchema = new JsonRowSerializationSchema(typeInformation);</span>
+  77 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"><abbr title="  78                 serializationSchema = new JsonCRowSerializationSchema(typeInformation, kafkaSinkTableInfo.getUpdateMode());">  78                 serializationSchema = new JsonCRowSerializationSchema(typeInformation, kafkaSinkTableInfo🔵</abbr></span>
+  79 &gt;&gt;&gt;&gt;&gt;&gt;&gt; GitAnalyzerPlus_theirs
+  80             } else {
+<abbr title="  81                 throw new IllegalArgumentException(&quot;sinkDataType:&quot; + FormatType.JSON.name() + &quot; must set schemaString（JSON Schema）or TypeInformation&lt;Row&gt;&quot;);">  81                 throw new IllegalArgumentException(&quot;sinkDataType:&quot; + FormatType.JSON.name() + &quot; must set 🔵</abbr>
+  82             }
+  83         } else if (FormatType.CSV.name().equalsIgnoreCase(kafkaSinkTableInfo.getSinkDataType())) {
+  84             if (StringUtils.isBlank(kafkaSinkTableInfo.getFieldDelimiter())) {
+<abbr title="  85                 throw new IllegalArgumentException(&quot;sinkDataType:&quot; + FormatType.CSV.name() + &quot; must set fieldDelimiter&quot;);">  85                 throw new IllegalArgumentException(&quot;sinkDataType:&quot; + FormatType.CSV.name() + &quot; must set f🔵</abbr>
+  86             }
+<abbr title="  87             final CsvCRowSerializationSchema.Builder serSchemaBuilder = new CsvCRowSerializationSchema.Builder(typeInformation);">  87             final CsvCRowSerializationSchema.Builder serSchemaBuilder = new CsvCRowSerializationSchema.Bu🔵</abbr>
+  88             serSchemaBuilder.setFieldDelimiter(kafkaSinkTableInfo.getFieldDelimiter().toCharArray()[0]);
+  89             serSchemaBuilder.setUpdateMode(kafkaSinkTableInfo.getUpdateMode());
+  90 
+  91             serializationSchema = serSchemaBuilder.build();
+  92         } else if (FormatType.AVRO.name().equalsIgnoreCase(kafkaSinkTableInfo.getSinkDataType())) {
+  93             if (StringUtils.isBlank(kafkaSinkTableInfo.getSchemaString())) {
+<abbr title="  94                 throw new IllegalArgumentException(&quot;sinkDataType:&quot; + FormatType.AVRO.name() + &quot; must set schemaString&quot;);">  94                 throw new IllegalArgumentException(&quot;sinkDataType:&quot; + FormatType.AVRO.name() + &quot; must set 🔵</abbr>
+  95             }
+<abbr title="  96             serializationSchema = new AvroCRowSerializationSchema(kafkaSinkTableInfo.getSchemaString(), kafkaSinkTableInfo.getUpdateMode());">  96             serializationSchema = new AvroCRowSerializationSchema(kafkaSinkTableInfo.getSchemaString(), k🔵</abbr>
+  97         }
+  98 
+  99         if (null == serializationSchema) {
+<abbr title=" 100             throw new UnsupportedOperationException(&quot;FormatType:&quot; + kafkaSinkTableInfo.getSinkDataType());"> 100             throw new UnsupportedOperationException(&quot;FormatType:&quot; + kafkaSinkTableInfo.getSinkDataType())🔵</abbr>
+ 101         }
+ 102 
+ 103         return serializationSchema;
+ 104     }
+ 105 
+ 106 }
+ </pre></td>
+                            <td><pre>   1 /*
+   2  * Licensed to the Apache Software Foundation (ASF) under one
+   3  * or more contributor license agreements.  See the NOTICE file
+   4  * distributed with this work for additional information
+   5  * regarding copyright ownership.  The ASF licenses this file
+   6  * to you under the Apache License, Version 2.0 (the
+   7  * &quot;License&quot;); you may not use this file except in compliance
+   8  * with the License.  You may obtain a copy of the License at
+   9  *
+  10  *     http://www.apache.org/licenses/LICENSE-2.0
+  11  *
+  12  * Unless required by applicable law or agreed to in writing, software
+  13  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15  * See the License for the specific language governing permissions and
+  16  * limitations under the License.
+  17  */
+  18 package com.dtstack.flink.sql.sink.kafka;
+  19 
+  20 import com.dtstack.flink.sql.format.FormatType;
+  21 import com.dtstack.flink.sql.format.SerializationMetricWrapper;
+  22 import com.dtstack.flink.sql.sink.kafka.serialization.AvroCRowSerializationSchema;
+  23 import com.dtstack.flink.sql.sink.kafka.serialization.CsvCRowSerializationSchema;
+  24 import com.dtstack.flink.sql.sink.kafka.serialization.JsonCRowSerializationSchema;
+  25 import com.dtstack.flink.sql.sink.kafka.table.KafkaSinkTableInfo;
+  26 import org.apache.commons.lang3.StringUtils;
+  27 import org.apache.flink.api.common.serialization.SerializationSchema;
+  28 import org.apache.flink.api.common.typeinfo.TypeInformation;
+  29 import org.apache.flink.streaming.api.functions.sink.RichSinkFunction;
+  30 import org.apache.flink.streaming.connectors.kafka.partitioner.FlinkKafkaPartitioner;
+  31 import org.apache.flink.table.runtime.types.CRow;
+  32 
+  33 import java.util.Optional;
+  34 import java.util.Properties;
+  35 
+  36 /**
+  37  * 抽象的kafka producer 的工厂类
+  38  * 包括序统一的序列化工具的构造
+  39  * company: www.dtstack.com
+  40  * @author: toutian
+  41  * create: 2019/12/26
+  42  */
+  43 public abstract class AbstractKafkaProducerFactory {
+  44 
+  45     /**
+  46      *  获取具体的KafkaProducer
+  47      * eg create KafkaProducer010
+  48      * @param kafkaSinkTableInfo
+  49      * @param typeInformation
+  50      * @param properties
+  51      * @param partitioner
+  52      * @return
+  53      */
+<abbr title="  54     public abstract RichSinkFunction&lt;CRow&gt; createKafkaProducer(KafkaSinkTableInfo kafkaSinkTableInfo, TypeInformation&lt;CRow&gt; typeInformation, Properties properties, Optional&lt;FlinkKafkaPartitioner&lt;CRow&gt;&gt; partitioner, String[] partitionKeys);">  54     public abstract RichSinkFunction&lt;CRow&gt; createKafkaProducer(KafkaSinkTableInfo kafkaSinkTableInfo, Typ🔵</abbr>
+  55 
+<abbr title="  56     private SerializationSchema&lt;CRow&gt; createSerializationSchema(KafkaSinkTableInfo kafkaSinkTableInfo, TypeInformation&lt;CRow&gt; typeInformation) {">  56     private SerializationSchema&lt;CRow&gt; createSerializationSchema(KafkaSinkTableInfo kafkaSinkTableInfo, Ty🔵</abbr>
+  57         SerializationSchema&lt;CRow&gt; serializationSchema = null;
+  58         if (FormatType.JSON.name().equalsIgnoreCase(kafkaSinkTableInfo.getSinkDataType())) {
+  59             if (StringUtils.isNotBlank(kafkaSinkTableInfo.getSchemaString())) {
+  60 &lt;&lt;&lt;&lt;&lt;&lt;&lt; MINE
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"><abbr title="  61                 serializationSchema = new JsonRowSerializationSchema.Builder(kafkaSinkTableInfo.getSchemaString()).build();">  61                 serializationSchema = new JsonRowSerializationSchema.Builder(kafkaSinkTableInfo.getSchema🔵</abbr></span>
+  62 ||||||| BASE
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  63             if (StringUtils.isNotBlank(kafkaSinkTableInfo.getSchemaString())) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"><abbr title="  64                 serializationSchema = new JsonRowSerializationSchema(kafkaSinkTableInfo.getSchemaString());">  64                 serializationSchema = new JsonRowSerializationSchema(kafkaSinkTableInfo.getSchemaString()🔵</abbr></span>
+  65 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"><abbr title="  66                 serializationSchema = new JsonCRowSerializationSchema(kafkaSinkTableInfo.getSchemaString(), kafkaSinkTableInfo.getUpdateMode());">  66                 serializationSchema = new JsonCRowSerializationSchema(kafkaSinkTableInfo.getSchemaString(🔵</abbr></span>
+  67 &gt;&gt;&gt;&gt;&gt;&gt;&gt; YOURS
+  68             } else if (typeInformation != null &amp;&amp; typeInformation.getArity() != 0) {
+  69 &lt;&lt;&lt;&lt;&lt;&lt;&lt; MINE
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  70                 serializationSchema = new JsonRowSerializationSchema.Builder(typeInformation).build();</span>
+  71 ||||||| BASE
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  72             } else if (typeInformation != null &amp;&amp; typeInformation.getArity() != 0) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  73                 serializationSchema = new JsonRowSerializationSchema(typeInformation);</span>
+  74 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"><abbr title="  75                 serializationSchema = new JsonCRowSerializationSchema(typeInformation, kafkaSinkTableInfo.getUpdateMode());">  75                 serializationSchema = new JsonCRowSerializationSchema(typeInformation, kafkaSinkTableInfo🔵</abbr></span>
+  76 &gt;&gt;&gt;&gt;&gt;&gt;&gt; YOURS
+  77             } else {
+<abbr title="  78                 throw new IllegalArgumentException(&quot;sinkDataType:&quot; + FormatType.JSON.name() + &quot; must set schemaString（JSON Schema）or TypeInformation&lt;Row&gt;&quot;);">  78                 throw new IllegalArgumentException(&quot;sinkDataType:&quot; + FormatType.JSON.name() + &quot; must set 🔵</abbr>
+  79             }
+  80         } else if (FormatType.CSV.name().equalsIgnoreCase(kafkaSinkTableInfo.getSinkDataType())) {
+  81             if (StringUtils.isBlank(kafkaSinkTableInfo.getFieldDelimiter())) {
+<abbr title="  82                 throw new IllegalArgumentException(&quot;sinkDataType:&quot; + FormatType.CSV.name() + &quot; must set fieldDelimiter&quot;);">  82                 throw new IllegalArgumentException(&quot;sinkDataType:&quot; + FormatType.CSV.name() + &quot; must set f🔵</abbr>
+  83             }
+<abbr title="  84             final CsvCRowSerializationSchema.Builder serSchemaBuilder = new CsvCRowSerializationSchema.Builder(typeInformation);">  84             final CsvCRowSerializationSchema.Builder serSchemaBuilder = new CsvCRowSerializationSchema.Bu🔵</abbr>
+  85             serSchemaBuilder.setFieldDelimiter(kafkaSinkTableInfo.getFieldDelimiter().toCharArray()[0]);
+  86             serSchemaBuilder.setUpdateMode(kafkaSinkTableInfo.getUpdateMode());
+  87 
+  88             serializationSchema = serSchemaBuilder.build();
+  89         } else if (FormatType.AVRO.name().equalsIgnoreCase(kafkaSinkTableInfo.getSinkDataType())) {
+  90             if (StringUtils.isBlank(kafkaSinkTableInfo.getSchemaString())) {
+<abbr title="  91                 throw new IllegalArgumentException(&quot;sinkDataType:&quot; + FormatType.AVRO.name() + &quot; must set schemaString&quot;);">  91                 throw new IllegalArgumentException(&quot;sinkDataType:&quot; + FormatType.AVRO.name() + &quot; must set 🔵</abbr>
+  92             }
+<abbr title="  93             serializationSchema = new AvroCRowSerializationSchema(kafkaSinkTableInfo.getSchemaString(), kafkaSinkTableInfo.getUpdateMode());">  93             serializationSchema = new AvroCRowSerializationSchema(kafkaSinkTableInfo.getSchemaString(), k🔵</abbr>
+  94         }
+  95 
+  96         if (null == serializationSchema) {
+<abbr title="  97             throw new UnsupportedOperationException(&quot;FormatType:&quot; + kafkaSinkTableInfo.getSinkDataType());">  97             throw new UnsupportedOperationException(&quot;FormatType:&quot; + kafkaSinkTableInfo.getSinkDataType())🔵</abbr>
+  98         }
+  99 
+ 100         return serializationSchema;
+ 101     }
+ 102 
+<abbr title=" 103     protected SerializationMetricWrapper createSerializationMetricWrapper(KafkaSinkTableInfo kafkaSinkTableInfo, TypeInformation&lt;CRow&gt; typeInformation) {"> 103     protected SerializationMetricWrapper createSerializationMetricWrapper(KafkaSinkTableInfo kafkaSinkTab🔵</abbr>
+<abbr title=" 104         SerializationSchema&lt;CRow&gt; serializationSchema = createSerializationSchema(kafkaSinkTableInfo, typeInformation);"> 104         SerializationSchema&lt;CRow&gt; serializationSchema = createSerializationSchema(kafkaSinkTableInfo, typ🔵</abbr>
+ 105         return new SerializationMetricWrapper(serializationSchema);
+ 106     }
+ 107 
+ 108 }</pre></td>
+                            <td><pre>   1 /*
+   2  * Licensed to the Apache Software Foundation (ASF) under one
+   3  * or more contributor license agreements.  See the NOTICE file
+   4  * distributed with this work for additional information
+   5  * regarding copyright ownership.  The ASF licenses this file
+   6  * to you under the Apache License, Version 2.0 (the
+   7  * &quot;License&quot;); you may not use this file except in compliance
+   8  * with the License.  You may obtain a copy of the License at
+   9  *
+  10  *     http://www.apache.org/licenses/LICENSE-2.0
+  11  *
+  12  * Unless required by applicable law or agreed to in writing, software
+  13  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15  * See the License for the specific language governing permissions and
+  16  * limitations under the License.
+  17  */
+  18 package com.dtstack.flink.sql.sink.kafka;
+  19 
+  20 import com.dtstack.flink.sql.format.FormatType;
+  21 import com.dtstack.flink.sql.format.SerializationMetricWrapper;
+  22 import com.dtstack.flink.sql.sink.kafka.serialization.AvroCRowSerializationSchema;
+  23 import com.dtstack.flink.sql.sink.kafka.serialization.CsvCRowSerializationSchema;
+  24 import com.dtstack.flink.sql.sink.kafka.serialization.JsonCRowSerializationSchema;
+  25 import com.dtstack.flink.sql.sink.kafka.table.KafkaSinkTableInfo;
+  26 import java.util.Optional;
+  27 import java.util.Properties;
+  28 import org.apache.commons.lang3.StringUtils;
+  29 import org.apache.flink.api.common.serialization.SerializationSchema;
+  30 import org.apache.flink.api.common.typeinfo.TypeInformation;
+  31 import org.apache.flink.streaming.api.functions.sink.RichSinkFunction;
+  32 import org.apache.flink.streaming.connectors.kafka.partitioner.FlinkKafkaPartitioner;
+  33 import org.apache.flink.table.runtime.types.CRow;
+  34 
+  35 
+  36 /**
+  37  * 抽象的kafka producer 的工厂类
+  38  * 包括序统一的序列化工具的构造
+  39  * company: www.dtstack.com
+  40  * @author: toutian
+  41  * create: 2019/12/26
+  42  */
+  43 public abstract class AbstractKafkaProducerFactory {
+  44     /**
+  45      *  获取具体的KafkaProducer
+  46      * eg create KafkaProducer010
+  47      * @param kafkaSinkTableInfo
+  48      * @param typeInformation
+  49      * @param properties
+  50      * @param partitioner
+  51      * @return
+  52      */
+<abbr title="  53     public abstract RichSinkFunction&lt;CRow&gt; createKafkaProducer(KafkaSinkTableInfo kafkaSinkTableInfo, TypeInformation&lt;CRow&gt; typeInformation, Properties properties, Optional&lt;FlinkKafkaPartitioner&lt;CRow&gt;&gt; partitioner, String[] partitionKeys);">  53     public abstract RichSinkFunction&lt;CRow&gt; createKafkaProducer(KafkaSinkTableInfo kafkaSinkTableInfo, Typ🔵</abbr>
+  54 
+<abbr title="  55     protected SerializationMetricWrapper createSerializationMetricWrapper(KafkaSinkTableInfo kafkaSinkTableInfo, TypeInformation&lt;CRow&gt; typeInformation) {">  55     protected SerializationMetricWrapper createSerializationMetricWrapper(KafkaSinkTableInfo kafkaSinkTab🔵</abbr>
+<abbr title="  56         SerializationSchema&lt;CRow&gt; serializationSchema = createSerializationSchema(kafkaSinkTableInfo, typeInformation);">  56         SerializationSchema&lt;CRow&gt; serializationSchema = createSerializationSchema(kafkaSinkTableInfo, typ🔵</abbr>
+  57         return new SerializationMetricWrapper(serializationSchema);
+  58     }
+  59 
+<abbr title="  60     private SerializationSchema&lt;CRow&gt; createSerializationSchema(KafkaSinkTableInfo kafkaSinkTableInfo, TypeInformation&lt;CRow&gt; typeInformation) {">  60     private SerializationSchema&lt;CRow&gt; createSerializationSchema(KafkaSinkTableInfo kafkaSinkTableInfo, Ty🔵</abbr>
+  61         SerializationSchema&lt;CRow&gt; serializationSchema = null;
+  62         if (FormatType.JSON.name().equalsIgnoreCase(kafkaSinkTableInfo.getSinkDataType())) {
+  63             if (StringUtils.isNotBlank(kafkaSinkTableInfo.getSchemaString())) {
+  64                 serializationSchema = new org.apache.flink.formats.json.JsonRowSerializationSchema.
+  65 &lt;&lt;&lt;&lt;&lt;&lt;&lt; LEFT
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  66 Builder</span>
+  67 ||||||| BASE
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"><abbr title="  68 /*d94z9sk0k4hf9j3ijd - note the base isn&#x27;t actually empty, spork simply doesn&#x27;t generate a base - gd930kwohrp23k5b6vdk93d3r*/">  68 /*d94z9sk0k4hf9j3ijd - note the base isn&#x27;t actually empty, spork simply doesn&#x27;t generate a base - gd930kw🔵</abbr></span>
+  69 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  70 </span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  71 JsonCRowSerializationSchema</span>
+  72 &gt;&gt;&gt;&gt;&gt;&gt;&gt; RIGHT
+  73                 (kafkaSinkTableInfo.getSchemaString(), kafkaSinkTableInfo.getUpdateMode()).build();
+  74             } else if ((typeInformation != null) &amp;&amp; (typeInformation.getArity() != 0)) {
+  75                 serializationSchema = new org.apache.flink.formats.json.JsonRowSerializationSchema.
+  76 &lt;&lt;&lt;&lt;&lt;&lt;&lt; LEFT
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  77 Builder</span>
+  78 ||||||| BASE
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"><abbr title="  79 /*d94z9sk0k4hf9j3ijd - note the base isn&#x27;t actually empty, spork simply doesn&#x27;t generate a base - gd930kwohrp23k5b6vdk93d3r*/">  79 /*d94z9sk0k4hf9j3ijd - note the base isn&#x27;t actually empty, spork simply doesn&#x27;t generate a base - gd930kw🔵</abbr></span>
+  80 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  81 </span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  82 JsonCRowSerializationSchema</span>
+  83 &gt;&gt;&gt;&gt;&gt;&gt;&gt; RIGHT
+  84                 (typeInformation, kafkaSinkTableInfo.getUpdateMode()).build();
+  85             } else {
+<abbr title="  86                 throw new IllegalArgumentException((&quot;sinkDataType:&quot; + FormatType.JSON.name()) + &quot; must set schemaString（JSON Schema）or TypeInformation&lt;Row&gt;&quot;);">  86                 throw new IllegalArgumentException((&quot;sinkDataType:&quot; + FormatType.JSON.name()) + &quot; must se🔵</abbr>
+  87             }
+  88         } else if (FormatType.CSV.name().equalsIgnoreCase(kafkaSinkTableInfo.getSinkDataType())) {
+  89             if (StringUtils.isBlank(kafkaSinkTableInfo.getFieldDelimiter())) {
+<abbr title="  90                 throw new IllegalArgumentException((&quot;sinkDataType:&quot; + FormatType.CSV.name()) + &quot; must set fieldDelimiter&quot;);">  90                 throw new IllegalArgumentException((&quot;sinkDataType:&quot; + FormatType.CSV.name()) + &quot; must set🔵</abbr>
+  91             }
+<abbr title="  92             final CsvCRowSerializationSchema.Builder serSchemaBuilder = new CsvCRowSerializationSchema.Builder(typeInformation);">  92             final CsvCRowSerializationSchema.Builder serSchemaBuilder = new CsvCRowSerializationSchema.Bu🔵</abbr>
+  93             serSchemaBuilder.setFieldDelimiter(kafkaSinkTableInfo.getFieldDelimiter().toCharArray()[0]);
+  94             serSchemaBuilder.setUpdateMode(kafkaSinkTableInfo.getUpdateMode());
+  95             serializationSchema = serSchemaBuilder.build();
+  96         } else if (FormatType.AVRO.name().equalsIgnoreCase(kafkaSinkTableInfo.getSinkDataType())) {
+  97             if (StringUtils.isBlank(kafkaSinkTableInfo.getSchemaString())) {
+<abbr title="  98                 throw new IllegalArgumentException((&quot;sinkDataType:&quot; + FormatType.AVRO.name()) + &quot; must set schemaString&quot;);">  98                 throw new IllegalArgumentException((&quot;sinkDataType:&quot; + FormatType.AVRO.name()) + &quot; must se🔵</abbr>
+  99             }
+<abbr title=" 100             serializationSchema = new AvroCRowSerializationSchema(kafkaSinkTableInfo.getSchemaString(), kafkaSinkTableInfo.getUpdateMode());"> 100             serializationSchema = new AvroCRowSerializationSchema(kafkaSinkTableInfo.getSchemaString(), k🔵</abbr>
+ 101         }
+ 102         if (null == serializationSchema) {
+<abbr title=" 103             throw new UnsupportedOperationException(&quot;FormatType:&quot; + kafkaSinkTableInfo.getSinkDataType());"> 103             throw new UnsupportedOperationException(&quot;FormatType:&quot; + kafkaSinkTableInfo.getSinkDataType())🔵</abbr>
+ 104         }
+ 105         return serializationSchema;
+ 106     }
+ 107 }</pre></td>
+                        </tr>
+                    </table>
+                </div>
+                <div id="bottom">
+                    <table style="margin:auto">
+                        <tr>
+                            <th>ours vs. base</th>
+                            <th>theirs vs. base</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1  /*
+   2   * Licensed to the Apache Software Foundation (ASF) under one
+   3   * or more contributor license agreements.  See the NOTICE file
+   4   * distributed with this work for additional information
+   5   * regarding copyright ownership.  The ASF licenses this file
+   6   * to you under the Apache License, Version 2.0 (the
+   7   * &quot;License&quot;); you may not use this file except in compliance
+   8   * with the License.  You may obtain a copy of the License at
+   9   *
+  10   *     http://www.apache.org/licenses/LICENSE-2.0
+  11   *
+  12   * Unless required by applicable law or agreed to in writing, software
+  13   * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15   * See the License for the specific language governing permissions and
+  16   * limitations under the License.
+  17   */
+  18  package com.dtstack.flink.sql.sink.kafka;
+  19  
+  20  import com.dtstack.flink.sql.format.FormatType;
+  21  import com.dtstack.flink.sql.format.SerializationMetricWrapper;
+
+
+
+  22  import com.dtstack.flink.sql.sink.kafka.table.KafkaSinkTableInfo;
+  23  import org.apache.commons.lang3.StringUtils;
+  24  import org.apache.flink.api.common.serialization.SerializationSchema;
+  25  import org.apache.flink.api.common.typeinfo.TypeInformation;
+  26  import org.apache.flink.formats.avro.AvroRowSerializationSchema;
+  27  import org.apache.flink.formats.csv.CsvRowSerializationSchema;
+  28  import org.apache.flink.formats.json.JsonRowSerializationSchema;
+  29  import org.apache.flink.streaming.api.functions.sink.RichSinkFunction;
+  30  import org.apache.flink.streaming.connectors.kafka.partitioner.FlinkKafkaPartitioner;
+  31  import org.apache.flink.types.Row;
+
+  32  
+  33  import java.util.Optional;
+  34  import java.util.Properties;
+  35  
+  36  /**
+  37   * 抽象的kafka producer 的工厂类
+  38   * 包括序统一的序列化工具的构造
+  39   * company: www.dtstack.com
+  40   * @author: toutian
+  41   * create: 2019/12/26
+  42   */
+  43  public abstract class AbstractKafkaProducerFactory {
+  44  
+  45      /**
+  46       *  获取具体的KafkaProducer
+  47       * eg create KafkaProducer010
+  48       * @param kafkaSinkTableInfo
+  49       * @param typeInformation
+  50       * @param properties
+  51       * @param partitioner
+  52       * @return
+  53       */
+<abbr title="  54      public abstract RichSinkFunction&lt;Row&gt; createKafkaProducer(KafkaSinkTableInfo kafkaSinkTableInfo, TypeInformation&lt;Row&gt; typeInformation, Properties properties, Optional&lt;FlinkKafkaPartitioner&lt;Row&gt;&gt; partitioner, String[] partitionKeys);">  54      public abstract RichSinkFunction&lt;Row&gt; createKafkaProducer(KafkaSinkTableInfo kafkaSinkTableInfo, TypeInformati🔵</abbr>
+
+  55  
+<abbr title="  56      protected SerializationMetricWrapper createSerializationMetricWrapper(KafkaSinkTableInfo kafkaSinkTableInfo, TypeInformation&lt;Row&gt; typeInformation) {">  56      protected SerializationMetricWrapper createSerializationMetricWrapper(KafkaSinkTableInfo kafkaSinkTableInfo, T🔵</abbr>
+  57          return new SerializationMetricWrapper(createSerializationSchema(kafkaSinkTableInfo, typeInformation));
+
+
+
+  58      }
+  59  
+<abbr title="  60      private SerializationSchema&lt;Row&gt; createSerializationSchema(KafkaSinkTableInfo kafkaSinkTableInfo, TypeInformation&lt;Row&gt; typeInformation) {">  60      private SerializationSchema&lt;Row&gt; createSerializationSchema(KafkaSinkTableInfo kafkaSinkTableInfo, TypeInformat🔵</abbr>
+  61          SerializationSchema&lt;Row&gt; serializationSchema = null;
+
+
+  62          if (FormatType.JSON.name().equalsIgnoreCase(kafkaSinkTableInfo.getSinkDataType())) {
+  63  
+  64              if (StringUtils.isNotBlank(kafkaSinkTableInfo.getSchemaString())) {
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  65 -                serializationSchema = new JsonRowSerializationSchema(kafkaSinkTableInfo.getSchemaString());</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"><abbr title="  66 +                serializationSchema = new JsonRowSerializationSchema.Builder(kafkaSinkTableInfo.getSchemaString()).build();">  66 +                serializationSchema = new JsonRowSerializationSchema.Builder(kafkaSinkTableInfo.getSchemaString())🔵</abbr></span>
+  67              } else if (typeInformation != null &amp;&amp; typeInformation.getArity() != 0) {
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  68 -                serializationSchema = new JsonRowSerializationSchema(typeInformation);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  69 +                serializationSchema = new JsonRowSerializationSchema.Builder(typeInformation).build();</span>
+  70              } else {
+<abbr title="  71                  throw new IllegalArgumentException(&quot;sinkDataType:&quot; + FormatType.JSON.name() + &quot; must set schemaString（JSON Schema）or TypeInformation&lt;Row&gt;&quot;);">  71                  throw new IllegalArgumentException(&quot;sinkDataType:&quot; + FormatType.JSON.name() + &quot; must set schemaStr🔵</abbr>
+  72              }
+  73  
+  74          } else if (FormatType.CSV.name().equalsIgnoreCase(kafkaSinkTableInfo.getSinkDataType())) {
+  75  
+  76              if (StringUtils.isBlank(kafkaSinkTableInfo.getFieldDelimiter())) {
+<abbr title="  77                  throw new IllegalArgumentException(&quot;sinkDataType:&quot; + FormatType.CSV.name() + &quot; must set fieldDelimiter&quot;);">  77                  throw new IllegalArgumentException(&quot;sinkDataType:&quot; + FormatType.CSV.name() + &quot; must set fieldDelim🔵</abbr>
+  78              }
+
+
+
+  79  
+<abbr title="  80              final CsvRowSerializationSchema.Builder serSchemaBuilder = new CsvRowSerializationSchema.Builder(typeInformation);">  80              final CsvRowSerializationSchema.Builder serSchemaBuilder = new CsvRowSerializationSchema.Builder(typeI🔵</abbr>
+  81              serSchemaBuilder.setFieldDelimiter(kafkaSinkTableInfo.getFieldDelimiter().toCharArray()[0]);
+  82              serializationSchema = serSchemaBuilder.build();
+  83  
+  84          } else if (FormatType.AVRO.name().equalsIgnoreCase(kafkaSinkTableInfo.getSinkDataType())) {
+  85  
+  86              if (StringUtils.isBlank(kafkaSinkTableInfo.getSchemaString())) {
+<abbr title="  87                  throw new IllegalArgumentException(&quot;sinkDataType:&quot; + FormatType.AVRO.name() + &quot; must set schemaString&quot;);">  87                  throw new IllegalArgumentException(&quot;sinkDataType:&quot; + FormatType.AVRO.name() + &quot; must set schemaStr🔵</abbr>
+  88              }
+  89  
+  90              serializationSchema = new AvroRowSerializationSchema(kafkaSinkTableInfo.getSchemaString());
+  91  
+
+  92          }
+  93  
+  94          if (null == serializationSchema) {
+  95              throw new UnsupportedOperationException(&quot;FormatType:&quot; + kafkaSinkTableInfo.getSinkDataType());
+  96          }
+  97  
+  98          return serializationSchema;
+  99      }
+ 100  
+ 101  }</pre></td>
+                            <td><pre>   1  /*
+   2   * Licensed to the Apache Software Foundation (ASF) under one
+   3   * or more contributor license agreements.  See the NOTICE file
+   4   * distributed with this work for additional information
+   5   * regarding copyright ownership.  The ASF licenses this file
+   6   * to you under the Apache License, Version 2.0 (the
+   7   * &quot;License&quot;); you may not use this file except in compliance
+   8   * with the License.  You may obtain a copy of the License at
+   9   *
+  10   *     http://www.apache.org/licenses/LICENSE-2.0
+  11   *
+  12   * Unless required by applicable law or agreed to in writing, software
+  13   * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15   * See the License for the specific language governing permissions and
+  16   * limitations under the License.
+  17   */
+  18  package com.dtstack.flink.sql.sink.kafka;
+  19  
+  20  import com.dtstack.flink.sql.format.FormatType;
+  21  import com.dtstack.flink.sql.format.SerializationMetricWrapper;
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  22 +import com.dtstack.flink.sql.sink.kafka.serialization.AvroCRowSerializationSchema;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  23 +import com.dtstack.flink.sql.sink.kafka.serialization.CsvCRowSerializationSchema;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  24 +import com.dtstack.flink.sql.sink.kafka.serialization.JsonCRowSerializationSchema;</span>
+  25  import com.dtstack.flink.sql.sink.kafka.table.KafkaSinkTableInfo;
+  26  import org.apache.commons.lang3.StringUtils;
+  27  import org.apache.flink.api.common.serialization.SerializationSchema;
+  28  import org.apache.flink.api.common.typeinfo.TypeInformation;
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  29 -import org.apache.flink.formats.avro.AvroRowSerializationSchema;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  30 -import org.apache.flink.formats.csv.CsvRowSerializationSchema;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  31 -import org.apache.flink.formats.json.JsonRowSerializationSchema;</span>
+  32  import org.apache.flink.streaming.api.functions.sink.RichSinkFunction;
+  33  import org.apache.flink.streaming.connectors.kafka.partitioner.FlinkKafkaPartitioner;
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  34 -import org.apache.flink.types.Row;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  35 +import org.apache.flink.table.runtime.types.CRow;</span>
+  36  
+  37  import java.util.Optional;
+  38  import java.util.Properties;
+  39  
+  40  /**
+  41   * 抽象的kafka producer 的工厂类
+  42   * 包括序统一的序列化工具的构造
+  43   * company: www.dtstack.com
+  44   * @author: toutian
+  45   * create: 2019/12/26
+  46   */
+  47  public abstract class AbstractKafkaProducerFactory {
+  48  
+  49      /**
+  50       *  获取具体的KafkaProducer
+  51       * eg create KafkaProducer010
+  52       * @param kafkaSinkTableInfo
+  53       * @param typeInformation
+  54       * @param properties
+  55       * @param partitioner
+  56       * @return
+  57       */
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"><abbr title="  58 -    public abstract RichSinkFunction&lt;Row&gt; createKafkaProducer(KafkaSinkTableInfo kafkaSinkTableInfo, TypeInformation&lt;Row&gt; typeInformation, Properties properties, Optional&lt;FlinkKafkaPartitioner&lt;Row&gt;&gt; partitioner, String[] partitionKeys);">  58 -    public abstract RichSinkFunction&lt;Row&gt; createKafkaProducer(KafkaSinkTableInfo kafkaSinkTableInfo, TypeInformati🔵</abbr></span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"><abbr title="  59 +    public abstract RichSinkFunction&lt;CRow&gt; createKafkaProducer(KafkaSinkTableInfo kafkaSinkTableInfo, TypeInformation&lt;CRow&gt; typeInformation, Properties properties, Optional&lt;FlinkKafkaPartitioner&lt;CRow&gt;&gt; partitioner, String[] partitionKeys);">  59 +    public abstract RichSinkFunction&lt;CRow&gt; createKafkaProducer(KafkaSinkTableInfo kafkaSinkTableInfo, TypeInformat🔵</abbr></span>
+  60  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"><abbr title="  61 -    protected SerializationMetricWrapper createSerializationMetricWrapper(KafkaSinkTableInfo kafkaSinkTableInfo, TypeInformation&lt;Row&gt; typeInformation) {">  61 -    protected SerializationMetricWrapper createSerializationMetricWrapper(KafkaSinkTableInfo kafkaSinkTableInfo, T🔵</abbr></span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  62 -        return new SerializationMetricWrapper(createSerializationSchema(kafkaSinkTableInfo, typeInformation));</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"><abbr title="  63 +    protected SerializationMetricWrapper createSerializationMetricWrapper(KafkaSinkTableInfo kafkaSinkTableInfo, TypeInformation&lt;CRow&gt; typeInformation) {">  63 +    protected SerializationMetricWrapper createSerializationMetricWrapper(KafkaSinkTableInfo kafkaSinkTableInfo, T🔵</abbr></span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"><abbr title="  64 +        SerializationSchema&lt;CRow&gt; serializationSchema = createSerializationSchema(kafkaSinkTableInfo, typeInformation);">  64 +        SerializationSchema&lt;CRow&gt; serializationSchema = createSerializationSchema(kafkaSinkTableInfo, typeInformat🔵</abbr></span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  65 +        return new SerializationMetricWrapper(serializationSchema);</span>
+  66      }
+  67  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"><abbr title="  68 -    private SerializationSchema&lt;Row&gt; createSerializationSchema(KafkaSinkTableInfo kafkaSinkTableInfo, TypeInformation&lt;Row&gt; typeInformation) {">  68 -    private SerializationSchema&lt;Row&gt; createSerializationSchema(KafkaSinkTableInfo kafkaSinkTableInfo, TypeInformat🔵</abbr></span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  69 -        SerializationSchema&lt;Row&gt; serializationSchema = null;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"><abbr title="  70 +    private SerializationSchema&lt;CRow&gt; createSerializationSchema(KafkaSinkTableInfo kafkaSinkTableInfo, TypeInformation&lt;CRow&gt; typeInformation) {">  70 +    private SerializationSchema&lt;CRow&gt; createSerializationSchema(KafkaSinkTableInfo kafkaSinkTableInfo, TypeInforma🔵</abbr></span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  71 +        SerializationSchema&lt;CRow&gt; serializationSchema = null;</span>
+  72          if (FormatType.JSON.name().equalsIgnoreCase(kafkaSinkTableInfo.getSinkDataType())) {
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  73 -</span>
+  74              if (StringUtils.isNotBlank(kafkaSinkTableInfo.getSchemaString())) {
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  75 -                serializationSchema = new JsonRowSerializationSchema(kafkaSinkTableInfo.getSchemaString());</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"><abbr title="  76 +                serializationSchema = new JsonCRowSerializationSchema(kafkaSinkTableInfo.getSchemaString(), kafkaSinkTableInfo.getUpdateMode());">  76 +                serializationSchema = new JsonCRowSerializationSchema(kafkaSinkTableInfo.getSchemaString(), kafkaS🔵</abbr></span>
+  77              } else if (typeInformation != null &amp;&amp; typeInformation.getArity() != 0) {
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  78 -                serializationSchema = new JsonRowSerializationSchema(typeInformation);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"><abbr title="  79 +                serializationSchema = new JsonCRowSerializationSchema(typeInformation, kafkaSinkTableInfo.getUpdateMode());">  79 +                serializationSchema = new JsonCRowSerializationSchema(typeInformation, kafkaSinkTableInfo.getUpdat🔵</abbr></span>
+  80              } else {
+<abbr title="  81                  throw new IllegalArgumentException(&quot;sinkDataType:&quot; + FormatType.JSON.name() + &quot; must set schemaString（JSON Schema）or TypeInformation&lt;Row&gt;&quot;);">  81                  throw new IllegalArgumentException(&quot;sinkDataType:&quot; + FormatType.JSON.name() + &quot; must set schemaStr🔵</abbr>
+  82              }
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  83 -</span>
+  84          } else if (FormatType.CSV.name().equalsIgnoreCase(kafkaSinkTableInfo.getSinkDataType())) {
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  85 -</span>
+  86              if (StringUtils.isBlank(kafkaSinkTableInfo.getFieldDelimiter())) {
+<abbr title="  87                  throw new IllegalArgumentException(&quot;sinkDataType:&quot; + FormatType.CSV.name() + &quot; must set fieldDelimiter&quot;);">  87                  throw new IllegalArgumentException(&quot;sinkDataType:&quot; + FormatType.CSV.name() + &quot; must set fieldDelim🔵</abbr>
+  88              }
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"><abbr title="  89 +            final CsvCRowSerializationSchema.Builder serSchemaBuilder = new CsvCRowSerializationSchema.Builder(typeInformation);">  89 +            final CsvCRowSerializationSchema.Builder serSchemaBuilder = new CsvCRowSerializationSchema.Builder(typ🔵</abbr></span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  90 +            serSchemaBuilder.setFieldDelimiter(kafkaSinkTableInfo.getFieldDelimiter().toCharArray()[0]);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  91 +            serSchemaBuilder.setUpdateMode(kafkaSinkTableInfo.getUpdateMode());</span>
+  92  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"><abbr title="  93 -            final CsvRowSerializationSchema.Builder serSchemaBuilder = new CsvRowSerializationSchema.Builder(typeInformation);">  93 -            final CsvRowSerializationSchema.Builder serSchemaBuilder = new CsvRowSerializationSchema.Builder(typeI🔵</abbr></span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  94 -            serSchemaBuilder.setFieldDelimiter(kafkaSinkTableInfo.getFieldDelimiter().toCharArray()[0]);</span>
+  95              serializationSchema = serSchemaBuilder.build();
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  96 -</span>
+  97          } else if (FormatType.AVRO.name().equalsIgnoreCase(kafkaSinkTableInfo.getSinkDataType())) {
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  98 -</span>
+  99              if (StringUtils.isBlank(kafkaSinkTableInfo.getSchemaString())) {
+<abbr title=" 100                  throw new IllegalArgumentException(&quot;sinkDataType:&quot; + FormatType.AVRO.name() + &quot; must set schemaString&quot;);"> 100                  throw new IllegalArgumentException(&quot;sinkDataType:&quot; + FormatType.AVRO.name() + &quot; must set schemaStr🔵</abbr>
+ 101              }
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 102 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 103 -            serializationSchema = new AvroRowSerializationSchema(kafkaSinkTableInfo.getSchemaString());</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 104 -</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"><abbr title=" 105 +            serializationSchema = new AvroCRowSerializationSchema(kafkaSinkTableInfo.getSchemaString(), kafkaSinkTableInfo.getUpdateMode());"> 105 +            serializationSchema = new AvroCRowSerializationSchema(kafkaSinkTableInfo.getSchemaString(), kafkaSinkT🔵</abbr></span>
+ 106          }
+ 107  
+ 108          if (null == serializationSchema) {
+ 109              throw new UnsupportedOperationException(&quot;FormatType:&quot; + kafkaSinkTableInfo.getSinkDataType());
+ 110          }
+ 111  
+ 112          return serializationSchema;
+ 113      }
+ 114  
+ 115  }</pre></td>
+                        </tr>
+                    </table>
+                </div>
+              </body>
+            </html>
+            

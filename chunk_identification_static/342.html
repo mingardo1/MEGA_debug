@@ -1,0 +1,2185 @@
+<!DOCTYPE html>
+    <html lang="en">
+              <head>
+                <meta charset="utf-8">
+                <title>342</title>
+                    <style>
+                        #top {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        #bottom {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        abbr {
+                          /* Here is the delay */
+                          transition-delay:0s;
+                        }
+                    </style>
+              </head>
+              <body>
+                <span style="height: 4vh">
+                    342
+                    <a href="341.html">prev</a>
+                    <a href="343.html">next</a>
+                    <a href="342_chunks.html">chunks</a>
+                    <a href="index.html">index</a>
+                    DTStack/flinkStreamSQL_65123bafa7a98b91e7a12e47b7750e93793b73ba_redis5/redis5-sink/src/main/java/com/dtstack/flink/sql/sink/redis/RedisOutputFormat.java
+                    <textarea rows=1 onclick='navigator.clipboard.writeText(this.value)'>cd C:\studies\se\mega\git-analyzer-plus\notebooks\debug
+del /Q *
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;65123bafa7a98b91e7a12e47b7750e93793b73ba:redis5/redis5-sink/src/main/java/com/dtstack/flink/sql/sink/redis/RedisOutputFormat.java&quot; &gt; committed.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;65123bafa7a98b91e7a12e47b7750e93793b73ba^1:redis5/redis5-sink/src/main/java/com/dtstack/flink/sql/sink/redis/RedisOutputFormat.java&quot; &gt; ours.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;65123bafa7a98b91e7a12e47b7750e93793b73ba^2:redis5/redis5-sink/src/main/java/com/dtstack/flink/sql/sink/redis/RedisOutputFormat.java&quot; &gt; theirs.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;4c42a0206e8e60664945d8380078cfb0f7c2f4e2:redis5/redis5-sink/src/main/java/com/dtstack/flink/sql/sink/redis/RedisOutputFormat.java&quot; &gt; base.java
+copy ours.java 1ours.java
+copy ours.java 2ours.java
+copy theirs.java 1theirs.java
+copy theirs.java 2theirs.java
+copy base.java 1base.java
+copy base.java 2base.java
+&quot;C:\Program Files\Java\jdk1.8.0_241\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\jFSTMerge\build\libs\jFSTMerge-all.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\jfstmerge.java --show-base
+&quot;C:\Program Files\Eclipse Adoptium\jdk-17.0.11.9-hotspot\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\spork\target\spork-0.5.0-SNAPSHOT.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\spork.java
+del /Q 1*.java
+del /Q 2*.java
+del /Q jfstmerge.java.merge
+</textarea>
+                    {strict: [[b], [b], [b], [j]], subset: [[b], [b], [b], [j]]}
+                </span>
+                <div id="top">
+
+                    <table>
+                        <tr>
+                            <th>line based (standard git)</th>
+                            <th>jfstmerge</th>
+                            <th>spork</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1 /*
+   2  * Licensed to the Apache Software Foundation (ASF) under one
+   3  * or more contributor license agreements.  See the NOTICE file
+   4  * distributed with this work for additional information
+   5  * regarding copyright ownership.  The ASF licenses this file
+   6  * to you under the Apache License, Version 2.0 (the
+   7  * &quot;License&quot;); you may not use this file except in compliance
+   8  * with the License.  You may obtain a copy of the License at
+   9  *
+  10  *     http://www.apache.org/licenses/LICENSE-2.0
+  11  *
+  12  * Unless required by applicable law or agreed to in writing, software
+  13  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15  * See the License for the specific language governing permissions and
+  16  * limitations under the License.
+  17  */
+  18 
+  19 package com.dtstack.flink.sql.sink.redis;
+  20 
+  21 import com.dtstack.flink.sql.outputformat.AbstractDtRichOutputFormat;
+  22 import com.dtstack.flink.sql.sink.redis.enums.RedisType;
+  23 import com.google.common.collect.Maps;
+  24 import org.apache.commons.lang3.StringUtils;
+  25 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
+  26 import org.apache.flink.api.common.typeinfo.TypeInformation;
+  27 import org.apache.flink.api.java.tuple.Tuple2;
+  28 import org.apache.flink.configuration.Configuration;
+  29 import org.apache.flink.types.Row;
+  30 import org.slf4j.Logger;
+  31 import org.slf4j.LoggerFactory;
+  32 import redis.clients.jedis.HostAndPort;
+  33 import redis.clients.jedis.JedisCluster;
+  34 import redis.clients.jedis.JedisCommands;
+  35 import redis.clients.jedis.JedisPool;
+  36 import redis.clients.jedis.JedisSentinelPool;
+  37 
+  38 import java.io.Closeable;
+  39 import java.io.IOException;
+  40 import java.util.HashSet;
+  41 import java.util.List;
+  42 import java.util.Map;
+  43 import java.util.Set;
+  44 
+  45 /**
+  46  * @author yanxi
+  47  */
+  48 public class RedisOutputFormat extends AbstractDtRichOutputFormat&lt;Tuple2&gt; {
+  49     private static final Logger LOG = LoggerFactory.getLogger(RedisOutputFormat.class);
+  50     protected String[] fieldNames;
+  51     protected TypeInformation&lt;?&gt;[] fieldTypes;
+  52     protected List&lt;String&gt; primaryKeys;
+  53 &lt;&lt;&lt;&lt;&lt;&lt;&lt; GitAnalyzerPlus_ours
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  54 </span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  55     protected int timeout;</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  56 </span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  57     protected long keyExpiredTime;</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  58 </span>
+  59 ||||||| GitAnalyzerPlus_base
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  60 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  61     private String database;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  62 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  63     private String tableName;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  64 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  65     private String password;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  66 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  67     private int redisType;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  68 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  69     private String maxTotal;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  70 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  71     private String maxIdle;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  72 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  73     private String minIdle;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  74 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  75     private String masterName;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  76 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  77     protected String[] fieldNames;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  78 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  79     protected TypeInformation&lt;?&gt;[] fieldTypes;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  80 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  81     protected List&lt;String&gt; primaryKeys;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  82 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  83     protected int timeout;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  84 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  85     private JedisPool pool;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  86 </span>
+  87 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  88     protected int timeout = 10000;</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  89     private String url;</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  90     private String database = &quot;0&quot;;</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  91     private String tableName;</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  92     private String password;</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  93     private int redisType;</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  94     private String maxTotal;</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  95     private String maxIdle;</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  96     private String minIdle;</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  97     private String masterName;</span>
+  98 &gt;&gt;&gt;&gt;&gt;&gt;&gt; GitAnalyzerPlus_theirs
+  99     private JedisPool pool;
+ 100 
+ 101     private JedisCommands jedis;
+ 102 
+ 103     private JedisSentinelPool jedisSentinelPool;
+ 104 
+ 105     private GenericObjectPoolConfig poolConfig;
+ 106 
+ 107     private RedisOutputFormat() {
+ 108     }
+ 109 
+ 110     public static RedisOutputFormatBuilder buildRedisOutputFormat() {
+ 111         return new RedisOutputFormatBuilder();
+ 112     }
+ 113 
+ 114     @Override
+ 115     public void configure(Configuration parameters) {
+ 116 
+ 117     }
+ 118 
+ 119     @Override
+ 120     public void open(int taskNumber, int numTasks) throws IOException {
+ 121         establishConnection();
+ 122         initMetric();
+ 123     }
+ 124 
+ 125     private GenericObjectPoolConfig setPoolConfig(String maxTotal, String maxIdle, String minIdle) {
+ 126         GenericObjectPoolConfig config = new GenericObjectPoolConfig();
+ 127         if (maxTotal != null) {
+ 128             config.setMaxTotal(Integer.parseInt(maxTotal));
+ 129         }
+ 130         if (maxIdle != null) {
+ 131             config.setMaxIdle(Integer.parseInt(maxIdle));
+ 132         }
+ 133         if (minIdle != null) {
+ 134             config.setMinIdle(Integer.parseInt(minIdle));
+ 135         }
+ 136         return config;
+ 137     }
+ 138 
+ 139     private void establishConnection() {
+ 140         poolConfig = setPoolConfig(maxTotal, maxIdle, minIdle);
+ 141         String[] nodes = StringUtils.split(url, &quot;,&quot;);
+ 142         String[] firstIpPort = StringUtils.split(nodes[0], &quot;:&quot;);
+ 143         String firstIp = firstIpPort[0];
+ 144         String firstPort = firstIpPort[1];
+ 145         Set&lt;HostAndPort&gt; addresses = new HashSet&lt;&gt;();
+ 146         Set&lt;String&gt; ipPorts = new HashSet&lt;&gt;();
+ 147         for (String ipPort : nodes) {
+ 148             ipPorts.add(ipPort);
+ 149             String[] ipPortPair = StringUtils.split(ipPort, &quot;:&quot;);
+ 150             addresses.add(new HostAndPort(ipPortPair[0].trim(), Integer.parseInt(ipPortPair[1].trim())));
+ 151         }
+ 152 
+ 153         switch (RedisType.parse(redisType)) {
+ 154             case STANDALONE:
+<abbr title=" 155                 pool = new JedisPool(poolConfig, firstIp, Integer.parseInt(firstPort), timeout, password, Integer.parseInt(database));"> 155                 pool = new JedisPool(poolConfig, firstIp, Integer.parseInt(firstPort), timeout, password,🔵</abbr>
+ 156                 jedis = pool.getResource();
+ 157                 break;
+ 158             case SENTINEL:
+<abbr title=" 159                 jedisSentinelPool = new JedisSentinelPool(masterName, ipPorts, poolConfig, timeout, password, Integer.parseInt(database));"> 159                 jedisSentinelPool = new JedisSentinelPool(masterName, ipPorts, poolConfig, timeout, passw🔵</abbr>
+ 160                 jedis = jedisSentinelPool.getResource();
+ 161                 break;
+ 162             case CLUSTER:
+ 163                 jedis = new JedisCluster(addresses, timeout, timeout, 10, password, poolConfig);
+ 164                 break;
+ 165             default:
+ 166                 throw new RuntimeException(&quot;unsupported redis type[ &quot; + redisType + &quot;]&quot;);
+ 167         }
+ 168     }
+ 169 
+ 170     @Override
+ 171     public void writeRecord(Tuple2 record) throws IOException {
+ 172         Tuple2&lt;Boolean, Row&gt; tupleTrans = record;
+ 173         Boolean retract = tupleTrans.getField(0);
+ 174         if (!retract) {
+ 175             return;
+ 176         }
+ 177         Row row = tupleTrans.getField(1);
+ 178         if (row.getArity() != fieldNames.length) {
+ 179             return;
+ 180         }
+ 181         Map&lt;String, Object&gt; refData = Maps.newHashMap();
+ 182         for (int i = 0; i &lt; fieldNames.length; i++) {
+ 183 &lt;&lt;&lt;&lt;&lt;&lt;&lt; GitAnalyzerPlus_ours
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 184             StringBuilder key = new StringBuilder();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 185             key.append(tableName).append(&quot;:&quot;).append(perKey).append(&quot;:&quot;).append(fieldNames[i]);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 186 </span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 187             String value = &quot;null&quot;;</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 188             Object field = row.getField(i);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 189             if (field != null) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 190                 value = field.toString();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 191             }</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 192             saveKey(key.toString(), value);</span>
+ 193 ||||||| GitAnalyzerPlus_base
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 194                 jedis = new JedisCluster(addresses, timeout, timeout, 10, password, poolConfig);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 195             default:</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 196         }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 197     }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 198 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 199     @Override</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 200     public void writeRecord(Tuple2 record) throws IOException {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 201         Tuple2&lt;Boolean, Row&gt; tupleTrans = record;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 202         Boolean retract = tupleTrans.getField(0);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 203         if (!retract) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 204             return;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 205         }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 206         Row row = tupleTrans.getField(1);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 207         if (row.getArity() != fieldNames.length) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 208             return;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 209         }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 210 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 211         HashMap&lt;String, Integer&gt; map = new HashMap&lt;&gt;(8);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 212         for (String primaryKey : primaryKeys) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 213             for (int i = 0; i &lt; fieldNames.length; i++) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 214                 if (fieldNames[i].equals(primaryKey)) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 215                     map.put(primaryKey, i);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 216                 }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 217             }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 218         }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 219 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 220         List&lt;String&gt; kvList = new LinkedList&lt;&gt;();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 221         for (String primaryKey : primaryKeys){</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 222             StringBuilder primaryKv = new StringBuilder();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 223             int index = map.get(primaryKey).intValue();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 224             primaryKv.append(primaryKey).append(&quot;:&quot;).append(row.getField(index));</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 225             kvList.add(primaryKv.toString());</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 226         }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 227 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 228         String perKey = String.join(&quot;:&quot;, kvList);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 229         for (int i = 0; i &lt; fieldNames.length; i++) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 230             StringBuilder key = new StringBuilder();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 231             key.append(tableName).append(&quot;:&quot;).append(perKey).append(&quot;:&quot;).append(fieldNames[i]);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 232 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 233             String value = &quot;null&quot;;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 234             Object field = row.getField(i);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 235             if (field != null) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 236                 value = field.toString();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 237             }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 238             jedis.set(key.toString(), value);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 239         }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 240 </span>
+ 241 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 242             refData.put(fieldNames[i], row.getField(i));</span>
+ 243 &gt;&gt;&gt;&gt;&gt;&gt;&gt; GitAnalyzerPlus_theirs
+ 244         }
+ 245         String redisKey = buildCacheKey(refData);
+ 246         refData.forEach((key, value) -&gt; jedis.hset(redisKey, key, String.valueOf(value)));
+ 247 
+ 248         if (outRecords.getCount() % ROW_PRINT_FREQUENCY == 0) {
+ 249             LOG.info(record.toString());
+ 250         }
+ 251         outRecords.inc();
+ 252     }
+ 253 
+ 254     /**
+ 255      * 1. save key and value.
+ 256      * 2. set expired time for key when keyExpiredTime has been set.
+ 257      * @param key
+ 258      * @param value
+ 259      */
+ 260     private void saveKey(String key, String value) {
+ 261         if (keyExpiredTime != 0L) {
+ 262             boolean keyExist = jedis.exists(key);
+ 263             if (keyExist) {
+ 264                 jedis.del(key);
+ 265             }
+ 266             jedis.set(key, value, &quot;NX&quot;, &quot;PX&quot;, keyExpiredTime);
+ 267         } else {
+ 268             jedis.set(key, value);
+ 269         }
+ 270     }
+ 271 
+ 272     @Override
+ 273     public void close() throws IOException {
+ 274         if (jedisSentinelPool != null) {
+ 275             jedisSentinelPool.close();
+ 276         }
+ 277         if (pool != null) {
+ 278             pool.close();
+ 279         }
+ 280         if (jedis != null) {
+ 281             if (jedis instanceof Closeable) {
+ 282                 ((Closeable) jedis).close();
+ 283             }
+ 284         }
+ 285 
+ 286     }
+ 287 
+ 288     public String buildCacheKey(Map&lt;String, Object&gt; refData) {
+ 289         StringBuilder keyBuilder = new StringBuilder(tableName);
+ 290         for (String primaryKey : primaryKeys) {
+ 291             if (!refData.containsKey(primaryKey)) {
+ 292                 return null;
+ 293             }
+ 294             keyBuilder.append(&quot;_&quot;).append(refData.get(primaryKey));
+ 295         }
+ 296         return keyBuilder.toString();
+ 297     }
+ 298 
+ 299     public static class RedisOutputFormatBuilder {
+ 300         private final RedisOutputFormat redisOutputFormat;
+ 301 
+ 302         protected RedisOutputFormatBuilder() {
+ 303             this.redisOutputFormat = new RedisOutputFormat();
+ 304         }
+ 305 
+ 306         public RedisOutputFormatBuilder setUrl(String url) {
+ 307             redisOutputFormat.url = url;
+ 308             return this;
+ 309         }
+ 310 
+ 311         public RedisOutputFormatBuilder setDatabase(String database) {
+ 312             redisOutputFormat.database = database;
+ 313             return this;
+ 314         }
+ 315 
+ 316         public RedisOutputFormatBuilder setTableName(String tableName) {
+ 317             redisOutputFormat.tableName = tableName;
+ 318             return this;
+ 319         }
+ 320 
+ 321         public RedisOutputFormatBuilder setPassword(String password) {
+ 322             redisOutputFormat.password = password;
+ 323             return this;
+ 324         }
+ 325 
+ 326         public RedisOutputFormatBuilder setFieldNames(String[] fieldNames) {
+ 327             redisOutputFormat.fieldNames = fieldNames;
+ 328             return this;
+ 329         }
+ 330 
+ 331         public RedisOutputFormatBuilder setFieldTypes(TypeInformation&lt;?&gt;[] fieldTypes) {
+ 332             redisOutputFormat.fieldTypes = fieldTypes;
+ 333             return this;
+ 334         }
+ 335 
+ 336         public RedisOutputFormatBuilder setPrimaryKeys(List&lt;String&gt; primaryKeys) {
+ 337             redisOutputFormat.primaryKeys = primaryKeys;
+ 338             return this;
+ 339         }
+ 340 
+ 341         public RedisOutputFormatBuilder setTimeout(int timeout) {
+ 342             redisOutputFormat.timeout = timeout;
+ 343             return this;
+ 344         }
+ 345 
+ 346         public RedisOutputFormatBuilder setRedisType(int redisType) {
+ 347             redisOutputFormat.redisType = redisType;
+ 348             return this;
+ 349         }
+ 350 
+ 351         public RedisOutputFormatBuilder setMaxTotal(String maxTotal) {
+ 352             redisOutputFormat.maxTotal = maxTotal;
+ 353             return this;
+ 354         }
+ 355 
+ 356         public RedisOutputFormatBuilder setMaxIdle(String maxIdle) {
+ 357             redisOutputFormat.maxIdle = maxIdle;
+ 358             return this;
+ 359         }
+ 360 
+ 361         public RedisOutputFormatBuilder setMinIdle(String minIdle) {
+ 362             redisOutputFormat.minIdle = minIdle;
+ 363             return this;
+ 364         }
+ 365 
+ 366         public RedisOutputFormatBuilder setMasterName(String masterName) {
+ 367             redisOutputFormat.masterName = masterName;
+ 368             return this;
+ 369         }
+ 370 
+ 371 &lt;&lt;&lt;&lt;&lt;&lt;&lt; GitAnalyzerPlus_ours
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 372         public RedisOutputFormatBuilder setKeyExpiredTime(long keyExpiredTime){</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 373             redisOutputFormat.keyExpiredTime = keyExpiredTime;</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 374             return this;</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 375         }</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 376 </span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 377         public RedisOutputFormat finish(){</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 378             if (redisOutputFormat.url == null){</span>
+ 379 ||||||| GitAnalyzerPlus_base
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 380         public RedisOutputFormatBuilder setPrimaryKeys(List&lt;String &gt; primaryKeys){</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 381             redisOutputFormat.primaryKeys = primaryKeys;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 382             return this;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 383         }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 384 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 385         public RedisOutputFormatBuilder setTimeout(int timeout){</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 386             redisOutputFormat.timeout = timeout;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 387             return this;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 388         }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 389 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 390         public RedisOutputFormatBuilder setRedisType(int redisType){</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 391             redisOutputFormat.redisType = redisType;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 392             return this;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 393         }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 394 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 395         public RedisOutputFormatBuilder setMaxTotal(String maxTotal){</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 396             redisOutputFormat.maxTotal = maxTotal;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 397             return this;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 398         }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 399 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 400         public RedisOutputFormatBuilder setMaxIdle(String maxIdle){</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 401             redisOutputFormat.maxIdle = maxIdle;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 402             return this;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 403         }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 404 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 405         public RedisOutputFormatBuilder setMinIdle(String minIdle){</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 406             redisOutputFormat.minIdle = minIdle;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 407             return this;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 408         }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 409 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 410         public RedisOutputFormatBuilder setMasterName(String masterName){</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 411             redisOutputFormat.masterName = masterName;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 412             return this;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 413         }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 414 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 415         public RedisOutputFormat finish(){</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 416             if (redisOutputFormat.url == null){</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 417                 throw new IllegalArgumentException(&quot;No URL supplied.&quot;);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 418             }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 419 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 420             if (redisOutputFormat.tableName == null){</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 421                 throw new IllegalArgumentException(&quot;No tablename supplied.&quot;);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 422             }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 423 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 424             return redisOutputFormat;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 425         }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 426     }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 427 }</span>
+ 428 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 429         public RedisOutputFormat finish() {</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 430             if (redisOutputFormat.url == null) {</span>
+ 431 &gt;&gt;&gt;&gt;&gt;&gt;&gt; GitAnalyzerPlus_theirs
+ 432                 throw new IllegalArgumentException(&quot;No URL supplied.&quot;);
+ 433             }
+ 434 
+ 435             if (redisOutputFormat.tableName == null) {
+ 436                 throw new IllegalArgumentException(&quot;No tablename supplied.&quot;);
+ 437             }
+ 438 
+ 439             return redisOutputFormat;
+ 440         }
+ 441     }
+ 442 }</pre></td>
+                            <td><pre>   1 /*
+   2  * Licensed to the Apache Software Foundation (ASF) under one
+   3  * or more contributor license agreements.  See the NOTICE file
+   4  * distributed with this work for additional information
+   5  * regarding copyright ownership.  The ASF licenses this file
+   6  * to you under the Apache License, Version 2.0 (the
+   7  * &quot;License&quot;); you may not use this file except in compliance
+   8  * with the License.  You may obtain a copy of the License at
+   9  *
+  10  *     http://www.apache.org/licenses/LICENSE-2.0
+  11  *
+  12  * Unless required by applicable law or agreed to in writing, software
+  13  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15  * See the License for the specific language governing permissions and
+  16  * limitations under the License.
+  17  */
+  18 
+  19 package com.dtstack.flink.sql.sink.redis;
+  20 
+  21 import com.dtstack.flink.sql.outputformat.AbstractDtRichOutputFormat;
+  22 import com.dtstack.flink.sql.sink.redis.enums.RedisType;
+  23 import com.google.common.collect.Maps;
+  24 import org.apache.commons.lang3.StringUtils;
+  25 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
+  26 import org.apache.flink.api.common.typeinfo.TypeInformation;
+  27 import org.apache.flink.api.java.tuple.Tuple2;
+  28 import org.apache.flink.configuration.Configuration;
+  29 import org.apache.flink.types.Row;
+  30 import org.slf4j.Logger;
+  31 import org.slf4j.LoggerFactory;
+  32 import redis.clients.jedis.HostAndPort;
+  33 import redis.clients.jedis.JedisCluster;
+  34 import redis.clients.jedis.JedisCommands;
+  35 import redis.clients.jedis.JedisPool;
+  36 import redis.clients.jedis.JedisSentinelPool;
+  37 
+  38 import java.io.Closeable;
+  39 import java.io.IOException;
+  40 import java.util.HashSet;
+  41 import java.util.List;
+  42 import java.util.Map;
+  43 import java.util.Set;
+  44 
+  45 /**
+  46  * @author yanxi
+  47  */
+  48 public class RedisOutputFormat extends AbstractDtRichOutputFormat&lt;Tuple2&gt; {
+  49     private static final Logger LOG = LoggerFactory.getLogger(RedisOutputFormat.class);
+  50     protected String[] fieldNames;
+  51     protected TypeInformation&lt;?&gt;[] fieldTypes;
+  52     protected List&lt;String&gt; primaryKeys;
+  53     protected int timeout = 10000;
+  54 
+  55     protected long keyExpiredTime;
+  56     private String url;
+  57     private String database = &quot;0&quot;;
+  58     private String tableName;
+  59     private String password;
+  60     private int redisType;
+  61     private String maxTotal;
+  62     private String maxIdle;
+  63     private String minIdle;
+  64     private String masterName;
+  65     private JedisPool pool;
+  66 
+  67     private JedisCommands jedis;
+  68 
+  69     private JedisSentinelPool jedisSentinelPool;
+  70 
+  71     private GenericObjectPoolConfig poolConfig;
+  72 
+  73     private RedisOutputFormat(){
+  74     }
+  75 
+  76     public static RedisOutputFormatBuilder buildRedisOutputFormat(){
+  77         return new RedisOutputFormatBuilder();
+  78     }
+  79 
+  80     @Override
+  81     public void configure(Configuration parameters) {
+  82 
+  83     }
+  84 
+  85     @Override
+  86     public void open(int taskNumber, int numTasks) throws IOException {
+  87         establishConnection();
+  88         initMetric();
+  89     }
+  90 
+  91     private GenericObjectPoolConfig setPoolConfig(String maxTotal, String maxIdle, String minIdle){
+  92         GenericObjectPoolConfig config = new GenericObjectPoolConfig();
+  93         if (maxTotal != null){
+  94             config.setMaxTotal(Integer.parseInt(maxTotal));
+  95         }
+  96         if (maxIdle != null){
+  97             config.setMaxIdle(Integer.parseInt(maxIdle));
+  98         }
+  99         if (minIdle != null){
+ 100             config.setMinIdle(Integer.parseInt(minIdle));
+ 101         }
+ 102         return config;
+ 103     }
+ 104 
+ 105     private void establishConnection() {
+ 106         poolConfig = setPoolConfig(maxTotal, maxIdle, minIdle);
+ 107         String[] nodes = StringUtils.split(url, &quot;,&quot;);
+ 108         String[] firstIpPort = StringUtils.split(nodes[0], &quot;:&quot;);
+ 109         String firstIp = firstIpPort[0];
+ 110         String firstPort = firstIpPort[1];
+ 111         Set&lt;HostAndPort&gt; addresses = new HashSet&lt;&gt;();
+ 112         Set&lt;String&gt; ipPorts = new HashSet&lt;&gt;();
+ 113         for (String ipPort : nodes) {
+ 114             ipPorts.add(ipPort);
+ 115             String[] ipPortPair = StringUtils.split(ipPort, &quot;:&quot;);
+ 116             addresses.add(new HostAndPort(ipPortPair[0].trim(), Integer.parseInt(ipPortPair[1].trim())));
+ 117         }
+ 118 
+ 119         switch (RedisType.parse(redisType)) {
+ 120             case STANDALONE:
+<abbr title=" 121                 pool = new JedisPool(poolConfig, firstIp, Integer.parseInt(firstPort), timeout, password, Integer.parseInt(database));"> 121                 pool = new JedisPool(poolConfig, firstIp, Integer.parseInt(firstPort), timeout, password,🔵</abbr>
+ 122                 jedis = pool.getResource();
+ 123                 break;
+ 124             case SENTINEL:
+<abbr title=" 125                 jedisSentinelPool = new JedisSentinelPool(masterName, ipPorts, poolConfig, timeout, password, Integer.parseInt(database));"> 125                 jedisSentinelPool = new JedisSentinelPool(masterName, ipPorts, poolConfig, timeout, passw🔵</abbr>
+ 126                 jedis = jedisSentinelPool.getResource();
+ 127                 break;
+ 128             case CLUSTER:
+ 129                 jedis = new JedisCluster(addresses, timeout, timeout, 10, password, poolConfig);
+ 130                 break;
+ 131             default:
+ 132                 throw new RuntimeException(&quot;unsupported redis type[ &quot; + redisType + &quot;]&quot;);
+ 133         }
+ 134     }
+ 135 
+ 136     @Override
+ 137     public void writeRecord(Tuple2 record) throws IOException {
+ 138         Tuple2&lt;Boolean, Row&gt; tupleTrans = record;
+ 139         Boolean retract = tupleTrans.getField(0);
+ 140         if (!retract) {
+ 141             return;
+ 142         }
+ 143         Row row = tupleTrans.getField(1);
+ 144         if (row.getArity() != fieldNames.length) {
+ 145             return;
+ 146         }
+ 147         Map&lt;String, Object&gt; refData = Maps.newHashMap();
+ 148             for (int i = 0; i &lt; fieldNames.length; i++) {
+ 149             refData.put(fieldNames[i], row.getField(i));
+ 150                 }
+ 151 &lt;&lt;&lt;&lt;&lt;&lt;&lt; MINE
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 152             }</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 153         }</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 154 </span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 155         List&lt;String&gt; kvList = new LinkedList&lt;&gt;();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 156         for (String primaryKey : primaryKeys){</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 157             StringBuilder primaryKv = new StringBuilder();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 158             int index = map.get(primaryKey).intValue();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 159             primaryKv.append(primaryKey).append(&quot;:&quot;).append(row.getField(index));</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 160             kvList.add(primaryKv.toString());</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 161         }</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 162 </span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 163         String perKey = String.join(&quot;:&quot;, kvList);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 164         for (int i = 0; i &lt; fieldNames.length; i++) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 165             StringBuilder key = new StringBuilder();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 166             key.append(tableName).append(&quot;:&quot;).append(perKey).append(&quot;:&quot;).append(fieldNames[i]);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 167 </span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 168             String value = &quot;null&quot;;</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 169             Object field = row.getField(i);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 170             if (field != null) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 171                 value = field.toString();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 172             }</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 173             saveKey(key.toString(), value);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 174         }</span>
+ 175 ||||||| BASE
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 176                 if (fieldNames[i].equals(primaryKey)) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 177                     map.put(primaryKey, i);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 178                 }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 179             }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 180         }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 181 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 182         List&lt;String&gt; kvList = new LinkedList&lt;&gt;();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 183         for (String primaryKey : primaryKeys){</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 184             StringBuilder primaryKv = new StringBuilder();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 185             int index = map.get(primaryKey).intValue();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 186             primaryKv.append(primaryKey).append(&quot;:&quot;).append(row.getField(index));</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 187             kvList.add(primaryKv.toString());</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 188         }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 189 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 190         String perKey = String.join(&quot;:&quot;, kvList);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 191         for (int i = 0; i &lt; fieldNames.length; i++) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 192             StringBuilder key = new StringBuilder();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 193             key.append(tableName).append(&quot;:&quot;).append(perKey).append(&quot;:&quot;).append(fieldNames[i]);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 194 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 195             String value = &quot;null&quot;;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 196             Object field = row.getField(i);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 197             if (field != null) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 198                 value = field.toString();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 199             }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 200             jedis.set(key.toString(), value);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 201         }</span>
+ 202 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 203         String redisKey = buildCacheKey(refData);</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 204         refData.forEach((key, value) -&gt; jedis.hset(redisKey, key, String.valueOf(value)));</span>
+ 205 &gt;&gt;&gt;&gt;&gt;&gt;&gt; YOURS
+ 206 
+ 207         if (outRecords.getCount() % ROW_PRINT_FREQUENCY == 0){
+ 208             LOG.info(record.toString());
+ 209         }
+ 210         outRecords.inc();
+ 211     }
+ 212 
+ 213     /**
+ 214      * 1. save key and value.
+ 215      * 2. set expired time for key when keyExpiredTime has been set.
+ 216      * @param key
+ 217      * @param value
+ 218      */
+ 219     private void saveKey(String key, String value) {
+ 220         if (keyExpiredTime != 0L) {
+ 221             boolean keyExist = jedis.exists(key);
+ 222             if (keyExist) {
+ 223                 jedis.del(key);
+ 224             }
+ 225             jedis.set(key, value, &quot;NX&quot;, &quot;PX&quot;, keyExpiredTime);
+ 226         } else {
+ 227             jedis.set(key, value);
+ 228         }
+ 229     }
+ 230 
+ 231     @Override
+ 232     public void close() throws IOException {
+ 233         if (jedisSentinelPool != null) {
+ 234             jedisSentinelPool.close();
+ 235         }
+ 236         if (pool != null) {
+ 237             pool.close();
+ 238         }
+ 239         if (jedis != null){
+ 240             if (jedis instanceof Closeable){
+ 241                 ((Closeable) jedis).close();
+ 242             }
+ 243         }
+ 244 
+ 245     }
+ 246 
+ 247     public String buildCacheKey(Map&lt;String, Object&gt; refData) {
+ 248         StringBuilder keyBuilder = new StringBuilder(tableName);
+ 249         for (String primaryKey : primaryKeys) {
+ 250             if (!refData.containsKey(primaryKey)) {
+ 251                 return null;
+ 252             }
+ 253             keyBuilder.append(&quot;_&quot;).append(refData.get(primaryKey));
+ 254         }
+ 255         return keyBuilder.toString();
+ 256     }
+ 257 
+ 258     public static class RedisOutputFormatBuilder {
+ 259         private final RedisOutputFormat redisOutputFormat;
+ 260 
+ 261         protected RedisOutputFormatBuilder(){
+ 262             this.redisOutputFormat = new RedisOutputFormat();
+ 263         }
+ 264 
+ 265         public RedisOutputFormatBuilder setUrl(String url){
+ 266             redisOutputFormat.url = url;
+ 267             return this;
+ 268         }
+ 269 
+ 270         public RedisOutputFormatBuilder setDatabase(String database){
+ 271             redisOutputFormat.database = database;
+ 272             return this;
+ 273         }
+ 274 
+ 275         public RedisOutputFormatBuilder setTableName(String tableName){
+ 276             redisOutputFormat.tableName = tableName;
+ 277             return this;
+ 278         }
+ 279 
+ 280         public RedisOutputFormatBuilder setPassword(String password){
+ 281             redisOutputFormat.password = password;
+ 282             return this;
+ 283         }
+ 284 
+ 285         public RedisOutputFormatBuilder setFieldNames(String[] fieldNames){
+ 286             redisOutputFormat.fieldNames = fieldNames;
+ 287             return this;
+ 288         }
+ 289 
+ 290         public RedisOutputFormatBuilder setFieldTypes(TypeInformation&lt;?&gt;[] fieldTypes){
+ 291             redisOutputFormat.fieldTypes = fieldTypes;
+ 292             return this;
+ 293         }
+ 294 
+ 295         public RedisOutputFormatBuilder setPrimaryKeys(List&lt;String &gt; primaryKeys){
+ 296             redisOutputFormat.primaryKeys = primaryKeys;
+ 297             return this;
+ 298         }
+ 299 
+ 300         public RedisOutputFormatBuilder setTimeout(int timeout){
+ 301             redisOutputFormat.timeout = timeout;
+ 302             return this;
+ 303         }
+ 304 
+ 305         public RedisOutputFormatBuilder setRedisType(int redisType){
+ 306             redisOutputFormat.redisType = redisType;
+ 307             return this;
+ 308         }
+ 309 
+ 310         public RedisOutputFormatBuilder setMaxTotal(String maxTotal){
+ 311             redisOutputFormat.maxTotal = maxTotal;
+ 312             return this;
+ 313         }
+ 314 
+ 315         public RedisOutputFormatBuilder setMaxIdle(String maxIdle){
+ 316             redisOutputFormat.maxIdle = maxIdle;
+ 317             return this;
+ 318         }
+ 319 
+ 320         public RedisOutputFormatBuilder setMinIdle(String minIdle){
+ 321             redisOutputFormat.minIdle = minIdle;
+ 322             return this;
+ 323         }
+ 324 
+ 325         public RedisOutputFormatBuilder setMasterName(String masterName){
+ 326             redisOutputFormat.masterName = masterName;
+ 327             return this;
+ 328         }
+ 329 
+ 330         public RedisOutputFormatBuilder setKeyExpiredTime(long keyExpiredTime){
+ 331             redisOutputFormat.keyExpiredTime = keyExpiredTime;
+ 332             return this;
+ 333         }
+ 334 
+ 335         public RedisOutputFormat finish(){
+ 336             if (redisOutputFormat.url == null){
+ 337                 throw new IllegalArgumentException(&quot;No URL supplied.&quot;);
+ 338             }
+ 339 
+ 340             if (redisOutputFormat.tableName == null){
+ 341                 throw new IllegalArgumentException(&quot;No tablename supplied.&quot;);
+ 342             }
+ 343 
+ 344             return redisOutputFormat;
+ 345         }
+ 346     }
+ 347 }
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ </pre></td>
+                            <td><pre>   1 /*
+   2  * Licensed to the Apache Software Foundation (ASF) under one
+   3  * or more contributor license agreements.  See the NOTICE file
+   4  * distributed with this work for additional information
+   5  * regarding copyright ownership.  The ASF licenses this file
+   6  * to you under the Apache License, Version 2.0 (the
+   7  * &quot;License&quot;); you may not use this file except in compliance
+   8  * with the License.  You may obtain a copy of the License at
+   9  *
+  10  *     http://www.apache.org/licenses/LICENSE-2.0
+  11  *
+  12  * Unless required by applicable law or agreed to in writing, software
+  13  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15  * See the License for the specific language governing permissions and
+  16  * limitations under the License.
+  17  */
+  18 package com.dtstack.flink.sql.sink.redis;
+  19 
+  20 import com.dtstack.flink.sql.outputformat.AbstractDtRichOutputFormat;
+  21 import com.dtstack.flink.sql.sink.redis.enums.RedisType;
+  22 import com.google.common.collect.Maps;
+  23 import java.io.Closeable;
+  24 import java.io.IOException;
+  25 import java.util.HashSet;
+  26 import java.util.List;
+  27 import java.util.Map;
+  28 import java.util.Set;
+  29 import org.apache.commons.lang3.StringUtils;
+  30 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
+  31 import org.apache.flink.api.common.typeinfo.TypeInformation;
+  32 import org.apache.flink.api.java.tuple.Tuple2;
+  33 import org.apache.flink.configuration.Configuration;
+  34 import org.apache.flink.types.Row;
+  35 import org.slf4j.Logger;
+  36 import org.slf4j.LoggerFactory;
+  37 import redis.clients.jedis.HostAndPort;
+  38 import redis.clients.jedis.JedisCluster;
+  39 import redis.clients.jedis.JedisCommands;
+  40 import redis.clients.jedis.JedisPool;
+  41 import redis.clients.jedis.JedisSentinelPool;
+  42 
+  43 
+  44 /**
+  45  * @author yanxi
+  46  */
+  47 public class RedisOutputFormat extends AbstractDtRichOutputFormat&lt;Tuple2&gt; {
+  48     private static final Logger LOG = LoggerFactory.getLogger(RedisOutputFormat.class);
+  49 
+  50     protected String[] fieldNames;
+  51 
+  52     protected TypeInformation&lt;?&gt;[] fieldTypes;
+  53 
+  54     protected List&lt;String&gt; primaryKeys;
+  55 
+  56     protected int timeout = 10000;
+  57 
+  58     private String url;
+  59 
+  60     private String database = &quot;0&quot;;
+  61 
+  62     private String tableName;
+  63 
+  64     private String password;
+  65 
+  66     private int redisType;
+  67 
+  68     private String maxTotal;
+  69 
+  70     private String maxIdle;
+  71 
+  72     private String minIdle;
+  73 
+  74     private String masterName;
+  75 
+  76     private JedisPool pool;
+  77 
+  78     private JedisCommands jedis;
+  79 
+  80     private JedisSentinelPool jedisSentinelPool;
+  81 
+  82     private GenericObjectPoolConfig poolConfig;
+  83 
+  84     private RedisOutputFormat() {
+  85     }
+  86 
+  87     public static RedisOutputFormatBuilder buildRedisOutputFormat(){
+  88         return new RedisOutputFormatBuilder();
+  89     }
+  90 
+  91     @Override
+  92     public void configure(Configuration parameters) {
+  93 
+  94     }
+  95 
+  96     @Override
+  97     public void open(int taskNumber, int numTasks) throws IOException {
+  98         establishConnection();
+  99         initMetric();
+ 100     }
+ 101 
+ 102     private GenericObjectPoolConfig setPoolConfig(String maxTotal, String maxIdle, String minIdle){
+ 103         GenericObjectPoolConfig config = new GenericObjectPoolConfig();
+ 104         if (maxTotal != null){
+ 105             config.setMaxTotal(Integer.parseInt(maxTotal));
+ 106         }
+ 107         if (maxIdle != null){
+ 108             config.setMaxIdle(Integer.parseInt(maxIdle));
+ 109         }
+ 110         if (minIdle != null){
+ 111             config.setMinIdle(Integer.parseInt(minIdle));
+ 112         }
+ 113         return config;
+ 114     }
+ 115 
+ 116     private void establishConnection() {
+ 117         poolConfig = setPoolConfig(maxTotal, maxIdle, minIdle);
+ 118         String[] nodes = StringUtils.split(url, &quot;,&quot;);
+ 119         String[] firstIpPort = StringUtils.split(nodes[0], &quot;:&quot;);
+ 120         String firstIp = firstIpPort[0];
+ 121         String firstPort = firstIpPort[1];
+ 122         Set&lt;HostAndPort&gt; addresses = new HashSet&lt;&gt;();
+ 123         Set&lt;String&gt; ipPorts = new HashSet&lt;&gt;();
+ 124         for (String ipPort : nodes) {
+ 125             ipPorts.add(ipPort);
+ 126             String[] ipPortPair = StringUtils.split(ipPort, &quot;:&quot;);
+ 127             addresses.add(new HostAndPort(ipPortPair[0].trim(), Integer.parseInt(ipPortPair[1].trim())));
+ 128         }
+ 129         switch (RedisType.parse(redisType)) {
+ 130             case STANDALONE :
+<abbr title=" 131                 pool = new JedisPool(poolConfig, firstIp, Integer.parseInt(firstPort), timeout, password, Integer.parseInt(database));"> 131                 pool = new JedisPool(poolConfig, firstIp, Integer.parseInt(firstPort), timeout, password,🔵</abbr>
+ 132                 jedis = pool.getResource();
+ 133                 break;
+ 134             case SENTINEL :
+<abbr title=" 135                 jedisSentinelPool = new JedisSentinelPool(masterName, ipPorts, poolConfig, timeout, password, Integer.parseInt(database));"> 135                 jedisSentinelPool = new JedisSentinelPool(masterName, ipPorts, poolConfig, timeout, passw🔵</abbr>
+ 136                 jedis = jedisSentinelPool.getResource();
+ 137                 break;
+ 138             case CLUSTER :
+ 139                 jedis = new JedisCluster(addresses, timeout, timeout, 10, password, poolConfig);
+ 140                 break;
+ 141             default :
+ 142                 throw new RuntimeException((&quot;unsupported redis type[ &quot; + redisType) + &quot;]&quot;);
+ 143         }
+ 144     }
+ 145 
+ 146     @Override
+ 147     public void writeRecord(Tuple2 record) throws IOException {
+ 148         Tuple2&lt;Boolean, Row&gt; tupleTrans = record;
+ 149         Boolean retract = tupleTrans.getField(0);
+ 150         if (!retract) {
+ 151             return;
+ 152         }
+ 153         Row row = tupleTrans.getField(1);
+ 154         if (row.getArity() != fieldNames.length) {
+ 155             return;
+ 156         }
+ 157         Map&lt;String, Object&gt; refData = Maps.newHashMap();
+ 158         for (int i = 0; i &lt; fieldNames.length; i++) {
+ 159             refData.put(fieldNames[i], row.getField(i));
+ 160         }
+ 161         String redisKey = buildCacheKey(refData);
+ 162         refData.forEach(( key, value) -&gt; jedis.hset(redisKey, key, String.valueOf(value)));
+ 163         if ((outRecords.getCount() % ROW_PRINT_FREQUENCY) == 0) {
+ 164             LOG.info(record.toString());
+ 165         }
+ 166         outRecords.inc();
+ 167     }
+ 168 
+ 169     @Override
+ 170     public void close() throws IOException {
+ 171         if (jedisSentinelPool != null) {
+ 172             jedisSentinelPool.close();
+ 173         }
+ 174         if (pool != null) {
+ 175             pool.close();
+ 176         }
+ 177         if (jedis != null){
+ 178             if (jedis instanceof Closeable){
+ 179                 ((Closeable) jedis).close();
+ 180             }
+ 181         }
+ 182 
+ 183     }
+ 184 
+ 185     public String buildCacheKey(Map&lt;String, Object&gt; refData) {
+ 186         StringBuilder keyBuilder = new StringBuilder(tableName);
+ 187         for (String primaryKey : primaryKeys) {
+ 188             if (!refData.containsKey(primaryKey)) {
+ 189                 return null;
+ 190             }
+ 191             keyBuilder.append(&quot;_&quot;).append(refData.get(primaryKey));
+ 192         }
+ 193         return keyBuilder.toString();
+ 194     }
+ 195 
+ 196     public static class RedisOutputFormatBuilder {
+ 197         private final RedisOutputFormat redisOutputFormat;
+ 198 
+ 199         protected RedisOutputFormatBuilder() {
+ 200             this.redisOutputFormat = new RedisOutputFormat();
+ 201         }
+ 202 
+ 203         public RedisOutputFormatBuilder setUrl(String url){
+ 204             redisOutputFormat.url = url;
+ 205             return this;
+ 206         }
+ 207 
+ 208         public RedisOutputFormatBuilder setDatabase(String database){
+ 209             redisOutputFormat.database = database;
+ 210             return this;
+ 211         }
+ 212 
+ 213         public RedisOutputFormatBuilder setTableName(String tableName){
+ 214             redisOutputFormat.tableName = tableName;
+ 215             return this;
+ 216         }
+ 217 
+ 218         public RedisOutputFormatBuilder setPassword(String password){
+ 219             redisOutputFormat.password = password;
+ 220             return this;
+ 221         }
+ 222 
+ 223         public RedisOutputFormatBuilder setFieldNames(String[] fieldNames){
+ 224             redisOutputFormat.fieldNames = fieldNames;
+ 225             return this;
+ 226         }
+ 227 
+ 228         public RedisOutputFormatBuilder setFieldTypes(TypeInformation&lt;?&gt;[] fieldTypes){
+ 229             redisOutputFormat.fieldTypes = fieldTypes;
+ 230             return this;
+ 231         }
+ 232 
+ 233         public RedisOutputFormatBuilder setPrimaryKeys(List&lt;String &gt; primaryKeys){
+ 234             redisOutputFormat.primaryKeys = primaryKeys;
+ 235             return this;
+ 236         }
+ 237 
+ 238         public RedisOutputFormatBuilder setTimeout(int timeout){
+ 239             redisOutputFormat.timeout = timeout;
+ 240             return this;
+ 241         }
+ 242 
+ 243         public RedisOutputFormatBuilder setRedisType(int redisType){
+ 244             redisOutputFormat.redisType = redisType;
+ 245             return this;
+ 246         }
+ 247 
+ 248         public RedisOutputFormatBuilder setMaxTotal(String maxTotal){
+ 249             redisOutputFormat.maxTotal = maxTotal;
+ 250             return this;
+ 251         }
+ 252 
+ 253         public RedisOutputFormatBuilder setMaxIdle(String maxIdle){
+ 254             redisOutputFormat.maxIdle = maxIdle;
+ 255             return this;
+ 256         }
+ 257 
+ 258         public RedisOutputFormatBuilder setMinIdle(String minIdle){
+ 259             redisOutputFormat.minIdle = minIdle;
+ 260             return this;
+ 261         }
+ 262 
+ 263         public RedisOutputFormatBuilder setMasterName(String masterName){
+ 264             redisOutputFormat.masterName = masterName;
+ 265             return this;
+ 266         }
+ 267 
+ 268         public RedisOutputFormatBuilder setKeyExpiredTime(long keyExpiredTime){
+ 269             redisOutputFormat.keyExpiredTime = keyExpiredTime;
+ 270             return this;
+ 271         }
+ 272 
+ 273         public RedisOutputFormat finish(){
+ 274             if (redisOutputFormat.url == null){
+ 275                 throw new IllegalArgumentException(&quot;No URL supplied.&quot;);
+ 276             }
+ 277 
+ 278             if (redisOutputFormat.tableName == null){
+ 279                 throw new IllegalArgumentException(&quot;No tablename supplied.&quot;);
+ 280             }
+ 281 
+ 282             return redisOutputFormat;
+ 283         }
+ 284     }
+ 285 }
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ </pre></td>
+                        </tr>
+                    </table>
+                </div>
+                <div id="bottom">
+                    <table style="margin:auto">
+                        <tr>
+                            <th>ours vs. base</th>
+                            <th>theirs vs. base</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1  /*
+   2   * Licensed to the Apache Software Foundation (ASF) under one
+   3   * or more contributor license agreements.  See the NOTICE file
+   4   * distributed with this work for additional information
+   5   * regarding copyright ownership.  The ASF licenses this file
+   6   * to you under the Apache License, Version 2.0 (the
+   7   * &quot;License&quot;); you may not use this file except in compliance
+   8   * with the License.  You may obtain a copy of the License at
+   9   *
+  10   *     http://www.apache.org/licenses/LICENSE-2.0
+  11   *
+  12   * Unless required by applicable law or agreed to in writing, software
+  13   * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15   * See the License for the specific language governing permissions and
+  16   * limitations under the License.
+  17   */
+  18  
+  19  package com.dtstack.flink.sql.sink.redis;
+  20  
+  21  import com.dtstack.flink.sql.outputformat.AbstractDtRichOutputFormat;
+  22  import com.dtstack.flink.sql.sink.redis.enums.RedisType;
+  23  import com.google.common.collect.Maps;
+  24  import org.apache.commons.lang3.StringUtils;
+  25  import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
+  26  import org.apache.flink.api.common.typeinfo.TypeInformation;
+  27  import org.apache.flink.api.java.tuple.Tuple2;
+  28  import org.apache.flink.configuration.Configuration;
+  29  import org.apache.flink.types.Row;
+  30  import org.slf4j.Logger;
+  31  import org.slf4j.LoggerFactory;
+  32  import redis.clients.jedis.HostAndPort;
+  33  import redis.clients.jedis.JedisCluster;
+  34  import redis.clients.jedis.JedisCommands;
+  35  import redis.clients.jedis.JedisPool;
+  36  import redis.clients.jedis.JedisSentinelPool;
+  37  
+  38  import java.io.Closeable;
+  39  import java.io.IOException;
+  40  import java.util.HashMap;
+  41  import java.util.HashSet;
+  42  import java.util.LinkedList;
+  43  import java.util.List;
+
+  44  import java.util.Set;
+  45  
+  46  /**
+  47   * @author yanxi
+  48   */
+  49  public class RedisOutputFormat extends AbstractDtRichOutputFormat&lt;Tuple2&gt; {
+  50      private static final Logger LOG = LoggerFactory.getLogger(RedisOutputFormat.class);
+  51  
+
+
+
+
+  52      private String url;
+  53  
+  54      private String database;
+  55  
+
+  56      private String tableName;
+  57  
+  58      private String password;
+  59  
+  60      private int redisType;
+  61  
+  62      private String maxTotal;
+  63  
+  64      private String maxIdle;
+  65  
+  66      private String minIdle;
+  67  
+  68      private String masterName;
+  69  
+  70      protected String[] fieldNames;
+  71  
+  72      protected TypeInformation&lt;?&gt;[] fieldTypes;
+  73  
+  74      protected List&lt;String&gt; primaryKeys;
+  75  
+  76      protected int timeout;
+  77  
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  78 +    protected long keyExpiredTime;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  79 +</span>
+  80      private JedisPool pool;
+  81  
+  82      private JedisCommands jedis;
+  83  
+  84      private JedisSentinelPool jedisSentinelPool;
+  85  
+  86      private GenericObjectPoolConfig poolConfig;
+  87  
+  88      private RedisOutputFormat(){
+  89      }
+
+
+
+
+
+
+
+  90      @Override
+  91      public void configure(Configuration parameters) {
+  92  
+  93      }
+  94  
+  95      @Override
+  96      public void open(int taskNumber, int numTasks) throws IOException {
+  97          establishConnection();
+  98          initMetric();
+  99      }
+ 100  
+ 101      private GenericObjectPoolConfig setPoolConfig(String maxTotal, String maxIdle, String minIdle){
+
+ 102          GenericObjectPoolConfig config = new GenericObjectPoolConfig();
+ 103          if (maxTotal != null){
+
+ 104              config.setMaxTotal(Integer.parseInt(maxTotal));
+ 105          }
+ 106          if (maxIdle != null){
+
+ 107              config.setMaxIdle(Integer.parseInt(maxIdle));
+ 108          }
+ 109          if (minIdle != null){
+
+ 110              config.setMinIdle(Integer.parseInt(minIdle));
+ 111          }
+ 112          return config;
+ 113      }
+ 114  
+ 115      private void establishConnection() {
+ 116          poolConfig = setPoolConfig(maxTotal, maxIdle, minIdle);
+ 117          String[] nodes = StringUtils.split(url, &quot;,&quot;);
+ 118          String[] firstIpPort = StringUtils.split(nodes[0], &quot;:&quot;);
+ 119          String firstIp = firstIpPort[0];
+ 120          String firstPort = firstIpPort[1];
+ 121          Set&lt;HostAndPort&gt; addresses = new HashSet&lt;&gt;();
+ 122          Set&lt;String&gt; ipPorts = new HashSet&lt;&gt;();
+ 123          for (String ipPort : nodes) {
+ 124              ipPorts.add(ipPort);
+ 125              String[] ipPortPair = StringUtils.split(ipPort, &quot;:&quot;);
+ 126              addresses.add(new HostAndPort(ipPortPair[0].trim(), Integer.valueOf(ipPortPair[1].trim())));
+ 127          }
+ 128          if (timeout == 0){
+ 129              timeout = 10000;
+ 130          }
+ 131          if (database == null)
+ 132          {
+ 133              database = &quot;0&quot;;
+ 134          }
+ 135  
+ 136          switch (redisType){
+ 137              //单机
+ 138              case 1:
+
+
+
+
+
+<abbr title=" 139                  pool = new JedisPool(poolConfig, firstIp, Integer.parseInt(firstPort), timeout, password, Integer.parseInt(database));"> 139                  pool = new JedisPool(poolConfig, firstIp, Integer.parseInt(firstPort), timeout, password, Integer.🔵</abbr>
+ 140                  jedis = pool.getResource();
+ 141                  break;
+ 142              //哨兵
+ 143              case 2:
+
+<abbr title=" 144                  jedisSentinelPool = new JedisSentinelPool(masterName, ipPorts, poolConfig, timeout, password, Integer.parseInt(database));"> 144                  jedisSentinelPool = new JedisSentinelPool(masterName, ipPorts, poolConfig, timeout, password, Inte🔵</abbr>
+ 145                  jedis = jedisSentinelPool.getResource();
+ 146                  break;
+ 147              //集群
+ 148              case 3:
+
+ 149                  jedis = new JedisCluster(addresses, timeout, timeout, 10, password, poolConfig);
+
+ 150              default:
+
+ 151          }
+ 152      }
+ 153  
+ 154      @Override
+ 155      public void writeRecord(Tuple2 record) throws IOException {
+ 156          Tuple2&lt;Boolean, Row&gt; tupleTrans = record;
+ 157          Boolean retract = tupleTrans.getField(0);
+ 158          if (!retract) {
+ 159              return;
+ 160          }
+ 161          Row row = tupleTrans.getField(1);
+ 162          if (row.getArity() != fieldNames.length) {
+ 163              return;
+ 164          }
+ 165  
+ 166          HashMap&lt;String, Integer&gt; map = new HashMap&lt;&gt;(8);
+ 167          for (String primaryKey : primaryKeys) {
+ 168              for (int i = 0; i &lt; fieldNames.length; i++) {
+ 169                  if (fieldNames[i].equals(primaryKey)) {
+ 170                      map.put(primaryKey, i);
+ 171                  }
+ 172              }
+ 173          }
+ 174  
+ 175          List&lt;String&gt; kvList = new LinkedList&lt;&gt;();
+ 176          for (String primaryKey : primaryKeys){
+ 177              StringBuilder primaryKv = new StringBuilder();
+ 178              int index = map.get(primaryKey).intValue();
+ 179              primaryKv.append(primaryKey).append(&quot;:&quot;).append(row.getField(index));
+ 180              kvList.add(primaryKv.toString());
+ 181          }
+ 182  
+ 183          String perKey = String.join(&quot;:&quot;, kvList);
+
+ 184          for (int i = 0; i &lt; fieldNames.length; i++) {
+ 185              StringBuilder key = new StringBuilder();
+ 186              key.append(tableName).append(&quot;:&quot;).append(perKey).append(&quot;:&quot;).append(fieldNames[i]);
+ 187  
+ 188              String value = &quot;null&quot;;
+ 189              Object field = row.getField(i);
+ 190              if (field != null) {
+ 191                  value = field.toString();
+ 192              }
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 193 -            jedis.set(key.toString(), value);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 194 +            saveKey(key.toString(), value);</span>
+ 195          }
+ 196  
+ 197          if (outRecords.getCount() % ROW_PRINT_FREQUENCY == 0){
+
+
+
+
+
+
+ 198              LOG.info(record.toString());
+ 199          }
+ 200          outRecords.inc();
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 201 +    }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 202 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 203 +    /**</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 204 +     * 1. save key and value.</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 205 +     * 2. set expired time for key when keyExpiredTime has been set.</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 206 +     * @param key</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 207 +     * @param value</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 208 +     */</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 209 +    private void saveKey(String key, String value) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 210 +        if (keyExpiredTime != 0L) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 211 +            boolean keyExist = jedis.exists(key);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 212 +            if (keyExist) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 213 +                jedis.del(key);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 214 +            }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 215 +            jedis.set(key, value, &quot;NX&quot;, &quot;PX&quot;, keyExpiredTime);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 216 +        } else {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 217 +            jedis.set(key, value);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 218 +        }</span>
+ 219      }
+ 220  
+ 221      @Override
+ 222      public void close() throws IOException {
+ 223          if (jedisSentinelPool != null) {
+ 224              jedisSentinelPool.close();
+ 225          }
+ 226          if (pool != null) {
+ 227              pool.close();
+ 228          }
+ 229          if (jedis != null){
+ 230              if (jedis instanceof Closeable){
+
+
+ 231                  ((Closeable) jedis).close();
+ 232              }
+ 233          }
+ 234  
+ 235      }
+ 236  
+ 237      public static RedisOutputFormatBuilder buildRedisOutputFormat(){
+ 238          return new RedisOutputFormatBuilder();
+ 239      }
+ 240  
+ 241      public static class RedisOutputFormatBuilder{
+
+
+
+
+
+
+
+
+
+
+
+
+ 242          private final RedisOutputFormat redisOutputFormat;
+ 243  
+ 244          protected RedisOutputFormatBuilder(){
+
+ 245              this.redisOutputFormat = new RedisOutputFormat();
+ 246          }
+ 247  
+ 248          public RedisOutputFormatBuilder setUrl(String url){
+
+ 249              redisOutputFormat.url = url;
+ 250              return this;
+ 251          }
+ 252  
+ 253          public RedisOutputFormatBuilder setDatabase(String database){
+
+ 254              redisOutputFormat.database = database;
+ 255              return this;
+ 256          }
+ 257  
+ 258          public RedisOutputFormatBuilder setTableName(String tableName){
+
+ 259              redisOutputFormat.tableName = tableName;
+ 260              return this;
+ 261          }
+ 262  
+ 263          public RedisOutputFormatBuilder setPassword(String password){
+
+ 264              redisOutputFormat.password = password;
+ 265              return this;
+ 266          }
+ 267  
+ 268          public RedisOutputFormatBuilder setFieldNames(String[] fieldNames){
+
+ 269              redisOutputFormat.fieldNames = fieldNames;
+ 270              return this;
+ 271          }
+ 272  
+ 273          public RedisOutputFormatBuilder setFieldTypes(TypeInformation&lt;?&gt;[] fieldTypes){
+
+ 274              redisOutputFormat.fieldTypes = fieldTypes;
+ 275              return this;
+ 276          }
+ 277  
+ 278          public RedisOutputFormatBuilder setPrimaryKeys(List&lt;String &gt; primaryKeys){
+
+ 279              redisOutputFormat.primaryKeys = primaryKeys;
+ 280              return this;
+ 281          }
+ 282  
+ 283          public RedisOutputFormatBuilder setTimeout(int timeout){
+
+ 284              redisOutputFormat.timeout = timeout;
+ 285              return this;
+ 286          }
+ 287  
+ 288          public RedisOutputFormatBuilder setRedisType(int redisType){
+
+ 289              redisOutputFormat.redisType = redisType;
+ 290              return this;
+ 291          }
+ 292  
+ 293          public RedisOutputFormatBuilder setMaxTotal(String maxTotal){
+
+ 294              redisOutputFormat.maxTotal = maxTotal;
+ 295              return this;
+ 296          }
+ 297  
+ 298          public RedisOutputFormatBuilder setMaxIdle(String maxIdle){
+
+ 299              redisOutputFormat.maxIdle = maxIdle;
+ 300              return this;
+ 301          }
+ 302  
+ 303          public RedisOutputFormatBuilder setMinIdle(String minIdle){
+
+ 304              redisOutputFormat.minIdle = minIdle;
+ 305              return this;
+ 306          }
+ 307  
+ 308          public RedisOutputFormatBuilder setMasterName(String masterName){
+
+ 309              redisOutputFormat.masterName = masterName;
+ 310              return this;
+ 311          }
+ 312  
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 313 +        public RedisOutputFormatBuilder setKeyExpiredTime(long keyExpiredTime){</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 314 +            redisOutputFormat.keyExpiredTime = keyExpiredTime;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 315 +            return this;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 316 +        }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 317 +</span>
+ 318          public RedisOutputFormat finish(){
+ 319              if (redisOutputFormat.url == null){
+
+
+ 320                  throw new IllegalArgumentException(&quot;No URL supplied.&quot;);
+ 321              }
+ 322  
+ 323              if (redisOutputFormat.tableName == null){
+
+ 324                  throw new IllegalArgumentException(&quot;No tablename supplied.&quot;);
+ 325              }
+ 326  
+ 327              return redisOutputFormat;
+ 328          }
+ 329      }
+ 330  }</pre></td>
+                            <td><pre>   1  /*
+   2   * Licensed to the Apache Software Foundation (ASF) under one
+   3   * or more contributor license agreements.  See the NOTICE file
+   4   * distributed with this work for additional information
+   5   * regarding copyright ownership.  The ASF licenses this file
+   6   * to you under the Apache License, Version 2.0 (the
+   7   * &quot;License&quot;); you may not use this file except in compliance
+   8   * with the License.  You may obtain a copy of the License at
+   9   *
+  10   *     http://www.apache.org/licenses/LICENSE-2.0
+  11   *
+  12   * Unless required by applicable law or agreed to in writing, software
+  13   * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15   * See the License for the specific language governing permissions and
+  16   * limitations under the License.
+  17   */
+  18  
+  19  package com.dtstack.flink.sql.sink.redis;
+  20  
+  21  import com.dtstack.flink.sql.outputformat.AbstractDtRichOutputFormat;
+  22  import com.dtstack.flink.sql.sink.redis.enums.RedisType;
+  23  import com.google.common.collect.Maps;
+  24  import org.apache.commons.lang3.StringUtils;
+  25  import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
+  26  import org.apache.flink.api.common.typeinfo.TypeInformation;
+  27  import org.apache.flink.api.java.tuple.Tuple2;
+  28  import org.apache.flink.configuration.Configuration;
+  29  import org.apache.flink.types.Row;
+  30  import org.slf4j.Logger;
+  31  import org.slf4j.LoggerFactory;
+  32  import redis.clients.jedis.HostAndPort;
+  33  import redis.clients.jedis.JedisCluster;
+  34  import redis.clients.jedis.JedisCommands;
+  35  import redis.clients.jedis.JedisPool;
+  36  import redis.clients.jedis.JedisSentinelPool;
+  37  
+  38  import java.io.Closeable;
+  39  import java.io.IOException;
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  40 -import java.util.HashMap;</span>
+  41  import java.util.HashSet;
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  42 -import java.util.LinkedList;</span>
+  43  import java.util.List;
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  44 +import java.util.Map;</span>
+  45  import java.util.Set;
+  46  
+  47  /**
+  48   * @author yanxi
+  49   */
+  50  public class RedisOutputFormat extends AbstractDtRichOutputFormat&lt;Tuple2&gt; {
+  51      private static final Logger LOG = LoggerFactory.getLogger(RedisOutputFormat.class);
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  52 -</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  53 +    protected String[] fieldNames;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  54 +    protected TypeInformation&lt;?&gt;[] fieldTypes;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  55 +    protected List&lt;String&gt; primaryKeys;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  56 +    protected int timeout = 10000;</span>
+  57      private String url;
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  58 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  59 -    private String database;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  60 -</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  61 +    private String database = &quot;0&quot;;</span>
+  62      private String tableName;
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  63 -</span>
+  64      private String password;
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  65 -</span>
+  66      private int redisType;
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  67 -</span>
+  68      private String maxTotal;
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  69 -</span>
+  70      private String maxIdle;
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  71 -</span>
+  72      private String minIdle;
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  73 -</span>
+  74      private String masterName;
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  75 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  76 -    protected String[] fieldNames;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  77 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  78 -    protected TypeInformation&lt;?&gt;[] fieldTypes;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  79 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  80 -    protected List&lt;String&gt; primaryKeys;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  81 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  82 -    protected int timeout;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  83 -</span>
+
+
+  84      private JedisPool pool;
+  85  
+  86      private JedisCommands jedis;
+  87  
+  88      private JedisSentinelPool jedisSentinelPool;
+  89  
+  90      private GenericObjectPoolConfig poolConfig;
+  91  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  92 -    private RedisOutputFormat(){</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  93 -    }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  94 +    private RedisOutputFormat() {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  95 +    }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  96 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  97 +    public static RedisOutputFormatBuilder buildRedisOutputFormat() {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  98 +        return new RedisOutputFormatBuilder();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  99 +    }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 100 +</span>
+ 101      @Override
+ 102      public void configure(Configuration parameters) {
+ 103  
+ 104      }
+ 105  
+ 106      @Override
+ 107      public void open(int taskNumber, int numTasks) throws IOException {
+ 108          establishConnection();
+ 109          initMetric();
+ 110      }
+ 111  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 112 -    private GenericObjectPoolConfig setPoolConfig(String maxTotal, String maxIdle, String minIdle){</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 113 +    private GenericObjectPoolConfig setPoolConfig(String maxTotal, String maxIdle, String minIdle) {</span>
+ 114          GenericObjectPoolConfig config = new GenericObjectPoolConfig();
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 115 -        if (maxTotal != null){</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 116 +        if (maxTotal != null) {</span>
+ 117              config.setMaxTotal(Integer.parseInt(maxTotal));
+ 118          }
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 119 -        if (maxIdle != null){</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 120 +        if (maxIdle != null) {</span>
+ 121              config.setMaxIdle(Integer.parseInt(maxIdle));
+ 122          }
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 123 -        if (minIdle != null){</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 124 +        if (minIdle != null) {</span>
+ 125              config.setMinIdle(Integer.parseInt(minIdle));
+ 126          }
+ 127          return config;
+ 128      }
+ 129  
+ 130      private void establishConnection() {
+ 131          poolConfig = setPoolConfig(maxTotal, maxIdle, minIdle);
+ 132          String[] nodes = StringUtils.split(url, &quot;,&quot;);
+ 133          String[] firstIpPort = StringUtils.split(nodes[0], &quot;:&quot;);
+ 134          String firstIp = firstIpPort[0];
+ 135          String firstPort = firstIpPort[1];
+ 136          Set&lt;HostAndPort&gt; addresses = new HashSet&lt;&gt;();
+ 137          Set&lt;String&gt; ipPorts = new HashSet&lt;&gt;();
+ 138          for (String ipPort : nodes) {
+ 139              ipPorts.add(ipPort);
+ 140              String[] ipPortPair = StringUtils.split(ipPort, &quot;:&quot;);
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 141 -            addresses.add(new HostAndPort(ipPortPair[0].trim(), Integer.valueOf(ipPortPair[1].trim())));</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 142 -        }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 143 -        if (timeout == 0){</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 144 -            timeout = 10000;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 145 -        }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 146 -        if (database == null)</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 147 -        {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 148 -            database = &quot;0&quot;;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 149 -        }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 150 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 151 -        switch (redisType){</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 152 -            //单机</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 153 -            case 1:</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 154 +            addresses.add(new HostAndPort(ipPortPair[0].trim(), Integer.parseInt(ipPortPair[1].trim())));</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 155 +        }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 156 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 157 +        switch (RedisType.parse(redisType)) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 158 +            case STANDALONE:</span>
+<abbr title=" 159                  pool = new JedisPool(poolConfig, firstIp, Integer.parseInt(firstPort), timeout, password, Integer.parseInt(database));"> 159                  pool = new JedisPool(poolConfig, firstIp, Integer.parseInt(firstPort), timeout, password, Integer.🔵</abbr>
+ 160                  jedis = pool.getResource();
+ 161                  break;
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 162 -            //哨兵</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 163 -            case 2:</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 164 +            case SENTINEL:</span>
+<abbr title=" 165                  jedisSentinelPool = new JedisSentinelPool(masterName, ipPorts, poolConfig, timeout, password, Integer.parseInt(database));"> 165                  jedisSentinelPool = new JedisSentinelPool(masterName, ipPorts, poolConfig, timeout, password, Inte🔵</abbr>
+ 166                  jedis = jedisSentinelPool.getResource();
+ 167                  break;
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 168 -            //集群</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 169 -            case 3:</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 170 +            case CLUSTER:</span>
+ 171                  jedis = new JedisCluster(addresses, timeout, timeout, 10, password, poolConfig);
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 172 +                break;</span>
+ 173              default:
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 174 +                throw new RuntimeException(&quot;unsupported redis type[ &quot; + redisType + &quot;]&quot;);</span>
+ 175          }
+ 176      }
+ 177  
+ 178      @Override
+ 179      public void writeRecord(Tuple2 record) throws IOException {
+ 180          Tuple2&lt;Boolean, Row&gt; tupleTrans = record;
+ 181          Boolean retract = tupleTrans.getField(0);
+ 182          if (!retract) {
+ 183              return;
+ 184          }
+ 185          Row row = tupleTrans.getField(1);
+ 186          if (row.getArity() != fieldNames.length) {
+ 187              return;
+ 188          }
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 189 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 190 -        HashMap&lt;String, Integer&gt; map = new HashMap&lt;&gt;(8);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 191 -        for (String primaryKey : primaryKeys) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 192 -            for (int i = 0; i &lt; fieldNames.length; i++) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 193 -                if (fieldNames[i].equals(primaryKey)) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 194 -                    map.put(primaryKey, i);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 195 -                }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 196 -            }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 197 -        }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 198 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 199 -        List&lt;String&gt; kvList = new LinkedList&lt;&gt;();</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 200 -        for (String primaryKey : primaryKeys){</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 201 -            StringBuilder primaryKv = new StringBuilder();</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 202 -            int index = map.get(primaryKey).intValue();</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 203 -            primaryKv.append(primaryKey).append(&quot;:&quot;).append(row.getField(index));</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 204 -            kvList.add(primaryKv.toString());</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 205 -        }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 206 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 207 -        String perKey = String.join(&quot;:&quot;, kvList);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 208 +        Map&lt;String, Object&gt; refData = Maps.newHashMap();</span>
+ 209          for (int i = 0; i &lt; fieldNames.length; i++) {
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 210 -            StringBuilder key = new StringBuilder();</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 211 -            key.append(tableName).append(&quot;:&quot;).append(perKey).append(&quot;:&quot;).append(fieldNames[i]);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 212 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 213 -            String value = &quot;null&quot;;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 214 -            Object field = row.getField(i);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 215 -            if (field != null) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 216 -                value = field.toString();</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 217 -            }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 218 -            jedis.set(key.toString(), value);</span>
+
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 219 -        }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 220 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 221 -        if (outRecords.getCount() % ROW_PRINT_FREQUENCY == 0){</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 222 +            refData.put(fieldNames[i], row.getField(i));</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 223 +        }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 224 +        String redisKey = buildCacheKey(refData);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 225 +        refData.forEach((key, value) -&gt; jedis.hset(redisKey, key, String.valueOf(value)));</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 226 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 227 +        if (outRecords.getCount() % ROW_PRINT_FREQUENCY == 0) {</span>
+ 228              LOG.info(record.toString());
+ 229          }
+ 230          outRecords.inc();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 231      }
+ 232  
+ 233      @Override
+ 234      public void close() throws IOException {
+ 235          if (jedisSentinelPool != null) {
+ 236              jedisSentinelPool.close();
+ 237          }
+ 238          if (pool != null) {
+ 239              pool.close();
+ 240          }
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 241 -        if (jedis != null){</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 242 -            if (jedis instanceof Closeable){</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 243 +        if (jedis != null) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 244 +            if (jedis instanceof Closeable) {</span>
+ 245                  ((Closeable) jedis).close();
+ 246              }
+ 247          }
+ 248  
+ 249      }
+ 250  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 251 -    public static RedisOutputFormatBuilder buildRedisOutputFormat(){</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 252 -        return new RedisOutputFormatBuilder();</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 253 -    }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 254 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 255 -    public static class RedisOutputFormatBuilder{</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 256 +    public String buildCacheKey(Map&lt;String, Object&gt; refData) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 257 +        StringBuilder keyBuilder = new StringBuilder(tableName);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 258 +        for (String primaryKey : primaryKeys) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 259 +            if (!refData.containsKey(primaryKey)) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 260 +                return null;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 261 +            }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 262 +            keyBuilder.append(&quot;_&quot;).append(refData.get(primaryKey));</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 263 +        }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 264 +        return keyBuilder.toString();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 265 +    }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 266 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 267 +    public static class RedisOutputFormatBuilder {</span>
+ 268          private final RedisOutputFormat redisOutputFormat;
+ 269  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 270 -        protected RedisOutputFormatBuilder(){</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 271 +        protected RedisOutputFormatBuilder() {</span>
+ 272              this.redisOutputFormat = new RedisOutputFormat();
+ 273          }
+ 274  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 275 -        public RedisOutputFormatBuilder setUrl(String url){</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 276 +        public RedisOutputFormatBuilder setUrl(String url) {</span>
+ 277              redisOutputFormat.url = url;
+ 278              return this;
+ 279          }
+ 280  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 281 -        public RedisOutputFormatBuilder setDatabase(String database){</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 282 +        public RedisOutputFormatBuilder setDatabase(String database) {</span>
+ 283              redisOutputFormat.database = database;
+ 284              return this;
+ 285          }
+ 286  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 287 -        public RedisOutputFormatBuilder setTableName(String tableName){</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 288 +        public RedisOutputFormatBuilder setTableName(String tableName) {</span>
+ 289              redisOutputFormat.tableName = tableName;
+ 290              return this;
+ 291          }
+ 292  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 293 -        public RedisOutputFormatBuilder setPassword(String password){</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 294 +        public RedisOutputFormatBuilder setPassword(String password) {</span>
+ 295              redisOutputFormat.password = password;
+ 296              return this;
+ 297          }
+ 298  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 299 -        public RedisOutputFormatBuilder setFieldNames(String[] fieldNames){</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 300 +        public RedisOutputFormatBuilder setFieldNames(String[] fieldNames) {</span>
+ 301              redisOutputFormat.fieldNames = fieldNames;
+ 302              return this;
+ 303          }
+ 304  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 305 -        public RedisOutputFormatBuilder setFieldTypes(TypeInformation&lt;?&gt;[] fieldTypes){</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 306 +        public RedisOutputFormatBuilder setFieldTypes(TypeInformation&lt;?&gt;[] fieldTypes) {</span>
+ 307              redisOutputFormat.fieldTypes = fieldTypes;
+ 308              return this;
+ 309          }
+ 310  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 311 -        public RedisOutputFormatBuilder setPrimaryKeys(List&lt;String &gt; primaryKeys){</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 312 +        public RedisOutputFormatBuilder setPrimaryKeys(List&lt;String&gt; primaryKeys) {</span>
+ 313              redisOutputFormat.primaryKeys = primaryKeys;
+ 314              return this;
+ 315          }
+ 316  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 317 -        public RedisOutputFormatBuilder setTimeout(int timeout){</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 318 +        public RedisOutputFormatBuilder setTimeout(int timeout) {</span>
+ 319              redisOutputFormat.timeout = timeout;
+ 320              return this;
+ 321          }
+ 322  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 323 -        public RedisOutputFormatBuilder setRedisType(int redisType){</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 324 +        public RedisOutputFormatBuilder setRedisType(int redisType) {</span>
+ 325              redisOutputFormat.redisType = redisType;
+ 326              return this;
+ 327          }
+ 328  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 329 -        public RedisOutputFormatBuilder setMaxTotal(String maxTotal){</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 330 +        public RedisOutputFormatBuilder setMaxTotal(String maxTotal) {</span>
+ 331              redisOutputFormat.maxTotal = maxTotal;
+ 332              return this;
+ 333          }
+ 334  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 335 -        public RedisOutputFormatBuilder setMaxIdle(String maxIdle){</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 336 +        public RedisOutputFormatBuilder setMaxIdle(String maxIdle) {</span>
+ 337              redisOutputFormat.maxIdle = maxIdle;
+ 338              return this;
+ 339          }
+ 340  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 341 -        public RedisOutputFormatBuilder setMinIdle(String minIdle){</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 342 +        public RedisOutputFormatBuilder setMinIdle(String minIdle) {</span>
+ 343              redisOutputFormat.minIdle = minIdle;
+ 344              return this;
+ 345          }
+ 346  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 347 -        public RedisOutputFormatBuilder setMasterName(String masterName){</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 348 +        public RedisOutputFormatBuilder setMasterName(String masterName) {</span>
+ 349              redisOutputFormat.masterName = masterName;
+ 350              return this;
+ 351          }
+ 352  
+
+
+
+
+
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 353 -        public RedisOutputFormat finish(){</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 354 -            if (redisOutputFormat.url == null){</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 355 +        public RedisOutputFormat finish() {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 356 +            if (redisOutputFormat.url == null) {</span>
+ 357                  throw new IllegalArgumentException(&quot;No URL supplied.&quot;);
+ 358              }
+ 359  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 360 -            if (redisOutputFormat.tableName == null){</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 361 +            if (redisOutputFormat.tableName == null) {</span>
+ 362                  throw new IllegalArgumentException(&quot;No tablename supplied.&quot;);
+ 363              }
+ 364  
+ 365              return redisOutputFormat;
+ 366          }
+ 367      }
+ 368  }</pre></td>
+                        </tr>
+                    </table>
+                </div>
+              </body>
+            </html>
+            

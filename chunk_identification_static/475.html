@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+    <html lang="en">
+              <head>
+                <meta charset="utf-8">
+                <title>475</title>
+                    <style>
+                        #top {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        #bottom {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        abbr {
+                          /* Here is the delay */
+                          transition-delay:0s;
+                        }
+                    </style>
+              </head>
+              <body>
+                <span style="height: 4vh">
+                    475
+                    <a href="474.html">prev</a>
+                    <a href="476.html">next</a>
+                    <a href="475_chunks.html">chunks</a>
+                    <a href="index.html">index</a>
+                    DTStack/flinkStreamSQL_1f467e8db1be23610cdc95a5c5e140b78d7f2639_launcher/src/main/java/com/dtstack/flink/sql/launcher/LauncherMain.java
+                    <textarea rows=1 onclick='navigator.clipboard.writeText(this.value)'>cd C:\studies\se\mega\git-analyzer-plus\notebooks\debug
+del /Q *
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;1f467e8db1be23610cdc95a5c5e140b78d7f2639:launcher/src/main/java/com/dtstack/flink/sql/launcher/LauncherMain.java&quot; &gt; committed.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;1f467e8db1be23610cdc95a5c5e140b78d7f2639^1:launcher/src/main/java/com/dtstack/flink/sql/launcher/LauncherMain.java&quot; &gt; ours.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;1f467e8db1be23610cdc95a5c5e140b78d7f2639^2:launcher/src/main/java/com/dtstack/flink/sql/launcher/LauncherMain.java&quot; &gt; theirs.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;fe59047deaebb385b0ac710d0a60ac6f9faed0a7:launcher/src/main/java/com/dtstack/flink/sql/launcher/LauncherMain.java&quot; &gt; base.java
+copy ours.java 1ours.java
+copy ours.java 2ours.java
+copy theirs.java 1theirs.java
+copy theirs.java 2theirs.java
+copy base.java 1base.java
+copy base.java 2base.java
+&quot;C:\Program Files\Java\jdk1.8.0_241\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\jFSTMerge\build\libs\jFSTMerge-all.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\jfstmerge.java --show-base
+&quot;C:\Program Files\Eclipse Adoptium\jdk-17.0.11.9-hotspot\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\spork\target\spork-0.5.0-SNAPSHOT.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\spork.java
+del /Q 1*.java
+del /Q 2*.java
+del /Q jfstmerge.java.merge
+</textarea>
+                    {strict: [[bs]], subset: [[bs]]}
+                </span>
+                <div id="top">
+
+                    <table>
+                        <tr>
+                            <th>line based (standard git)</th>
+                            <th>jfstmerge</th>
+                            <th>spork</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1 /*
+   2  * Licensed to the Apache Software Foundation (ASF) under one
+   3  * or more contributor license agreements.  See the NOTICE file
+   4  * distributed with this work for additional information
+   5  * regarding copyright ownership.  The ASF licenses this file
+   6  * to you under the Apache License, Version 2.0 (the
+   7  * &quot;License&quot;); you may not use this file except in compliance
+   8  * with the License.  You may obtain a copy of the License at
+   9  *
+  10  *     http://www.apache.org/licenses/LICENSE-2.0
+  11  *
+  12  * Unless required by applicable law or agreed to in writing, software
+  13  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15  * See the License for the specific language governing permissions and
+  16  * limitations under the License.
+  17  */
+  18 
+  19 
+  20 package com.dtstack.flink.sql.launcher;
+  21 
+  22 import com.dtstack.flink.sql.constrant.ConfigConstrant;
+  23 import com.google.common.collect.Lists;
+  24 import com.alibaba.fastjson.JSON;
+  25 import com.alibaba.fastjson.TypeReference;
+  26 import com.dtstack.flink.sql.enums.ClusterMode;
+  27 import com.dtstack.flink.sql.Main;
+  28 import com.dtstack.flink.sql.launcher.perjob.PerJobSubmitter;
+  29 import com.dtstack.flink.sql.option.OptionParser;
+  30 import com.dtstack.flink.sql.option.Options;
+  31 import com.dtstack.flink.sql.util.PluginUtil;
+  32 import org.apache.commons.io.Charsets;
+  33 import org.apache.commons.lang.BooleanUtils;
+  34 import org.apache.commons.lang.StringUtils;
+  35 import org.apache.flink.client.program.ClusterClient;
+  36 import org.apache.flink.client.program.PackagedProgram;
+  37 import org.apache.flink.client.program.PackagedProgramUtils;
+  38 import org.apache.flink.configuration.Configuration;
+  39 import org.apache.flink.configuration.GlobalConfiguration;
+  40 import org.apache.flink.runtime.jobgraph.JobGraph;
+  41 import org.apache.flink.runtime.jobgraph.SavepointRestoreSettings;
+  42 import org.apache.flink.util.FileUtils;
+  43 import org.slf4j.Logger;
+  44 import org.slf4j.LoggerFactory;
+  45 
+  46 import java.io.File;
+  47 import java.io.IOException;
+  48 import java.net.URLDecoder;
+  49 import java.util.LinkedList;
+  50 import java.util.List;
+  51 import java.util.Map;
+  52 import java.util.Properties;
+  53 
+  54 /**
+  55  * Date: 2017/2/20
+  56  * Company: www.dtstack.com
+  57  *
+  58  * @author xuchao
+  59  */
+  60 
+  61 public class LauncherMain {
+  62 
+  63     private static final Logger LOG = LoggerFactory.getLogger(LauncherMain.class);
+  64     private static final String CORE_JAR = &quot;core&quot;;
+  65 
+  66     private static final Logger LOG = LoggerFactory.getLogger(LauncherMain.class);
+  67 
+  68     private static String SP = File.separator;
+  69 
+  70     private static String getLocalCoreJarPath(String localSqlRootJar) throws Exception {
+  71         String jarPath = PluginUtil.getCoreJarFileName(localSqlRootJar, CORE_JAR);
+  72         return localSqlRootJar + SP + jarPath;
+  73     }
+  74 
+  75     public static void main(String[] args) throws Exception {
+  76 &lt;&lt;&lt;&lt;&lt;&lt;&lt; GitAnalyzerPlus_ours
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  77 </span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  78         LOG.info(&quot;----start----&quot;);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  79 </span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  80         if (args.length == 1 &amp;&amp; args[0].endsWith(&quot;.json&quot;)){</span>
+  81 ||||||| GitAnalyzerPlus_base
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  82         OptionParser optionParser = new OptionParser(args);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  83         Options launcherOptions = optionParser.getOptions();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  84         String mode = launcherOptions.getMode();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  85         List&lt;String&gt; argList = optionParser.getProgramExeArgList();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  86 </span>
+  87 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  88         if (args.length == 1 &amp;&amp; args[0].endsWith(&quot;.json&quot;)) {</span>
+  89 &gt;&gt;&gt;&gt;&gt;&gt;&gt; GitAnalyzerPlus_theirs
+  90             args = parseJson(args);
+  91         }
+  92 
+  93         OptionParser optionParser = new OptionParser(args);
+  94         Options launcherOptions = optionParser.getOptions();
+  95         String mode = launcherOptions.getMode();
+  96         List&lt;String&gt; argList = optionParser.getProgramExeArgList();
+  97 
+  98         String confProp = launcherOptions.getConfProp();
+  99         confProp = URLDecoder.decode(confProp, Charsets.UTF_8.toString());
+ 100         Properties confProperties = PluginUtil.jsonStrToObject(confProp, Properties.class);
+ 101 
+ 102         LOG.info(&quot;current job mode is {}&quot;, mode);
+ 103 
+ 104         if (mode.equals(ClusterMode.local.name())) {
+ 105             String[] localArgs = argList.toArray(new String[0]);
+ 106             Main.main(localArgs);
+ 107             return;
+ 108         }
+ 109 
+ 110         String pluginRoot = launcherOptions.getLocalSqlPluginPath();
+ 111         File jarFile = new File(getLocalCoreJarPath(pluginRoot));
+ 112         String[] remoteArgs = argList.toArray(new String[0]);
+ 113         PackagedProgram program = new PackagedProgram(jarFile, Lists.newArrayList(), remoteArgs);
+ 114 
+ 115         String savePointPath = confProperties.getProperty(ConfigConstrant.SAVE_POINT_PATH_KEY);
+ 116         if (StringUtils.isNotBlank(savePointPath)) {
+<abbr title=" 117             String allowNonRestoredState = confProperties.getOrDefault(ConfigConstrant.ALLOW_NON_RESTORED_STATE_KEY, &quot;false&quot;).toString();"> 117             String allowNonRestoredState = confProperties.getOrDefault(ConfigConstrant.ALLOW_NON_RESTORED🔵</abbr>
+<abbr title=" 118             program.setSavepointRestoreSettings(SavepointRestoreSettings.forPath(savePointPath, BooleanUtils.toBoolean(allowNonRestoredState)));"> 118             program.setSavepointRestoreSettings(SavepointRestoreSettings.forPath(savePointPath, BooleanUt🔵</abbr>
+ 119         }
+ 120 
+ 121         if (mode.equals(ClusterMode.yarnPer.name())) {
+ 122             String flinkConfDir = launcherOptions.getFlinkconf();
+<abbr title=" 123             Configuration config = StringUtils.isEmpty(flinkConfDir) ? new Configuration() : GlobalConfiguration.loadConfiguration(flinkConfDir);"> 123             Configuration config = StringUtils.isEmpty(flinkConfDir) ? new Configuration() : GlobalConfig🔵</abbr>
+ 124             JobGraph jobGraph = PackagedProgramUtils.createJobGraph(program, config, 1);
+ 125 
+ 126             LOG.info(&quot;current jobID is {}&quot;, jobGraph.getJobID());
+ 127 
+<abbr title=" 128             LOG.info(&quot;submit applicationId is {}&quot;, PerJobSubmitter.submit(launcherOptions, jobGraph, config));"> 128             LOG.info(&quot;submit applicationId is {}&quot;, PerJobSubmitter.submit(launcherOptions, jobGraph, conf🔵</abbr>
+ 129         } else {
+ 130             ClusterClient clusterClient = ClusterClientFactory.createClusterClient(launcherOptions);
+ 131             clusterClient.run(program, 1);
+ 132             clusterClient.shutdown();
+ 133         }
+ 134 
+ 135     }
+ 136 
+ 137     private static String[] parseJson(String[] args) throws IOException {
+ 138         String lastStr = FileUtils.readFileUtf8(new File(args[0]));
+ 139         Map&lt;String, Object&gt; map = JSON.parseObject(lastStr, new TypeReference&lt;Map&lt;String, Object&gt;&gt;() {
+ 140         });
+ 141         List&lt;String&gt; list = new LinkedList&lt;&gt;();
+ 142         for (Map.Entry&lt;String, Object&gt; entry : map.entrySet()) {
+ 143             list.add(&quot;-&quot; + entry.getKey());
+ 144             list.add(entry.getValue().toString());
+ 145         }
+ 146         return list.toArray(new String[0]);
+ 147     }
+ 148 }</pre></td>
+                            <td><pre>   1 /*
+   2  * Licensed to the Apache Software Foundation (ASF) under one
+   3  * or more contributor license agreements.  See the NOTICE file
+   4  * distributed with this work for additional information
+   5  * regarding copyright ownership.  The ASF licenses this file
+   6  * to you under the Apache License, Version 2.0 (the
+   7  * &quot;License&quot;); you may not use this file except in compliance
+   8  * with the License.  You may obtain a copy of the License at
+   9  *
+  10  *     http://www.apache.org/licenses/LICENSE-2.0
+  11  *
+  12  * Unless required by applicable law or agreed to in writing, software
+  13  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15  * See the License for the specific language governing permissions and
+  16  * limitations under the License.
+  17  */
+  18 
+  19 
+  20 
+  21 package com.dtstack.flink.sql.launcher;
+  22 
+  23 import com.dtstack.flink.sql.constrant.ConfigConstrant;
+  24 import com.google.common.collect.Lists;
+  25 import com.alibaba.fastjson.JSON;
+  26 import com.alibaba.fastjson.TypeReference;
+  27 import com.dtstack.flink.sql.enums.ClusterMode;
+  28 import com.dtstack.flink.sql.Main;
+  29 import com.dtstack.flink.sql.launcher.perjob.PerJobSubmitter;
+  30 import com.dtstack.flink.sql.option.OptionParser;
+  31 import com.dtstack.flink.sql.option.Options;
+  32 import com.dtstack.flink.sql.util.PluginUtil;
+  33 import org.apache.commons.io.Charsets;
+  34 import org.apache.commons.lang.BooleanUtils;
+  35 import org.apache.commons.lang.StringUtils;
+  36 import org.apache.flink.client.program.ClusterClient;
+  37 import org.apache.flink.client.program.PackagedProgram;
+  38 import org.apache.flink.client.program.PackagedProgramUtils;
+  39 import org.apache.flink.configuration.Configuration;
+  40 import org.apache.flink.configuration.GlobalConfiguration;
+  41 import org.apache.flink.runtime.jobgraph.JobGraph;
+  42 import org.apache.flink.runtime.jobgraph.SavepointRestoreSettings;
+  43 import org.apache.flink.util.FileUtils;
+  44 import org.slf4j.Logger;
+  45 import org.slf4j.LoggerFactory;
+  46 
+  47 import java.io.File;
+  48 import java.io.IOException;
+  49 import java.net.URLDecoder;
+  50 import java.util.LinkedList;
+  51 import java.util.List;
+  52 import java.util.Map;
+  53 import java.util.Properties;
+  54 
+  55 /**
+  56  * Date: 2017/2/20
+  57  * Company: www.dtstack.com
+  58  *
+  59  * @author xuchao
+  60  */
+  61 
+  62 public class LauncherMain {
+  63     private static final String CORE_JAR = &quot;core&quot;;
+  64 
+  65     private static final Logger LOG = LoggerFactory.getLogger(LauncherMain.class);
+  66 
+  67     private static String SP = File.separator;
+  68 
+  69     private static String getLocalCoreJarPath(String localSqlRootJar) throws Exception {
+  70         String jarPath = PluginUtil.getCoreJarFileName(localSqlRootJar, CORE_JAR);
+  71         return localSqlRootJar + SP + jarPath;
+  72     }
+  73 
+  74     public static void main(String[] args) throws Exception {
+  75 
+  76         LOG.info(&quot;----start----&quot;);
+  77 
+  78         if (args.length == 1 &amp;&amp; args[0].endsWith(&quot;.json&quot;)){
+  79             args = parseJson(args);
+  80         }
+  81 
+  82         OptionParser optionParser = new OptionParser(args);
+  83         Options launcherOptions = optionParser.getOptions();
+  84         String mode = launcherOptions.getMode();
+  85         List&lt;String&gt; argList = optionParser.getProgramExeArgList();
+  86 
+  87         String confProp = launcherOptions.getConfProp();
+  88         confProp = URLDecoder.decode(confProp, Charsets.UTF_8.toString());
+  89         Properties confProperties = PluginUtil.jsonStrToObject(confProp, Properties.class);
+  90 
+  91         LOG.info(&quot;current job mode is {}&quot;, mode);
+  92 
+  93         if(mode.equals(ClusterMode.local.name())) {
+  94             String[] localArgs = argList.toArray(new String[0]);
+  95             Main.main(localArgs);
+  96             return;
+  97         }
+  98 
+  99         String pluginRoot = launcherOptions.getLocalSqlPluginPath();
+ 100         File jarFile = new File(getLocalCoreJarPath(pluginRoot));
+ 101         String[] remoteArgs = argList.toArray(new String[0]);
+ 102         PackagedProgram program = new PackagedProgram(jarFile, Lists.newArrayList(), remoteArgs);
+ 103 
+ 104         String savePointPath = confProperties.getProperty(ConfigConstrant.SAVE_POINT_PATH_KEY);
+ 105         if(StringUtils.isNotBlank(savePointPath)){
+<abbr title=" 106             String allowNonRestoredState = confProperties.getOrDefault(ConfigConstrant.ALLOW_NON_RESTORED_STATE_KEY, &quot;false&quot;).toString();"> 106             String allowNonRestoredState = confProperties.getOrDefault(ConfigConstrant.ALLOW_NON_RESTORED🔵</abbr>
+<abbr title=" 107             program.setSavepointRestoreSettings(SavepointRestoreSettings.forPath(savePointPath, BooleanUtils.toBoolean(allowNonRestoredState)));"> 107             program.setSavepointRestoreSettings(SavepointRestoreSettings.forPath(savePointPath, BooleanUt🔵</abbr>
+ 108         }
+ 109 
+ 110         if(mode.equals(ClusterMode.yarnPer.name())){
+ 111             String flinkConfDir = launcherOptions.getFlinkconf();
+<abbr title=" 112             Configuration config = StringUtils.isEmpty(flinkConfDir) ? new Configuration() : GlobalConfiguration.loadConfiguration(flinkConfDir);"> 112             Configuration config = StringUtils.isEmpty(flinkConfDir) ? new Configuration() : GlobalConfig🔵</abbr>
+ 113             JobGraph jobGraph = PackagedProgramUtils.createJobGraph(program, config, 1);
+ 114 
+ 115             LOG.info(&quot;current jobID is {}&quot;, jobGraph.getJobID());
+ 116 
+<abbr title=" 117             LOG.info(&quot;submit applicationId is {}&quot;, PerJobSubmitter.submit(launcherOptions, jobGraph, config));"> 117             LOG.info(&quot;submit applicationId is {}&quot;, PerJobSubmitter.submit(launcherOptions, jobGraph, conf🔵</abbr>
+ 118         } else {
+ 119             ClusterClient clusterClient = ClusterClientFactory.createClusterClient(launcherOptions);
+ 120             clusterClient.run(program, 1);
+ 121             clusterClient.shutdown();
+ 122         }
+ 123 
+ 124     }
+ 125 
+ 126     private static String[] parseJson(String[] args) throws IOException {
+ 127         String lastStr = FileUtils.readFileUtf8(new File(args[0]));
+ 128         Map&lt;String, Object&gt; map = JSON.parseObject(lastStr, new TypeReference&lt;Map&lt;String, Object&gt;&gt;() {
+ 129         });
+ 130         List&lt;String&gt; list = new LinkedList&lt;&gt;();
+ 131         for (Map.Entry&lt;String, Object&gt; entry : map.entrySet()) {
+ 132             list.add(&quot;-&quot; + entry.getKey());
+ 133             list.add(entry.getValue().toString());
+ 134         }
+ 135         return list.toArray(new String[0]);
+ 136     }
+ 137 }
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ </pre></td>
+                            <td><pre>   1 /*
+   2  * Licensed to the Apache Software Foundation (ASF) under one
+   3  * or more contributor license agreements.  See the NOTICE file
+   4  * distributed with this work for additional information
+   5  * regarding copyright ownership.  The ASF licenses this file
+   6  * to you under the Apache License, Version 2.0 (the
+   7  * &quot;License&quot;); you may not use this file except in compliance
+   8  * with the License.  You may obtain a copy of the License at
+   9  *
+  10  *     http://www.apache.org/licenses/LICENSE-2.0
+  11  *
+  12  * Unless required by applicable law or agreed to in writing, software
+  13  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15  * See the License for the specific language governing permissions and
+  16  * limitations under the License.
+  17  */
+  18 package com.dtstack.flink.sql.launcher;
+  19 
+  20 import com.alibaba.fastjson.JSON;
+  21 import com.alibaba.fastjson.TypeReference;
+  22 import com.dtstack.flink.sql.Main;
+  23 import com.dtstack.flink.sql.constrant.ConfigConstrant;
+  24 import com.dtstack.flink.sql.enums.ClusterMode;
+  25 import com.dtstack.flink.sql.launcher.perjob.PerJobSubmitter;
+  26 import com.dtstack.flink.sql.option.OptionParser;
+  27 import com.dtstack.flink.sql.option.Options;
+  28 import com.dtstack.flink.sql.util.PluginUtil;
+  29 import com.google.common.collect.Lists;
+  30 import java.io.File;
+  31 import java.io.IOException;
+  32 import java.net.URLDecoder;
+  33 import java.util.LinkedList;
+  34 import java.util.List;
+  35 import java.util.Map;
+  36 import java.util.Properties;
+  37 import org.apache.commons.io.Charsets;
+  38 import org.apache.commons.lang.BooleanUtils;
+  39 import org.apache.commons.lang.StringUtils;
+  40 import org.apache.flink.client.program.ClusterClient;
+  41 import org.apache.flink.client.program.PackagedProgram;
+  42 import org.apache.flink.client.program.PackagedProgramUtils;
+  43 import org.apache.flink.configuration.Configuration;
+  44 import org.apache.flink.configuration.GlobalConfiguration;
+  45 import org.apache.flink.runtime.jobgraph.JobGraph;
+  46 import org.apache.flink.runtime.jobgraph.SavepointRestoreSettings;
+  47 import org.apache.flink.util.FileUtils;
+  48 import org.slf4j.Logger;
+  49 import org.slf4j.LoggerFactory;
+  50 
+  51 
+  52 /**
+  53  * Date: 2017/2/20
+  54  * Company: www.dtstack.com
+  55  *
+  56  * @author xuchao
+  57  */
+  58 
+  59 public class LauncherMain {
+  60 
+  61     private static final Logger LOG = LoggerFactory.getLogger(LauncherMain.class);
+  62     private static final String CORE_JAR = &quot;core&quot;;
+  63 
+  64     private static final Logger LOG = LoggerFactory.getLogger(LauncherMain.class);
+  65 
+  66     private static String SP = File.separator;
+  67 
+  68     private static String getLocalCoreJarPath(String localSqlRootJar) throws Exception {
+  69         String jarPath = PluginUtil.getCoreJarFileName(localSqlRootJar, CORE_JAR);
+  70         return localSqlRootJar + SP + jarPath;
+  71     }
+  72 
+  73     public static void main(String[] args) throws Exception {
+  74 
+  75 &lt;&lt;&lt;&lt;&lt;&lt;&lt; LEFT
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  76 </span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  77         LOG.info(&quot;----start----&quot;);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  78 </span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  79         if (args.length == 1 &amp;&amp; args[0].endsWith(&quot;.json&quot;)){</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  80 </span>
+  81 ||||||| BASE
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"><abbr title="  82 /*d94z9sk0k4hf9j3ijd - note the base isn&#x27;t actually empty, spork simply doesn&#x27;t generate a base - gd930kwohrp23k5b6vdk93d3r*/">  82 /*d94z9sk0k4hf9j3ijd - note the base isn&#x27;t actually empty, spork simply doesn&#x27;t generate a base - gd930kw🔵</abbr></span>
+  83 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  84 </span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  85         if (args.length == 1 &amp;&amp; args[0].endsWith(&quot;.json&quot;)) {</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  86 </span>
+  87 &gt;&gt;&gt;&gt;&gt;&gt;&gt; RIGHT
+  88             args = parseJson(args);
+  89         }
+  90 
+  91         OptionParser optionParser = new OptionParser(args);
+  92         Options launcherOptions = optionParser.getOptions();
+  93         String mode = launcherOptions.getMode();
+  94         List&lt;String&gt; argList = optionParser.getProgramExeArgList();
+  95 
+  96         String confProp = launcherOptions.getConfProp();
+  97         confProp = URLDecoder.decode(confProp, Charsets.UTF_8.toString());
+  98         Properties confProperties = PluginUtil.jsonStrToObject(confProp, Properties.class);
+  99 
+ 100         LOG.info(&quot;current job mode is {}&quot;, mode);
+ 101 
+ 102         if (mode.equals(ClusterMode.local.name())) {
+ 103             String[] localArgs = argList.toArray(new String[0]);
+ 104             Main.main(localArgs);
+ 105             return;
+ 106         }
+ 107 
+ 108         String pluginRoot = launcherOptions.getLocalSqlPluginPath();
+ 109         File jarFile = new File(getLocalCoreJarPath(pluginRoot));
+ 110         String[] remoteArgs = argList.toArray(new String[0]);
+ 111         PackagedProgram program = new PackagedProgram(jarFile, Lists.newArrayList(), remoteArgs);
+ 112 
+ 113         String savePointPath = confProperties.getProperty(ConfigConstrant.SAVE_POINT_PATH_KEY);
+ 114         if (StringUtils.isNotBlank(savePointPath)) {
+<abbr title=" 115             String allowNonRestoredState = confProperties.getOrDefault(ConfigConstrant.ALLOW_NON_RESTORED_STATE_KEY, &quot;false&quot;).toString();"> 115             String allowNonRestoredState = confProperties.getOrDefault(ConfigConstrant.ALLOW_NON_RESTORED🔵</abbr>
+<abbr title=" 116             program.setSavepointRestoreSettings(SavepointRestoreSettings.forPath(savePointPath, BooleanUtils.toBoolean(allowNonRestoredState)));"> 116             program.setSavepointRestoreSettings(SavepointRestoreSettings.forPath(savePointPath, BooleanUt🔵</abbr>
+ 117         }
+ 118 
+ 119         if (mode.equals(ClusterMode.yarnPer.name())) {
+ 120             String flinkConfDir = launcherOptions.getFlinkconf();
+<abbr title=" 121             Configuration config = StringUtils.isEmpty(flinkConfDir) ? new Configuration() : GlobalConfiguration.loadConfiguration(flinkConfDir);"> 121             Configuration config = StringUtils.isEmpty(flinkConfDir) ? new Configuration() : GlobalConfig🔵</abbr>
+ 122             JobGraph jobGraph = PackagedProgramUtils.createJobGraph(program, config, 1);
+ 123 
+ 124             LOG.info(&quot;current jobID is {}&quot;, jobGraph.getJobID());
+ 125 
+<abbr title=" 126             LOG.info(&quot;submit applicationId is {}&quot;, PerJobSubmitter.submit(launcherOptions, jobGraph, config));"> 126             LOG.info(&quot;submit applicationId is {}&quot;, PerJobSubmitter.submit(launcherOptions, jobGraph, conf🔵</abbr>
+ 127         } else {
+ 128             ClusterClient clusterClient = ClusterClientFactory.createClusterClient(launcherOptions);
+ 129             clusterClient.run(program, 1);
+ 130             clusterClient.shutdown();
+ 131         }
+ 132 
+ 133     }
+ 134 
+ 135     private static String[] parseJson(String[] args) throws IOException {
+ 136         String lastStr = FileUtils.readFileUtf8(new File(args[0]));
+ 137         Map&lt;String, Object&gt; map = JSON.parseObject(lastStr, new TypeReference&lt;Map&lt;String, Object&gt;&gt;() {
+ 138         });
+ 139         List&lt;String&gt; list = new LinkedList&lt;&gt;();
+ 140         for (Map.Entry&lt;String, Object&gt; entry : map.entrySet()) {
+ 141             list.add(&quot;-&quot; + entry.getKey());
+ 142             list.add(entry.getValue().toString());
+ 143         }
+ 144         return list.toArray(new String[0]);
+ 145     }
+ 146 }
+ </pre></td>
+                        </tr>
+                    </table>
+                </div>
+                <div id="bottom">
+                    <table style="margin:auto">
+                        <tr>
+                            <th>ours vs. base</th>
+                            <th>theirs vs. base</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1  /*
+   2   * Licensed to the Apache Software Foundation (ASF) under one
+   3   * or more contributor license agreements.  See the NOTICE file
+   4   * distributed with this work for additional information
+   5   * regarding copyright ownership.  The ASF licenses this file
+   6   * to you under the Apache License, Version 2.0 (the
+   7   * &quot;License&quot;); you may not use this file except in compliance
+   8   * with the License.  You may obtain a copy of the License at
+   9   *
+  10   *     http://www.apache.org/licenses/LICENSE-2.0
+  11   *
+  12   * Unless required by applicable law or agreed to in writing, software
+  13   * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15   * See the License for the specific language governing permissions and
+  16   * limitations under the License.
+  17   */
+  18  
+  19  
+  20  
+  21  package com.dtstack.flink.sql.launcher;
+  22  
+  23  import com.dtstack.flink.sql.constrant.ConfigConstrant;
+  24  import com.google.common.collect.Lists;
+  25  import com.alibaba.fastjson.JSON;
+  26  import com.alibaba.fastjson.TypeReference;
+  27  import com.dtstack.flink.sql.enums.ClusterMode;
+  28  import com.dtstack.flink.sql.Main;
+  29  import com.dtstack.flink.sql.launcher.perjob.PerJobSubmitter;
+  30  import com.dtstack.flink.sql.option.OptionParser;
+  31  import com.dtstack.flink.sql.option.Options;
+  32  import com.dtstack.flink.sql.util.PluginUtil;
+  33  import org.apache.commons.io.Charsets;
+  34  import org.apache.commons.lang.BooleanUtils;
+  35  import org.apache.commons.lang.StringUtils;
+  36  import org.apache.flink.client.program.ClusterClient;
+  37  import org.apache.flink.client.program.PackagedProgram;
+  38  import org.apache.flink.client.program.PackagedProgramUtils;
+  39  import org.apache.flink.configuration.Configuration;
+  40  import org.apache.flink.configuration.GlobalConfiguration;
+  41  import org.apache.flink.runtime.jobgraph.JobGraph;
+  42  import org.apache.flink.runtime.jobgraph.SavepointRestoreSettings;
+  43  import org.apache.flink.util.FileUtils;
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  44 +import org.slf4j.Logger;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  45 +import org.slf4j.LoggerFactory;</span>
+  46  
+  47  import java.io.File;
+  48  import java.io.IOException;
+  49  import java.net.URLDecoder;
+  50  import java.util.LinkedList;
+  51  import java.util.List;
+  52  import java.util.Map;
+  53  import java.util.Properties;
+  54  
+  55  /**
+  56   * Date: 2017/2/20
+  57   * Company: www.dtstack.com
+
+  58   * @author xuchao
+  59   */
+  60  
+  61  public class LauncherMain {
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  62 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  63 +    private static final Logger LOG = LoggerFactory.getLogger(LauncherMain.class);</span>
+  64      private static final String CORE_JAR = &quot;core&quot;;
+  65  
+
+
+  66      private static String SP = File.separator;
+  67  
+  68      private static String getLocalCoreJarPath(String localSqlRootJar) throws Exception {
+  69          String jarPath = PluginUtil.getCoreJarFileName(localSqlRootJar, CORE_JAR);
+  70          String corePath = localSqlRootJar + SP + jarPath;
+  71          return corePath;
+
+  72      }
+  73  
+  74      public static void main(String[] args) throws Exception {
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  75 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  76 +        LOG.info(&quot;----start----&quot;);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  77 +</span>
+  78          if (args.length == 1 &amp;&amp; args[0].endsWith(&quot;.json&quot;)){
+
+  79              args = parseJson(args);
+  80          }
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  81 +</span>
+  82          OptionParser optionParser = new OptionParser(args);
+  83          Options launcherOptions = optionParser.getOptions();
+  84          String mode = launcherOptions.getMode();
+  85          List&lt;String&gt; argList = optionParser.getProgramExeArgList();
+  86  
+  87          String confProp = launcherOptions.getConfProp();
+  88          confProp = URLDecoder.decode(confProp, Charsets.UTF_8.toString());
+  89          Properties confProperties = PluginUtil.jsonStrToObject(confProp, Properties.class);
+  90  
+  91          if(mode.equals(ClusterMode.local.name())) {
+  92              String[] localArgs = argList.toArray(new String[argList.size()]);
+
+
+
+
+  93              Main.main(localArgs);
+  94              return;
+  95          }
+  96  
+  97          String pluginRoot = launcherOptions.getLocalSqlPluginPath();
+  98          File jarFile = new File(getLocalCoreJarPath(pluginRoot));
+  99          String[] remoteArgs = argList.toArray(new String[argList.size()]);
+
+ 100          PackagedProgram program = new PackagedProgram(jarFile, Lists.newArrayList(), remoteArgs);
+ 101  
+ 102          String savePointPath = confProperties.getProperty(ConfigConstrant.SAVE_POINT_PATH_KEY);
+ 103          if(StringUtils.isNotBlank(savePointPath)){
+
+<abbr title=" 104              String allowNonRestoredState = confProperties.getOrDefault(ConfigConstrant.ALLOW_NON_RESTORED_STATE_KEY, &quot;false&quot;).toString();"> 104              String allowNonRestoredState = confProperties.getOrDefault(ConfigConstrant.ALLOW_NON_RESTORED_STATE_KE🔵</abbr>
+<abbr title=" 105              program.setSavepointRestoreSettings(SavepointRestoreSettings.forPath(savePointPath, BooleanUtils.toBoolean(allowNonRestoredState)));"> 105              program.setSavepointRestoreSettings(SavepointRestoreSettings.forPath(savePointPath, BooleanUtils.toBoo🔵</abbr>
+ 106          }
+ 107  
+ 108          if(mode.equals(ClusterMode.yarnPer.name())){
+
+ 109              String flinkConfDir = launcherOptions.getFlinkconf();
+<abbr title=" 110              Configuration config = StringUtils.isEmpty(flinkConfDir) ? new Configuration() : GlobalConfiguration.loadConfiguration(flinkConfDir);"> 110              Configuration config = StringUtils.isEmpty(flinkConfDir) ? new Configuration() : GlobalConfiguration.l🔵</abbr>
+ 111              JobGraph jobGraph = PackagedProgramUtils.createJobGraph(program, config, 1);
+ 112              PerJobSubmitter.submit(launcherOptions, jobGraph, config);
+
+
+
+
+ 113          } else {
+ 114              ClusterClient clusterClient = ClusterClientFactory.createClusterClient(launcherOptions);
+ 115              clusterClient.run(program, 1);
+ 116              clusterClient.shutdown();
+ 117          }
+ 118  
+ 119      }
+ 120  
+ 121      private static String[] parseJson(String[] args) throws IOException {
+ 122          String lastStr = FileUtils.readFileUtf8(new File(args[0]));
+ 123          Map&lt;String, Object&gt; map = JSON.parseObject(lastStr, new TypeReference&lt;Map&lt;String, Object&gt;&gt;() {
+ 124          });
+ 125          List&lt;String&gt; list = new LinkedList&lt;&gt;();
+ 126          for (Map.Entry&lt;String, Object&gt; entry : map.entrySet()) {
+ 127              list.add(&quot;-&quot; + entry.getKey());
+ 128              list.add(entry.getValue().toString());
+ 129          }
+ 130          String[] array = list.toArray(new String[list.size()]);
+ 131          return array;
+
+ 132      }
+ 133  }</pre></td>
+                            <td><pre>   1  /*
+   2   * Licensed to the Apache Software Foundation (ASF) under one
+   3   * or more contributor license agreements.  See the NOTICE file
+   4   * distributed with this work for additional information
+   5   * regarding copyright ownership.  The ASF licenses this file
+   6   * to you under the Apache License, Version 2.0 (the
+   7   * &quot;License&quot;); you may not use this file except in compliance
+   8   * with the License.  You may obtain a copy of the License at
+   9   *
+  10   *     http://www.apache.org/licenses/LICENSE-2.0
+  11   *
+  12   * Unless required by applicable law or agreed to in writing, software
+  13   * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15   * See the License for the specific language governing permissions and
+  16   * limitations under the License.
+  17   */
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  18 -</span>
+  19  
+  20  
+  21  package com.dtstack.flink.sql.launcher;
+  22  
+  23  import com.dtstack.flink.sql.constrant.ConfigConstrant;
+  24  import com.google.common.collect.Lists;
+  25  import com.alibaba.fastjson.JSON;
+  26  import com.alibaba.fastjson.TypeReference;
+  27  import com.dtstack.flink.sql.enums.ClusterMode;
+  28  import com.dtstack.flink.sql.Main;
+  29  import com.dtstack.flink.sql.launcher.perjob.PerJobSubmitter;
+  30  import com.dtstack.flink.sql.option.OptionParser;
+  31  import com.dtstack.flink.sql.option.Options;
+  32  import com.dtstack.flink.sql.util.PluginUtil;
+  33  import org.apache.commons.io.Charsets;
+  34  import org.apache.commons.lang.BooleanUtils;
+  35  import org.apache.commons.lang.StringUtils;
+  36  import org.apache.flink.client.program.ClusterClient;
+  37  import org.apache.flink.client.program.PackagedProgram;
+  38  import org.apache.flink.client.program.PackagedProgramUtils;
+  39  import org.apache.flink.configuration.Configuration;
+  40  import org.apache.flink.configuration.GlobalConfiguration;
+  41  import org.apache.flink.runtime.jobgraph.JobGraph;
+  42  import org.apache.flink.runtime.jobgraph.SavepointRestoreSettings;
+  43  import org.apache.flink.util.FileUtils;
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  44 +import org.slf4j.Logger;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  45 +import org.slf4j.LoggerFactory;</span>
+  46  
+  47  import java.io.File;
+  48  import java.io.IOException;
+  49  import java.net.URLDecoder;
+  50  import java.util.LinkedList;
+  51  import java.util.List;
+  52  import java.util.Map;
+  53  import java.util.Properties;
+  54  
+  55  /**
+  56   * Date: 2017/2/20
+  57   * Company: www.dtstack.com
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  58 + *</span>
+  59   * @author xuchao
+  60   */
+  61  
+  62  public class LauncherMain {
+
+
+  63      private static final String CORE_JAR = &quot;core&quot;;
+  64  
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  65 +    private static final Logger LOG = LoggerFactory.getLogger(LauncherMain.class);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  66 +</span>
+  67      private static String SP = File.separator;
+  68  
+  69      private static String getLocalCoreJarPath(String localSqlRootJar) throws Exception {
+  70          String jarPath = PluginUtil.getCoreJarFileName(localSqlRootJar, CORE_JAR);
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  71 -        String corePath = localSqlRootJar + SP + jarPath;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  72 -        return corePath;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  73 +        return localSqlRootJar + SP + jarPath;</span>
+  74      }
+  75  
+  76      public static void main(String[] args) throws Exception {
+
+
+
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  77 -        if (args.length == 1 &amp;&amp; args[0].endsWith(&quot;.json&quot;)){</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  78 +        if (args.length == 1 &amp;&amp; args[0].endsWith(&quot;.json&quot;)) {</span>
+  79              args = parseJson(args);
+  80          }
+
+  81          OptionParser optionParser = new OptionParser(args);
+  82          Options launcherOptions = optionParser.getOptions();
+  83          String mode = launcherOptions.getMode();
+  84          List&lt;String&gt; argList = optionParser.getProgramExeArgList();
+  85  
+  86          String confProp = launcherOptions.getConfProp();
+  87          confProp = URLDecoder.decode(confProp, Charsets.UTF_8.toString());
+  88          Properties confProperties = PluginUtil.jsonStrToObject(confProp, Properties.class);
+  89  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  90 -        if(mode.equals(ClusterMode.local.name())) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  91 -            String[] localArgs = argList.toArray(new String[argList.size()]);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  92 +        LOG.info(&quot;current job mode is {}&quot;, mode);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  93 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  94 +        if (mode.equals(ClusterMode.local.name())) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  95 +            String[] localArgs = argList.toArray(new String[0]);</span>
+  96              Main.main(localArgs);
+  97              return;
+  98          }
+  99  
+ 100          String pluginRoot = launcherOptions.getLocalSqlPluginPath();
+ 101          File jarFile = new File(getLocalCoreJarPath(pluginRoot));
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 102 -        String[] remoteArgs = argList.toArray(new String[argList.size()]);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 103 +        String[] remoteArgs = argList.toArray(new String[0]);</span>
+ 104          PackagedProgram program = new PackagedProgram(jarFile, Lists.newArrayList(), remoteArgs);
+ 105  
+ 106          String savePointPath = confProperties.getProperty(ConfigConstrant.SAVE_POINT_PATH_KEY);
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 107 -        if(StringUtils.isNotBlank(savePointPath)){</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 108 +        if (StringUtils.isNotBlank(savePointPath)) {</span>
+<abbr title=" 109              String allowNonRestoredState = confProperties.getOrDefault(ConfigConstrant.ALLOW_NON_RESTORED_STATE_KEY, &quot;false&quot;).toString();"> 109              String allowNonRestoredState = confProperties.getOrDefault(ConfigConstrant.ALLOW_NON_RESTORED_STATE_KE🔵</abbr>
+<abbr title=" 110              program.setSavepointRestoreSettings(SavepointRestoreSettings.forPath(savePointPath, BooleanUtils.toBoolean(allowNonRestoredState)));"> 110              program.setSavepointRestoreSettings(SavepointRestoreSettings.forPath(savePointPath, BooleanUtils.toBoo🔵</abbr>
+ 111          }
+ 112  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 113 -        if(mode.equals(ClusterMode.yarnPer.name())){</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 114 +        if (mode.equals(ClusterMode.yarnPer.name())) {</span>
+ 115              String flinkConfDir = launcherOptions.getFlinkconf();
+<abbr title=" 116              Configuration config = StringUtils.isEmpty(flinkConfDir) ? new Configuration() : GlobalConfiguration.loadConfiguration(flinkConfDir);"> 116              Configuration config = StringUtils.isEmpty(flinkConfDir) ? new Configuration() : GlobalConfiguration.l🔵</abbr>
+ 117              JobGraph jobGraph = PackagedProgramUtils.createJobGraph(program, config, 1);
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 118 -            PerJobSubmitter.submit(launcherOptions, jobGraph, config);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 119 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 120 +            LOG.info(&quot;current jobID is {}&quot;, jobGraph.getJobID());</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 121 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 122 +            LOG.info(&quot;submit applicationId is {}&quot;, PerJobSubmitter.submit(launcherOptions, jobGraph, config));</span>
+ 123          } else {
+ 124              ClusterClient clusterClient = ClusterClientFactory.createClusterClient(launcherOptions);
+ 125              clusterClient.run(program, 1);
+ 126              clusterClient.shutdown();
+ 127          }
+ 128  
+ 129      }
+ 130  
+ 131      private static String[] parseJson(String[] args) throws IOException {
+ 132          String lastStr = FileUtils.readFileUtf8(new File(args[0]));
+ 133          Map&lt;String, Object&gt; map = JSON.parseObject(lastStr, new TypeReference&lt;Map&lt;String, Object&gt;&gt;() {
+ 134          });
+ 135          List&lt;String&gt; list = new LinkedList&lt;&gt;();
+ 136          for (Map.Entry&lt;String, Object&gt; entry : map.entrySet()) {
+ 137              list.add(&quot;-&quot; + entry.getKey());
+ 138              list.add(entry.getValue().toString());
+ 139          }
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 140 -        String[] array = list.toArray(new String[list.size()]);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 141 -        return array;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 142 +        return list.toArray(new String[0]);</span>
+ 143      }
+ 144  }</pre></td>
+                        </tr>
+                    </table>
+                </div>
+              </body>
+            </html>
+            

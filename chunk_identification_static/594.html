@@ -1,0 +1,2016 @@
+<!DOCTYPE html>
+    <html lang="en">
+              <head>
+                <meta charset="utf-8">
+                <title>594</title>
+                    <style>
+                        #top {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        #bottom {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        abbr {
+                          /* Here is the delay */
+                          transition-delay:0s;
+                        }
+                    </style>
+              </head>
+              <body>
+                <span style="height: 4vh">
+                    594
+                    <a href="593.html">prev</a>
+                    <a href="595.html">next</a>
+                    <a href="594_chunks.html">chunks</a>
+                    <a href="index.html">index</a>
+                    DTStack/flinkStreamSQL_658a6401f4f487101aa34499ee28925ef80ffac3_rdb/rdb-sink/src/main/java/com/dtstack/flink/sql/sink/rdb/RdbSink.java
+                    <textarea rows=1 onclick='navigator.clipboard.writeText(this.value)'>cd C:\studies\se\mega\git-analyzer-plus\notebooks\debug
+del /Q *
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;658a6401f4f487101aa34499ee28925ef80ffac3:rdb/rdb-sink/src/main/java/com/dtstack/flink/sql/sink/rdb/RdbSink.java&quot; &gt; committed.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;658a6401f4f487101aa34499ee28925ef80ffac3^1:rdb/rdb-sink/src/main/java/com/dtstack/flink/sql/sink/rdb/RdbSink.java&quot; &gt; ours.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;658a6401f4f487101aa34499ee28925ef80ffac3^2:rdb/rdb-sink/src/main/java/com/dtstack/flink/sql/sink/rdb/RdbSink.java&quot; &gt; theirs.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;0e612c38ef73e0fe86c07e0b47c41fb3ae2d0f0b:rdb/rdb-sink/src/main/java/com/dtstack/flink/sql/sink/rdb/RdbSink.java&quot; &gt; base.java
+copy ours.java 1ours.java
+copy ours.java 2ours.java
+copy theirs.java 1theirs.java
+copy theirs.java 2theirs.java
+copy base.java 1base.java
+copy base.java 2base.java
+&quot;C:\Program Files\Java\jdk1.8.0_241\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\jFSTMerge\build\libs\jFSTMerge-all.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\jfstmerge.java --show-base
+&quot;C:\Program Files\Eclipse Adoptium\jdk-17.0.11.9-hotspot\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\spork\target\spork-0.5.0-SNAPSHOT.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\spork.java
+del /Q 1*.java
+del /Q 2*.java
+del /Q jfstmerge.java.merge
+</textarea>
+                    {strict: [[bs], [sbj], [bs], [j]], subset: [[bs], [sbj], [sbj]]}
+                </span>
+                <div id="top">
+
+                    <table>
+                        <tr>
+                            <th>line based (standard git)</th>
+                            <th>jfstmerge</th>
+                            <th>spork</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1 /**
+   2  * Licensed to the Apache Software Foundation (ASF) under one
+   3  * or more contributor license agreements.  See the NOTICE file
+   4  * distributed with this work for additional information
+   5  * regarding copyright ownership.  The ASF licenses this file
+   6  * to you under the Apache License, Version 2.0 (the
+   7  * &quot;License&quot;); you may not use this file except in compliance
+   8  * with the License.  You may obtain a copy of the License at
+   9  * &lt;p&gt;
+  10  * http://www.apache.org/licenses/LICENSE-2.0
+  11  * &lt;p&gt;
+  12  * Unless required by applicable law or agreed to in writing, software
+  13  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15  * See the License for the specific language governing permissions and
+  16  * limitations under the License.
+  17  */
+  18 package com.dtstack.flink.sql.sink.rdb;
+  19 
+  20 import com.dtstack.flink.sql.sink.IStreamSinkGener;
+  21 import com.dtstack.flink.sql.sink.rdb.format.JDBCUpsertOutputFormat;
+  22 import com.dtstack.flink.sql.sink.rdb.table.RdbTableInfo;
+  23 import com.dtstack.flink.sql.table.TargetTableInfo;
+  24 import org.apache.commons.lang3.StringUtils;
+  25 import org.apache.flink.api.common.typeinfo.TypeInformation;
+  26 import org.apache.flink.api.java.tuple.Tuple2;
+  27 import org.apache.flink.api.java.typeutils.RowTypeInfo;
+  28 import org.apache.flink.api.java.typeutils.TupleTypeInfo;
+  29 import org.apache.flink.streaming.api.datastream.DataStream;
+  30 import org.apache.flink.streaming.api.functions.sink.OutputFormatSinkFunction;
+  31 import org.apache.flink.table.sinks.RetractStreamTableSink;
+  32 import org.apache.flink.table.sinks.TableSink;
+  33 import org.apache.flink.types.Row;
+  34 import com.dtstack.flink.sql.sink.rdb.dialect.JDBCDialect;
+  35 
+  36 import java.io.Serializable;
+  37 import java.math.BigDecimal;
+  38 import java.sql.Date;
+  39 import java.sql.Timestamp;
+  40 import java.sql.Types;
+  41 import java.util.Arrays;
+  42 import java.util.List;
+  43 
+  44 /**
+  45  * Reason:
+  46  * Date: 2018/11/27
+  47  * Company: www.dtstack.com
+  48  *
+  49  * @author maqi
+  50  */
+<abbr title="  51 public abstract class RdbSink implements RetractStreamTableSink&lt;Row&gt;, Serializable, IStreamSinkGener&lt;RdbSink&gt; {">  51 public abstract class RdbSink implements RetractStreamTableSink&lt;Row&gt;, Serializable, IStreamSinkGener&lt;RdbS🔵</abbr>
+  52 
+  53     protected String driverName;
+  54 
+  55     protected String dbURL;
+  56 
+  57     protected String userName;
+  58 
+  59     protected String password;
+  60 
+  61     protected String dbType;
+  62 
+  63     protected int batchNum = 100;
+  64 
+  65     protected long batchWaitInterval = 10000;
+  66 
+  67     protected int[] sqlTypes;
+  68 
+  69     protected String tableName;
+  70 
+  71     protected String registerTabName;
+  72 
+  73     protected String sql;
+  74 
+  75     protected List&lt;String&gt; primaryKeys;
+  76 
+  77     protected String[] fieldNames;
+  78 
+  79     private TypeInformation[] fieldTypes;
+  80 
+  81     private int parallelism = -1;
+  82 
+  83     protected String schema;
+  84 
+  85 &lt;&lt;&lt;&lt;&lt;&lt;&lt; GitAnalyzerPlus_ours
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  86     protected JDBCDialect jdbcDialect;</span>
+  87 ||||||| GitAnalyzerPlus_base
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  88 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  89     public RichSinkFunction createJdbcSinkFunc() {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  90         if (driverName == null || dbURL == null || userName == null</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  91                 || password == null || sqlTypes == null || tableName == null) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"><abbr title="  92             throw new RuntimeException(&quot;any of params in(driverName, dbURL, userName, password, type, tableName) &quot; +">  92             throw new RuntimeException(&quot;any of params in(driverName, dbURL, userName, password, type, tab🔵</abbr></span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  93                     &quot; must not be null. please check it!!!&quot;);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  94         }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  95         RetractJDBCOutputFormat outputFormat = getOutputFormat();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  96         outputFormat.setDbURL(dbURL);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  97         outputFormat.setDrivername(driverName);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  98         outputFormat.setUsername(userName);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  99         outputFormat.setPassword(password);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 100         outputFormat.setInsertQuery(sql);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 101         outputFormat.setBatchNum(batchNum);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 102         outputFormat.setBatchWaitInterval(batchWaitInterval);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 103         outputFormat.setTypesArray(sqlTypes);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 104         outputFormat.setTableName(tableName);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 105         outputFormat.setDbType(dbType);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 106         outputFormat.setSchema(schema);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 107         outputFormat.setDbSink(this);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 108 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 109         outputFormat.verifyField();</span>
+ 110 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 111     protected RdbTableInfo rdbTableInfo;</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 112 </span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 113     public RichSinkFunction createJdbcSinkFunc() {</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 114         if (driverName == null || dbURL == null || userName == null</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 115                 || password == null || sqlTypes == null || tableName == null) {</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"><abbr title=" 116             throw new RuntimeException(&quot;any of params in(driverName, dbURL, userName, password, type, tableName) &quot; +"> 116             throw new RuntimeException(&quot;any of params in(driverName, dbURL, userName, password, type, tab🔵</abbr></span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 117                     &quot; must not be null. please check it!!!&quot;);</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 118         }</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 119         RetractJDBCOutputFormat outputFormat = getOutputFormat();</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 120         outputFormat.setDbURL(dbURL);</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 121         outputFormat.setDrivername(driverName);</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 122         outputFormat.setUsername(userName);</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 123         outputFormat.setPassword(password);</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 124         outputFormat.setInsertQuery(sql);</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 125         outputFormat.setBatchNum(batchNum);</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 126         outputFormat.setBatchWaitInterval(batchWaitInterval);</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 127         outputFormat.setTypesArray(sqlTypes);</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 128         outputFormat.setTableName(tableName);</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 129         outputFormat.setDbType(dbType);</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 130         outputFormat.setSchema(schema);</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 131         outputFormat.setDbSink(this);</span>
+ 132 &gt;&gt;&gt;&gt;&gt;&gt;&gt; GitAnalyzerPlus_theirs
+ 133 
+ 134     protected boolean allReplace;
+ 135 
+ 136     protected String updateMode;
+ 137 
+ 138     public RdbSink(JDBCDialect jdbcDialect) {
+ 139         this.jdbcDialect = jdbcDialect;
+ 140     }
+ 141 
+ 142     @Override
+ 143     public RdbSink genStreamSink(TargetTableInfo targetTableInfo) {
+ 144 &lt;&lt;&lt;&lt;&lt;&lt;&lt; GitAnalyzerPlus_ours
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 145         RdbTableInfo rdbTableInfo = (RdbTableInfo) targetTableInfo;</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 146         this.batchNum = rdbTableInfo.getBatchSize() == null ? batchNum : rdbTableInfo.getBatchSize();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 147         this.batchWaitInterval = rdbTableInfo.getBatchWaitInterval() == null ?</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 148                 batchWaitInterval : rdbTableInfo.getBatchWaitInterval();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"><abbr title=" 149         this.parallelism = rdbTableInfo.getParallelism() == null ? parallelism : rdbTableInfo.getParallelism();"> 149         this.parallelism = rdbTableInfo.getParallelism() == null ? parallelism : rdbTableInfo.getParallel🔵</abbr></span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 150         this.dbURL = rdbTableInfo.getUrl();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 151         this.userName = rdbTableInfo.getUserName();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 152         this.password = rdbTableInfo.getPassword();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 153         this.tableName = rdbTableInfo.getTableName();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 154         this.registerTabName = rdbTableInfo.getName();</span>
+ 155 ||||||| GitAnalyzerPlus_base
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 156         outputFormat.setInsertQuery(sql);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 157         outputFormat.setBatchNum(batchNum);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 158         outputFormat.setBatchWaitInterval(batchWaitInterval);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 159         outputFormat.setTypesArray(sqlTypes);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 160         outputFormat.setTableName(tableName);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 161         outputFormat.setDbType(dbType);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 162         outputFormat.setSchema(schema);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 163         outputFormat.setDbSink(this);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 164 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 165         outputFormat.verifyField();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 166         OutputFormatSinkFunction outputFormatSinkFunc = new OutputFormatSinkFunction(outputFormat);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 167         return outputFormatSinkFunc;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 168     }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 169 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 170 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 171     @Override</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 172     public RdbSink genStreamSink(TargetTableInfo targetTableInfo) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 173         RdbTableInfo rdbTableInfo = (RdbTableInfo) targetTableInfo;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 174 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 175         String tmpDbURL = rdbTableInfo.getUrl();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 176         String tmpUserName = rdbTableInfo.getUserName();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 177         String tmpPassword = rdbTableInfo.getPassword();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 178         String tmpTableName = rdbTableInfo.getTableName();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 179         String tmpRegisterName = rdbTableInfo.getName();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 180 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 181         Integer tmpSqlBatchSize = rdbTableInfo.getBatchSize();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 182         if (tmpSqlBatchSize != null) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 183             setBatchNum(tmpSqlBatchSize);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 184         }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 185 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 186         Long batchWaitInterval = rdbTableInfo.getBatchWaitInterval();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 187         if (batchWaitInterval != null) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 188             setBatchWaitInterval(batchWaitInterval);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 189         }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 190 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 191         Integer tmpSinkParallelism = rdbTableInfo.getParallelism();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 192         if (tmpSinkParallelism != null) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 193             setParallelism(tmpSinkParallelism);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 194         }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 195 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 196         List&lt;String&gt; fields = Arrays.asList(rdbTableInfo.getFields());</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 197         List&lt;Class&gt; fieldTypeArray = Arrays.asList(rdbTableInfo.getFieldClasses());</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 198 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 199         this.driverName = getDriverName();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 200         this.dbURL = tmpDbURL;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 201         this.userName = tmpUserName;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 202         this.password = tmpPassword;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 203         this.tableName = tmpTableName;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 204         this.registerTabName = tmpRegisterName;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 205         this.primaryKeys = rdbTableInfo.getPrimaryKeys();</span>
+ 206 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 207         this.rdbTableInfo = (RdbTableInfo) targetTableInfo;</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 208         String tmpDbURL = rdbTableInfo.getUrl();</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 209         String tmpUserName = rdbTableInfo.getUserName();</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 210         String tmpPassword = rdbTableInfo.getPassword();</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 211         String tmpTableName = rdbTableInfo.getTableName();</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 212         String tmpRegisterName = rdbTableInfo.getName();</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 213 </span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 214         Integer tmpSqlBatchSize = rdbTableInfo.getBatchSize();</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 215         if (tmpSqlBatchSize != null) {</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 216             setBatchNum(tmpSqlBatchSize);</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 217         }</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 218 </span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 219         Long batchWaitInterval = rdbTableInfo.getBatchWaitInterval();</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 220         if (batchWaitInterval != null) {</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 221             setBatchWaitInterval(batchWaitInterval);</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 222         }</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 223 </span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 224         Integer tmpSinkParallelism = rdbTableInfo.getParallelism();</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 225         if (tmpSinkParallelism != null) {</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 226             setParallelism(tmpSinkParallelism);</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 227         }</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 228 </span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 229         List&lt;String&gt; fields = Arrays.asList(rdbTableInfo.getFields());</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 230         List&lt;Class&gt; fieldTypeArray = Arrays.asList(rdbTableInfo.getFieldClasses());</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 231 </span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 232         this.driverName = getDriverName();</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 233         this.dbURL = tmpDbURL;</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 234         this.userName = tmpUserName;</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 235         this.password = tmpPassword;</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 236         this.tableName = tmpTableName;</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 237         this.registerTabName = tmpRegisterName;</span>
+ 238 &gt;&gt;&gt;&gt;&gt;&gt;&gt; GitAnalyzerPlus_theirs
+ 239         this.primaryKeys = rdbTableInfo.getPrimaryKeys();
+ 240         this.dbType = rdbTableInfo.getType();
+ 241         this.schema = rdbTableInfo.getSchema();
+ 242         List&lt;Class&gt; fieldTypeArray = Arrays.asList(rdbTableInfo.getFieldClasses());
+ 243         this.sqlTypes = JDBCTypeConvertUtils.buildSqlTypes(fieldTypeArray);
+ 244         this.allReplace = rdbTableInfo.isAllReplace();
+ 245         this.updateMode = rdbTableInfo.getUpdateMode();
+ 246         return this;
+ 247     }
+ 248 
+ 249 
+ 250     @Override
+ 251     public void emitDataStream(DataStream&lt;Tuple2&lt;Boolean, Row&gt;&gt; dataStream) {
+ 252         dataStream.addSink(new OutputFormatSinkFunction(getOutputFormat()))
+ 253                 .setParallelism(parallelism)
+ 254                 .name(registerTabName);
+ 255     }
+ 256 
+ 257     @Override
+<abbr title=" 258     public TableSink&lt;Tuple2&lt;Boolean, Row&gt;&gt; configure(String[] fieldNames, TypeInformation&lt;?&gt;[] fieldTypes) {"> 258     public TableSink&lt;Tuple2&lt;Boolean, Row&gt;&gt; configure(String[] fieldNames, TypeInformation&lt;?&gt;[] fieldTypes🔵</abbr>
+ 259         this.fieldNames = fieldNames;
+ 260         this.fieldTypes = fieldTypes;
+ 261         return this;
+ 262     }
+ 263 
+ 264     @Override
+ 265     public TupleTypeInfo&lt;Tuple2&lt;Boolean, Row&gt;&gt; getOutputType() {
+ 266         return new TupleTypeInfo(org.apache.flink.table.api.Types.BOOLEAN(), getRecordType());
+ 267     }
+ 268 
+ 269     @Override
+ 270     public TypeInformation&lt;Row&gt; getRecordType() {
+ 271         return new RowTypeInfo(fieldTypes, fieldNames);
+ 272     }
+ 273 
+ 274     @Override
+ 275     public String[] getFieldNames() {
+ 276         return fieldNames;
+ 277     }
+ 278 
+ 279     @Override
+ 280     public TypeInformation&lt;?&gt;[] getFieldTypes() {
+ 281         return fieldTypes;
+ 282     }
+ 283 
+ 284 &lt;&lt;&lt;&lt;&lt;&lt;&lt; GitAnalyzerPlus_ours
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 285     public abstract JDBCUpsertOutputFormat getOutputFormat();</span>
+ 286 ||||||| GitAnalyzerPlus_base
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 287         return this;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 288     }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 289 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 290 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 291     /**</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 292      * By now specified class type conversion.</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 293      * FIXME Follow-up has added a new type of time needs to be modified</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 294      *</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 295      * @param fieldTypeArray</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 296      */</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 297     protected void buildSqlTypes(List&lt;Class&gt; fieldTypeArray) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 298 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 299         int[] tmpFieldsType = new int[fieldTypeArray.size()];</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 300         for (int i = 0; i &lt; fieldTypeArray.size(); i++) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 301             String fieldType = fieldTypeArray.get(i).getName();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 302             if (fieldType.equals(Integer.class.getName())) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 303                 tmpFieldsType[i] = Types.INTEGER;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 304             }else if (fieldType.equals(Boolean.class.getName())) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 305                 tmpFieldsType[i] = Types.BOOLEAN;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 306             }else if (fieldType.equals(Long.class.getName())) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 307                 tmpFieldsType[i] = Types.BIGINT;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 308             } else if (fieldType.equals(Byte.class.getName())) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 309                 tmpFieldsType[i] = Types.TINYINT;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 310             } else if (fieldType.equals(Short.class.getName())) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 311                 tmpFieldsType[i] = Types.SMALLINT;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 312             } else if (fieldType.equals(String.class.getName())) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 313                 tmpFieldsType[i] = Types.CHAR;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 314             } else if (fieldType.equals(Byte.class.getName())) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 315                 tmpFieldsType[i] = Types.BINARY;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 316             } else if (fieldType.equals(Float.class.getName())) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 317                 tmpFieldsType[i] = Types.FLOAT;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 318             } else if (fieldType.equals(Double.class.getName())) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 319                 tmpFieldsType[i] = Types.DOUBLE;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 320             } else if (fieldType.equals(Timestamp.class.getName())) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 321                 tmpFieldsType[i] = Types.TIMESTAMP;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 322             } else if (fieldType.equals(BigDecimal.class.getName())) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 323                 tmpFieldsType[i] = Types.DECIMAL;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 324             } else if (fieldType.equals(Date.class.getName())) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 325                 tmpFieldsType[i] = Types.DATE;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 326             } else {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 327                 throw new RuntimeException(&quot;no support field type for sql. the input type:&quot; + fieldType);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 328             }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 329         }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 330 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 331         this.sqlTypes = tmpFieldsType;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 332     }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 333 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 334 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 335     @Override</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 336     public void emitDataStream(DataStream&lt;Tuple2&lt;Boolean, Row&gt;&gt; dataStream) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 337         RichSinkFunction richSinkFunction = createJdbcSinkFunc();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 338         DataStreamSink streamSink = dataStream.addSink(richSinkFunction);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 339         streamSink.name(registerTabName);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 340         if (parallelism &gt; 0) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 341             streamSink.setParallelism(parallelism);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 342         }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 343     }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 344 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 345     @Override</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"><abbr title=" 346     public TableSink&lt;Tuple2&lt;Boolean, Row&gt;&gt; configure(String[] fieldNames, TypeInformation&lt;?&gt;[] fieldTypes) {"> 346     public TableSink&lt;Tuple2&lt;Boolean, Row&gt;&gt; configure(String[] fieldNames, TypeInformation&lt;?&gt;[] fieldTypes🔵</abbr></span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 347         this.fieldNames = fieldNames;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 348         this.fieldTypes = fieldTypes;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 349         return this;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 350     }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 351 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 352 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 353     public void setBatchNum(int batchNum) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 354         this.batchNum = batchNum;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 355     }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 356 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 357     public void setBatchWaitInterval(long batchWaitInterval) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 358         this.batchWaitInterval = batchWaitInterval;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 359     }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 360 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 361     @Override</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 362     public TupleTypeInfo&lt;Tuple2&lt;Boolean, Row&gt;&gt; getOutputType() {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 363         return new TupleTypeInfo(org.apache.flink.table.api.Types.BOOLEAN(), getRecordType());</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 364     }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 365 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 366     @Override</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 367     public TypeInformation&lt;Row&gt; getRecordType() {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 368         return new RowTypeInfo(fieldTypes, fieldNames);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 369     }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 370 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 371     @Override</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 372     public String[] getFieldNames() {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 373         return fieldNames;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 374     }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 375 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 376     @Override</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 377     public TypeInformation&lt;?&gt;[] getFieldTypes() {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 378         return fieldTypes;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 379     }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 380 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 381 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 382     public void setParallelism(int parallelism) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 383         this.parallelism = parallelism;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 384     }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 385 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 386     public void setDbType(String dbType) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 387         this.dbType = dbType;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 388     }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 389 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 390     /**</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 391      * you need to implements  this method in your own class.</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 392      *</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 393      * @param tableName</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 394      * @param fields</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 395      */</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 396     public abstract void buildSql(String schema, String tableName, List&lt;String&gt; fields);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 397 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 398     /**</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 399      * sqlserver and oracle maybe implement</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 400      *</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 401      * @param tableName</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 402      * @param fieldNames</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 403      * @param realIndexes</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 404      * @return</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 405      */</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"><abbr title=" 406     public abstract String buildUpdateSql(String schema, String tableName, List&lt;String&gt; fieldNames, Map&lt;String, List&lt;String&gt;&gt; realIndexes, List&lt;String&gt; fullField);"> 406     public abstract String buildUpdateSql(String schema, String tableName, List&lt;String&gt; fieldNames, Map&lt;S🔵</abbr></span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 407 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 408     public abstract String getDriverName();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 409 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 410     public abstract RetractJDBCOutputFormat getOutputFormat();</span>
+ 411 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 412 </span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 413     public void setParallelism(int parallelism) {</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 414         this.parallelism = parallelism;</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 415     }</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 416 </span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 417     public void setDbType(String dbType) {</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 418         this.dbType = dbType;</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 419     }</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 420 </span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 421     /**</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 422      * you need to implements  this method in your own class.</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 423      *</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 424      * @param tableName</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 425      * @param fields</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 426      */</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 427     public abstract void buildSql(String schema, String tableName, List&lt;String&gt; fields);</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 428 </span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 429     /**</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 430      * sqlserver and oracle maybe implement</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 431      *</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 432      * @param fieldNames</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 433      * @param realIndexes</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 434      * @return</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 435      */</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"><abbr title=" 436     public abstract String buildUpdateSql(String schema, String tableName, List&lt;String&gt; fieldNames, Map&lt;String, List&lt;String&gt;&gt; realIndexes, List&lt;String&gt; fullField);"> 436     public abstract String buildUpdateSql(String schema, String tableName, List&lt;String&gt; fieldNames, Map&lt;S🔵</abbr></span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 437 </span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 438     public abstract String getDriverName();</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 439 </span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 440     public abstract RetractJDBCOutputFormat getOutputFormat();</span>
+ 441 &gt;&gt;&gt;&gt;&gt;&gt;&gt; GitAnalyzerPlus_theirs
+ 442 
+ 443 }</pre></td>
+                            <td><pre>   1 /**
+   2  * Licensed to the Apache Software Foundation (ASF) under one
+   3  * or more contributor license agreements.  See the NOTICE file
+   4  * distributed with this work for additional information
+   5  * regarding copyright ownership.  The ASF licenses this file
+   6  * to you under the Apache License, Version 2.0 (the
+   7  * &quot;License&quot;); you may not use this file except in compliance
+   8  * with the License.  You may obtain a copy of the License at
+   9  * &lt;p&gt;
+  10  * http://www.apache.org/licenses/LICENSE-2.0
+  11  * &lt;p&gt;
+  12  * Unless required by applicable law or agreed to in writing, software
+  13  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15  * See the License for the specific language governing permissions and
+  16  * limitations under the License.
+  17  */
+  18 package com.dtstack.flink.sql.sink.rdb;
+  19 
+  20 import com.dtstack.flink.sql.sink.IStreamSinkGener;
+  21 import com.dtstack.flink.sql.sink.rdb.format.JDBCUpsertOutputFormat;
+  22 import com.dtstack.flink.sql.sink.rdb.table.RdbTableInfo;
+  23 import com.dtstack.flink.sql.table.TargetTableInfo;
+  24 import org.apache.commons.lang3.StringUtils;
+  25 import org.apache.flink.api.common.typeinfo.TypeInformation;
+  26 import org.apache.flink.api.java.tuple.Tuple2;
+  27 import org.apache.flink.api.java.typeutils.RowTypeInfo;
+  28 import org.apache.flink.api.java.typeutils.TupleTypeInfo;
+  29 import org.apache.flink.streaming.api.datastream.DataStream;
+  30 import org.apache.flink.streaming.api.functions.sink.OutputFormatSinkFunction;
+  31 import org.apache.flink.table.sinks.RetractStreamTableSink;
+  32 import org.apache.flink.table.sinks.TableSink;
+  33 import org.apache.flink.types.Row;
+  34 import com.dtstack.flink.sql.sink.rdb.dialect.JDBCDialect;
+  35 
+  36 import java.io.Serializable;
+  37 import java.math.BigDecimal;
+  38 import java.sql.Date;
+  39 import java.sql.Timestamp;
+  40 import java.sql.Types;
+  41 import java.util.Arrays;
+  42 import java.util.List;
+  43 
+  44 /**
+  45  * Reason:
+  46  * Date: 2018/11/27
+  47  * Company: www.dtstack.com
+  48  *
+  49  * @author maqi
+  50  */
+<abbr title="  51 public abstract class RdbSink implements RetractStreamTableSink&lt;Row&gt;, Serializable, IStreamSinkGener&lt;RdbSink&gt; {">  51 public abstract class RdbSink implements RetractStreamTableSink&lt;Row&gt;, Serializable, IStreamSinkGener&lt;RdbS🔵</abbr>
+  52 
+  53     protected String driverName;
+  54 
+  55     protected String dbURL;
+  56 
+  57     protected String userName;
+  58 
+  59     protected String password;
+  60 
+  61     protected String dbType;
+  62 
+  63     protected int batchNum = 100;
+  64 
+  65     protected long batchWaitInterval = 10000;
+  66 
+  67     protected int[] sqlTypes;
+  68 
+  69     protected String tableName;
+  70 
+  71     protected String registerTabName;
+  72 
+  73     protected String sql;
+  74 
+  75     protected List&lt;String&gt; primaryKeys;
+  76 
+  77     protected String[] fieldNames;
+  78 
+  79     private TypeInformation[] fieldTypes;
+  80 
+  81     private int parallelism = -1;
+  82 
+  83     protected String schema;
+  84 
+  85     protected JDBCDialect jdbcDialect;
+  86 
+  87     protected boolean allReplace;
+  88 
+  89     protected String updateMode;
+  90 
+  91     public RdbSink(JDBCDialect jdbcDialect) {
+  92         this.jdbcDialect = jdbcDialect;
+  93     }
+  94 
+  95     protected RdbTableInfo rdbTableInfo;
+  96 
+  97     @Override
+  98     public RdbSink genStreamSink(TargetTableInfo targetTableInfo) {
+  99 &lt;&lt;&lt;&lt;&lt;&lt;&lt; MINE
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 100         RdbTableInfo rdbTableInfo = (RdbTableInfo) targetTableInfo;</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 101         this.batchNum = rdbTableInfo.getBatchSize() == null ? batchNum : rdbTableInfo.getBatchSize();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 102         this.batchWaitInterval = rdbTableInfo.getBatchWaitInterval() == null ?</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 103                 batchWaitInterval : rdbTableInfo.getBatchWaitInterval();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"><abbr title=" 104         this.parallelism = rdbTableInfo.getParallelism() == null ? parallelism : rdbTableInfo.getParallelism();"> 104         this.parallelism = rdbTableInfo.getParallelism() == null ? parallelism : rdbTableInfo.getParallel🔵</abbr></span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 105         this.dbURL = rdbTableInfo.getUrl();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 106         this.userName = rdbTableInfo.getUserName();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 107         this.password = rdbTableInfo.getPassword();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 108         this.tableName = rdbTableInfo.getTableName();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 109         this.registerTabName = rdbTableInfo.getName();</span>
+ 110 ||||||| BASE
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 111         RdbTableInfo rdbTableInfo = (RdbTableInfo) targetTableInfo;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 112 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 113         String tmpDbURL = rdbTableInfo.getUrl();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 114         String tmpUserName = rdbTableInfo.getUserName();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 115         String tmpPassword = rdbTableInfo.getPassword();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 116         String tmpTableName = rdbTableInfo.getTableName();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 117         String tmpRegisterName = rdbTableInfo.getName();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 118 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 119         Integer tmpSqlBatchSize = rdbTableInfo.getBatchSize();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 120         if (tmpSqlBatchSize != null) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 121             setBatchNum(tmpSqlBatchSize);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 122         }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 123 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 124         Long batchWaitInterval = rdbTableInfo.getBatchWaitInterval();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 125         if (batchWaitInterval != null) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 126             setBatchWaitInterval(batchWaitInterval);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 127         }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 128 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 129         Integer tmpSinkParallelism = rdbTableInfo.getParallelism();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 130         if (tmpSinkParallelism != null) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 131             setParallelism(tmpSinkParallelism);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 132         }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 133 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 134         List&lt;String&gt; fields = Arrays.asList(rdbTableInfo.getFields());</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 135         List&lt;Class&gt; fieldTypeArray = Arrays.asList(rdbTableInfo.getFieldClasses());</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 136 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 137         this.driverName = getDriverName();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 138         this.dbURL = tmpDbURL;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 139         this.userName = tmpUserName;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 140         this.password = tmpPassword;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 141         this.tableName = tmpTableName;</span>
+ 142 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 143         this.rdbTableInfo = (RdbTableInfo) targetTableInfo;</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 144         String tmpDbURL = rdbTableInfo.getUrl();</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 145         String tmpUserName = rdbTableInfo.getUserName();</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 146         String tmpPassword = rdbTableInfo.getPassword();</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 147         String tmpTableName = rdbTableInfo.getTableName();</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 148         String tmpRegisterName = rdbTableInfo.getName();</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 149 </span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 150         Integer tmpSqlBatchSize = rdbTableInfo.getBatchSize();</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 151         if (tmpSqlBatchSize != null) {</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 152             setBatchNum(tmpSqlBatchSize);</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 153         }</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 154 </span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 155         Long batchWaitInterval = rdbTableInfo.getBatchWaitInterval();</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 156         if (batchWaitInterval != null) {</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 157             setBatchWaitInterval(batchWaitInterval);</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 158         }</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 159 </span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 160         Integer tmpSinkParallelism = rdbTableInfo.getParallelism();</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 161         if (tmpSinkParallelism != null) {</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 162             setParallelism(tmpSinkParallelism);</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 163         }</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 164 </span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 165         List&lt;String&gt; fields = Arrays.asList(rdbTableInfo.getFields());</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 166         List&lt;Class&gt; fieldTypeArray = Arrays.asList(rdbTableInfo.getFieldClasses());</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 167 </span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 168         this.driverName = getDriverName();</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 169         this.dbURL = tmpDbURL;</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 170         this.userName = tmpUserName;</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 171         this.password = tmpPassword;</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 172         this.tableName = tmpTableName;</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 173         this.registerTabName = tmpRegisterName;</span>
+ 174 &gt;&gt;&gt;&gt;&gt;&gt;&gt; YOURS
+ 175         this.primaryKeys = rdbTableInfo.getPrimaryKeys();
+ 176         this.dbType = rdbTableInfo.getType();
+ 177         this.schema = rdbTableInfo.getSchema();
+ 178         List&lt;Class&gt; fieldTypeArray = Arrays.asList(rdbTableInfo.getFieldClasses());
+ 179         this.sqlTypes = JDBCTypeConvertUtils.buildSqlTypes(fieldTypeArray);
+ 180         this.allReplace = rdbTableInfo.isAllReplace();
+ 181         this.updateMode = rdbTableInfo.getUpdateMode();
+ 182         return this;
+ 183     }
+ 184 
+ 185 
+ 186     @Override
+ 187     public void emitDataStream(DataStream&lt;Tuple2&lt;Boolean, Row&gt;&gt; dataStream) {
+ 188         dataStream.addSink(new OutputFormatSinkFunction(getOutputFormat()))
+ 189                 .setParallelism(parallelism)
+ 190                 .name(registerTabName);
+ 191     }
+ 192 
+ 193     @Override
+<abbr title=" 194     public TableSink&lt;Tuple2&lt;Boolean, Row&gt;&gt; configure(String[] fieldNames, TypeInformation&lt;?&gt;[] fieldTypes) {"> 194     public TableSink&lt;Tuple2&lt;Boolean, Row&gt;&gt; configure(String[] fieldNames, TypeInformation&lt;?&gt;[] fieldTypes🔵</abbr>
+ 195         this.fieldNames = fieldNames;
+ 196         this.fieldTypes = fieldTypes;
+ 197         return this;
+ 198     }
+ 199 
+ 200     @Override
+ 201     public TupleTypeInfo&lt;Tuple2&lt;Boolean, Row&gt;&gt; getOutputType() {
+ 202         return new TupleTypeInfo(org.apache.flink.table.api.Types.BOOLEAN(), getRecordType());
+ 203     }
+ 204 
+ 205     @Override
+ 206     public TypeInformation&lt;Row&gt; getRecordType() {
+ 207         return new RowTypeInfo(fieldTypes, fieldNames);
+ 208     }
+ 209 
+ 210     @Override
+ 211     public String[] getFieldNames() {
+ 212         return fieldNames;
+ 213     }
+ 214 
+ 215     @Override
+ 216     public TypeInformation&lt;?&gt;[] getFieldTypes() {
+ 217         return fieldTypes;
+ 218     }
+ 219 &lt;&lt;&lt;&lt;&lt;&lt;&lt; MINE
+ 220 ||||||| BASE
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 221 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 222 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 223     /**</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 224      * sqlserver and oracle maybe implement</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 225      *</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 226      * @param tableName</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 227      * @param fieldNames</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 228      * @param realIndexes</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 229      * @return</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 230      */</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 231 </span>
+ 232 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 233 </span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 234 </span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 235     /**</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 236      * sqlserver and oracle maybe implement</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 237      *</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 238      * @param fieldNames</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 239      * @param realIndexes</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 240      * @return</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 241      */</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 242 </span>
+ 243 &gt;&gt;&gt;&gt;&gt;&gt;&gt; YOURS
+ 244 
+ 245 
+ 246     public abstract JDBCUpsertOutputFormat getOutputFormat();
+ 247 
+ 248 }
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ </pre></td>
+                            <td><pre>   1 /**
+   2  * Licensed to the Apache Software Foundation (ASF) under one
+   3  * or more contributor license agreements.  See the NOTICE file
+   4  * distributed with this work for additional information
+   5  * regarding copyright ownership.  The ASF licenses this file
+   6  * to you under the Apache License, Version 2.0 (the
+   7  * &quot;License&quot;); you may not use this file except in compliance
+   8  * with the License.  You may obtain a copy of the License at
+   9  * &lt;p&gt;
+  10  * http://www.apache.org/licenses/LICENSE-2.0
+  11  * &lt;p&gt;
+  12  * Unless required by applicable law or agreed to in writing, software
+  13  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15  * See the License for the specific language governing permissions and
+  16  * limitations under the License.
+  17  */
+  18 package com.dtstack.flink.sql.sink.rdb;
+  19 
+  20 import com.dtstack.flink.sql.sink.IStreamSinkGener;
+  21 import com.dtstack.flink.sql.sink.rdb.dialect.JDBCDialect;
+  22 import com.dtstack.flink.sql.sink.rdb.format.JDBCUpsertOutputFormat;
+  23 import com.dtstack.flink.sql.sink.rdb.table.RdbTableInfo;
+  24 import com.dtstack.flink.sql.table.TargetTableInfo;
+  25 import java.io.Serializable;
+  26 import java.math.BigDecimal;
+  27 import java.sql.Date;
+  28 import java.sql.Timestamp;
+  29 import java.sql.Types;
+  30 import java.util.Arrays;
+  31 import java.util.List;
+  32 import org.apache.commons.lang3.StringUtils;
+  33 import org.apache.flink.api.common.typeinfo.TypeInformation;
+  34 import org.apache.flink.api.java.tuple.Tuple2;
+  35 import org.apache.flink.api.java.typeutils.RowTypeInfo;
+  36 import org.apache.flink.api.java.typeutils.TupleTypeInfo;
+  37 import org.apache.flink.streaming.api.datastream.DataStream;
+  38 import org.apache.flink.streaming.api.functions.sink.OutputFormatSinkFunction;
+  39 import org.apache.flink.table.sinks.RetractStreamTableSink;
+  40 import org.apache.flink.table.sinks.TableSink;
+  41 import org.apache.flink.types.Row;
+  42 
+  43 
+  44 /**
+  45  * Reason:
+  46  * Date: 2018/11/27
+  47  * Company: www.dtstack.com
+  48  *
+  49  * @author maqi
+  50  */
+<abbr title="  51 public abstract class RdbSink implements RetractStreamTableSink&lt;Row&gt;, Serializable, IStreamSinkGener&lt;RdbSink&gt; {">  51 public abstract class RdbSink implements RetractStreamTableSink&lt;Row&gt;, Serializable, IStreamSinkGener&lt;RdbS🔵</abbr>
+  52 
+  53     protected String driverName;
+  54 
+  55     protected String dbURL;
+  56 
+  57     protected String userName;
+  58 
+  59     protected String password;
+  60 
+  61     protected String dbType;
+  62 
+  63     protected int batchNum = 100;
+  64 
+  65     protected long batchWaitInterval = 10000;
+  66 
+  67     protected int[] sqlTypes;
+  68 
+  69     protected String tableName;
+  70 
+  71     protected String registerTabName;
+  72 
+  73     protected String sql;
+  74 
+  75     protected List&lt;String&gt; primaryKeys;
+  76 
+  77     protected String[] fieldNames;
+  78 
+  79     private TypeInformation[] fieldTypes;
+  80 
+  81     private int parallelism = -1;
+  82 
+  83     protected String schema;
+  84 
+  85 
+  86 &lt;&lt;&lt;&lt;&lt;&lt;&lt; LEFT
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  87     protected JDBCDialect jdbcDialect;</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  88 </span>
+  89 ||||||| BASE
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"><abbr title="  90 /*d94z9sk0k4hf9j3ijd - note the base isn&#x27;t actually empty, spork simply doesn&#x27;t generate a base - gd930kwohrp23k5b6vdk93d3r*/">  90 /*d94z9sk0k4hf9j3ijd - note the base isn&#x27;t actually empty, spork simply doesn&#x27;t generate a base - gd930kw🔵</abbr></span>
+  91 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  92 </span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  93     protected RdbTableInfo rdbTableInfo;</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  94 </span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  95     public RichSinkFunction createJdbcSinkFunc() {</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  96         if (driverName == null || dbURL == null || userName == null</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  97                 || password == null || sqlTypes == null || tableName == null) {</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"><abbr title="  98             throw new RuntimeException(&quot;any of params in(driverName, dbURL, userName, password, type, tableName) &quot; +">  98             throw new RuntimeException(&quot;any of params in(driverName, dbURL, userName, password, type, tab🔵</abbr></span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  99                     &quot; must not be null. please check it!!!&quot;);</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 100         }</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 101         RetractJDBCOutputFormat outputFormat = getOutputFormat();</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 102         outputFormat.setDbURL(dbURL);</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 103         outputFormat.setDrivername(driverName);</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 104         outputFormat.setUsername(userName);</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 105         outputFormat.setPassword(password);</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 106         outputFormat.setInsertQuery(sql);</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 107         outputFormat.setBatchNum(batchNum);</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 108         outputFormat.setBatchWaitInterval(batchWaitInterval);</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 109         outputFormat.setTypesArray(sqlTypes);</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 110         outputFormat.setTableName(tableName);</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 111         outputFormat.setDbType(dbType);</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 112         outputFormat.setSchema(schema);</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 113         outputFormat.setDbSink(this);</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 114 </span>
+ 115 &gt;&gt;&gt;&gt;&gt;&gt;&gt; RIGHT
+ 116 
+ 117     protected boolean allReplace;
+ 118 
+ 119     protected String updateMode;
+ 120 
+ 121     public RdbSink(JDBCDialect jdbcDialect) {
+ 122         this.jdbcDialect = jdbcDialect;
+ 123     }
+ 124 
+ 125     @Override
+ 126     public RdbSink genStreamSink(TargetTableInfo targetTableInfo) {
+ 127 
+ 128 &lt;&lt;&lt;&lt;&lt;&lt;&lt; LEFT
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 129         RdbTableInfo rdbTableInfo = (RdbTableInfo) targetTableInfo;</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 130         this.batchNum = rdbTableInfo.getBatchSize() == null ? batchNum : rdbTableInfo.getBatchSize();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 131         this.batchWaitInterval = rdbTableInfo.getBatchWaitInterval() == null ?</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 132                 batchWaitInterval : rdbTableInfo.getBatchWaitInterval();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"><abbr title=" 133         this.parallelism = rdbTableInfo.getParallelism() == null ? parallelism : rdbTableInfo.getParallelism();"> 133         this.parallelism = rdbTableInfo.getParallelism() == null ? parallelism : rdbTableInfo.getParallel🔵</abbr></span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 134         this.dbURL = rdbTableInfo.getUrl();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 135         this.userName = rdbTableInfo.getUserName();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 136         this.password = rdbTableInfo.getPassword();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 137         this.tableName = rdbTableInfo.getTableName();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 138         this.registerTabName = rdbTableInfo.getName();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 139 </span>
+ 140 ||||||| BASE
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"><abbr title=" 141 /*d94z9sk0k4hf9j3ijd - note the base isn&#x27;t actually empty, spork simply doesn&#x27;t generate a base - gd930kwohrp23k5b6vdk93d3r*/"> 141 /*d94z9sk0k4hf9j3ijd - note the base isn&#x27;t actually empty, spork simply doesn&#x27;t generate a base - gd930kw🔵</abbr></span>
+ 142 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 143 </span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 144         this.rdbTableInfo = (RdbTableInfo) targetTableInfo;</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 145         String tmpDbURL = rdbTableInfo.getUrl();</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 146         String tmpUserName = rdbTableInfo.getUserName();</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 147         String tmpPassword = rdbTableInfo.getPassword();</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 148         String tmpTableName = rdbTableInfo.getTableName();</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 149         String tmpRegisterName = rdbTableInfo.getName();</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 150 </span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 151         Integer tmpSqlBatchSize = rdbTableInfo.getBatchSize();</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 152         if (tmpSqlBatchSize != null) {</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 153             setBatchNum(tmpSqlBatchSize);</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 154         }</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 155 </span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 156         Long batchWaitInterval = rdbTableInfo.getBatchWaitInterval();</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 157         if (batchWaitInterval != null) {</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 158             setBatchWaitInterval(batchWaitInterval);</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 159         }</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 160 </span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 161         Integer tmpSinkParallelism = rdbTableInfo.getParallelism();</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 162         if (tmpSinkParallelism != null) {</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 163             setParallelism(tmpSinkParallelism);</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 164         }</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 165 </span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 166         List&lt;String&gt; fields = Arrays.asList(rdbTableInfo.getFields());</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 167         List&lt;Class&gt; fieldTypeArray = Arrays.asList(rdbTableInfo.getFieldClasses());</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 168 </span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 169         this.driverName = getDriverName();</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 170         this.dbURL = tmpDbURL;</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 171         this.userName = tmpUserName;</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 172         this.password = tmpPassword;</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 173         this.tableName = tmpTableName;</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 174         this.registerTabName = tmpRegisterName;</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 175 </span>
+ 176 &gt;&gt;&gt;&gt;&gt;&gt;&gt; RIGHT
+ 177         this.primaryKeys = rdbTableInfo.getPrimaryKeys();
+ 178         this.dbType = rdbTableInfo.getType();
+ 179         this.schema = rdbTableInfo.getSchema();
+ 180         List&lt;Class&gt; fieldTypeArray = Arrays.asList(rdbTableInfo.getFieldClasses());
+ 181         this.sqlTypes = JDBCTypeConvertUtils.buildSqlTypes(fieldTypeArray);
+ 182         this.allReplace = rdbTableInfo.isAllReplace();
+ 183         this.updateMode = rdbTableInfo.getUpdateMode();
+ 184         return this;
+ 185     }
+ 186 
+ 187 
+ 188     @Override
+ 189     public void emitDataStream(DataStream&lt;Tuple2&lt;Boolean, Row&gt;&gt; dataStream) {
+ 190         dataStream.addSink(new OutputFormatSinkFunction(getOutputFormat()))
+ 191                 .setParallelism(parallelism)
+ 192                 .name(registerTabName);
+ 193     }
+ 194 
+ 195     @Override
+<abbr title=" 196     public TableSink&lt;Tuple2&lt;Boolean, Row&gt;&gt; configure(String[] fieldNames, TypeInformation&lt;?&gt;[] fieldTypes) {"> 196     public TableSink&lt;Tuple2&lt;Boolean, Row&gt;&gt; configure(String[] fieldNames, TypeInformation&lt;?&gt;[] fieldTypes🔵</abbr>
+ 197         this.fieldNames = fieldNames;
+ 198         this.fieldTypes = fieldTypes;
+ 199         return this;
+ 200     }
+ 201 
+ 202     @Override
+ 203     public TupleTypeInfo&lt;Tuple2&lt;Boolean, Row&gt;&gt; getOutputType() {
+ 204         return new TupleTypeInfo(org.apache.flink.table.api.Types.BOOLEAN(), getRecordType());
+ 205     }
+ 206 
+ 207     @Override
+ 208     public TypeInformation&lt;Row&gt; getRecordType() {
+ 209         return new RowTypeInfo(fieldTypes, fieldNames);
+ 210     }
+ 211 
+ 212     @Override
+ 213     public String[] getFieldNames() {
+ 214         return fieldNames;
+ 215     }
+ 216 
+ 217     @Override
+ 218     public TypeInformation&lt;?&gt;[] getFieldTypes() {
+ 219         return fieldTypes;
+ 220     }
+ 221 
+ 222 
+ 223 &lt;&lt;&lt;&lt;&lt;&lt;&lt; LEFT
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 224     public abstract JDBCUpsertOutputFormat getOutputFormat();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 225 </span>
+ 226 ||||||| BASE
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"><abbr title=" 227 /*d94z9sk0k4hf9j3ijd - note the base isn&#x27;t actually empty, spork simply doesn&#x27;t generate a base - gd930kwohrp23k5b6vdk93d3r*/"> 227 /*d94z9sk0k4hf9j3ijd - note the base isn&#x27;t actually empty, spork simply doesn&#x27;t generate a base - gd930kw🔵</abbr></span>
+ 228 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 229 </span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 230 </span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 231     public void setParallelism(int parallelism) {</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 232         this.parallelism = parallelism;</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 233     }</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 234 </span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 235     public void setDbType(String dbType) {</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 236         this.dbType = dbType;</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 237     }</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 238 </span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 239     /**</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 240      * you need to implements  this method in your own class.</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 241      *</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 242      * @param tableName</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 243      * @param fields</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 244      */</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 245     public abstract void buildSql(String schema, String tableName, List&lt;String&gt; fields);</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 246 </span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 247     /**</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 248      * sqlserver and oracle maybe implement</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 249      *</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 250      * @param fieldNames</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 251      * @param realIndexes</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 252      * @return</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 253      */</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"><abbr title=" 254     public abstract String buildUpdateSql(String schema, String tableName, List&lt;String&gt; fieldNames, Map&lt;String, List&lt;String&gt;&gt; realIndexes, List&lt;String&gt; fullField);"> 254     public abstract String buildUpdateSql(String schema, String tableName, List&lt;String&gt; fieldNames, Map&lt;S🔵</abbr></span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 255 </span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 256     public abstract String getDriverName();</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 257 </span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 258     public abstract RetractJDBCOutputFormat getOutputFormat();</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 259 </span>
+ 260 &gt;&gt;&gt;&gt;&gt;&gt;&gt; RIGHT
+ 261 
+ 262 }
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ </pre></td>
+                        </tr>
+                    </table>
+                </div>
+                <div id="bottom">
+                    <table style="margin:auto">
+                        <tr>
+                            <th>ours vs. base</th>
+                            <th>theirs vs. base</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1  /**
+   2   * Licensed to the Apache Software Foundation (ASF) under one
+   3   * or more contributor license agreements.  See the NOTICE file
+   4   * distributed with this work for additional information
+   5   * regarding copyright ownership.  The ASF licenses this file
+   6   * to you under the Apache License, Version 2.0 (the
+   7   * &quot;License&quot;); you may not use this file except in compliance
+   8   * with the License.  You may obtain a copy of the License at
+   9   * &lt;p&gt;
+  10   * http://www.apache.org/licenses/LICENSE-2.0
+  11   * &lt;p&gt;
+  12   * Unless required by applicable law or agreed to in writing, software
+  13   * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15   * See the License for the specific language governing permissions and
+  16   * limitations under the License.
+  17   */
+  18  package com.dtstack.flink.sql.sink.rdb;
+  19  
+  20  import com.dtstack.flink.sql.sink.IStreamSinkGener;
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  21 -import com.dtstack.flink.sql.sink.rdb.format.RetractJDBCOutputFormat;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  22 +import com.dtstack.flink.sql.sink.rdb.format.JDBCUpsertOutputFormat;</span>
+  23  import com.dtstack.flink.sql.sink.rdb.table.RdbTableInfo;
+  24  import com.dtstack.flink.sql.table.TargetTableInfo;
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  25 +import org.apache.commons.lang3.StringUtils;</span>
+  26  import org.apache.flink.api.common.typeinfo.TypeInformation;
+  27  import org.apache.flink.api.java.tuple.Tuple2;
+  28  import org.apache.flink.api.java.typeutils.RowTypeInfo;
+  29  import org.apache.flink.api.java.typeutils.TupleTypeInfo;
+  30  import org.apache.flink.streaming.api.datastream.DataStream;
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  31 -import org.apache.flink.streaming.api.datastream.DataStreamSink;</span>
+  32  import org.apache.flink.streaming.api.functions.sink.OutputFormatSinkFunction;
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  33 -import org.apache.flink.streaming.api.functions.sink.RichSinkFunction;</span>
+  34  import org.apache.flink.table.sinks.RetractStreamTableSink;
+  35  import org.apache.flink.table.sinks.TableSink;
+  36  import org.apache.flink.types.Row;
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  37 +import com.dtstack.flink.sql.sink.rdb.dialect.JDBCDialect;</span>
+  38  
+  39  import java.io.Serializable;
+  40  import java.math.BigDecimal;
+  41  import java.sql.Date;
+  42  import java.sql.Timestamp;
+  43  import java.sql.Types;
+  44  import java.util.Arrays;
+  45  import java.util.List;
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  46 -import java.util.Map;</span>
+  47  
+  48  /**
+  49   * Reason:
+  50   * Date: 2018/11/27
+  51   * Company: www.dtstack.com
+  52   *
+  53   * @author maqi
+  54   */
+  55  public abstract class RdbSink implements RetractStreamTableSink&lt;Row&gt;, Serializable, IStreamSinkGener&lt;RdbSink&gt; {
+  56  
+  57      protected String driverName;
+  58  
+  59      protected String dbURL;
+  60  
+  61      protected String userName;
+  62  
+  63      protected String password;
+  64  
+  65      protected String dbType;
+  66  
+  67      protected int batchNum = 100;
+  68  
+  69      protected long batchWaitInterval = 10000;
+  70  
+  71      protected int[] sqlTypes;
+  72  
+  73      protected String tableName;
+  74  
+  75      protected String registerTabName;
+  76  
+  77      protected String sql;
+  78  
+  79      protected List&lt;String&gt; primaryKeys;
+  80  
+  81      protected String[] fieldNames;
+  82  
+  83      private TypeInformation[] fieldTypes;
+  84  
+  85      private int parallelism = -1;
+  86  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  87 -    private String schema;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  88 +    protected String schema;</span>
+  89  
+
+
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  90 -    public RichSinkFunction createJdbcSinkFunc() {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  91 -        if (driverName == null || dbURL == null || userName == null</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  92 -                || password == null || sqlTypes == null || tableName == null) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"><abbr title="  93 -            throw new RuntimeException(&quot;any of params in(driverName, dbURL, userName, password, type, tableName) &quot; +">  93 -            throw new RuntimeException(&quot;any of params in(driverName, dbURL, userName, password, type, tableName) &quot;🔵</abbr></span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  94 -                    &quot; must not be null. please check it!!!&quot;);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  95 -        }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  96 -        RetractJDBCOutputFormat outputFormat = getOutputFormat();</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  97 -        outputFormat.setDbURL(dbURL);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  98 -        outputFormat.setDrivername(driverName);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  99 -        outputFormat.setUsername(userName);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 100 -        outputFormat.setPassword(password);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 101 -        outputFormat.setInsertQuery(sql);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 102 -        outputFormat.setBatchNum(batchNum);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 103 -        outputFormat.setBatchWaitInterval(batchWaitInterval);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 104 -        outputFormat.setTypesArray(sqlTypes);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 105 -        outputFormat.setTableName(tableName);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 106 -        outputFormat.setDbType(dbType);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 107 -        outputFormat.setSchema(schema);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 108 -        outputFormat.setDbSink(this);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 109 +    protected JDBCDialect jdbcDialect;</span>
+ 110  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 111 -        outputFormat.verifyField();</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 112 -        OutputFormatSinkFunction outputFormatSinkFunc = new OutputFormatSinkFunction(outputFormat);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 113 -        return outputFormatSinkFunc;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 114 +    protected boolean allReplace;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 115 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 116 +    protected String updateMode;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 117 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 118 +    public RdbSink(JDBCDialect jdbcDialect) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 119 +        this.jdbcDialect = jdbcDialect;</span>
+ 120      }
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 121 -</span>
+ 122  
+ 123      @Override
+ 124      public RdbSink genStreamSink(TargetTableInfo targetTableInfo) {
+ 125          RdbTableInfo rdbTableInfo = (RdbTableInfo) targetTableInfo;
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 126 -</span>
+
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 127 -        String tmpDbURL = rdbTableInfo.getUrl();</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 128 -        String tmpUserName = rdbTableInfo.getUserName();</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 129 -        String tmpPassword = rdbTableInfo.getPassword();</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 130 -        String tmpTableName = rdbTableInfo.getTableName();</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 131 -        String tmpRegisterName = rdbTableInfo.getName();</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 132 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 133 -        Integer tmpSqlBatchSize = rdbTableInfo.getBatchSize();</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 134 -        if (tmpSqlBatchSize != null) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 135 -            setBatchNum(tmpSqlBatchSize);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 136 -        }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 137 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 138 -        Long batchWaitInterval = rdbTableInfo.getBatchWaitInterval();</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 139 -        if (batchWaitInterval != null) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 140 -            setBatchWaitInterval(batchWaitInterval);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 141 -        }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 142 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 143 -        Integer tmpSinkParallelism = rdbTableInfo.getParallelism();</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 144 -        if (tmpSinkParallelism != null) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 145 -            setParallelism(tmpSinkParallelism);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 146 -        }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 147 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 148 -        List&lt;String&gt; fields = Arrays.asList(rdbTableInfo.getFields());</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 149 -        List&lt;Class&gt; fieldTypeArray = Arrays.asList(rdbTableInfo.getFieldClasses());</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 150 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 151 -        this.driverName = getDriverName();</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 152 -        this.dbURL = tmpDbURL;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 153 -        this.userName = tmpUserName;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 154 -        this.password = tmpPassword;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 155 -        this.tableName = tmpTableName;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 156 -        this.registerTabName = tmpRegisterName;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 157 +        this.batchNum = rdbTableInfo.getBatchSize() == null ? batchNum : rdbTableInfo.getBatchSize();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 158 +        this.batchWaitInterval = rdbTableInfo.getBatchWaitInterval() == null ?</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 159 +                batchWaitInterval : rdbTableInfo.getBatchWaitInterval();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 160 +        this.parallelism = rdbTableInfo.getParallelism() == null ? parallelism : rdbTableInfo.getParallelism();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 161 +        this.dbURL = rdbTableInfo.getUrl();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 162 +        this.userName = rdbTableInfo.getUserName();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 163 +        this.password = rdbTableInfo.getPassword();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 164 +        this.tableName = rdbTableInfo.getTableName();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 165 +        this.registerTabName = rdbTableInfo.getName();</span>
+ 166          this.primaryKeys = rdbTableInfo.getPrimaryKeys();
+ 167          this.dbType = rdbTableInfo.getType();
+ 168          this.schema = rdbTableInfo.getSchema();
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 169 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 170 -        buildSql(schema, tableName, fields);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 171 -        buildSqlTypes(fieldTypeArray);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 172 +        List&lt;Class&gt; fieldTypeArray = Arrays.asList(rdbTableInfo.getFieldClasses());</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 173 +        this.sqlTypes = JDBCTypeConvertUtils.buildSqlTypes(fieldTypeArray);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 174 +        this.allReplace = rdbTableInfo.isAllReplace();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 175 +        this.updateMode = rdbTableInfo.getUpdateMode();</span>
+ 176          return this;
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 177 -    }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 178 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 179 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 180 -    /**</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 181 -     * By now specified class type conversion.</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 182 -     * FIXME Follow-up has added a new type of time needs to be modified</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 183 -     *</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 184 -     * @param fieldTypeArray</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 185 -     */</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 186 -    protected void buildSqlTypes(List&lt;Class&gt; fieldTypeArray) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 187 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 188 -        int[] tmpFieldsType = new int[fieldTypeArray.size()];</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 189 -        for (int i = 0; i &lt; fieldTypeArray.size(); i++) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 190 -            String fieldType = fieldTypeArray.get(i).getName();</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 191 -            if (fieldType.equals(Integer.class.getName())) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 192 -                tmpFieldsType[i] = Types.INTEGER;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 193 -            }else if (fieldType.equals(Boolean.class.getName())) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 194 -                tmpFieldsType[i] = Types.BOOLEAN;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 195 -            }else if (fieldType.equals(Long.class.getName())) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 196 -                tmpFieldsType[i] = Types.BIGINT;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 197 -            } else if (fieldType.equals(Byte.class.getName())) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 198 -                tmpFieldsType[i] = Types.TINYINT;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 199 -            } else if (fieldType.equals(Short.class.getName())) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 200 -                tmpFieldsType[i] = Types.SMALLINT;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 201 -            } else if (fieldType.equals(String.class.getName())) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 202 -                tmpFieldsType[i] = Types.CHAR;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 203 -            } else if (fieldType.equals(Byte.class.getName())) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 204 -                tmpFieldsType[i] = Types.BINARY;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 205 -            } else if (fieldType.equals(Float.class.getName())) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 206 -                tmpFieldsType[i] = Types.FLOAT;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 207 -            } else if (fieldType.equals(Double.class.getName())) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 208 -                tmpFieldsType[i] = Types.DOUBLE;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 209 -            } else if (fieldType.equals(Timestamp.class.getName())) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 210 -                tmpFieldsType[i] = Types.TIMESTAMP;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 211 -            } else if (fieldType.equals(BigDecimal.class.getName())) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 212 -                tmpFieldsType[i] = Types.DECIMAL;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 213 -            } else if (fieldType.equals(Date.class.getName())) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 214 -                tmpFieldsType[i] = Types.DATE;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 215 -            } else {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 216 -                throw new RuntimeException(&quot;no support field type for sql. the input type:&quot; + fieldType);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 217 -            }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 218 -        }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 219 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 220 -        this.sqlTypes = tmpFieldsType;</span>
+ 221      }
+ 222  
+ 223  
+ 224      @Override
+ 225      public void emitDataStream(DataStream&lt;Tuple2&lt;Boolean, Row&gt;&gt; dataStream) {
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 226 -        RichSinkFunction richSinkFunction = createJdbcSinkFunc();</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 227 -        DataStreamSink streamSink = dataStream.addSink(richSinkFunction);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 228 -        streamSink.name(registerTabName);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 229 -        if (parallelism &gt; 0) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 230 -            streamSink.setParallelism(parallelism);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 231 -        }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 232 +        dataStream.addSink(new OutputFormatSinkFunction(getOutputFormat()))</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 233 +                .setParallelism(parallelism)</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 234 +                .name(registerTabName);</span>
+ 235      }
+ 236  
+ 237      @Override
+ 238      public TableSink&lt;Tuple2&lt;Boolean, Row&gt;&gt; configure(String[] fieldNames, TypeInformation&lt;?&gt;[] fieldTypes) {
+ 239          this.fieldNames = fieldNames;
+ 240          this.fieldTypes = fieldTypes;
+ 241          return this;
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 242 -    }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 243 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 244 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 245 -    public void setBatchNum(int batchNum) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 246 -        this.batchNum = batchNum;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 247 -    }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 248 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 249 -    public void setBatchWaitInterval(long batchWaitInterval) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 250 -        this.batchWaitInterval = batchWaitInterval;</span>
+ 251      }
+ 252  
+ 253      @Override
+ 254      public TupleTypeInfo&lt;Tuple2&lt;Boolean, Row&gt;&gt; getOutputType() {
+ 255          return new TupleTypeInfo(org.apache.flink.table.api.Types.BOOLEAN(), getRecordType());
+ 256      }
+ 257  
+ 258      @Override
+ 259      public TypeInformation&lt;Row&gt; getRecordType() {
+ 260          return new RowTypeInfo(fieldTypes, fieldNames);
+ 261      }
+ 262  
+ 263      @Override
+ 264      public String[] getFieldNames() {
+ 265          return fieldNames;
+ 266      }
+ 267  
+ 268      @Override
+ 269      public TypeInformation&lt;?&gt;[] getFieldTypes() {
+ 270          return fieldTypes;
+ 271      }
+ 272  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 273 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 274 -    public void setParallelism(int parallelism) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 275 -        this.parallelism = parallelism;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 276 -    }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 277 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 278 -    public void setDbType(String dbType) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 279 -        this.dbType = dbType;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 280 -    }</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 281 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 282 -    /**</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 283 -     * you need to implements  this method in your own class.</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 284 -     *</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 285 -     * @param tableName</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 286 -     * @param fields</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 287 -     */</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 288 -    public abstract void buildSql(String schema, String tableName, List&lt;String&gt; fields);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 289 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 290 -    /**</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 291 -     * sqlserver and oracle maybe implement</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 292 -     *</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 293 -     * @param tableName</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 294 -     * @param fieldNames</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 295 -     * @param realIndexes</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 296 -     * @return</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 297 -     */</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"><abbr title=" 298 -    public abstract String buildUpdateSql(String schema, String tableName, List&lt;String&gt; fieldNames, Map&lt;String, List&lt;String&gt;&gt; realIndexes, List&lt;String&gt; fullField);"> 298 -    public abstract String buildUpdateSql(String schema, String tableName, List&lt;String&gt; fieldNames, Map&lt;String, Li🔵</abbr></span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 299 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 300 -    public abstract String getDriverName();</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 301 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 302 -    public abstract RetractJDBCOutputFormat getOutputFormat();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 303 +    public abstract JDBCUpsertOutputFormat getOutputFormat();</span>
+ 304  
+ 305  }</pre></td>
+                            <td><pre>   1  /**
+   2   * Licensed to the Apache Software Foundation (ASF) under one
+   3   * or more contributor license agreements.  See the NOTICE file
+   4   * distributed with this work for additional information
+   5   * regarding copyright ownership.  The ASF licenses this file
+   6   * to you under the Apache License, Version 2.0 (the
+   7   * &quot;License&quot;); you may not use this file except in compliance
+   8   * with the License.  You may obtain a copy of the License at
+   9   * &lt;p&gt;
+  10   * http://www.apache.org/licenses/LICENSE-2.0
+  11   * &lt;p&gt;
+  12   * Unless required by applicable law or agreed to in writing, software
+  13   * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15   * See the License for the specific language governing permissions and
+  16   * limitations under the License.
+  17   */
+  18  package com.dtstack.flink.sql.sink.rdb;
+  19  
+  20  import com.dtstack.flink.sql.sink.IStreamSinkGener;
+  21  import com.dtstack.flink.sql.sink.rdb.format.RetractJDBCOutputFormat;
+
+  22  import com.dtstack.flink.sql.sink.rdb.table.RdbTableInfo;
+  23  import com.dtstack.flink.sql.table.TargetTableInfo;
+
+  24  import org.apache.flink.api.common.typeinfo.TypeInformation;
+  25  import org.apache.flink.api.java.tuple.Tuple2;
+  26  import org.apache.flink.api.java.typeutils.RowTypeInfo;
+  27  import org.apache.flink.api.java.typeutils.TupleTypeInfo;
+  28  import org.apache.flink.streaming.api.datastream.DataStream;
+  29  import org.apache.flink.streaming.api.datastream.DataStreamSink;
+  30  import org.apache.flink.streaming.api.functions.sink.OutputFormatSinkFunction;
+  31  import org.apache.flink.streaming.api.functions.sink.RichSinkFunction;
+  32  import org.apache.flink.table.sinks.RetractStreamTableSink;
+  33  import org.apache.flink.table.sinks.TableSink;
+  34  import org.apache.flink.types.Row;
+
+  35  
+  36  import java.io.Serializable;
+  37  import java.math.BigDecimal;
+  38  import java.sql.Date;
+  39  import java.sql.Timestamp;
+  40  import java.sql.Types;
+  41  import java.util.Arrays;
+  42  import java.util.List;
+  43  import java.util.Map;
+  44  
+  45  /**
+  46   * Reason:
+  47   * Date: 2018/11/27
+  48   * Company: www.dtstack.com
+  49   *
+  50   * @author maqi
+  51   */
+  52  public abstract class RdbSink implements RetractStreamTableSink&lt;Row&gt;, Serializable, IStreamSinkGener&lt;RdbSink&gt; {
+  53  
+  54      protected String driverName;
+  55  
+  56      protected String dbURL;
+  57  
+  58      protected String userName;
+  59  
+  60      protected String password;
+  61  
+  62      protected String dbType;
+  63  
+  64      protected int batchNum = 100;
+  65  
+  66      protected long batchWaitInterval = 10000;
+  67  
+  68      protected int[] sqlTypes;
+  69  
+  70      protected String tableName;
+  71  
+  72      protected String registerTabName;
+  73  
+  74      protected String sql;
+  75  
+  76      protected List&lt;String&gt; primaryKeys;
+  77  
+  78      protected String[] fieldNames;
+  79  
+  80      private TypeInformation[] fieldTypes;
+  81  
+  82      private int parallelism = -1;
+  83  
+  84      private String schema;
+
+  85  
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  86 +    protected RdbTableInfo rdbTableInfo;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  87 +</span>
+  88      public RichSinkFunction createJdbcSinkFunc() {
+  89          if (driverName == null || dbURL == null || userName == null
+  90                  || password == null || sqlTypes == null || tableName == null) {
+<abbr title="  91              throw new RuntimeException(&quot;any of params in(driverName, dbURL, userName, password, type, tableName) &quot; +">  91              throw new RuntimeException(&quot;any of params in(driverName, dbURL, userName, password, type, tableName) &quot;🔵</abbr>
+  92                      &quot; must not be null. please check it!!!&quot;);
+  93          }
+  94          RetractJDBCOutputFormat outputFormat = getOutputFormat();
+  95          outputFormat.setDbURL(dbURL);
+  96          outputFormat.setDrivername(driverName);
+  97          outputFormat.setUsername(userName);
+  98          outputFormat.setPassword(password);
+  99          outputFormat.setInsertQuery(sql);
+ 100          outputFormat.setBatchNum(batchNum);
+ 101          outputFormat.setBatchWaitInterval(batchWaitInterval);
+ 102          outputFormat.setTypesArray(sqlTypes);
+ 103          outputFormat.setTableName(tableName);
+ 104          outputFormat.setDbType(dbType);
+ 105          outputFormat.setSchema(schema);
+ 106          outputFormat.setDbSink(this);
+
+ 107  
+ 108          outputFormat.verifyField();
+ 109          OutputFormatSinkFunction outputFormatSinkFunc = new OutputFormatSinkFunction(outputFormat);
+ 110          return outputFormatSinkFunc;
+
+
+
+
+
+
+ 111      }
+ 112  
+ 113  
+ 114      @Override
+ 115      public RdbSink genStreamSink(TargetTableInfo targetTableInfo) {
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 116 -        RdbTableInfo rdbTableInfo = (RdbTableInfo) targetTableInfo;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 117 -</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 118 +        this.rdbTableInfo = (RdbTableInfo) targetTableInfo;</span>
+ 119          String tmpDbURL = rdbTableInfo.getUrl();
+ 120          String tmpUserName = rdbTableInfo.getUserName();
+ 121          String tmpPassword = rdbTableInfo.getPassword();
+ 122          String tmpTableName = rdbTableInfo.getTableName();
+ 123          String tmpRegisterName = rdbTableInfo.getName();
+ 124  
+ 125          Integer tmpSqlBatchSize = rdbTableInfo.getBatchSize();
+ 126          if (tmpSqlBatchSize != null) {
+ 127              setBatchNum(tmpSqlBatchSize);
+ 128          }
+ 129  
+ 130          Long batchWaitInterval = rdbTableInfo.getBatchWaitInterval();
+ 131          if (batchWaitInterval != null) {
+ 132              setBatchWaitInterval(batchWaitInterval);
+ 133          }
+ 134  
+ 135          Integer tmpSinkParallelism = rdbTableInfo.getParallelism();
+ 136          if (tmpSinkParallelism != null) {
+ 137              setParallelism(tmpSinkParallelism);
+ 138          }
+ 139  
+ 140          List&lt;String&gt; fields = Arrays.asList(rdbTableInfo.getFields());
+ 141          List&lt;Class&gt; fieldTypeArray = Arrays.asList(rdbTableInfo.getFieldClasses());
+ 142  
+ 143          this.driverName = getDriverName();
+ 144          this.dbURL = tmpDbURL;
+ 145          this.userName = tmpUserName;
+ 146          this.password = tmpPassword;
+ 147          this.tableName = tmpTableName;
+ 148          this.registerTabName = tmpRegisterName;
+
+
+
+
+
+
+
+
+
+ 149          this.primaryKeys = rdbTableInfo.getPrimaryKeys();
+ 150          this.dbType = rdbTableInfo.getType();
+ 151          this.schema = rdbTableInfo.getSchema();
+ 152  
+ 153          buildSql(schema, tableName, fields);
+ 154          buildSqlTypes(fieldTypeArray);
+
+
+
+
+ 155          return this;
+ 156      }
+ 157  
+ 158  
+ 159      /**
+ 160       * By now specified class type conversion.
+ 161       * FIXME Follow-up has added a new type of time needs to be modified
+ 162       *
+ 163       * @param fieldTypeArray
+ 164       */
+ 165      protected void buildSqlTypes(List&lt;Class&gt; fieldTypeArray) {
+ 166  
+ 167          int[] tmpFieldsType = new int[fieldTypeArray.size()];
+ 168          for (int i = 0; i &lt; fieldTypeArray.size(); i++) {
+ 169              String fieldType = fieldTypeArray.get(i).getName();
+ 170              if (fieldType.equals(Integer.class.getName())) {
+ 171                  tmpFieldsType[i] = Types.INTEGER;
+ 172              }else if (fieldType.equals(Boolean.class.getName())) {
+ 173                  tmpFieldsType[i] = Types.BOOLEAN;
+ 174              }else if (fieldType.equals(Long.class.getName())) {
+ 175                  tmpFieldsType[i] = Types.BIGINT;
+ 176              } else if (fieldType.equals(Byte.class.getName())) {
+ 177                  tmpFieldsType[i] = Types.TINYINT;
+ 178              } else if (fieldType.equals(Short.class.getName())) {
+ 179                  tmpFieldsType[i] = Types.SMALLINT;
+ 180              } else if (fieldType.equals(String.class.getName())) {
+ 181                  tmpFieldsType[i] = Types.CHAR;
+ 182              } else if (fieldType.equals(Byte.class.getName())) {
+ 183                  tmpFieldsType[i] = Types.BINARY;
+ 184              } else if (fieldType.equals(Float.class.getName())) {
+ 185                  tmpFieldsType[i] = Types.FLOAT;
+ 186              } else if (fieldType.equals(Double.class.getName())) {
+ 187                  tmpFieldsType[i] = Types.DOUBLE;
+ 188              } else if (fieldType.equals(Timestamp.class.getName())) {
+ 189                  tmpFieldsType[i] = Types.TIMESTAMP;
+ 190              } else if (fieldType.equals(BigDecimal.class.getName())) {
+ 191                  tmpFieldsType[i] = Types.DECIMAL;
+ 192              } else if (fieldType.equals(Date.class.getName())) {
+ 193                  tmpFieldsType[i] = Types.DATE;
+ 194              } else {
+ 195                  throw new RuntimeException(&quot;no support field type for sql. the input type:&quot; + fieldType);
+ 196              }
+ 197          }
+ 198  
+ 199          this.sqlTypes = tmpFieldsType;
+ 200      }
+ 201  
+ 202  
+ 203      @Override
+ 204      public void emitDataStream(DataStream&lt;Tuple2&lt;Boolean, Row&gt;&gt; dataStream) {
+ 205          RichSinkFunction richSinkFunction = createJdbcSinkFunc();
+ 206          DataStreamSink streamSink = dataStream.addSink(richSinkFunction);
+ 207          streamSink.name(registerTabName);
+ 208          if (parallelism &gt; 0) {
+ 209              streamSink.setParallelism(parallelism);
+ 210          }
+
+
+
+ 211      }
+ 212  
+ 213      @Override
+ 214      public TableSink&lt;Tuple2&lt;Boolean, Row&gt;&gt; configure(String[] fieldNames, TypeInformation&lt;?&gt;[] fieldTypes) {
+ 215          this.fieldNames = fieldNames;
+ 216          this.fieldTypes = fieldTypes;
+ 217          return this;
+ 218      }
+ 219  
+ 220  
+ 221      public void setBatchNum(int batchNum) {
+ 222          this.batchNum = batchNum;
+ 223      }
+ 224  
+ 225      public void setBatchWaitInterval(long batchWaitInterval) {
+ 226          this.batchWaitInterval = batchWaitInterval;
+ 227      }
+ 228  
+ 229      @Override
+ 230      public TupleTypeInfo&lt;Tuple2&lt;Boolean, Row&gt;&gt; getOutputType() {
+ 231          return new TupleTypeInfo(org.apache.flink.table.api.Types.BOOLEAN(), getRecordType());
+ 232      }
+ 233  
+ 234      @Override
+ 235      public TypeInformation&lt;Row&gt; getRecordType() {
+ 236          return new RowTypeInfo(fieldTypes, fieldNames);
+ 237      }
+ 238  
+ 239      @Override
+ 240      public String[] getFieldNames() {
+ 241          return fieldNames;
+ 242      }
+ 243  
+ 244      @Override
+ 245      public TypeInformation&lt;?&gt;[] getFieldTypes() {
+ 246          return fieldTypes;
+ 247      }
+ 248  
+ 249  
+ 250      public void setParallelism(int parallelism) {
+ 251          this.parallelism = parallelism;
+ 252      }
+ 253  
+ 254      public void setDbType(String dbType) {
+ 255          this.dbType = dbType;
+ 256      }
+ 257  
+ 258      /**
+ 259       * you need to implements  this method in your own class.
+ 260       *
+ 261       * @param tableName
+ 262       * @param fields
+ 263       */
+ 264      public abstract void buildSql(String schema, String tableName, List&lt;String&gt; fields);
+ 265  
+ 266      /**
+ 267       * sqlserver and oracle maybe implement
+ 268       *
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 269 -     * @param tableName</span>
+ 270       * @param fieldNames
+ 271       * @param realIndexes
+ 272       * @return
+ 273       */
+<abbr title=" 274      public abstract String buildUpdateSql(String schema, String tableName, List&lt;String&gt; fieldNames, Map&lt;String, List&lt;String&gt;&gt; realIndexes, List&lt;String&gt; fullField);"> 274      public abstract String buildUpdateSql(String schema, String tableName, List&lt;String&gt; fieldNames, Map&lt;String, Li🔵</abbr>
+ 275  
+ 276      public abstract String getDriverName();
+ 277  
+ 278      public abstract RetractJDBCOutputFormat getOutputFormat();
+
+ 279  
+ 280  }</pre></td>
+                        </tr>
+                    </table>
+                </div>
+              </body>
+            </html>
+            

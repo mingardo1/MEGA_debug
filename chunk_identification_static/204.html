@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+    <html lang="en">
+              <head>
+                <meta charset="utf-8">
+                <title>204</title>
+                    <style>
+                        #top {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        #bottom {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        abbr {
+                          /* Here is the delay */
+                          transition-delay:0s;
+                        }
+                    </style>
+              </head>
+              <body>
+                <span style="height: 4vh">
+                    204
+                    <a href="203.html">prev</a>
+                    <a href="205.html">next</a>
+                    <a href="204_chunks.html">chunks</a>
+                    <a href="index.html">index</a>
+                    CyanogenMod/android_packages_apps_Trebuchet_393631d4b5600c33bd5ebe4ed21c5a49e6f5f66e_src/com/android/launcher3/LauncherAppWidgetHost.java
+                    <textarea rows=1 onclick='navigator.clipboard.writeText(this.value)'>cd C:\studies\se\mega\git-analyzer-plus\notebooks\debug
+del /Q *
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\CyanogenMod\android_packages_apps_Trebuchet show &quot;393631d4b5600c33bd5ebe4ed21c5a49e6f5f66e:src/com/android/launcher3/LauncherAppWidgetHost.java&quot; &gt; committed.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\CyanogenMod\android_packages_apps_Trebuchet show &quot;393631d4b5600c33bd5ebe4ed21c5a49e6f5f66e^1:src/com/android/launcher3/LauncherAppWidgetHost.java&quot; &gt; ours.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\CyanogenMod\android_packages_apps_Trebuchet show &quot;393631d4b5600c33bd5ebe4ed21c5a49e6f5f66e^2:src/com/android/launcher3/LauncherAppWidgetHost.java&quot; &gt; theirs.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\CyanogenMod\android_packages_apps_Trebuchet show &quot;68fdeaadc621b7a9200f5c75790eb756a1983d02:src/com/android/launcher3/LauncherAppWidgetHost.java&quot; &gt; base.java
+copy ours.java 1ours.java
+copy ours.java 2ours.java
+copy theirs.java 1theirs.java
+copy theirs.java 2theirs.java
+copy base.java 1base.java
+copy base.java 2base.java
+&quot;C:\Program Files\Java\jdk1.8.0_241\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\jFSTMerge\build\libs\jFSTMerge-all.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\jfstmerge.java --show-base
+&quot;C:\Program Files\Eclipse Adoptium\jdk-17.0.11.9-hotspot\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\spork\target\spork-0.5.0-SNAPSHOT.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\spork.java
+del /Q 1*.java
+del /Q 2*.java
+del /Q jfstmerge.java.merge
+</textarea>
+                    {strict: [[b], [j]], subset: [[bj]]}
+                </span>
+                <div id="top">
+
+                    <table>
+                        <tr>
+                            <th>line based (standard git)</th>
+                            <th>jfstmerge</th>
+                            <th>spork</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1 /*
+   2  * Copyright (C) 2009 The Android Open Source Project
+   3  *
+   4  * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+   5  * you may not use this file except in compliance with the License.
+   6  * You may obtain a copy of the License at
+   7  *
+   8  *      http://www.apache.org/licenses/LICENSE-2.0
+   9  *
+  10  * Unless required by applicable law or agreed to in writing, software
+  11  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  12  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  13  * See the License for the specific language governing permissions and
+  14  * limitations under the License.
+  15  */
+  16 
+  17 package com.android.launcher3;
+  18 
+  19 import android.appwidget.AppWidgetHost;
+  20 import android.appwidget.AppWidgetHostView;
+  21 import android.appwidget.AppWidgetProviderInfo;
+  22 import android.content.Context;
+  23 import android.os.TransactionTooLargeException;
+  24 import android.view.LayoutInflater;
+  25 
+  26 import java.util.ArrayList;
+  27 
+  28 
+  29 /**
+  30  * Specific {@link AppWidgetHost} that creates our {@link LauncherAppWidgetHostView}
+  31  * which correctly captures all long-press events. This ensures that users can
+  32  * always pick up and move widgets.
+  33  */
+  34 public class LauncherAppWidgetHost extends AppWidgetHost {
+  35 
+  36     private final ArrayList&lt;Runnable&gt; mProviderChangeListeners = new ArrayList&lt;Runnable&gt;();
+  37 
+  38     Launcher mLauncher;
+  39 
+  40     public LauncherAppWidgetHost(Launcher launcher, int hostId) {
+  41         super(launcher, hostId);
+  42         mLauncher = launcher;
+  43     }
+  44 
+  45     @Override
+  46     protected AppWidgetHostView onCreateView(Context context, int appWidgetId,
+  47             AppWidgetProviderInfo appWidget) {
+  48         return new LauncherAppWidgetHostView(context);
+  49     }
+  50 
+  51     @Override
+  52     public void startListening() {
+  53         try {
+  54             super.startListening();
+  55         } catch (Exception e) {
+  56             if (e.getCause() instanceof TransactionTooLargeException) {
+  57                 // We&#x27;re willing to let this slide. The exception is being caused by the list of
+  58                 // RemoteViews which is being passed back. The startListening relationship will
+  59                 // have been established by this point, and we will end up populating the
+  60                 // widgets upon bind anyway. See issue 14255011 for more context.
+  61             } else {
+  62                 throw new RuntimeException(e);
+  63             }
+  64         }
+  65     }
+  66 
+  67     @Override
+  68     public void stopListening() {
+  69         super.stopListening();
+  70         clearViews();
+  71     }
+  72 
+  73     public void addProviderChangeListener(Runnable callback) {
+  74         mProviderChangeListeners.add(callback);
+  75     }
+  76 
+  77     public void removeProviderChangeListener(Runnable callback) {
+  78         mProviderChangeListeners.remove(callback);
+  79     }
+  80 
+  81     protected void onProvidersChanged() {
+  82         // Once we get the message that widget packages are updated, we need to rebind items
+  83         // in AppsCustomize accordingly.
+  84 &lt;&lt;&lt;&lt;&lt;&lt;&lt; GitAnalyzerPlus_ours
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  85         mLauncher.bindPackagesUpdated(LauncherModel.getSortedWidgetsAndShortcuts(mLauncher,</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  86                 true /* refresh */));</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  87 </span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  88         if (!mProviderChangeListeners.isEmpty()) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  89             for (Runnable callback : new ArrayList&lt;&gt;(mProviderChangeListeners)) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  90                 callback.run();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  91             }</span>
+  92 ||||||| GitAnalyzerPlus_base
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  93         mLauncher.bindPackagesUpdated(LauncherModel.getSortedWidgetsAndShortcuts(mLauncher,</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  94                 true /* refresh */));</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  95 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  96         for (Runnable callback : mProviderChangeListeners) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  97             callback.run();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  98         }</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  99     }</span>
+ 100 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 101         mLauncher.getModel().loadAndBindWidgetsAndShortcuts(mLauncher, mLauncher);</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 102         for (Runnable callback : mProviderChangeListeners) {</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 103             callback.run();</span>
+ 104 &gt;&gt;&gt;&gt;&gt;&gt;&gt; GitAnalyzerPlus_theirs
+ 105         }
+ 106     }
+ 107 
+ 108     public AppWidgetHostView createView(Context context, int appWidgetId,
+ 109             LauncherAppWidgetProviderInfo appWidget) {
+ 110         if (appWidget.isCustomWidget) {
+ 111             LauncherAppWidgetHostView lahv = new LauncherAppWidgetHostView(context);
+ 112             LayoutInflater inflater = (LayoutInflater)
+ 113                     context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+ 114             inflater.inflate(appWidget.initialLayout, lahv);
+ 115             lahv.setAppWidget(0, appWidget);
+ 116             lahv.updateLastInflationOrientation();
+ 117             return lahv;
+ 118         } else {
+ 119             return super.createView(context, appWidgetId, appWidget);
+ 120         }
+ 121     }
+ 122 
+ 123     /**
+ 124      * Called when the AppWidget provider for a AppWidget has been upgraded to a new apk.
+ 125      */
+ 126     @Override
+ 127     protected void onProviderChanged(int appWidgetId, AppWidgetProviderInfo appWidget) {
+ 128         LauncherAppWidgetProviderInfo info = LauncherAppWidgetProviderInfo.fromProviderInfo(
+ 129                 mLauncher, appWidget);
+ 130         super.onProviderChanged(appWidgetId, info);
+ 131     }
+ 132 }</pre></td>
+                            <td><pre>   1 /*
+   2  * Copyright (C) 2009 The Android Open Source Project
+   3  *
+   4  * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+   5  * you may not use this file except in compliance with the License.
+   6  * You may obtain a copy of the License at
+   7  *
+   8  *      http://www.apache.org/licenses/LICENSE-2.0
+   9  *
+  10  * Unless required by applicable law or agreed to in writing, software
+  11  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  12  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  13  * See the License for the specific language governing permissions and
+  14  * limitations under the License.
+  15  */
+  16 
+  17 package com.android.launcher3;
+  18 
+  19 import android.appwidget.AppWidgetHost;
+  20 import android.appwidget.AppWidgetHostView;
+  21 import android.appwidget.AppWidgetProviderInfo;
+  22 import android.content.Context;
+  23 import android.os.TransactionTooLargeException;
+  24 import android.view.LayoutInflater;
+  25 
+  26 import java.util.ArrayList;
+  27 
+  28 
+  29 /**
+  30  * Specific {@link AppWidgetHost} that creates our {@link LauncherAppWidgetHostView}
+  31  * which correctly captures all long-press events. This ensures that users can
+  32  * always pick up and move widgets.
+  33  */
+  34 public class LauncherAppWidgetHost extends AppWidgetHost {
+  35 
+  36     private final ArrayList&lt;Runnable&gt; mProviderChangeListeners = new ArrayList&lt;Runnable&gt;();
+  37 
+  38     Launcher mLauncher;
+  39 
+  40     public LauncherAppWidgetHost(Launcher launcher, int hostId) {
+  41         super(launcher, hostId);
+  42         mLauncher = launcher;
+  43     }
+  44 
+  45     @Override
+  46     protected AppWidgetHostView onCreateView(Context context, int appWidgetId,
+  47             AppWidgetProviderInfo appWidget) {
+  48         return new LauncherAppWidgetHostView(context);
+  49     }
+  50 
+  51     @Override
+  52     public void startListening() {
+  53         try {
+  54             super.startListening();
+  55         } catch (Exception e) {
+  56             if (e.getCause() instanceof TransactionTooLargeException) {
+  57                 // We&#x27;re willing to let this slide. The exception is being caused by the list of
+  58                 // RemoteViews which is being passed back. The startListening relationship will
+  59                 // have been established by this point, and we will end up populating the
+  60                 // widgets upon bind anyway. See issue 14255011 for more context.
+  61             } else {
+  62                 throw new RuntimeException(e);
+  63             }
+  64         }
+  65     }
+  66 
+  67     @Override
+  68     public void stopListening() {
+  69         super.stopListening();
+  70         clearViews();
+  71     }
+  72 
+  73     public void addProviderChangeListener(Runnable callback) {
+  74         mProviderChangeListeners.add(callback);
+  75     }
+  76 
+  77     public void removeProviderChangeListener(Runnable callback) {
+  78         mProviderChangeListeners.remove(callback);
+  79     }
+  80 
+  81     protected void onProvidersChanged() {
+  82         // Once we get the message that widget packages are updated, we need to rebind items
+  83         // in AppsCustomize accordingly.
+  84 &lt;&lt;&lt;&lt;&lt;&lt;&lt; MINE
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  85         mLauncher.bindPackagesUpdated(LauncherModel.getSortedWidgetsAndShortcuts(mLauncher,</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  86                 true /* refresh */));</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  87 </span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  88         if (!mProviderChangeListeners.isEmpty()) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  89             for (Runnable callback : new ArrayList&lt;&gt;(mProviderChangeListeners)) {</span>
+  90 ||||||| BASE
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  91         mLauncher.bindPackagesUpdated(LauncherModel.getSortedWidgetsAndShortcuts(mLauncher,</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  92                 true /* refresh */));</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  93 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  94         for (Runnable callback : mProviderChangeListeners) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  95             callback.run();</span>
+  96 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  97         mLauncher.getModel().loadAndBindWidgetsAndShortcuts(mLauncher, mLauncher);</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  98         for (Runnable callback : mProviderChangeListeners) {</span>
+  99 &gt;&gt;&gt;&gt;&gt;&gt;&gt; YOURS
+ 100             callback.run();
+ 101         }
+ 102     }
+ 103     }
+ 104 
+ 105     public AppWidgetHostView createView(Context context, int appWidgetId,
+ 106             LauncherAppWidgetProviderInfo appWidget) {
+ 107         if (appWidget.isCustomWidget) {
+ 108             LauncherAppWidgetHostView lahv = new LauncherAppWidgetHostView(context);
+ 109             LayoutInflater inflater = (LayoutInflater)
+ 110                     context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+ 111             inflater.inflate(appWidget.initialLayout, lahv);
+ 112             lahv.setAppWidget(0, appWidget);
+ 113             lahv.updateLastInflationOrientation();
+ 114             return lahv;
+ 115         } else {
+ 116             return super.createView(context, appWidgetId, appWidget);
+ 117         }
+ 118     }
+ 119 
+ 120     /**
+ 121      * Called when the AppWidget provider for a AppWidget has been upgraded to a new apk.
+ 122      */
+ 123     @Override
+ 124     protected void onProviderChanged(int appWidgetId, AppWidgetProviderInfo appWidget) {
+ 125         LauncherAppWidgetProviderInfo info = LauncherAppWidgetProviderInfo.fromProviderInfo(
+ 126                 mLauncher, appWidget);
+ 127         super.onProviderChanged(appWidgetId, info);
+ 128     }
+ 129 }
+ 
+ </pre></td>
+                            <td><pre>   1 /*
+   2  * Copyright (C) 2009 The Android Open Source Project
+   3  *
+   4  * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+   5  * you may not use this file except in compliance with the License.
+   6  * You may obtain a copy of the License at
+   7  *
+   8  *      http://www.apache.org/licenses/LICENSE-2.0
+   9  *
+  10  * Unless required by applicable law or agreed to in writing, software
+  11  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  12  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  13  * See the License for the specific language governing permissions and
+  14  * limitations under the License.
+  15  */
+  16 package com.android.launcher3;
+  17 
+  18 import android.appwidget.AppWidgetHost;
+  19 import android.appwidget.AppWidgetHostView;
+  20 import android.appwidget.AppWidgetProviderInfo;
+  21 import android.content.Context;
+  22 import android.os.TransactionTooLargeException;
+  23 import android.view.LayoutInflater;
+  24 import java.util.ArrayList;
+  25 
+  26 
+  27 /**
+  28  * Specific {@link AppWidgetHost} that creates our {@link LauncherAppWidgetHostView}
+  29  * which correctly captures all long-press events. This ensures that users can
+  30  * always pick up and move widgets.
+  31  */
+  32 public class LauncherAppWidgetHost extends AppWidgetHost {
+  33     private final ArrayList&lt;Runnable&gt; mProviderChangeListeners = new ArrayList&lt;Runnable&gt;();
+  34 
+  35     Launcher mLauncher;
+  36 
+  37     public LauncherAppWidgetHost(Launcher launcher, int hostId) {
+  38         super(launcher, hostId);
+  39         mLauncher = launcher;
+  40     }
+  41 
+  42     @Override
+  43     protected AppWidgetHostView onCreateView(Context context, int appWidgetId,
+  44             AppWidgetProviderInfo appWidget) {
+  45         return new LauncherAppWidgetHostView(context);
+  46     }
+  47 
+  48     @Override
+  49     public void startListening() {
+  50         try {
+  51             super.startListening();
+  52         } catch (Exception e) {
+  53             if (e.getCause() instanceof TransactionTooLargeException) {
+  54                 // We&#x27;re willing to let this slide. The exception is being caused by the list of
+  55                 // RemoteViews which is being passed back. The startListening relationship will
+  56                 // have been established by this point, and we will end up populating the
+  57                 // widgets upon bind anyway. See issue 14255011 for more context.
+  58             } else {
+  59                 throw new RuntimeException(e);
+  60             }
+  61         }
+  62     }
+  63 
+  64     @Override
+  65     public void stopListening() {
+  66         super.stopListening();
+  67         clearViews();
+  68     }
+  69 
+  70     public void addProviderChangeListener(Runnable callback) {
+  71         mProviderChangeListeners.add(callback);
+  72     }
+  73 
+  74     public void removeProviderChangeListener(Runnable callback) {
+  75         mProviderChangeListeners.remove(callback);
+  76     }
+  77 
+  78     protected void onProvidersChanged() {
+  79         // Once we get the message that widget packages are updated, we need to rebind items
+  80         // in AppsCustomize accordingly.
+  81         mLauncher.getModel().loadAndBindWidgetsAndShortcuts(mLauncher, mLauncher);
+  82         if (!mProviderChangeListeners.isEmpty()) {
+  83             for (Runnable callback : new ArrayList&lt;&gt;(mProviderChangeListeners)) {
+  84                 callback.run();
+  85             }
+  86         }
+  87     }
+  88 
+  89     public AppWidgetHostView createView(Context context, int appWidgetId,
+  90             LauncherAppWidgetProviderInfo appWidget) {
+  91         if (appWidget.isCustomWidget) {
+  92             LauncherAppWidgetHostView lahv = new LauncherAppWidgetHostView(context);
+  93             LayoutInflater inflater = (LayoutInflater)
+  94                     context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+  95             inflater.inflate(appWidget.initialLayout, lahv);
+  96             lahv.setAppWidget(0, appWidget);
+  97             lahv.updateLastInflationOrientation();
+  98             return lahv;
+  99         } else {
+ 100             return super.createView(context, appWidgetId, appWidget);
+ 101         }
+ 102     }
+ 103 
+ 104     /**
+ 105      * Called when the AppWidget provider for a AppWidget has been upgraded to a new apk.
+ 106      */
+ 107     @Override
+ 108     protected void onProviderChanged(int appWidgetId, AppWidgetProviderInfo appWidget) {
+ 109         LauncherAppWidgetProviderInfo info = LauncherAppWidgetProviderInfo.fromProviderInfo(
+ 110                 mLauncher, appWidget);
+ 111         super.onProviderChanged(appWidgetId, info);
+ 112     }
+ 113 }
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ </pre></td>
+                        </tr>
+                    </table>
+                </div>
+                <div id="bottom">
+                    <table style="margin:auto">
+                        <tr>
+                            <th>ours vs. base</th>
+                            <th>theirs vs. base</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1  /*
+   2   * Copyright (C) 2009 The Android Open Source Project
+   3   *
+   4   * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+   5   * you may not use this file except in compliance with the License.
+   6   * You may obtain a copy of the License at
+   7   *
+   8   *      http://www.apache.org/licenses/LICENSE-2.0
+   9   *
+  10   * Unless required by applicable law or agreed to in writing, software
+  11   * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  12   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  13   * See the License for the specific language governing permissions and
+  14   * limitations under the License.
+  15   */
+  16  
+  17  package com.android.launcher3;
+  18  
+  19  import android.appwidget.AppWidgetHost;
+  20  import android.appwidget.AppWidgetHostView;
+  21  import android.appwidget.AppWidgetProviderInfo;
+  22  import android.content.Context;
+  23  import android.os.TransactionTooLargeException;
+  24  import android.view.LayoutInflater;
+  25  
+  26  import java.util.ArrayList;
+  27  
+  28  
+  29  /**
+  30   * Specific {@link AppWidgetHost} that creates our {@link LauncherAppWidgetHostView}
+  31   * which correctly captures all long-press events. This ensures that users can
+  32   * always pick up and move widgets.
+  33   */
+  34  public class LauncherAppWidgetHost extends AppWidgetHost {
+  35  
+  36      private final ArrayList&lt;Runnable&gt; mProviderChangeListeners = new ArrayList&lt;Runnable&gt;();
+  37  
+  38      Launcher mLauncher;
+  39  
+  40      public LauncherAppWidgetHost(Launcher launcher, int hostId) {
+  41          super(launcher, hostId);
+  42          mLauncher = launcher;
+  43      }
+  44  
+  45      @Override
+  46      protected AppWidgetHostView onCreateView(Context context, int appWidgetId,
+  47              AppWidgetProviderInfo appWidget) {
+  48          return new LauncherAppWidgetHostView(context);
+  49      }
+  50  
+  51      @Override
+  52      public void startListening() {
+  53          try {
+  54              super.startListening();
+  55          } catch (Exception e) {
+  56              if (e.getCause() instanceof TransactionTooLargeException) {
+  57                  // We&#x27;re willing to let this slide. The exception is being caused by the list of
+  58                  // RemoteViews which is being passed back. The startListening relationship will
+  59                  // have been established by this point, and we will end up populating the
+  60                  // widgets upon bind anyway. See issue 14255011 for more context.
+  61              } else {
+  62                  throw new RuntimeException(e);
+  63              }
+  64          }
+  65      }
+  66  
+  67      @Override
+  68      public void stopListening() {
+  69          super.stopListening();
+  70          clearViews();
+  71      }
+  72  
+  73      public void addProviderChangeListener(Runnable callback) {
+  74          mProviderChangeListeners.add(callback);
+  75      }
+  76  
+  77      public void removeProviderChangeListener(Runnable callback) {
+  78          mProviderChangeListeners.remove(callback);
+  79      }
+  80  
+  81      protected void onProvidersChanged() {
+  82          // Once we get the message that widget packages are updated, we need to rebind items
+  83          // in AppsCustomize accordingly.
+  84          mLauncher.bindPackagesUpdated(LauncherModel.getSortedWidgetsAndShortcuts(mLauncher,
+  85                  true /* refresh */));
+  86  
+
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  87 -        for (Runnable callback : mProviderChangeListeners) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  88 -            callback.run();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  89 +        if (!mProviderChangeListeners.isEmpty()) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  90 +            for (Runnable callback : new ArrayList&lt;&gt;(mProviderChangeListeners)) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  91 +                callback.run();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  92 +            }</span>
+  93          }
+  94      }
+  95  
+  96      public AppWidgetHostView createView(Context context, int appWidgetId,
+  97              LauncherAppWidgetProviderInfo appWidget) {
+  98          if (appWidget.isCustomWidget) {
+  99              LauncherAppWidgetHostView lahv = new LauncherAppWidgetHostView(context);
+ 100              LayoutInflater inflater = (LayoutInflater)
+ 101                      context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+ 102              inflater.inflate(appWidget.initialLayout, lahv);
+ 103              lahv.setAppWidget(0, appWidget);
+ 104              lahv.updateLastInflationOrientation();
+ 105              return lahv;
+ 106          } else {
+ 107              return super.createView(context, appWidgetId, appWidget);
+ 108          }
+ 109      }
+ 110  
+ 111      /**
+ 112       * Called when the AppWidget provider for a AppWidget has been upgraded to a new apk.
+ 113       */
+ 114      @Override
+ 115      protected void onProviderChanged(int appWidgetId, AppWidgetProviderInfo appWidget) {
+ 116          LauncherAppWidgetProviderInfo info = LauncherAppWidgetProviderInfo.fromProviderInfo(
+ 117                  mLauncher, appWidget);
+ 118          super.onProviderChanged(appWidgetId, info);
+ 119      }
+ 120  }</pre></td>
+                            <td><pre>   1  /*
+   2   * Copyright (C) 2009 The Android Open Source Project
+   3   *
+   4   * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+   5   * you may not use this file except in compliance with the License.
+   6   * You may obtain a copy of the License at
+   7   *
+   8   *      http://www.apache.org/licenses/LICENSE-2.0
+   9   *
+  10   * Unless required by applicable law or agreed to in writing, software
+  11   * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  12   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  13   * See the License for the specific language governing permissions and
+  14   * limitations under the License.
+  15   */
+  16  
+  17  package com.android.launcher3;
+  18  
+  19  import android.appwidget.AppWidgetHost;
+  20  import android.appwidget.AppWidgetHostView;
+  21  import android.appwidget.AppWidgetProviderInfo;
+  22  import android.content.Context;
+  23  import android.os.TransactionTooLargeException;
+  24  import android.view.LayoutInflater;
+  25  
+  26  import java.util.ArrayList;
+  27  
+  28  
+  29  /**
+  30   * Specific {@link AppWidgetHost} that creates our {@link LauncherAppWidgetHostView}
+  31   * which correctly captures all long-press events. This ensures that users can
+  32   * always pick up and move widgets.
+  33   */
+  34  public class LauncherAppWidgetHost extends AppWidgetHost {
+  35  
+  36      private final ArrayList&lt;Runnable&gt; mProviderChangeListeners = new ArrayList&lt;Runnable&gt;();
+  37  
+  38      Launcher mLauncher;
+  39  
+  40      public LauncherAppWidgetHost(Launcher launcher, int hostId) {
+  41          super(launcher, hostId);
+  42          mLauncher = launcher;
+  43      }
+  44  
+  45      @Override
+  46      protected AppWidgetHostView onCreateView(Context context, int appWidgetId,
+  47              AppWidgetProviderInfo appWidget) {
+  48          return new LauncherAppWidgetHostView(context);
+  49      }
+  50  
+  51      @Override
+  52      public void startListening() {
+  53          try {
+  54              super.startListening();
+  55          } catch (Exception e) {
+  56              if (e.getCause() instanceof TransactionTooLargeException) {
+  57                  // We&#x27;re willing to let this slide. The exception is being caused by the list of
+  58                  // RemoteViews which is being passed back. The startListening relationship will
+  59                  // have been established by this point, and we will end up populating the
+  60                  // widgets upon bind anyway. See issue 14255011 for more context.
+  61              } else {
+  62                  throw new RuntimeException(e);
+  63              }
+  64          }
+  65      }
+  66  
+  67      @Override
+  68      public void stopListening() {
+  69          super.stopListening();
+  70          clearViews();
+  71      }
+  72  
+  73      public void addProviderChangeListener(Runnable callback) {
+  74          mProviderChangeListeners.add(callback);
+  75      }
+  76  
+  77      public void removeProviderChangeListener(Runnable callback) {
+  78          mProviderChangeListeners.remove(callback);
+  79      }
+  80  
+  81      protected void onProvidersChanged() {
+  82          // Once we get the message that widget packages are updated, we need to rebind items
+  83          // in AppsCustomize accordingly.
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  84 -        mLauncher.bindPackagesUpdated(LauncherModel.getSortedWidgetsAndShortcuts(mLauncher,</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  85 -                true /* refresh */));</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  86 -</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  87 +        mLauncher.getModel().loadAndBindWidgetsAndShortcuts(mLauncher, mLauncher);</span>
+  88          for (Runnable callback : mProviderChangeListeners) {
+  89              callback.run();
+
+
+
+
+  90          }
+  91      }
+  92  
+  93      public AppWidgetHostView createView(Context context, int appWidgetId,
+  94              LauncherAppWidgetProviderInfo appWidget) {
+  95          if (appWidget.isCustomWidget) {
+  96              LauncherAppWidgetHostView lahv = new LauncherAppWidgetHostView(context);
+  97              LayoutInflater inflater = (LayoutInflater)
+  98                      context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+  99              inflater.inflate(appWidget.initialLayout, lahv);
+ 100              lahv.setAppWidget(0, appWidget);
+ 101              lahv.updateLastInflationOrientation();
+ 102              return lahv;
+ 103          } else {
+ 104              return super.createView(context, appWidgetId, appWidget);
+ 105          }
+ 106      }
+ 107  
+ 108      /**
+ 109       * Called when the AppWidget provider for a AppWidget has been upgraded to a new apk.
+ 110       */
+ 111      @Override
+ 112      protected void onProviderChanged(int appWidgetId, AppWidgetProviderInfo appWidget) {
+ 113          LauncherAppWidgetProviderInfo info = LauncherAppWidgetProviderInfo.fromProviderInfo(
+ 114                  mLauncher, appWidget);
+ 115          super.onProviderChanged(appWidgetId, info);
+ 116      }
+ 117  }</pre></td>
+                        </tr>
+                    </table>
+                </div>
+              </body>
+            </html>
+            

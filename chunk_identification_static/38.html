@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+    <html lang="en">
+              <head>
+                <meta charset="utf-8">
+                <title>38</title>
+                    <style>
+                        #top {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        #bottom {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        abbr {
+                          /* Here is the delay */
+                          transition-delay:0s;
+                        }
+                    </style>
+              </head>
+              <body>
+                <span style="height: 4vh">
+                    38
+                    <a href="37.html">prev</a>
+                    <a href="39.html">next</a>
+                    <a href="38_chunks.html">chunks</a>
+                    <a href="index.html">index</a>
+                    AriaLyy/Aria_5a70764596654bf9b70fb9295d7fef3a7b445fa0_Aria/src/main/java/com/arialyy/aria/core/command/normal/CancelAllCmd.java
+                    <textarea rows=1 onclick='navigator.clipboard.writeText(this.value)'>cd C:\studies\se\mega\git-analyzer-plus\notebooks\debug
+del /Q *
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\AriaLyy\Aria show &quot;5a70764596654bf9b70fb9295d7fef3a7b445fa0:Aria/src/main/java/com/arialyy/aria/core/command/normal/CancelAllCmd.java&quot; &gt; committed.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\AriaLyy\Aria show &quot;5a70764596654bf9b70fb9295d7fef3a7b445fa0^1:Aria/src/main/java/com/arialyy/aria/core/command/normal/CancelAllCmd.java&quot; &gt; ours.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\AriaLyy\Aria show &quot;5a70764596654bf9b70fb9295d7fef3a7b445fa0^2:Aria/src/main/java/com/arialyy/aria/core/command/normal/CancelAllCmd.java&quot; &gt; theirs.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\AriaLyy\Aria show &quot;3b30d31b8e7b111906dc91f9bcbaf2bfd9a39907:Aria/src/main/java/com/arialyy/aria/core/command/normal/CancelAllCmd.java&quot; &gt; base.java
+copy ours.java 1ours.java
+copy ours.java 2ours.java
+copy theirs.java 1theirs.java
+copy theirs.java 2theirs.java
+copy base.java 1base.java
+copy base.java 2base.java
+&quot;C:\Program Files\Java\jdk1.8.0_241\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\jFSTMerge\build\libs\jFSTMerge-all.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\jfstmerge.java --show-base
+&quot;C:\Program Files\Eclipse Adoptium\jdk-17.0.11.9-hotspot\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\spork\target\spork-0.5.0-SNAPSHOT.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\spork.java
+del /Q 1*.java
+del /Q 2*.java
+del /Q jfstmerge.java.merge
+</textarea>
+                    {strict: [[bj]], subset: [[bj]]}
+                </span>
+                <div id="top">
+
+                    <table>
+                        <tr>
+                            <th>line based (standard git)</th>
+                            <th>jfstmerge</th>
+                            <th>spork</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1 /*
+   2  * Copyright (C) 2016 AriaLyy(https://github.com/AriaLyy/Aria)
+   3  *
+   4  * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+   5  * you may not use this file except in compliance with the License.
+   6  * You may obtain a copy of the License at
+   7  *
+   8  *      http://www.apache.org/licenses/LICENSE-2.0
+   9  *
+  10  * Unless required by applicable law or agreed to in writing, software
+  11  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  12  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  13  * See the License for the specific language governing permissions and
+  14  * limitations under the License.
+  15  */
+  16 
+  17 package com.arialyy.aria.core.command.normal;
+  18 
+  19 import com.arialyy.aria.core.download.DownloadGroupTaskEntity;
+  20 import com.arialyy.aria.core.download.DownloadTaskEntity;
+  21 import com.arialyy.aria.core.inf.AbsTaskEntity;
+  22 import com.arialyy.aria.core.upload.UploadTaskEntity;
+  23 import com.arialyy.aria.orm.DbEntity;
+  24 import com.arialyy.aria.util.CommonUtil;
+  25 import java.util.List;
+  26 
+  27 /**
+  28  * Created by AriaL on 2017/6/27.
+  29  * 删除所有任务，并且删除所有回掉
+  30  */
+  31 public class CancelAllCmd&lt;T extends AbsTaskEntity&gt; extends AbsNormalCmd&lt;T&gt; {
+  32   /**
+  33    * removeFile {@code true} 删除已经下载完成的任务，不仅删除下载记录，还会删除已经下载完成的文件，{@code false}
+  34    * 如果文件已经下载完成，只删除下载记录
+  35    */
+  36   public boolean removeFile = false;
+  37 
+  38   /**
+  39    * @param targetName 产生任务的对象名
+  40    */
+  41   CancelAllCmd(String targetName, T entity) {
+  42     super(targetName, entity);
+  43   }
+  44 
+  45   @Override public void executeCmd() {
+  46     removeAll();
+  47     if (mTaskEntity instanceof DownloadTaskEntity
+  48         || mTaskEntity instanceof DownloadGroupTaskEntity) {
+  49       handleDownloadRemove();
+  50 &lt;&lt;&lt;&lt;&lt;&lt;&lt; GitAnalyzerPlus_ours
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  51       handleDownloadRemove();</span>
+  52 ||||||| GitAnalyzerPlus_base
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  53     }</span>
+  54 =======
+  55 &gt;&gt;&gt;&gt;&gt;&gt;&gt; GitAnalyzerPlus_theirs
+  56       handleDownloadGroupRemove();
+  57     } else if (mTaskEntity instanceof UploadTaskEntity) {
+  58       handleUploadRemove();
+  59       handleUploadRemove();
+  60     }
+  61   }
+  62 
+  63   /**
+  64    * 处理下载任务组的删除操作
+  65    */
+  66   private void handleDownloadGroupRemove() {
+  67     List&lt;DownloadGroupTaskEntity&gt; allEntity = DbEntity.findAllData(DownloadGroupTaskEntity.class);
+  68     if (allEntity == null || allEntity.size() == 0) return;
+  69     for (DownloadGroupTaskEntity entity : allEntity) {
+  70       CommonUtil.delDownloadGroupTaskConfig(removeFile, entity);
+  71     }
+  72   }
+  73 
+  74   /**
+  75    * 处理下载任务组的删除操作
+  76    */
+  77   private void handleDownloadGroupRemove() {
+  78     List&lt;DownloadGroupTaskEntity&gt; allEntity = DbEntity.findAllData(DownloadGroupTaskEntity.class);
+  79     if (allEntity == null || allEntity.size() == 0) return;
+  80     for (DownloadGroupTaskEntity entity : allEntity) {
+  81       CommonUtil.delDownloadGroupTaskConfig(removeFile, entity);
+  82     }
+  83   }
+  84 
+  85   /**
+  86    * 处理上传的删除
+  87    */
+  88   private void handleUploadRemove() {
+  89     List&lt;UploadTaskEntity&gt; allEntity = DbEntity.findAllData(UploadTaskEntity.class);
+  90     if (allEntity == null || allEntity.size() == 0) return;
+  91     for (UploadTaskEntity entity : allEntity) {
+  92       CommonUtil.delUploadTaskConfig(removeFile, entity);
+  93     }
+  94   }
+  95 
+  96   /**
+  97    * 处理下载的删除
+  98    */
+  99   private void handleDownloadRemove() {
+ 100     List&lt;DownloadTaskEntity&gt; allEntity = DbEntity.findAllData(DownloadTaskEntity.class);
+ 101     if (allEntity == null || allEntity.size() == 0) return;
+ 102     for (DownloadTaskEntity entity : allEntity) {
+ 103       CommonUtil.delDownloadTaskConfig(removeFile, entity);
+ 104     }
+ 105   }
+ 106 }</pre></td>
+                            <td><pre>   1 /*
+   2  * Copyright (C) 2016 AriaLyy(https://github.com/AriaLyy/Aria)
+   3  *
+   4  * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+   5  * you may not use this file except in compliance with the License.
+   6  * You may obtain a copy of the License at
+   7  *
+   8  *      http://www.apache.org/licenses/LICENSE-2.0
+   9  *
+  10  * Unless required by applicable law or agreed to in writing, software
+  11  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  12  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  13  * See the License for the specific language governing permissions and
+  14  * limitations under the License.
+  15  */
+  16 
+  17 package com.arialyy.aria.core.command.normal;
+  18 
+  19 import com.arialyy.aria.core.download.DownloadGroupTaskEntity;
+  20 import com.arialyy.aria.core.download.DownloadTaskEntity;
+  21 import com.arialyy.aria.core.inf.AbsTaskEntity;
+  22 import com.arialyy.aria.core.upload.UploadTaskEntity;
+  23 import com.arialyy.aria.orm.DbEntity;
+  24 import com.arialyy.aria.util.CommonUtil;
+  25 import java.util.List;
+  26 
+  27 /**
+  28  * Created by AriaL on 2017/6/27.
+  29  * 删除所有任务，并且删除所有回掉
+  30  */
+  31 public class CancelAllCmd&lt;T extends AbsTaskEntity&gt; extends AbsNormalCmd&lt;T&gt; {
+  32   /**
+  33    * removeFile {@code true} 删除已经下载完成的任务，不仅删除下载记录，还会删除已经下载完成的文件，{@code false}
+  34    * 如果文件已经下载完成，只删除下载记录
+  35    */
+  36   public boolean removeFile = false;
+  37 
+  38   /**
+  39    * @param targetName 产生任务的对象名
+  40    */
+  41   CancelAllCmd(String targetName, T entity) {
+  42     super(targetName, entity);
+  43   }
+  44 
+  45   @Override public void executeCmd() {
+  46     removeAll();
+  47     if (mTaskEntity instanceof DownloadTaskEntity
+  48         || mTaskEntity instanceof DownloadGroupTaskEntity) {
+  49       handleDownloadRemove();
+  50 &lt;&lt;&lt;&lt;&lt;&lt;&lt; MINE
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  51       handleDownloadRemove();</span>
+  52 ||||||| BASE
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  53       handleUploadRemove();</span>
+  54 =======
+  55 &gt;&gt;&gt;&gt;&gt;&gt;&gt; YOURS
+  56       handleDownloadGroupRemove();
+  57     } else if (mTaskEntity instanceof UploadTaskEntity) {
+  58       handleUploadRemove();
+  59       handleUploadRemove();
+  60     }
+  61   }
+  62 
+  63   /**
+  64    * 处理下载任务组的删除操作
+  65    */
+  66   private void handleDownloadGroupRemove() {
+  67     List&lt;DownloadGroupTaskEntity&gt; allEntity = DbEntity.findAllData(DownloadGroupTaskEntity.class);
+  68     if (allEntity == null || allEntity.size() == 0) return;
+  69     for (DownloadGroupTaskEntity entity : allEntity) {
+  70       CommonUtil.delDownloadGroupTaskConfig(removeFile, entity);
+  71     }
+  72   }
+  73 
+  74   /**
+  75    * 处理上传的删除
+  76    */
+  77   private void handleUploadRemove() {
+  78     List&lt;UploadTaskEntity&gt; allEntity = DbEntity.findAllData(UploadTaskEntity.class);
+  79     if (allEntity == null || allEntity.size() == 0) return;
+  80     for (UploadTaskEntity entity : allEntity) {
+  81       CommonUtil.delUploadTaskConfig(removeFile, entity);
+  82     }
+  83   }
+  84 
+  85   /**
+  86    * 处理下载的删除
+  87    */
+  88   private void handleDownloadRemove() {
+  89     List&lt;DownloadTaskEntity&gt; allEntity = DbEntity.findAllData(DownloadTaskEntity.class);
+  90     if (allEntity == null || allEntity.size() == 0) return;
+  91     for (DownloadTaskEntity entity : allEntity) {
+  92       CommonUtil.delDownloadTaskConfig(removeFile, entity);
+  93     }
+  94   }
+  95 }
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ </pre></td>
+                            <td><pre>   1 /*
+   2  * Copyright (C) 2016 AriaLyy(https://github.com/AriaLyy/Aria)
+   3  *
+   4  * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+   5  * you may not use this file except in compliance with the License.
+   6  * You may obtain a copy of the License at
+   7  *
+   8  *      http://www.apache.org/licenses/LICENSE-2.0
+   9  *
+  10  * Unless required by applicable law or agreed to in writing, software
+  11  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  12  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  13  * See the License for the specific language governing permissions and
+  14  * limitations under the License.
+  15  */
+  16 package com.arialyy.aria.core.command.normal;
+  17 
+  18 import com.arialyy.aria.core.download.DownloadGroupTaskEntity;
+  19 import com.arialyy.aria.core.download.DownloadTaskEntity;
+  20 import com.arialyy.aria.core.inf.AbsTaskEntity;
+  21 import com.arialyy.aria.core.upload.UploadTaskEntity;
+  22 import com.arialyy.aria.orm.DbEntity;
+  23 import com.arialyy.aria.util.CommonUtil;
+  24 import java.util.List;
+  25 
+  26 
+  27 /**
+  28  * Created by AriaL on 2017/6/27.
+  29  * 删除所有任务，并且删除所有回掉
+  30  */
+  31 public class CancelAllCmd&lt;T extends AbsTaskEntity&gt; extends AbsNormalCmd&lt;T&gt; {
+  32   /**
+  33    * removeFile {@code true} 删除已经下载完成的任务，不仅删除下载记录，还会删除已经下载完成的文件，{@code false}
+  34    * 如果文件已经下载完成，只删除下载记录
+  35    */
+  36   public boolean removeFile = false;
+  37 
+  38   /**
+  39    *
+  40    *
+  41    * @param targetName
+  42    * 		产生任务的对象名
+  43    */
+  44   CancelAllCmd(String targetName, T entity) {
+  45     super(targetName, entity);
+  46   }
+  47 
+  48   @Override
+  49   public void executeCmd() {
+  50     removeAll();
+<abbr title="  51     if ((mTaskEntity instanceof DownloadTaskEntity) || (mTaskEntity instanceof DownloadGroupTaskEntity)) {">  51     if ((mTaskEntity instanceof DownloadTaskEntity) || (mTaskEntity instanceof DownloadGroupTaskEntity)) 🔵</abbr>
+  52       handleDownloadRemove();
+  53       handleDownloadRemove();
+  54       handleDownloadGroupRemove();
+  55     } else if (mTaskEntity instanceof UploadTaskEntity) {
+  56       handleUploadRemove();
+  57       handleUploadRemove();
+  58     }
+  59   }
+  60 
+  61   /**
+  62    * 处理下载任务组的删除操作
+  63    */
+  64   private void handleDownloadGroupRemove() {
+  65     List&lt;DownloadGroupTaskEntity&gt; allEntity = DbEntity.findAllData(DownloadGroupTaskEntity.class);
+  66     if ((allEntity == null) || (allEntity.size() == 0)) {
+  67       return;
+  68     }
+  69     for (DownloadGroupTaskEntity entity : allEntity) {
+  70       CommonUtil.delDownloadGroupTaskConfig(removeFile, entity);
+  71     }
+  72   }
+  73 
+  74   /**
+  75    * 处理上传的删除
+  76    */
+  77   private void handleUploadRemove() {
+  78     List&lt;UploadTaskEntity&gt; allEntity = DbEntity.findAllData(UploadTaskEntity.class);
+  79     if (allEntity == null || allEntity.size() == 0) return;
+  80     for (UploadTaskEntity entity : allEntity) {
+  81       CommonUtil.delUploadTaskConfig(removeFile, entity);
+  82     }
+  83   }
+  84 
+  85   /**
+  86    * 处理下载的删除
+  87    */
+  88   private void handleDownloadRemove() {
+  89     List&lt;DownloadTaskEntity&gt; allEntity = DbEntity.findAllData(DownloadTaskEntity.class);
+  90     if (allEntity == null || allEntity.size() == 0) return;
+  91     for (DownloadTaskEntity entity : allEntity) {
+  92       CommonUtil.delDownloadTaskConfig(removeFile, entity);
+  93     }
+  94   }
+  95 }
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ </pre></td>
+                        </tr>
+                    </table>
+                </div>
+                <div id="bottom">
+                    <table style="margin:auto">
+                        <tr>
+                            <th>ours vs. base</th>
+                            <th>theirs vs. base</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1  /*
+   2   * Copyright (C) 2016 AriaLyy(https://github.com/AriaLyy/Aria)
+   3   *
+   4   * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+   5   * you may not use this file except in compliance with the License.
+   6   * You may obtain a copy of the License at
+   7   *
+   8   *      http://www.apache.org/licenses/LICENSE-2.0
+   9   *
+  10   * Unless required by applicable law or agreed to in writing, software
+  11   * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  12   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  13   * See the License for the specific language governing permissions and
+  14   * limitations under the License.
+  15   */
+  16  
+  17  package com.arialyy.aria.core.command.normal;
+  18  
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  19 +import com.arialyy.aria.core.download.DownloadGroupTaskEntity;</span>
+  20  import com.arialyy.aria.core.download.DownloadTaskEntity;
+  21  import com.arialyy.aria.core.inf.AbsTaskEntity;
+  22  import com.arialyy.aria.core.upload.UploadTaskEntity;
+  23  import com.arialyy.aria.orm.DbEntity;
+  24  import com.arialyy.aria.util.CommonUtil;
+  25  import java.util.List;
+  26  
+  27  /**
+  28   * Created by AriaL on 2017/6/27.
+  29   * 删除所有任务，并且删除所有回掉
+  30   */
+  31  public class CancelAllCmd&lt;T extends AbsTaskEntity&gt; extends AbsNormalCmd&lt;T&gt; {
+  32    /**
+  33     * removeFile {@code true} 删除已经下载完成的任务，不仅删除下载记录，还会删除已经下载完成的文件，{@code false}
+  34     * 如果文件已经下载完成，只删除下载记录
+  35     */
+  36    public boolean removeFile = false;
+  37  
+  38    /**
+  39     * @param targetName 产生任务的对象名
+  40     */
+  41    CancelAllCmd(String targetName, T entity) {
+  42      super(targetName, entity);
+  43    }
+  44  
+  45    @Override public void executeCmd() {
+  46      removeAll();
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  47 -    if (mTaskEntity instanceof DownloadTaskEntity) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  48 +    if (mTaskEntity instanceof DownloadTaskEntity</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  49 +        || mTaskEntity instanceof DownloadGroupTaskEntity) {</span>
+  50        handleDownloadRemove();
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  51 +      handleDownloadRemove();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  52 +      handleDownloadGroupRemove();</span>
+  53      } else if (mTaskEntity instanceof UploadTaskEntity) {
+  54        handleUploadRemove();
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  55 +      handleUploadRemove();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  56 +    }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  57 +  }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  58 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  59 +  /**</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  60 +   * 处理下载任务组的删除操作</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  61 +   */</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  62 +  private void handleDownloadGroupRemove() {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  63 +    List&lt;DownloadGroupTaskEntity&gt; allEntity = DbEntity.findAllData(DownloadGroupTaskEntity.class);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  64 +    if (allEntity == null || allEntity.size() == 0) return;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  65 +    for (DownloadGroupTaskEntity entity : allEntity) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  66 +      CommonUtil.delDownloadGroupTaskConfig(removeFile, entity);</span>
+  67      }
+  68    }
+  69  
+  70    /**
+  71     * 处理上传的删除
+  72     */
+  73    private void handleUploadRemove() {
+  74      List&lt;UploadTaskEntity&gt; allEntity = DbEntity.findAllData(UploadTaskEntity.class);
+  75      if (allEntity == null || allEntity.size() == 0) return;
+  76      for (UploadTaskEntity entity : allEntity) {
+  77        CommonUtil.delUploadTaskConfig(removeFile, entity);
+  78      }
+  79    }
+  80  
+  81    /**
+  82     * 处理下载的删除
+  83     */
+  84    private void handleDownloadRemove() {
+  85      List&lt;DownloadTaskEntity&gt; allEntity = DbEntity.findAllData(DownloadTaskEntity.class);
+  86      if (allEntity == null || allEntity.size() == 0) return;
+  87      for (DownloadTaskEntity entity : allEntity) {
+  88        CommonUtil.delDownloadTaskConfig(removeFile, entity);
+  89      }
+  90    }
+  91  }</pre></td>
+                            <td><pre>   1  /*
+   2   * Copyright (C) 2016 AriaLyy(https://github.com/AriaLyy/Aria)
+   3   *
+   4   * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+   5   * you may not use this file except in compliance with the License.
+   6   * You may obtain a copy of the License at
+   7   *
+   8   *      http://www.apache.org/licenses/LICENSE-2.0
+   9   *
+  10   * Unless required by applicable law or agreed to in writing, software
+  11   * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  12   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  13   * See the License for the specific language governing permissions and
+  14   * limitations under the License.
+  15   */
+  16  
+  17  package com.arialyy.aria.core.command.normal;
+  18  
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  19 +import com.arialyy.aria.core.download.DownloadGroupTaskEntity;</span>
+  20  import com.arialyy.aria.core.download.DownloadTaskEntity;
+  21  import com.arialyy.aria.core.inf.AbsTaskEntity;
+  22  import com.arialyy.aria.core.upload.UploadTaskEntity;
+  23  import com.arialyy.aria.orm.DbEntity;
+  24  import com.arialyy.aria.util.CommonUtil;
+  25  import java.util.List;
+  26  
+  27  /**
+  28   * Created by AriaL on 2017/6/27.
+  29   * 删除所有任务，并且删除所有回掉
+  30   */
+  31  public class CancelAllCmd&lt;T extends AbsTaskEntity&gt; extends AbsNormalCmd&lt;T&gt; {
+  32    /**
+  33     * removeFile {@code true} 删除已经下载完成的任务，不仅删除下载记录，还会删除已经下载完成的文件，{@code false}
+  34     * 如果文件已经下载完成，只删除下载记录
+  35     */
+  36    public boolean removeFile = false;
+  37  
+  38    /**
+  39     * @param targetName 产生任务的对象名
+  40     */
+  41    CancelAllCmd(String targetName, T entity) {
+  42      super(targetName, entity);
+  43    }
+  44  
+  45    @Override public void executeCmd() {
+  46      removeAll();
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  47 -    if (mTaskEntity instanceof DownloadTaskEntity) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  48 +    if (mTaskEntity instanceof DownloadTaskEntity</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  49 +        || mTaskEntity instanceof DownloadGroupTaskEntity) {</span>
+  50        handleDownloadRemove();
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  51 +      handleDownloadGroupRemove();</span>
+
+  52      } else if (mTaskEntity instanceof UploadTaskEntity) {
+  53        handleUploadRemove();
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  54 +    }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  55 +  }</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  56 +</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  57 +  /**</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  58 +   * 处理下载任务组的删除操作</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  59 +   */</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  60 +  private void handleDownloadGroupRemove() {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  61 +    List&lt;DownloadGroupTaskEntity&gt; allEntity = DbEntity.findAllData(DownloadGroupTaskEntity.class);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  62 +    if (allEntity == null || allEntity.size() == 0) return;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  63 +    for (DownloadGroupTaskEntity entity : allEntity) {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  64 +      CommonUtil.delDownloadGroupTaskConfig(removeFile, entity);</span>
+
+  65      }
+  66    }
+  67  
+  68    /**
+  69     * 处理上传的删除
+  70     */
+  71    private void handleUploadRemove() {
+  72      List&lt;UploadTaskEntity&gt; allEntity = DbEntity.findAllData(UploadTaskEntity.class);
+  73      if (allEntity == null || allEntity.size() == 0) return;
+  74      for (UploadTaskEntity entity : allEntity) {
+  75        CommonUtil.delUploadTaskConfig(removeFile, entity);
+  76      }
+  77    }
+  78  
+  79    /**
+  80     * 处理下载的删除
+  81     */
+  82    private void handleDownloadRemove() {
+  83      List&lt;DownloadTaskEntity&gt; allEntity = DbEntity.findAllData(DownloadTaskEntity.class);
+  84      if (allEntity == null || allEntity.size() == 0) return;
+  85      for (DownloadTaskEntity entity : allEntity) {
+  86        CommonUtil.delDownloadTaskConfig(removeFile, entity);
+  87      }
+  88    }
+  89  }</pre></td>
+                        </tr>
+                    </table>
+                </div>
+              </body>
+            </html>
+            

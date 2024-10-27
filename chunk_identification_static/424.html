@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+    <html lang="en">
+              <head>
+                <meta charset="utf-8">
+                <title>424</title>
+                    <style>
+                        #top {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        #bottom {
+                            height: 48vh;
+                            overflow-y: auto;
+                        }
+                        abbr {
+                          /* Here is the delay */
+                          transition-delay:0s;
+                        }
+                    </style>
+              </head>
+              <body>
+                <span style="height: 4vh">
+                    424
+                    <a href="423.html">prev</a>
+                    <a href="425.html">next</a>
+                    <a href="424_chunks.html">chunks</a>
+                    <a href="index.html">index</a>
+                    DTStack/flinkStreamSQL_2705aac3d06cbddde0e20d031034cccddec41b89_kafka11/kafka11-source/src/main/java/com/dtstack/flink/sql/source/kafka/KafkaSource.java
+                    <textarea rows=1 onclick='navigator.clipboard.writeText(this.value)'>cd C:\studies\se\mega\git-analyzer-plus\notebooks\debug
+del /Q *
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;2705aac3d06cbddde0e20d031034cccddec41b89:kafka11/kafka11-source/src/main/java/com/dtstack/flink/sql/source/kafka/KafkaSource.java&quot; &gt; committed.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;2705aac3d06cbddde0e20d031034cccddec41b89^1:kafka11/kafka11-source/src/main/java/com/dtstack/flink/sql/source/kafka/KafkaSource.java&quot; &gt; ours.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;2705aac3d06cbddde0e20d031034cccddec41b89^2:kafka11/kafka11-source/src/main/java/com/dtstack/flink/sql/source/kafka/KafkaSource.java&quot; &gt; theirs.java
+git -C C:\studies\se\mega\project-dirs\projects_Java_desc-stars-1000\DTStack\flinkStreamSQL show &quot;b78a00511222379d99f2b7cb19f3ac63dbfd2779:kafka11/kafka11-source/src/main/java/com/dtstack/flink/sql/source/kafka/KafkaSource.java&quot; &gt; base.java
+copy ours.java 1ours.java
+copy ours.java 2ours.java
+copy theirs.java 1theirs.java
+copy theirs.java 2theirs.java
+copy base.java 1base.java
+copy base.java 2base.java
+&quot;C:\Program Files\Java\jdk1.8.0_241\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\jFSTMerge\build\libs\jFSTMerge-all.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\1theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\jfstmerge.java --show-base
+&quot;C:\Program Files\Eclipse Adoptium\jdk-17.0.11.9-hotspot\bin\java.exe&quot; -Dfile.encoding=UTF-8 -jar &quot;C:\studies\se\spork\target\spork-0.5.0-SNAPSHOT.jar&quot; C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2ours.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2base.java C:\studies\se\mega\git-analyzer-plus\notebooks\debug\2theirs.java -o C:\studies\se\mega\git-analyzer-plus\notebooks\debug\spork.java
+del /Q 1*.java
+del /Q 2*.java
+del /Q jfstmerge.java.merge
+</textarea>
+                    {strict: [[b], [j]], subset: [[b], [j]]}
+                </span>
+                <div id="top">
+
+                    <table>
+                        <tr>
+                            <th>line based (standard git)</th>
+                            <th>jfstmerge</th>
+                            <th>spork</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1 /*
+   2  * Licensed to the Apache Software Foundation (ASF) under one
+   3  * or more contributor license agreements.  See the NOTICE file
+   4  * distributed with this work for additional information
+   5  * regarding copyright ownership.  The ASF licenses this file
+   6  * to you under the Apache License, Version 2.0 (the
+   7  * &quot;License&quot;); you may not use this file except in compliance
+   8  * with the License.  You may obtain a copy of the License at
+   9  *
+  10  *     http://www.apache.org/licenses/LICENSE-2.0
+  11  *
+  12  * Unless required by applicable law or agreed to in writing, software
+  13  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15  * See the License for the specific language governing permissions and
+  16  * limitations under the License.
+  17  */
+  18 
+  19 
+  20 package com.dtstack.flink.sql.source.kafka;
+  21 
+  22 import com.dtstack.flink.sql.source.kafka.table.KafkaSourceTableInfo;
+  23 import com.dtstack.flink.sql.table.AbstractSourceTableInfo;
+  24 import org.apache.commons.lang3.StringUtils;
+  25 import org.apache.flink.api.common.typeinfo.TypeInformation;
+  26 import org.apache.flink.streaming.api.datastream.DataStreamSource;
+  27 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+  28 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer011;
+  29 import org.apache.flink.table.api.Table;
+  30 import org.apache.flink.table.api.java.StreamTableEnvironment;
+  31 import org.apache.flink.types.Row;
+  32 import java.util.Properties;
+  33 
+  34 /**
+  35  * If eventtime field is specified, the default time field rowtime
+  36  * Date: 2018/09/18
+  37  * Company: www.dtstack.com
+  38  *
+  39  * @author sishu.yss
+  40  */
+  41 
+  42 public class KafkaSource extends AbstractKafkaSource {
+  43 
+  44     @Override
+<abbr title="  45     public Table genStreamSource(AbstractSourceTableInfo sourceTableInfo, StreamExecutionEnvironment env, StreamTableEnvironment tableEnv) {">  45     public Table genStreamSource(AbstractSourceTableInfo sourceTableInfo, StreamExecutionEnvironment env,🔵</abbr>
+  46         KafkaSourceTableInfo kafkaSourceTableInfo = (KafkaSourceTableInfo) sourceTableInfo;
+  47         String topicName = kafkaSourceTableInfo.getTopic();
+  48 
+  49         Properties kafkaProperties = getKafkaProperties(kafkaSourceTableInfo);
+  50         TypeInformation&lt;Row&gt; typeInformation = getRowTypeInformation(kafkaSourceTableInfo);
+<abbr title="  51         FlinkKafkaConsumer011&lt;Row&gt; kafkaSrc = (FlinkKafkaConsumer011&lt;Row&gt;) new KafkaConsumer011Factory().createKafkaTableSource(kafkaSourceTableInfo, typeInformation, kafkaProperties);">  51         FlinkKafkaConsumer011&lt;Row&gt; kafkaSrc = (FlinkKafkaConsumer011&lt;Row&gt;) new KafkaConsumer011Factory().🔵</abbr>
+  52 
+  53         String sourceOperatorName = generateOperatorName(sourceTableInfo.getName(), topicName);
+  54         DataStreamSource kafkaSource = env.addSource(kafkaSrc, sourceOperatorName, typeInformation);
+  55         kafkaSource.setParallelism(kafkaSourceTableInfo.getParallelism());
+  56 
+  57         setStartPosition(kafkaSourceTableInfo.getOffsetReset(), topicName, kafkaSrc);
+  58         String fields = StringUtils.join(kafkaSourceTableInfo.getFields(), &quot;,&quot;);
+  59 
+  60 &lt;&lt;&lt;&lt;&lt;&lt;&lt; GitAnalyzerPlus_ours
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  61 		TypeInformation[] types = new TypeInformation[kafkaSourceTableInfo.getFields().length];</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  62 		for (int i = 0; i &lt; kafkaSourceTableInfo.getFieldClasses().length; i++) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  63 			types[i] = TypeInformation.of(kafkaSourceTableInfo.getFieldClasses()[i]);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  64 		}</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  65 </span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  66 		TypeInformation&lt;Row&gt; typeInformation = new RowTypeInfo(types, kafkaSourceTableInfo.getFields());</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  67 </span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"><abbr title="  68 		FlinkKafkaConsumer011&lt;Row&gt; kafkaSrc = (FlinkKafkaConsumer011&lt;Row&gt;) new KafkaConsumer011Factory().createKafkaTableSource(kafkaSourceTableInfo, typeInformation, props);">  68 		FlinkKafkaConsumer011&lt;Row&gt; kafkaSrc = (FlinkKafkaConsumer011&lt;Row&gt;) new KafkaConsumer011Factory().create🔵</abbr></span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  69 </span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  70 		//earliest,latest</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  71 		if (&quot;earliest&quot;.equalsIgnoreCase(kafkaSourceTableInfo.getOffsetReset())) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  72 			kafkaSrc.setStartFromEarliest();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  73 		} else if (DtStringUtil.isJosn(kafkaSourceTableInfo.getOffsetReset())) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  74 			try {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"><abbr title="  75 				Properties properties = PluginUtil.jsonStrToObject(kafkaSourceTableInfo.getOffsetReset(), Properties.class);">  75 				Properties properties = PluginUtil.jsonStrToObject(kafkaSourceTableInfo.getOffsetReset(), Properties.🔵</abbr></span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  76 				Map&lt;String, Object&gt; offsetMap = PluginUtil.objectToMap(properties);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  77 				Map&lt;KafkaTopicPartition, Long&gt; specificStartupOffsets = new HashMap&lt;&gt;(16);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  78 				for (Map.Entry&lt;String, Object&gt; entry : offsetMap.entrySet()) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"><abbr title="  79 					specificStartupOffsets.put(new KafkaTopicPartition(topicName, Integer.valueOf(entry.getKey())), Long.valueOf(entry.getValue().toString()));">  79 					specificStartupOffsets.put(new KafkaTopicPartition(topicName, Integer.valueOf(entry.getKey())), Long🔵</abbr></span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  80 				}</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  81 				kafkaSrc.setStartFromSpecificOffsets(specificStartupOffsets);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  82 			} catch (Exception e) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  83 				throw new RuntimeException(&quot;not support offsetReset type:&quot; + kafkaSourceTableInfo.getOffsetReset());</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  84 			}</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  85 		} else {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  86 			kafkaSrc.setStartFromLatest();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  87 		}</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  88 </span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  89 		String fields = StringUtils.join(kafkaSourceTableInfo.getFields(), &quot;,&quot;);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"><abbr title="  90 		String sourceOperatorName = SOURCE_OPERATOR_NAME_TPL.replace(&quot;${topic}&quot;, topicName).replace(&quot;${table}&quot;, sourceTableInfo.getName());">  90 		String sourceOperatorName = SOURCE_OPERATOR_NAME_TPL.replace(&quot;${topic}&quot;, topicName).replace(&quot;${table}&quot;,🔵</abbr></span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  91 </span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  92 		DataStreamSource kafkaSource = env.addSource(kafkaSrc, sourceOperatorName, typeInformation);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  93 		Integer parallelism = kafkaSourceTableInfo.getParallelism();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  94 		if (parallelism != null) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  95 			kafkaSource.setParallelism(parallelism);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  96 		}</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  97 		return tableEnv.fromDataStream(kafkaSource, fields);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  98 	}</span>
+  99 ||||||| GitAnalyzerPlus_base
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 100 	 */</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 101 	@SuppressWarnings(&quot;rawtypes&quot;)</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 102 	@Override</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"><abbr title=" 103 	public Table genStreamSource(AbstractSourceTableInfo sourceTableInfo, StreamExecutionEnvironment env, StreamTableEnvironment tableEnv) {"> 103 	public Table genStreamSource(AbstractSourceTableInfo sourceTableInfo, StreamExecutionEnvironment env, St🔵</abbr></span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 104 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 105 		KafkaSourceTableInfo kafkaSourceTableInfo = (KafkaSourceTableInfo) sourceTableInfo;</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 106 		String topicName = kafkaSourceTableInfo.getTopic();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 107 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 108 		Properties props = new Properties();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 109 		for (String key : kafkaSourceTableInfo.getKafkaParamKeys()) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 110 			props.setProperty(key, kafkaSourceTableInfo.getKafkaParam(key));</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 111 		}</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 112 		props.setProperty(&quot;bootstrap.servers&quot;, kafkaSourceTableInfo.getBootstrapServers());</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 113 		if (DtStringUtil.isJosn(kafkaSourceTableInfo.getOffsetReset())){</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 114 			props.setProperty(&quot;auto.offset.reset&quot;, &quot;none&quot;);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 115 		} else {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 116 			props.setProperty(&quot;auto.offset.reset&quot;, kafkaSourceTableInfo.getOffsetReset());</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 117 		}</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 118 		if (StringUtils.isNotBlank(kafkaSourceTableInfo.getGroupId())){</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 119 			props.setProperty(&quot;group.id&quot;, kafkaSourceTableInfo.getGroupId());</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 120 		}</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 121 		// only required for Kafka 0.8</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 122 		//TODO props.setProperty(&quot;zookeeper.connect&quot;, kafka09SourceTableInfo.)</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 123 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 124 		TypeInformation[] types = new TypeInformation[kafkaSourceTableInfo.getFields().length];</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 125 		for (int i = 0; i &lt; kafkaSourceTableInfo.getFieldClasses().length; i++) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 126 			types[i] = TypeInformation.of(kafkaSourceTableInfo.getFieldClasses()[i]);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 127 		}</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 128 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 129 		TypeInformation&lt;Row&gt; typeInformation = new RowTypeInfo(types, kafkaSourceTableInfo.getFields());</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 130 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"><abbr title=" 131 		FlinkKafkaConsumer011&lt;Row&gt; kafkaSrc = (FlinkKafkaConsumer011&lt;Row&gt;) new KafkaConsumer011Factory().createKafkaTableSource(kafkaSourceTableInfo, typeInformation, props);"> 131 		FlinkKafkaConsumer011&lt;Row&gt; kafkaSrc = (FlinkKafkaConsumer011&lt;Row&gt;) new KafkaConsumer011Factory().create🔵</abbr></span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 132 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 133 		//earliest,latest</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 134 		if (&quot;earliest&quot;.equalsIgnoreCase(kafkaSourceTableInfo.getOffsetReset())) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 135 			kafkaSrc.setStartFromEarliest();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"><abbr title=" 136 		} else if (DtStringUtil.isJosn(kafkaSourceTableInfo.getOffsetReset())) {// {&quot;0&quot;:12312,&quot;1&quot;:12321,&quot;2&quot;:12312}"> 136 		} else if (DtStringUtil.isJosn(kafkaSourceTableInfo.getOffsetReset())) {// {&quot;0&quot;:12312,&quot;1&quot;:12321,&quot;2&quot;:123🔵</abbr></span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 137 			try {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"><abbr title=" 138 				Properties properties = PluginUtil.jsonStrToObject(kafkaSourceTableInfo.getOffsetReset(), Properties.class);"> 138 				Properties properties = PluginUtil.jsonStrToObject(kafkaSourceTableInfo.getOffsetReset(), Properties.🔵</abbr></span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 139 				Map&lt;String, Object&gt; offsetMap = PluginUtil.objectToMap(properties);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 140 				Map&lt;KafkaTopicPartition, Long&gt; specificStartupOffsets = new HashMap&lt;&gt;();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 141 				for (Map.Entry&lt;String, Object&gt; entry : offsetMap.entrySet()) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"><abbr title=" 142 					specificStartupOffsets.put(new KafkaTopicPartition(topicName, Integer.valueOf(entry.getKey())), Long.valueOf(entry.getValue().toString()));"> 142 					specificStartupOffsets.put(new KafkaTopicPartition(topicName, Integer.valueOf(entry.getKey())), Long🔵</abbr></span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 143 				}</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 144 				kafkaSrc.setStartFromSpecificOffsets(specificStartupOffsets);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 145 			} catch (Exception e) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 146 				throw new RuntimeException(&quot;not support offsetReset type:&quot; + kafkaSourceTableInfo.getOffsetReset());</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 147 			}</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 148 		} else {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 149 			kafkaSrc.setStartFromLatest();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 150 		}</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 151 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 152 		String fields = StringUtils.join(kafkaSourceTableInfo.getFields(), &quot;,&quot;);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"><abbr title=" 153 		String sourceOperatorName = SOURCE_OPERATOR_NAME_TPL.replace(&quot;${topic}&quot;, topicName).replace(&quot;${table}&quot;, sourceTableInfo.getName());"> 153 		String sourceOperatorName = SOURCE_OPERATOR_NAME_TPL.replace(&quot;${topic}&quot;, topicName).replace(&quot;${table}&quot;,🔵</abbr></span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 154 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 155 		DataStreamSource kafkaSource = env.addSource(kafkaSrc, sourceOperatorName, typeInformation);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 156 		Integer parallelism = kafkaSourceTableInfo.getParallelism();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 157 		if (parallelism != null) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 158 			kafkaSource.setParallelism(parallelism);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 159 		}</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 160 		return tableEnv.fromDataStream(kafkaSource, fields);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 161 	}</span>
+ 162 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 163         return tableEnv.fromDataStream(kafkaSource, fields);</span>
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 164     }</span>
+ 165 &gt;&gt;&gt;&gt;&gt;&gt;&gt; GitAnalyzerPlus_theirs
+ 166 }</pre></td>
+                            <td><pre>   1 /*
+   2  * Licensed to the Apache Software Foundation (ASF) under one
+   3  * or more contributor license agreements.  See the NOTICE file
+   4  * distributed with this work for additional information
+   5  * regarding copyright ownership.  The ASF licenses this file
+   6  * to you under the Apache License, Version 2.0 (the
+   7  * &quot;License&quot;); you may not use this file except in compliance
+   8  * with the License.  You may obtain a copy of the License at
+   9  *
+  10  *     http://www.apache.org/licenses/LICENSE-2.0
+  11  *
+  12  * Unless required by applicable law or agreed to in writing, software
+  13  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15  * See the License for the specific language governing permissions and
+  16  * limitations under the License.
+  17  */
+  18 
+  19 
+  20 package com.dtstack.flink.sql.source.kafka;
+  21 
+  22 import com.dtstack.flink.sql.source.kafka.table.KafkaSourceTableInfo;
+  23 import com.dtstack.flink.sql.table.AbstractSourceTableInfo;
+  24 import org.apache.commons.lang3.StringUtils;
+  25 import org.apache.flink.api.common.typeinfo.TypeInformation;
+  26 import org.apache.flink.streaming.api.datastream.DataStreamSource;
+  27 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+  28 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer011;
+  29 import org.apache.flink.table.api.Table;
+  30 import org.apache.flink.table.api.java.StreamTableEnvironment;
+  31 import org.apache.flink.types.Row;
+  32 import java.util.Properties;
+  33 
+  34 /**
+  35  * If eventtime field is specified, the default time field rowtime
+  36  * Date: 2018/09/18
+  37  * Company: www.dtstack.com
+  38  *
+  39  * @author sishu.yss
+  40  */
+  41 
+  42 public class KafkaSource extends AbstractKafkaSource {
+  43 
+  44     	@Override
+<abbr title="  45 	public Table genStreamSource(AbstractSourceTableInfo sourceTableInfo, StreamExecutionEnvironment env, StreamTableEnvironment tableEnv) {">  45 	public Table genStreamSource(AbstractSourceTableInfo sourceTableInfo, StreamExecutionEnvironment env, St🔵</abbr>
+  46 		KafkaSourceTableInfo kafkaSourceTableInfo = (KafkaSourceTableInfo) sourceTableInfo;
+  47 		String topicName = kafkaSourceTableInfo.getTopic();
+  48 
+  49         Properties kafkaProperties = getKafkaProperties(kafkaSourceTableInfo);
+  50         TypeInformation&lt;Row&gt; typeInformation = getRowTypeInformation(kafkaSourceTableInfo);
+<abbr title="  51         FlinkKafkaConsumer011&lt;Row&gt; kafkaSrc = (FlinkKafkaConsumer011&lt;Row&gt;) new KafkaConsumer011Factory().createKafkaTableSource(kafkaSourceTableInfo, typeInformation, kafkaProperties);">  51         FlinkKafkaConsumer011&lt;Row&gt; kafkaSrc = (FlinkKafkaConsumer011&lt;Row&gt;) new KafkaConsumer011Factory().🔵</abbr>
+  52 
+  53 &lt;&lt;&lt;&lt;&lt;&lt;&lt; MINE
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  54 		TypeInformation[] types = new TypeInformation[kafkaSourceTableInfo.getFields().length];</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  55 		for (int i = 0; i &lt; kafkaSourceTableInfo.getFieldClasses().length; i++) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  56 			types[i] = TypeInformation.of(kafkaSourceTableInfo.getFieldClasses()[i]);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  57 		}</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  58 </span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  59 		TypeInformation&lt;Row&gt; typeInformation = new RowTypeInfo(types, kafkaSourceTableInfo.getFields());</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  60 </span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"><abbr title="  61 		FlinkKafkaConsumer011&lt;Row&gt; kafkaSrc = (FlinkKafkaConsumer011&lt;Row&gt;) new KafkaConsumer011Factory().createKafkaTableSource(kafkaSourceTableInfo, typeInformation, props);">  61 		FlinkKafkaConsumer011&lt;Row&gt; kafkaSrc = (FlinkKafkaConsumer011&lt;Row&gt;) new KafkaConsumer011Factory().create🔵</abbr></span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  62 </span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  63 		//earliest,latest</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  64 		if (&quot;earliest&quot;.equalsIgnoreCase(kafkaSourceTableInfo.getOffsetReset())) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  65 			kafkaSrc.setStartFromEarliest();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  66 		} else if (DtStringUtil.isJosn(kafkaSourceTableInfo.getOffsetReset())) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  67 			try {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"><abbr title="  68 				Properties properties = PluginUtil.jsonStrToObject(kafkaSourceTableInfo.getOffsetReset(), Properties.class);">  68 				Properties properties = PluginUtil.jsonStrToObject(kafkaSourceTableInfo.getOffsetReset(), Properties.🔵</abbr></span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  69 				Map&lt;String, Object&gt; offsetMap = PluginUtil.objectToMap(properties);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  70 				Map&lt;KafkaTopicPartition, Long&gt; specificStartupOffsets = new HashMap&lt;&gt;(16);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  71 				for (Map.Entry&lt;String, Object&gt; entry : offsetMap.entrySet()) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"><abbr title="  72 					specificStartupOffsets.put(new KafkaTopicPartition(topicName, Integer.valueOf(entry.getKey())), Long.valueOf(entry.getValue().toString()));">  72 					specificStartupOffsets.put(new KafkaTopicPartition(topicName, Integer.valueOf(entry.getKey())), Long🔵</abbr></span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  73 				}</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  74 				kafkaSrc.setStartFromSpecificOffsets(specificStartupOffsets);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  75 			} catch (Exception e) {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  76 				throw new RuntimeException(&quot;not support offsetReset type:&quot; + kafkaSourceTableInfo.getOffsetReset());</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  77 			}</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  78 		} else {</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  79 			kafkaSrc.setStartFromLatest();</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  80 		}</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  81 </span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  82 		String fields = StringUtils.join(kafkaSourceTableInfo.getFields(), &quot;,&quot;);</span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"><abbr title="  83 		String sourceOperatorName = SOURCE_OPERATOR_NAME_TPL.replace(&quot;${topic}&quot;, topicName).replace(&quot;${table}&quot;, sourceTableInfo.getName());">  83 		String sourceOperatorName = SOURCE_OPERATOR_NAME_TPL.replace(&quot;${topic}&quot;, topicName).replace(&quot;${table}&quot;,🔵</abbr></span>
+<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  84 </span>
+  85 ||||||| BASE
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  86 			props.setProperty(key, kafkaSourceTableInfo.getKafkaParam(key));</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  87 		}</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  88 		props.setProperty(&quot;bootstrap.servers&quot;, kafkaSourceTableInfo.getBootstrapServers());</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  89 		if (DtStringUtil.isJosn(kafkaSourceTableInfo.getOffsetReset())){</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  90 			props.setProperty(&quot;auto.offset.reset&quot;, &quot;none&quot;);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  91 		} else {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  92 			props.setProperty(&quot;auto.offset.reset&quot;, kafkaSourceTableInfo.getOffsetReset());</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  93 		}</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  94 		if (StringUtils.isNotBlank(kafkaSourceTableInfo.getGroupId())){</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  95 			props.setProperty(&quot;group.id&quot;, kafkaSourceTableInfo.getGroupId());</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  96 		}</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  97 		// only required for Kafka 0.8</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  98 		//TODO props.setProperty(&quot;zookeeper.connect&quot;, kafka09SourceTableInfo.)</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  99 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 100 		TypeInformation[] types = new TypeInformation[kafkaSourceTableInfo.getFields().length];</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 101 		for (int i = 0; i &lt; kafkaSourceTableInfo.getFieldClasses().length; i++) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 102 			types[i] = TypeInformation.of(kafkaSourceTableInfo.getFieldClasses()[i]);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 103 		}</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 104 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 105 		TypeInformation&lt;Row&gt; typeInformation = new RowTypeInfo(types, kafkaSourceTableInfo.getFields());</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 106 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"><abbr title=" 107 		FlinkKafkaConsumer011&lt;Row&gt; kafkaSrc = (FlinkKafkaConsumer011&lt;Row&gt;) new KafkaConsumer011Factory().createKafkaTableSource(kafkaSourceTableInfo, typeInformation, props);"> 107 		FlinkKafkaConsumer011&lt;Row&gt; kafkaSrc = (FlinkKafkaConsumer011&lt;Row&gt;) new KafkaConsumer011Factory().create🔵</abbr></span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 108 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 109 		//earliest,latest</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 110 		if (&quot;earliest&quot;.equalsIgnoreCase(kafkaSourceTableInfo.getOffsetReset())) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 111 			kafkaSrc.setStartFromEarliest();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"><abbr title=" 112 		} else if (DtStringUtil.isJosn(kafkaSourceTableInfo.getOffsetReset())) {// {&quot;0&quot;:12312,&quot;1&quot;:12321,&quot;2&quot;:12312}"> 112 		} else if (DtStringUtil.isJosn(kafkaSourceTableInfo.getOffsetReset())) {// {&quot;0&quot;:12312,&quot;1&quot;:12321,&quot;2&quot;:123🔵</abbr></span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 113 			try {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"><abbr title=" 114 				Properties properties = PluginUtil.jsonStrToObject(kafkaSourceTableInfo.getOffsetReset(), Properties.class);"> 114 				Properties properties = PluginUtil.jsonStrToObject(kafkaSourceTableInfo.getOffsetReset(), Properties.🔵</abbr></span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 115 				Map&lt;String, Object&gt; offsetMap = PluginUtil.objectToMap(properties);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 116 				Map&lt;KafkaTopicPartition, Long&gt; specificStartupOffsets = new HashMap&lt;&gt;();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 117 				for (Map.Entry&lt;String, Object&gt; entry : offsetMap.entrySet()) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"><abbr title=" 118 					specificStartupOffsets.put(new KafkaTopicPartition(topicName, Integer.valueOf(entry.getKey())), Long.valueOf(entry.getValue().toString()));"> 118 					specificStartupOffsets.put(new KafkaTopicPartition(topicName, Integer.valueOf(entry.getKey())), Long🔵</abbr></span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 119 				}</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 120 				kafkaSrc.setStartFromSpecificOffsets(specificStartupOffsets);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 121 			} catch (Exception e) {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 122 				throw new RuntimeException(&quot;not support offsetReset type:&quot; + kafkaSourceTableInfo.getOffsetReset());</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 123 			}</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 124 		} else {</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 125 			kafkaSrc.setStartFromLatest();</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 126 		}</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 127 </span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 128 		String fields = StringUtils.join(kafkaSourceTableInfo.getFields(), &quot;,&quot;);</span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"><abbr title=" 129 		String sourceOperatorName = SOURCE_OPERATOR_NAME_TPL.replace(&quot;${topic}&quot;, topicName).replace(&quot;${table}&quot;, sourceTableInfo.getName());"> 129 		String sourceOperatorName = SOURCE_OPERATOR_NAME_TPL.replace(&quot;${topic}&quot;, topicName).replace(&quot;${table}&quot;,🔵</abbr></span>
+<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 130 </span>
+ 131 =======
+<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 132         String sourceOperatorName = generateOperatorName(sourceTableInfo.getName(), topicName);</span>
+ 133 &gt;&gt;&gt;&gt;&gt;&gt;&gt; YOURS
+ 134 		DataStreamSource kafkaSource = env.addSource(kafkaSrc, sourceOperatorName, typeInformation);
+ 135         kafkaSource.setParallelism(kafkaSourceTableInfo.getParallelism());
+ 136 
+ 137         setStartPosition(kafkaSourceTableInfo.getOffsetReset(), topicName, kafkaSrc);
+ 138         String fields = StringUtils.join(kafkaSourceTableInfo.getFields(), &quot;,&quot;);
+ 139 
+ 140 		return tableEnv.fromDataStream(kafkaSource, fields);
+ 141 	}
+ 142 }
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ </pre></td>
+                            <td><pre>   1 /*
+   2  * Licensed to the Apache Software Foundation (ASF) under one
+   3  * or more contributor license agreements.  See the NOTICE file
+   4  * distributed with this work for additional information
+   5  * regarding copyright ownership.  The ASF licenses this file
+   6  * to you under the Apache License, Version 2.0 (the
+   7  * &quot;License&quot;); you may not use this file except in compliance
+   8  * with the License.  You may obtain a copy of the License at
+   9  *
+  10  *     http://www.apache.org/licenses/LICENSE-2.0
+  11  *
+  12  * Unless required by applicable law or agreed to in writing, software
+  13  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15  * See the License for the specific language governing permissions and
+  16  * limitations under the License.
+  17  */
+  18 package com.dtstack.flink.sql.source.kafka;
+  19 
+  20 import com.dtstack.flink.sql.source.kafka.table.KafkaSourceTableInfo;
+  21 import com.dtstack.flink.sql.table.AbstractSourceTableInfo;
+  22 import java.util.Properties;
+  23 import org.apache.commons.lang3.StringUtils;
+  24 import org.apache.flink.api.common.typeinfo.TypeInformation;
+  25 import org.apache.flink.streaming.api.datastream.DataStreamSource;
+  26 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+  27 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer011;
+  28 import org.apache.flink.table.api.Table;
+  29 import org.apache.flink.table.api.java.StreamTableEnvironment;
+  30 import org.apache.flink.types.Row;
+  31 
+  32 
+  33 /**
+  34  * If eventtime field is specified, the default time field rowtime
+  35  * Date: 2018/09/18
+  36  * Company: www.dtstack.com
+  37  *
+  38  * @author sishu.yss
+  39  */
+  40 public class KafkaSource extends AbstractKafkaSource {
+  41 	@Override
+<abbr title="  42 	public Table genStreamSource(AbstractSourceTableInfo sourceTableInfo, StreamExecutionEnvironment env, StreamTableEnvironment tableEnv) {">  42 	public Table genStreamSource(AbstractSourceTableInfo sourceTableInfo, StreamExecutionEnvironment env, St🔵</abbr>
+  43 		KafkaSourceTableInfo kafkaSourceTableInfo = ((KafkaSourceTableInfo) (sourceTableInfo));
+  44 		String topicName = kafkaSourceTableInfo.getTopic();
+  45 		Properties kafkaProperties = getKafkaProperties(kafkaSourceTableInfo);
+  46 		TypeInformation&lt;Row&gt; typeInformation = getRowTypeInformation(kafkaSourceTableInfo);
+<abbr title="  47 		FlinkKafkaConsumer011&lt;Row&gt; kafkaSrc = ((FlinkKafkaConsumer011&lt;Row&gt;) (new KafkaConsumer011Factory().createKafkaTableSource(kafkaSourceTableInfo, typeInformation, kafkaProperties)));">  47 		FlinkKafkaConsumer011&lt;Row&gt; kafkaSrc = ((FlinkKafkaConsumer011&lt;Row&gt;) (new KafkaConsumer011Factory().crea🔵</abbr>
+  48 		String sourceOperatorName = generateOperatorName(sourceTableInfo.getName(), topicName);
+  49 		DataStreamSource kafkaSource = env.addSource(kafkaSrc, sourceOperatorName, typeInformation);
+  50 		kafkaSource.setParallelism(kafkaSourceTableInfo.getParallelism());
+  51 		setStartPosition(kafkaSourceTableInfo.getOffsetReset(), topicName, kafkaSrc);
+  52 		String fields = StringUtils.join(kafkaSourceTableInfo.getFields(), &quot;,&quot;);
+  53 		return tableEnv.fromDataStream(kafkaSource, fields);
+  54 	}
+  55 }
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ </pre></td>
+                        </tr>
+                    </table>
+                </div>
+                <div id="bottom">
+                    <table style="margin:auto">
+                        <tr>
+                            <th>ours vs. base</th>
+                            <th>theirs vs. base</th>
+                        </tr>
+                        <tr>
+                            <td><pre>   1  /*
+   2   * Licensed to the Apache Software Foundation (ASF) under one
+   3   * or more contributor license agreements.  See the NOTICE file
+   4   * distributed with this work for additional information
+   5   * regarding copyright ownership.  The ASF licenses this file
+   6   * to you under the Apache License, Version 2.0 (the
+   7   * &quot;License&quot;); you may not use this file except in compliance
+   8   * with the License.  You may obtain a copy of the License at
+   9   *
+  10   *     http://www.apache.org/licenses/LICENSE-2.0
+  11   *
+  12   * Unless required by applicable law or agreed to in writing, software
+  13   * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15   * See the License for the specific language governing permissions and
+  16   * limitations under the License.
+  17   */
+  18  
+  19  
+  20  package com.dtstack.flink.sql.source.kafka;
+  21  
+  22  import com.dtstack.flink.sql.source.IStreamSourceGener;
+  23  import com.dtstack.flink.sql.source.kafka.table.KafkaSourceTableInfo;
+  24  import com.dtstack.flink.sql.table.AbstractSourceTableInfo;
+  25  import com.dtstack.flink.sql.util.DtStringUtil;
+  26  import com.dtstack.flink.sql.util.PluginUtil;
+  27  import org.apache.commons.lang3.StringUtils;
+  28  import org.apache.flink.api.common.typeinfo.TypeInformation;
+  29  import org.apache.flink.api.java.typeutils.RowTypeInfo;
+  30  import org.apache.flink.streaming.api.datastream.DataStreamSource;
+  31  import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+  32  import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer011;
+  33  import org.apache.flink.streaming.connectors.kafka.internals.KafkaTopicPartition;
+  34  import org.apache.flink.table.api.Table;
+  35  import org.apache.flink.table.api.java.StreamTableEnvironment;
+  36  import org.apache.flink.types.Row;
+  37  
+  38  import java.util.HashMap;
+  39  import java.util.Map;
+  40  import java.util.Properties;
+  41  
+  42  /**
+  43   * If eventtime field is specified, the default time field rowtime
+  44   * Date: 2018/09/18
+  45   * Company: www.dtstack.com
+  46   *
+  47   * @author sishu.yss
+  48   */
+  49  
+  50  public class KafkaSource implements IStreamSourceGener&lt;Table&gt; {
+
+  51  
+  52  	private static final String SOURCE_OPERATOR_NAME_TPL = &quot;${topic}_${table}&quot;;
+
+
+
+
+  53  
+  54  	/**
+  55  	 * Get kafka data source, you need to provide the data field names, data types
+  56  	 * If you do not specify auto.offset.reset, the default use groupoffset
+  57  	 *
+  58  	 * @param sourceTableInfo
+  59  	 * @return
+  60  	 */
+  61  	@SuppressWarnings(&quot;rawtypes&quot;)
+  62  	@Override
+<abbr title="  63  	public Table genStreamSource(AbstractSourceTableInfo sourceTableInfo, StreamExecutionEnvironment env, StreamTableEnvironment tableEnv) {">  63  	public Table genStreamSource(AbstractSourceTableInfo sourceTableInfo, StreamExecutionEnvironment env, StreamTable🔵</abbr>
+
+
+
+  64  
+  65  		KafkaSourceTableInfo kafkaSourceTableInfo = (KafkaSourceTableInfo) sourceTableInfo;
+  66  		String topicName = kafkaSourceTableInfo.getTopic();
+
+
+
+  67  
+  68  		Properties props = new Properties();
+  69  		for (String key : kafkaSourceTableInfo.getKafkaParamKeys()) {
+  70  			props.setProperty(key, kafkaSourceTableInfo.getKafkaParam(key));
+  71  		}
+  72  		props.setProperty(&quot;bootstrap.servers&quot;, kafkaSourceTableInfo.getBootstrapServers());
+  73  		if (DtStringUtil.isJosn(kafkaSourceTableInfo.getOffsetReset())){
+  74  			props.setProperty(&quot;auto.offset.reset&quot;, &quot;none&quot;);
+  75  		} else {
+  76  			props.setProperty(&quot;auto.offset.reset&quot;, kafkaSourceTableInfo.getOffsetReset());
+  77  		}
+  78  		if (StringUtils.isNotBlank(kafkaSourceTableInfo.getGroupId())){
+  79  			props.setProperty(&quot;group.id&quot;, kafkaSourceTableInfo.getGroupId());
+  80  		}
+  81  		// only required for Kafka 0.8
+  82  		//TODO props.setProperty(&quot;zookeeper.connect&quot;, kafka09SourceTableInfo.)
+
+
+  83  
+  84  		TypeInformation[] types = new TypeInformation[kafkaSourceTableInfo.getFields().length];
+  85  		for (int i = 0; i &lt; kafkaSourceTableInfo.getFieldClasses().length; i++) {
+  86  			types[i] = TypeInformation.of(kafkaSourceTableInfo.getFieldClasses()[i]);
+  87  		}
+  88  
+  89  		TypeInformation&lt;Row&gt; typeInformation = new RowTypeInfo(types, kafkaSourceTableInfo.getFields());
+  90  
+<abbr title="  91  		FlinkKafkaConsumer011&lt;Row&gt; kafkaSrc = (FlinkKafkaConsumer011&lt;Row&gt;) new KafkaConsumer011Factory().createKafkaTableSource(kafkaSourceTableInfo, typeInformation, props);">  91  		FlinkKafkaConsumer011&lt;Row&gt; kafkaSrc = (FlinkKafkaConsumer011&lt;Row&gt;) new KafkaConsumer011Factory().createKafkaTabl🔵</abbr>
+  92  
+  93  		//earliest,latest
+  94  		if (&quot;earliest&quot;.equalsIgnoreCase(kafkaSourceTableInfo.getOffsetReset())) {
+  95  			kafkaSrc.setStartFromEarliest();
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  96 -		} else if (DtStringUtil.isJosn(kafkaSourceTableInfo.getOffsetReset())) {// {&quot;0&quot;:12312,&quot;1&quot;:12321,&quot;2&quot;:12312}</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  97 +		} else if (DtStringUtil.isJosn(kafkaSourceTableInfo.getOffsetReset())) {</span>
+  98  			try {
+  99  				Properties properties = PluginUtil.jsonStrToObject(kafkaSourceTableInfo.getOffsetReset(), Properties.class);
+ 100  				Map&lt;String, Object&gt; offsetMap = PluginUtil.objectToMap(properties);
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 101 -				Map&lt;KafkaTopicPartition, Long&gt; specificStartupOffsets = new HashMap&lt;&gt;();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 102 +				Map&lt;KafkaTopicPartition, Long&gt; specificStartupOffsets = new HashMap&lt;&gt;(16);</span>
+ 103  				for (Map.Entry&lt;String, Object&gt; entry : offsetMap.entrySet()) {
+<abbr title=" 104  					specificStartupOffsets.put(new KafkaTopicPartition(topicName, Integer.valueOf(entry.getKey())), Long.valueOf(entry.getValue().toString()));"> 104  					specificStartupOffsets.put(new KafkaTopicPartition(topicName, Integer.valueOf(entry.getKey())), Long.valueOf(🔵</abbr>
+ 105  				}
+ 106  				kafkaSrc.setStartFromSpecificOffsets(specificStartupOffsets);
+ 107  			} catch (Exception e) {
+ 108  				throw new RuntimeException(&quot;not support offsetReset type:&quot; + kafkaSourceTableInfo.getOffsetReset());
+ 109  			}
+ 110  		} else {
+ 111  			kafkaSrc.setStartFromLatest();
+ 112  		}
+ 113  
+ 114  		String fields = StringUtils.join(kafkaSourceTableInfo.getFields(), &quot;,&quot;);
+<abbr title=" 115  		String sourceOperatorName = SOURCE_OPERATOR_NAME_TPL.replace(&quot;${topic}&quot;, topicName).replace(&quot;${table}&quot;, sourceTableInfo.getName());"> 115  		String sourceOperatorName = SOURCE_OPERATOR_NAME_TPL.replace(&quot;${topic}&quot;, topicName).replace(&quot;${table}&quot;, sourceTa🔵</abbr>
+ 116  
+ 117  		DataStreamSource kafkaSource = env.addSource(kafkaSrc, sourceOperatorName, typeInformation);
+ 118  		Integer parallelism = kafkaSourceTableInfo.getParallelism();
+ 119  		if (parallelism != null) {
+ 120  			kafkaSource.setParallelism(parallelism);
+ 121  		}
+ 122  		return tableEnv.fromDataStream(kafkaSource, fields);
+ 123  	}
+
+
+ 124  }</pre></td>
+                            <td><pre>   1  /*
+   2   * Licensed to the Apache Software Foundation (ASF) under one
+   3   * or more contributor license agreements.  See the NOTICE file
+   4   * distributed with this work for additional information
+   5   * regarding copyright ownership.  The ASF licenses this file
+   6   * to you under the Apache License, Version 2.0 (the
+   7   * &quot;License&quot;); you may not use this file except in compliance
+   8   * with the License.  You may obtain a copy of the License at
+   9   *
+  10   *     http://www.apache.org/licenses/LICENSE-2.0
+  11   *
+  12   * Unless required by applicable law or agreed to in writing, software
+  13   * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  14   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  15   * See the License for the specific language governing permissions and
+  16   * limitations under the License.
+  17   */
+  18  
+  19  
+  20  package com.dtstack.flink.sql.source.kafka;
+  21  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  22 -import com.dtstack.flink.sql.source.IStreamSourceGener;</span>
+  23  import com.dtstack.flink.sql.source.kafka.table.KafkaSourceTableInfo;
+  24  import com.dtstack.flink.sql.table.AbstractSourceTableInfo;
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  25 -import com.dtstack.flink.sql.util.DtStringUtil;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  26 -import com.dtstack.flink.sql.util.PluginUtil;</span>
+  27  import org.apache.commons.lang3.StringUtils;
+  28  import org.apache.flink.api.common.typeinfo.TypeInformation;
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  29 -import org.apache.flink.api.java.typeutils.RowTypeInfo;</span>
+  30  import org.apache.flink.streaming.api.datastream.DataStreamSource;
+  31  import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+  32  import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer011;
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  33 -import org.apache.flink.streaming.connectors.kafka.internals.KafkaTopicPartition;</span>
+  34  import org.apache.flink.table.api.Table;
+  35  import org.apache.flink.table.api.java.StreamTableEnvironment;
+  36  import org.apache.flink.types.Row;
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  37 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  38 -import java.util.HashMap;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  39 -import java.util.Map;</span>
+  40  import java.util.Properties;
+  41  
+  42  /**
+  43   * If eventtime field is specified, the default time field rowtime
+  44   * Date: 2018/09/18
+  45   * Company: www.dtstack.com
+  46   *
+  47   * @author sishu.yss
+  48   */
+  49  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  50 -public class KafkaSource implements IStreamSourceGener&lt;Table&gt; {</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  51 +public class KafkaSource extends AbstractKafkaSource {</span>
+  52  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  53 -	private static final String SOURCE_OPERATOR_NAME_TPL = &quot;${topic}_${table}&quot;;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  54 +    @Override</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"><abbr title="  55 +    public Table genStreamSource(AbstractSourceTableInfo sourceTableInfo, StreamExecutionEnvironment env, StreamTableEnvironment tableEnv) {">  55 +    public Table genStreamSource(AbstractSourceTableInfo sourceTableInfo, StreamExecutionEnvironment env, StreamTa🔵</abbr></span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  56 +        KafkaSourceTableInfo kafkaSourceTableInfo = (KafkaSourceTableInfo) sourceTableInfo;</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  57 +        String topicName = kafkaSourceTableInfo.getTopic();</span>
+  58  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  59 -	/**</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  60 -	 * Get kafka data source, you need to provide the data field names, data types</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  61 -	 * If you do not specify auto.offset.reset, the default use groupoffset</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  62 -	 *</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  63 -	 * @param sourceTableInfo</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  64 -	 * @return</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  65 -	 */</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  66 -	@SuppressWarnings(&quot;rawtypes&quot;)</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  67 -	@Override</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"><abbr title="  68 -	public Table genStreamSource(AbstractSourceTableInfo sourceTableInfo, StreamExecutionEnvironment env, StreamTableEnvironment tableEnv) {">  68 -	public Table genStreamSource(AbstractSourceTableInfo sourceTableInfo, StreamExecutionEnvironment env, StreamTable🔵</abbr></span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  69 +        Properties kafkaProperties = getKafkaProperties(kafkaSourceTableInfo);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  70 +        TypeInformation&lt;Row&gt; typeInformation = getRowTypeInformation(kafkaSourceTableInfo);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"><abbr title="  71 +        FlinkKafkaConsumer011&lt;Row&gt; kafkaSrc = (FlinkKafkaConsumer011&lt;Row&gt;) new KafkaConsumer011Factory().createKafkaTableSource(kafkaSourceTableInfo, typeInformation, kafkaProperties);">  71 +        FlinkKafkaConsumer011&lt;Row&gt; kafkaSrc = (FlinkKafkaConsumer011&lt;Row&gt;) new KafkaConsumer011Factory().createKaf🔵</abbr></span>
+  72  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  73 -		KafkaSourceTableInfo kafkaSourceTableInfo = (KafkaSourceTableInfo) sourceTableInfo;</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  74 -		String topicName = kafkaSourceTableInfo.getTopic();</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  75 +        String sourceOperatorName = generateOperatorName(sourceTableInfo.getName(), topicName);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  76 +        DataStreamSource kafkaSource = env.addSource(kafkaSrc, sourceOperatorName, typeInformation);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  77 +        kafkaSource.setParallelism(kafkaSourceTableInfo.getParallelism());</span>
+  78  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  79 -		Properties props = new Properties();</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  80 -		for (String key : kafkaSourceTableInfo.getKafkaParamKeys()) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  81 -			props.setProperty(key, kafkaSourceTableInfo.getKafkaParam(key));</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  82 -		}</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  83 -		props.setProperty(&quot;bootstrap.servers&quot;, kafkaSourceTableInfo.getBootstrapServers());</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  84 -		if (DtStringUtil.isJosn(kafkaSourceTableInfo.getOffsetReset())){</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  85 -			props.setProperty(&quot;auto.offset.reset&quot;, &quot;none&quot;);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  86 -		} else {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  87 -			props.setProperty(&quot;auto.offset.reset&quot;, kafkaSourceTableInfo.getOffsetReset());</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  88 -		}</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  89 -		if (StringUtils.isNotBlank(kafkaSourceTableInfo.getGroupId())){</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  90 -			props.setProperty(&quot;group.id&quot;, kafkaSourceTableInfo.getGroupId());</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  91 -		}</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  92 -		// only required for Kafka 0.8</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  93 -		//TODO props.setProperty(&quot;zookeeper.connect&quot;, kafka09SourceTableInfo.)</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  94 +        setStartPosition(kafkaSourceTableInfo.getOffsetReset(), topicName, kafkaSrc);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  95 +        String fields = StringUtils.join(kafkaSourceTableInfo.getFields(), &quot;,&quot;);</span>
+  96  
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  97 -		TypeInformation[] types = new TypeInformation[kafkaSourceTableInfo.getFields().length];</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  98 -		for (int i = 0; i &lt; kafkaSourceTableInfo.getFieldClasses().length; i++) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  99 -			types[i] = TypeInformation.of(kafkaSourceTableInfo.getFieldClasses()[i]);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 100 -		}</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 101 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 102 -		TypeInformation&lt;Row&gt; typeInformation = new RowTypeInfo(types, kafkaSourceTableInfo.getFields());</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 103 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"><abbr title=" 104 -		FlinkKafkaConsumer011&lt;Row&gt; kafkaSrc = (FlinkKafkaConsumer011&lt;Row&gt;) new KafkaConsumer011Factory().createKafkaTableSource(kafkaSourceTableInfo, typeInformation, props);"> 104 -		FlinkKafkaConsumer011&lt;Row&gt; kafkaSrc = (FlinkKafkaConsumer011&lt;Row&gt;) new KafkaConsumer011Factory().createKafkaTabl🔵</abbr></span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 105 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 106 -		//earliest,latest</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 107 -		if (&quot;earliest&quot;.equalsIgnoreCase(kafkaSourceTableInfo.getOffsetReset())) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 108 -			kafkaSrc.setStartFromEarliest();</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 109 -		} else if (DtStringUtil.isJosn(kafkaSourceTableInfo.getOffsetReset())) {// {&quot;0&quot;:12312,&quot;1&quot;:12321,&quot;2&quot;:12312}</span>
+
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 110 -			try {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 111 -				Properties properties = PluginUtil.jsonStrToObject(kafkaSourceTableInfo.getOffsetReset(), Properties.class);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 112 -				Map&lt;String, Object&gt; offsetMap = PluginUtil.objectToMap(properties);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 113 -				Map&lt;KafkaTopicPartition, Long&gt; specificStartupOffsets = new HashMap&lt;&gt;();</span>
+
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 114 -				for (Map.Entry&lt;String, Object&gt; entry : offsetMap.entrySet()) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"><abbr title=" 115 -					specificStartupOffsets.put(new KafkaTopicPartition(topicName, Integer.valueOf(entry.getKey())), Long.valueOf(entry.getValue().toString()));"> 115 -					specificStartupOffsets.put(new KafkaTopicPartition(topicName, Integer.valueOf(entry.getKey())), Long.valueOf(🔵</abbr></span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 116 -				}</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 117 -				kafkaSrc.setStartFromSpecificOffsets(specificStartupOffsets);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 118 -			} catch (Exception e) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 119 -				throw new RuntimeException(&quot;not support offsetReset type:&quot; + kafkaSourceTableInfo.getOffsetReset());</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 120 -			}</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 121 -		} else {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 122 -			kafkaSrc.setStartFromLatest();</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 123 -		}</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 124 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 125 -		String fields = StringUtils.join(kafkaSourceTableInfo.getFields(), &quot;,&quot;);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"><abbr title=" 126 -		String sourceOperatorName = SOURCE_OPERATOR_NAME_TPL.replace(&quot;${topic}&quot;, topicName).replace(&quot;${table}&quot;, sourceTableInfo.getName());"> 126 -		String sourceOperatorName = SOURCE_OPERATOR_NAME_TPL.replace(&quot;${topic}&quot;, topicName).replace(&quot;${table}&quot;, sourceTa🔵</abbr></span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 127 -</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 128 -		DataStreamSource kafkaSource = env.addSource(kafkaSrc, sourceOperatorName, typeInformation);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 129 -		Integer parallelism = kafkaSourceTableInfo.getParallelism();</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 130 -		if (parallelism != null) {</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 131 -			kafkaSource.setParallelism(parallelism);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 132 -		}</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 133 -		return tableEnv.fromDataStream(kafkaSource, fields);</span>
+<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0"> 134 -	}</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 135 +        return tableEnv.fromDataStream(kafkaSource, fields);</span>
+<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 136 +    }</span>
+ 137  }</pre></td>
+                        </tr>
+                    </table>
+                </div>
+              </body>
+            </html>
+            
