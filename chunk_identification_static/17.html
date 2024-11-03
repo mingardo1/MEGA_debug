@@ -12,11 +12,24 @@
                             height: 48vh;
                             overflow-y: auto;
                         }
-                        abbr {
-                          /* Here is the delay */
-                          transition-delay:0s;
+                        .highlighted {
+                            background-color: rgba(177, 82, 227, 0.85) !important;
                         }
                     </style>
+                    <script>
+                        function enter(c) {
+                            const lines = document.getElementsByClassName(c);
+                            for (let i = 0; i < lines.length; i++) {
+                               lines.item(i).classList.add('highlighted');
+                            }
+                        }
+                        function out(c) {
+                            const lines = document.getElementsByClassName(c);
+                            for (let i = 0; i < lines.length; i++) {
+                               lines.item(i).classList.remove('highlighted');
+                            }
+                        }
+                    </script>
               </head>
               <body>
                 <span style="height: 4vh">
@@ -55,340 +68,340 @@ del /Q jfstmerge.java.merge
                             <th>spork</th>
                         </tr>
                         <tr>
-                            <td><pre>   1 /*
-   2  * Copyright (C) 2016 AriaLyy(https://github.com/AriaLyy/Aria)
-   3  *
-   4  * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
-   5  * you may not use this file except in compliance with the License.
-   6  * You may obtain a copy of the License at
-   7  *
-   8  *      http://www.apache.org/licenses/LICENSE-2.0
-   9  *
-  10  * Unless required by applicable law or agreed to in writing, software
-  11  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
-  12  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  13  * See the License for the specific language governing permissions and
-  14  * limitations under the License.
-  15  */
-  16 package com.arialyy.aria.core.download;
-  17 
-  18 import android.os.Handler;
-  19 import com.arialyy.aria.core.download.downloader.IDownloadGroupListener;
-  20 import com.arialyy.aria.core.inf.GroupSendParams;
-  21 import com.arialyy.aria.core.scheduler.ISchedulers;
-  22 import com.arialyy.aria.util.ALog;
-  23 
-  24 /**
-  25  * Created by Aria.Lao on 2017/7/20.
-  26  * 任务组下载事件
-  27  */
-  28 class DownloadGroupListener
-  29     extends BaseDListener&lt;DownloadGroupEntity, DownloadGroupTaskEntity, DownloadGroupTask&gt;
-  30     implements IDownloadGroupListener {
-  31   private final String TAG = &quot;DownloadGroupListener&quot;;
-  32   private GroupSendParams&lt;DownloadGroupTask, DownloadEntity&gt; mSeedEntity;
-  33 
-  34   DownloadGroupListener(DownloadGroupTask task, Handler outHandler) {
-  35     super(task, outHandler);
-  36     mSeedEntity = new GroupSendParams&lt;&gt;();
-  37     mSeedEntity.groupTask = task;
-  38   }
-  39 
-  40   @Override public void onSubPre(DownloadEntity subEntity) {
-  41     sendInState2Target(ISchedulers.SUB_PRE, subEntity);
-  42   }
-  43 
-  44   @Override public void supportBreakpoint(boolean support, DownloadEntity subEntity) {
-  45 
-  46   }
-  47 
-  48   @Override public void onSubStart(DownloadEntity subEntity) {
-  49     sendInState2Target(ISchedulers.SUB_START, subEntity);
-  50   }
-  51 
-  52   @Override public void onSubStop(DownloadEntity subEntity) {
-  53     saveCurrentLocation();
-  54     sendInState2Target(ISchedulers.SUB_STOP, subEntity);
-  55   }
-  56 
-  57   @Override public void onSubComplete(DownloadEntity subEntity) {
-  58     saveCurrentLocation();
-  59     sendInState2Target(ISchedulers.SUB_COMPLETE, subEntity);
-  60   }
-  61 
-  62   @Override public void onSubFail(DownloadEntity subEntity) {
-  63     saveCurrentLocation();
-  64     sendInState2Target(ISchedulers.SUB_FAIL, subEntity);
-  65   }
-  66 
-  67   @Override public void onSubCancel(DownloadEntity subEntity) {
-  68     saveCurrentLocation();
-  69     sendInState2Target(ISchedulers.SUB_CANCEL, subEntity);
-  70   }
-  71 
-  72   @Override public void onSubRunning(DownloadEntity subEntity) {
-  73     sendInState2Target(ISchedulers.SUB_RUNNING, subEntity);
-  74   }
-  75 
-  76   /**
-  77    * 将任务状态发送给下载器
-  78    *
-  79    * @param state {@link ISchedulers#START}
-  80    */
-  81   private void sendInState2Target(int state, DownloadEntity subEntity) {
-  82     if (outHandler.get() != null) {
-  83       mSeedEntity.entity = subEntity;
-  84       outHandler.get().obtainMessage(state, ISchedulers.IS_SUB_TASK, 0, mSeedEntity).sendToTarget();
-  85     }
-  86   }
-  87 
-  88   private void saveCurrentLocation() {
-  89     if (mEntity.getSubEntities() == null || mEntity.getSubEntities().isEmpty()) {
-  90       ALog.w(TAG, &quot;保存进度失败，子任务为null&quot;);
-  91       return;
-  92     }
-  93     long location = 0;
-  94     for (DownloadEntity e : mEntity.getSubEntities()) {
-  95       location += e.getCurrentProgress();
-  96     }
-  97 &lt;&lt;&lt;&lt;&lt;&lt;&lt; GitAnalyzerPlus_ours
-<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  98     if (location &gt; mEntity.getFileSize()) {</span>
-<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  99       location = mEntity.getFileSize();</span>
-<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 100     }</span>
- 101 ||||||| GitAnalyzerPlus_base
-<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 102     mEntity.setCurrentProgress(location);</span>
-<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 103     mEntity.update();</span>
-<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 104   }</span>
-<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 105 }</span>
- 106 =======
-<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 107 </span>
- 108 &gt;&gt;&gt;&gt;&gt;&gt;&gt; GitAnalyzerPlus_theirs
- 109     mEntity.setCurrentProgress(location);
- 110     mEntity.update();
- 111   }
- 112 }</pre></td>
-                            <td><pre>   1 /*
-   2  * Copyright (C) 2016 AriaLyy(https://github.com/AriaLyy/Aria)
-   3  *
-   4  * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
-   5  * you may not use this file except in compliance with the License.
-   6  * You may obtain a copy of the License at
-   7  *
-   8  *      http://www.apache.org/licenses/LICENSE-2.0
-   9  *
-  10  * Unless required by applicable law or agreed to in writing, software
-  11  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
-  12  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  13  * See the License for the specific language governing permissions and
-  14  * limitations under the License.
-  15  */
-  16 package com.arialyy.aria.core.download;
-  17 
-  18 import android.os.Handler;
-  19 import com.arialyy.aria.core.download.downloader.IDownloadGroupListener;
-  20 import com.arialyy.aria.core.inf.GroupSendParams;
-  21 import com.arialyy.aria.core.scheduler.ISchedulers;
-  22 import com.arialyy.aria.util.ALog;
-  23 
-  24 /**
-  25  * Created by Aria.Lao on 2017/7/20.
-  26  * 任务组下载事件
-  27  */
-  28 class DownloadGroupListener
-  29     extends BaseDListener&lt;DownloadGroupEntity, DownloadGroupTaskEntity, DownloadGroupTask&gt;
-  30     implements IDownloadGroupListener {
-  31   private final String TAG = &quot;DownloadGroupListener&quot;;
-  32   private GroupSendParams&lt;DownloadGroupTask, DownloadEntity&gt; mSeedEntity;
-  33 
-  34   DownloadGroupListener(DownloadGroupTask task, Handler outHandler) {
-  35     super(task, outHandler);
-  36     mSeedEntity = new GroupSendParams&lt;&gt;();
-  37     mSeedEntity.groupTask = task;
-  38   }
-  39 
-  40   @Override public void onSubPre(DownloadEntity subEntity) {
-  41     sendInState2Target(ISchedulers.SUB_PRE, subEntity);
-  42   }
-  43 
-  44   @Override public void supportBreakpoint(boolean support, DownloadEntity subEntity) {
-  45 
-  46   }
-  47 
-  48   @Override public void onSubStart(DownloadEntity subEntity) {
-  49     sendInState2Target(ISchedulers.SUB_START, subEntity);
-  50   }
-  51 
-  52   @Override public void onSubStop(DownloadEntity subEntity) {
-  53     saveCurrentLocation();
-  54     sendInState2Target(ISchedulers.SUB_STOP, subEntity);
-  55   }
-  56 
-  57   @Override public void onSubComplete(DownloadEntity subEntity) {
-  58     saveCurrentLocation();
-  59     sendInState2Target(ISchedulers.SUB_COMPLETE, subEntity);
-  60   }
-  61 
-  62   @Override public void onSubFail(DownloadEntity subEntity) {
-  63     saveCurrentLocation();
-  64     sendInState2Target(ISchedulers.SUB_FAIL, subEntity);
-  65   }
-  66 
-  67   @Override public void onSubCancel(DownloadEntity subEntity) {
-  68     saveCurrentLocation();
-  69     sendInState2Target(ISchedulers.SUB_CANCEL, subEntity);
-  70   }
-  71 
-  72   @Override public void onSubRunning(DownloadEntity subEntity) {
-  73     sendInState2Target(ISchedulers.SUB_RUNNING, subEntity);
-  74   }
-  75 
-  76   /**
-  77    * 将任务状态发送给下载器
-  78    *
-  79    * @param state {@link ISchedulers#START}
-  80    */
-  81   private void sendInState2Target(int state, DownloadEntity subEntity) {
-  82     if (outHandler.get() != null) {
-  83       mSeedEntity.entity = subEntity;
-  84       outHandler.get().obtainMessage(state, ISchedulers.IS_SUB_TASK, 0, mSeedEntity).sendToTarget();
-  85     }
-  86   }
-  87 
-  88   private void saveCurrentLocation() {
-  89     if (mEntity.getSubEntities() == null || mEntity.getSubEntities().isEmpty()) {
-  90       ALog.w(TAG, &quot;保存进度失败，子任务为null&quot;);
-  91       return;
-  92     }
-  93     long location = 0;
-  94     for (DownloadEntity e : mEntity.getSubEntities()) {
-  95       location += e.getCurrentProgress();
-  96     }
-  97     if (location &gt; mEntity.getFileSize()) {
-  98       location = mEntity.getFileSize();
-  99     }
- 100     mEntity.setCurrentProgress(location);
- 101     mEntity.update();
- 102   }
- 103 }
- 
- 
- 
- 
- 
- 
- 
- </pre></td>
-                            <td><pre>   1 /*
-   2  * Copyright (C) 2016 AriaLyy(https://github.com/AriaLyy/Aria)
-   3  *
-   4  * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
-   5  * you may not use this file except in compliance with the License.
-   6  * You may obtain a copy of the License at
-   7  *
-   8  *      http://www.apache.org/licenses/LICENSE-2.0
-   9  *
-  10  * Unless required by applicable law or agreed to in writing, software
-  11  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
-  12  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  13  * See the License for the specific language governing permissions and
-  14  * limitations under the License.
-  15  */
-  16 package com.arialyy.aria.core.download;
-  17 
-  18 import android.os.Handler;
-  19 import com.arialyy.aria.core.download.downloader.IDownloadGroupListener;
-  20 import com.arialyy.aria.core.inf.GroupSendParams;
-  21 import com.arialyy.aria.core.scheduler.ISchedulers;
-  22 import com.arialyy.aria.util.ALog;
-  23 
-  24 
-  25 /**
-  26  * Created by Aria.Lao on 2017/7/20.
-  27  * 任务组下载事件
-  28  */
-<abbr title="  29 class DownloadGroupListener extends BaseDListener&lt;DownloadGroupEntity, DownloadGroupTaskEntity, DownloadGroupTask&gt; implements IDownloadGroupListener {">  29 class DownloadGroupListener extends BaseDListener&lt;DownloadGroupEntity, DownloadGroupTaskEntity, DownloadG🔵</abbr>
-  30   private final String TAG = &quot;DownloadGroupListener&quot;;
-  31 
-  32   private GroupSendParams&lt;DownloadGroupTask, DownloadEntity&gt; mSeedEntity;
-  33 
-  34   DownloadGroupListener(DownloadGroupTask task, Handler outHandler) {
-  35     super(task, outHandler);
-  36     mSeedEntity = new GroupSendParams&lt;&gt;();
-  37     mSeedEntity.groupTask = task;
-  38   }
-  39 
-  40   @Override public void onSubPre(DownloadEntity subEntity) {
-  41     sendInState2Target(ISchedulers.SUB_PRE, subEntity);
-  42   }
-  43 
-  44   @Override public void supportBreakpoint(boolean support, DownloadEntity subEntity) {
-  45 
-  46   }
-  47 
-  48   @Override public void onSubStart(DownloadEntity subEntity) {
-  49     sendInState2Target(ISchedulers.SUB_START, subEntity);
-  50   }
-  51 
-  52   @Override public void onSubStop(DownloadEntity subEntity) {
-  53     saveCurrentLocation();
-  54     sendInState2Target(ISchedulers.SUB_STOP, subEntity);
-  55   }
-  56 
-  57   @Override public void onSubComplete(DownloadEntity subEntity) {
-  58     saveCurrentLocation();
-  59     sendInState2Target(ISchedulers.SUB_COMPLETE, subEntity);
-  60   }
-  61 
-  62   @Override public void onSubFail(DownloadEntity subEntity) {
-  63     saveCurrentLocation();
-  64     sendInState2Target(ISchedulers.SUB_FAIL, subEntity);
-  65   }
-  66 
-  67   @Override public void onSubCancel(DownloadEntity subEntity) {
-  68     saveCurrentLocation();
-  69     sendInState2Target(ISchedulers.SUB_CANCEL, subEntity);
-  70   }
-  71 
-  72   @Override public void onSubRunning(DownloadEntity subEntity) {
-  73     sendInState2Target(ISchedulers.SUB_RUNNING, subEntity);
-  74   }
-  75 
-  76   /**
-  77    * 将任务状态发送给下载器
-  78    *
-  79    * @param state {@link ISchedulers#START}
-  80    */
-  81   private void sendInState2Target(int state, DownloadEntity subEntity) {
-  82     if (outHandler.get() != null) {
-  83       mSeedEntity.entity = subEntity;
-  84       outHandler.get().obtainMessage(state, ISchedulers.IS_SUB_TASK, 0, mSeedEntity).sendToTarget();
-  85     }
-  86   }
-  87 
-  88   private void saveCurrentLocation() {
-  89     if ((mEntity.getSubEntities() == null) || mEntity.getSubEntities().isEmpty()) {
-  90       ALog.w(TAG, &quot;保存进度失败，子任务为null&quot;);
-  91       return;
-  92     }
-  93     long location = 0;
-  94     for (DownloadEntity e : mEntity.getSubEntities()) {
-  95       location += e.getCurrentProgress();
-  96     }
-  97     if (location &gt; mEntity.getFileSize()) {
-  98       location = mEntity.getFileSize();
-  99     }
- 100     mEntity.setCurrentProgress(location);
- 101     mEntity.update();
- 102   }
- 103 }
- 
- 
- 
- 
- 
- 
- 
- </pre></td>
+                            <td><pre><span class="4534359625031764666" onmouseenter="enter('4534359625031764666');" onmouseout="out('4534359625031764666');" style="">   1 /*                                                                                                       </span>
+<span class="-4176855950178531235" onmouseenter="enter('-4176855950178531235');" onmouseout="out('-4176855950178531235');" style="">   2  * Copyright (C) 2016 AriaLyy(https://github.com/AriaLyy/Aria)                                           </span>
+<span class="329605257831645060" onmouseenter="enter('329605257831645060');" onmouseout="out('329605257831645060');" style="">   3  *                                                                                                       </span>
+<span class="-7144700690364548245" onmouseenter="enter('-7144700690364548245');" onmouseout="out('-7144700690364548245');" style="">   4  * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);                                       </span>
+<span class="-6614298523444173250" onmouseenter="enter('-6614298523444173250');" onmouseout="out('-6614298523444173250');" style="">   5  * you may not use this file except in compliance with the License.                                      </span>
+<span class="-4753901504248728101" onmouseenter="enter('-4753901504248728101');" onmouseout="out('-4753901504248728101');" style="">   6  * You may obtain a copy of the License at                                                               </span>
+<span class="329605257831645060" onmouseenter="enter('329605257831645060');" onmouseout="out('329605257831645060');" style="">   7  *                                                                                                       </span>
+<span class="-763207030729826407" onmouseenter="enter('-763207030729826407');" onmouseout="out('-763207030729826407');" style="">   8  *      http://www.apache.org/licenses/LICENSE-2.0                                                       </span>
+<span class="329605257831645060" onmouseenter="enter('329605257831645060');" onmouseout="out('329605257831645060');" style="">   9  *                                                                                                       </span>
+<span class="2557607632756179983" onmouseenter="enter('2557607632756179983');" onmouseout="out('2557607632756179983');" style="">  10  * Unless required by applicable law or agreed to in writing, software                                   </span>
+<span class="-9189129105512731955" onmouseenter="enter('-9189129105512731955');" onmouseout="out('-9189129105512731955');" style="">  11  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,                                     </span>
+<span class="5781161717946418340" onmouseenter="enter('5781161717946418340');" onmouseout="out('5781161717946418340');" style="">  12  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.                              </span>
+<span class="1761562277992059393" onmouseenter="enter('1761562277992059393');" onmouseout="out('1761562277992059393');" style="">  13  * See the License for the specific language governing permissions and                                   </span>
+<span class="7217408601297779962" onmouseenter="enter('7217408601297779962');" onmouseout="out('7217408601297779962');" style="">  14  * limitations under the License.                                                                        </span>
+<span class="-3478703399357275674" onmouseenter="enter('-3478703399357275674');" onmouseout="out('-3478703399357275674');" style="">  15  */                                                                                                      </span>
+<span class="1987357580077471394" onmouseenter="enter('1987357580077471394');" onmouseout="out('1987357580077471394');" style="">  16 package com.arialyy.aria.core.download;                                                                  </span>
+<span  style="">  17                                                                                                          </span>
+<span class="-1086316590722027623" onmouseenter="enter('-1086316590722027623');" onmouseout="out('-1086316590722027623');" style="">  18 import android.os.Handler;                                                                               </span>
+<span class="3512451831006950044" onmouseenter="enter('3512451831006950044');" onmouseout="out('3512451831006950044');" style="">  19 import com.arialyy.aria.core.download.downloader.IDownloadGroupListener;                                 </span>
+<span class="2889735241540192402" onmouseenter="enter('2889735241540192402');" onmouseout="out('2889735241540192402');" style="">  20 import com.arialyy.aria.core.inf.GroupSendParams;                                                        </span>
+<span class="-1011357815313335831" onmouseenter="enter('-1011357815313335831');" onmouseout="out('-1011357815313335831');" style="">  21 import com.arialyy.aria.core.scheduler.ISchedulers;                                                      </span>
+<span class="-3586495952513455611" onmouseenter="enter('-3586495952513455611');" onmouseout="out('-3586495952513455611');" style="">  22 import com.arialyy.aria.util.ALog;                                                                       </span>
+<span  style="">  23                                                                                                          </span>
+<span class="1188357178855945174" onmouseenter="enter('1188357178855945174');" onmouseout="out('1188357178855945174');" style="">  24 /**                                                                                                      </span>
+<span class="2534896381285876432" onmouseenter="enter('2534896381285876432');" onmouseout="out('2534896381285876432');" style="">  25  * Created by Aria.Lao on 2017/7/20.                                                                     </span>
+<span class="-9096439396806402745" onmouseenter="enter('-9096439396806402745');" onmouseout="out('-9096439396806402745');" style="">  26  * 任务组下载事件                                                                                               </span>
+<span class="-3478703399357275674" onmouseenter="enter('-3478703399357275674');" onmouseout="out('-3478703399357275674');" style="">  27  */                                                                                                      </span>
+<span class="-6354426688120911263" onmouseenter="enter('-6354426688120911263');" onmouseout="out('-6354426688120911263');" style="">  28 class DownloadGroupListener                                                                              </span>
+<span class="-1696246330845699577" onmouseenter="enter('-1696246330845699577');" onmouseout="out('-1696246330845699577');" style="">  29     extends BaseDListener&lt;DownloadGroupEntity, DownloadGroupTaskEntity, DownloadGroupTask&gt;               </span>
+<span class="174064491892165481" onmouseenter="enter('174064491892165481');" onmouseout="out('174064491892165481');" style="">  30     implements IDownloadGroupListener {                                                                  </span>
+<span class="6540580073454354808" onmouseenter="enter('6540580073454354808');" onmouseout="out('6540580073454354808');" style="">  31   private final String TAG = &quot;DownloadGroupListener&quot;;                                                    </span>
+<span class="8244649316010409606" onmouseenter="enter('8244649316010409606');" onmouseout="out('8244649316010409606');" style="">  32   private GroupSendParams&lt;DownloadGroupTask, DownloadEntity&gt; mSeedEntity;                                </span>
+<span  style="">  33                                                                                                          </span>
+<span class="-6619231611956441231" onmouseenter="enter('-6619231611956441231');" onmouseout="out('-6619231611956441231');" style="">  34   DownloadGroupListener(DownloadGroupTask task, Handler outHandler) {                                    </span>
+<span class="-2542085818511540915" onmouseenter="enter('-2542085818511540915');" onmouseout="out('-2542085818511540915');" style="">  35     super(task, outHandler);                                                                             </span>
+<span class="3048968685552743029" onmouseenter="enter('3048968685552743029');" onmouseout="out('3048968685552743029');" style="">  36     mSeedEntity = new GroupSendParams&lt;&gt;();                                                               </span>
+<span class="-2544312095676519537" onmouseenter="enter('-2544312095676519537');" onmouseout="out('-2544312095676519537');" style="">  37     mSeedEntity.groupTask = task;                                                                        </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  38   }                                                                                                      </span>
+<span  style="">  39                                                                                                          </span>
+<span class="-7152713013246739105" onmouseenter="enter('-7152713013246739105');" onmouseout="out('-7152713013246739105');" style="">  40   @Override public void onSubPre(DownloadEntity subEntity) {                                             </span>
+<span class="-7182424035728283005" onmouseenter="enter('-7182424035728283005');" onmouseout="out('-7182424035728283005');" style="">  41     sendInState2Target(ISchedulers.SUB_PRE, subEntity);                                                  </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  42   }                                                                                                      </span>
+<span  style="">  43                                                                                                          </span>
+<span class="2557885658490133733" onmouseenter="enter('2557885658490133733');" onmouseout="out('2557885658490133733');" style="">  44   @Override public void supportBreakpoint(boolean support, DownloadEntity subEntity) {                   </span>
+<span  style="">  45                                                                                                          </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  46   }                                                                                                      </span>
+<span  style="">  47                                                                                                          </span>
+<span class="-3554047889098977200" onmouseenter="enter('-3554047889098977200');" onmouseout="out('-3554047889098977200');" style="">  48   @Override public void onSubStart(DownloadEntity subEntity) {                                           </span>
+<span class="-3483918869661876627" onmouseenter="enter('-3483918869661876627');" onmouseout="out('-3483918869661876627');" style="">  49     sendInState2Target(ISchedulers.SUB_START, subEntity);                                                </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  50   }                                                                                                      </span>
+<span  style="">  51                                                                                                          </span>
+<span class="-9173863251124520181" onmouseenter="enter('-9173863251124520181');" onmouseout="out('-9173863251124520181');" style="">  52   @Override public void onSubStop(DownloadEntity subEntity) {                                            </span>
+<span class="-4416783850467854062" onmouseenter="enter('-4416783850467854062');" onmouseout="out('-4416783850467854062');" style="">  53     saveCurrentLocation();                                                                               </span>
+<span class="-8919611147806563552" onmouseenter="enter('-8919611147806563552');" onmouseout="out('-8919611147806563552');" style="">  54     sendInState2Target(ISchedulers.SUB_STOP, subEntity);                                                 </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  55   }                                                                                                      </span>
+<span  style="">  56                                                                                                          </span>
+<span class="137061115358111094" onmouseenter="enter('137061115358111094');" onmouseout="out('137061115358111094');" style="">  57   @Override public void onSubComplete(DownloadEntity subEntity) {                                        </span>
+<span class="-4416783850467854062" onmouseenter="enter('-4416783850467854062');" onmouseout="out('-4416783850467854062');" style="">  58     saveCurrentLocation();                                                                               </span>
+<span class="2395008898484536012" onmouseenter="enter('2395008898484536012');" onmouseout="out('2395008898484536012');" style="">  59     sendInState2Target(ISchedulers.SUB_COMPLETE, subEntity);                                             </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  60   }                                                                                                      </span>
+<span  style="">  61                                                                                                          </span>
+<span class="-4223446572895854644" onmouseenter="enter('-4223446572895854644');" onmouseout="out('-4223446572895854644');" style="">  62   @Override public void onSubFail(DownloadEntity subEntity) {                                            </span>
+<span class="-4416783850467854062" onmouseenter="enter('-4416783850467854062');" onmouseout="out('-4416783850467854062');" style="">  63     saveCurrentLocation();                                                                               </span>
+<span class="4886366574578496486" onmouseenter="enter('4886366574578496486');" onmouseout="out('4886366574578496486');" style="">  64     sendInState2Target(ISchedulers.SUB_FAIL, subEntity);                                                 </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  65   }                                                                                                      </span>
+<span  style="">  66                                                                                                          </span>
+<span class="-7084121618920090508" onmouseenter="enter('-7084121618920090508');" onmouseout="out('-7084121618920090508');" style="">  67   @Override public void onSubCancel(DownloadEntity subEntity) {                                          </span>
+<span class="-4416783850467854062" onmouseenter="enter('-4416783850467854062');" onmouseout="out('-4416783850467854062');" style="">  68     saveCurrentLocation();                                                                               </span>
+<span class="-4627350495791369590" onmouseenter="enter('-4627350495791369590');" onmouseout="out('-4627350495791369590');" style="">  69     sendInState2Target(ISchedulers.SUB_CANCEL, subEntity);                                               </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  70   }                                                                                                      </span>
+<span  style="">  71                                                                                                          </span>
+<span class="-5819639562503137910" onmouseenter="enter('-5819639562503137910');" onmouseout="out('-5819639562503137910');" style="">  72   @Override public void onSubRunning(DownloadEntity subEntity) {                                         </span>
+<span class="-9172465205633208584" onmouseenter="enter('-9172465205633208584');" onmouseout="out('-9172465205633208584');" style="">  73     sendInState2Target(ISchedulers.SUB_RUNNING, subEntity);                                              </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  74   }                                                                                                      </span>
+<span  style="">  75                                                                                                          </span>
+<span class="1188357178855945174" onmouseenter="enter('1188357178855945174');" onmouseout="out('1188357178855945174');" style="">  76   /**                                                                                                    </span>
+<span class="5309333678065732533" onmouseenter="enter('5309333678065732533');" onmouseout="out('5309333678065732533');" style="">  77    * 将任务状态发送给下载器                                                                                         </span>
+<span class="329605257831645060" onmouseenter="enter('329605257831645060');" onmouseout="out('329605257831645060');" style="">  78    *                                                                                                     </span>
+<span class="4745042362407675676" onmouseenter="enter('4745042362407675676');" onmouseout="out('4745042362407675676');" style="">  79    * @param state {@link ISchedulers#START}                                                              </span>
+<span class="-3478703399357275674" onmouseenter="enter('-3478703399357275674');" onmouseout="out('-3478703399357275674');" style="">  80    */                                                                                                    </span>
+<span class="8596630920523236144" onmouseenter="enter('8596630920523236144');" onmouseout="out('8596630920523236144');" style="">  81   private void sendInState2Target(int state, DownloadEntity subEntity) {                                 </span>
+<span class="14240507737599715" onmouseenter="enter('14240507737599715');" onmouseout="out('14240507737599715');" style="">  82     if (outHandler.get() != null) {                                                                      </span>
+<span class="-5392518758519400861" onmouseenter="enter('-5392518758519400861');" onmouseout="out('-5392518758519400861');" style="">  83       mSeedEntity.entity = subEntity;                                                                    </span>
+<span class="5207111582530770694" onmouseenter="enter('5207111582530770694');" onmouseout="out('5207111582530770694');" style="">  84       outHandler.get().obtainMessage(state, ISchedulers.IS_SUB_TASK, 0, mSeedEntity).sendToTarget();     </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  85     }                                                                                                    </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  86   }                                                                                                      </span>
+<span  style="">  87                                                                                                          </span>
+<span class="-8190767281264611311" onmouseenter="enter('-8190767281264611311');" onmouseout="out('-8190767281264611311');" style="">  88   private void saveCurrentLocation() {                                                                   </span>
+<span class="-8607572572942247296" onmouseenter="enter('-8607572572942247296');" onmouseout="out('-8607572572942247296');" style="">  89     if (mEntity.getSubEntities() == null || mEntity.getSubEntities().isEmpty()) {                        </span>
+<span class="7207045947689942291" onmouseenter="enter('7207045947689942291');" onmouseout="out('7207045947689942291');" style="">  90       ALog.w(TAG, &quot;保存进度失败，子任务为null&quot;);                                                                    </span>
+<span class="4043029072030362567" onmouseenter="enter('4043029072030362567');" onmouseout="out('4043029072030362567');" style="">  91       return;                                                                                            </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  92     }                                                                                                    </span>
+<span class="-1772918154446906383" onmouseenter="enter('-1772918154446906383');" onmouseout="out('-1772918154446906383');" style="">  93     long location = 0;                                                                                   </span>
+<span class="-33757067416748864" onmouseenter="enter('-33757067416748864');" onmouseout="out('-33757067416748864');" style="">  94     for (DownloadEntity e : mEntity.getSubEntities()) {                                                  </span>
+<span class="-1288312593516515904" onmouseenter="enter('-1288312593516515904');" onmouseout="out('-1288312593516515904');" style="">  95       location += e.getCurrentProgress();                                                                </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  96     }                                                                                                    </span>
+<span class="-4667942192763773056" onmouseenter="enter('-4667942192763773056');" onmouseout="out('-4667942192763773056');" style="">  97 &lt;&lt;&lt;&lt;&lt;&lt;&lt; GitAnalyzerPlus_ours                                                                             </span>
+<span class="-2107349552983253362" onmouseenter="enter('-2107349552983253362');" onmouseout="out('-2107349552983253362');" style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  98     if (location &gt; mEntity.getFileSize()) {                                                              </span>
+<span class="6182870096164611028" onmouseenter="enter('6182870096164611028');" onmouseout="out('6182870096164611028');" style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  99       location = mEntity.getFileSize();                                                                  </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="background-color: rgba(255, 167, 0, 0.24); margin: 0"> 100     }                                                                                                    </span>
+<span class="6741223626729319096" onmouseenter="enter('6741223626729319096');" onmouseout="out('6741223626729319096');" style=""> 101 ||||||| GitAnalyzerPlus_base                                                                             </span>
+<span class="4583373925393926398" onmouseenter="enter('4583373925393926398');" onmouseout="out('4583373925393926398');" style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 102     mEntity.setCurrentProgress(location);                                                                </span>
+<span class="-2332174823472847291" onmouseenter="enter('-2332174823472847291');" onmouseout="out('-2332174823472847291');" style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 103     mEntity.update();                                                                                    </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 104   }                                                                                                      </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="background-color: rgba(0, 0, 0, 0.15); margin: 0"> 105 }                                                                                                        </span>
+<span class="3796057323931724632" onmouseenter="enter('3796057323931724632');" onmouseout="out('3796057323931724632');" style=""> 106 =======                                                                                                  </span>
+<span  style="background-color: rgba(0, 0, 255, 0.24); margin: 0"> 107                                                                                                          </span>
+<span class="-1382546150375666264" onmouseenter="enter('-1382546150375666264');" onmouseout="out('-1382546150375666264');" style=""> 108 &gt;&gt;&gt;&gt;&gt;&gt;&gt; GitAnalyzerPlus_theirs                                                                           </span>
+<span class="4583373925393926398" onmouseenter="enter('4583373925393926398');" onmouseout="out('4583373925393926398');" style=""> 109     mEntity.setCurrentProgress(location);                                                                </span>
+<span class="-2332174823472847291" onmouseenter="enter('-2332174823472847291');" onmouseout="out('-2332174823472847291');" style=""> 110     mEntity.update();                                                                                    </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style=""> 111   }                                                                                                      </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style=""> 112 }                                                                                                        </span></pre></td>
+                            <td><pre><span class="4534359625031764666" onmouseenter="enter('4534359625031764666');" onmouseout="out('4534359625031764666');" style="">   1 /*                                                                                                       </span>
+<span class="-4176855950178531235" onmouseenter="enter('-4176855950178531235');" onmouseout="out('-4176855950178531235');" style="">   2  * Copyright (C) 2016 AriaLyy(https://github.com/AriaLyy/Aria)                                           </span>
+<span class="329605257831645060" onmouseenter="enter('329605257831645060');" onmouseout="out('329605257831645060');" style="">   3  *                                                                                                       </span>
+<span class="-7144700690364548245" onmouseenter="enter('-7144700690364548245');" onmouseout="out('-7144700690364548245');" style="">   4  * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);                                       </span>
+<span class="-6614298523444173250" onmouseenter="enter('-6614298523444173250');" onmouseout="out('-6614298523444173250');" style="">   5  * you may not use this file except in compliance with the License.                                      </span>
+<span class="-4753901504248728101" onmouseenter="enter('-4753901504248728101');" onmouseout="out('-4753901504248728101');" style="">   6  * You may obtain a copy of the License at                                                               </span>
+<span class="329605257831645060" onmouseenter="enter('329605257831645060');" onmouseout="out('329605257831645060');" style="">   7  *                                                                                                       </span>
+<span class="-763207030729826407" onmouseenter="enter('-763207030729826407');" onmouseout="out('-763207030729826407');" style="">   8  *      http://www.apache.org/licenses/LICENSE-2.0                                                       </span>
+<span class="329605257831645060" onmouseenter="enter('329605257831645060');" onmouseout="out('329605257831645060');" style="">   9  *                                                                                                       </span>
+<span class="2557607632756179983" onmouseenter="enter('2557607632756179983');" onmouseout="out('2557607632756179983');" style="">  10  * Unless required by applicable law or agreed to in writing, software                                   </span>
+<span class="-9189129105512731955" onmouseenter="enter('-9189129105512731955');" onmouseout="out('-9189129105512731955');" style="">  11  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,                                     </span>
+<span class="5781161717946418340" onmouseenter="enter('5781161717946418340');" onmouseout="out('5781161717946418340');" style="">  12  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.                              </span>
+<span class="1761562277992059393" onmouseenter="enter('1761562277992059393');" onmouseout="out('1761562277992059393');" style="">  13  * See the License for the specific language governing permissions and                                   </span>
+<span class="7217408601297779962" onmouseenter="enter('7217408601297779962');" onmouseout="out('7217408601297779962');" style="">  14  * limitations under the License.                                                                        </span>
+<span class="-3478703399357275674" onmouseenter="enter('-3478703399357275674');" onmouseout="out('-3478703399357275674');" style="">  15  */                                                                                                      </span>
+<span class="1987357580077471394" onmouseenter="enter('1987357580077471394');" onmouseout="out('1987357580077471394');" style="">  16 package com.arialyy.aria.core.download;                                                                  </span>
+<span  style="">  17                                                                                                          </span>
+<span class="-1086316590722027623" onmouseenter="enter('-1086316590722027623');" onmouseout="out('-1086316590722027623');" style="">  18 import android.os.Handler;                                                                               </span>
+<span class="3512451831006950044" onmouseenter="enter('3512451831006950044');" onmouseout="out('3512451831006950044');" style="">  19 import com.arialyy.aria.core.download.downloader.IDownloadGroupListener;                                 </span>
+<span class="2889735241540192402" onmouseenter="enter('2889735241540192402');" onmouseout="out('2889735241540192402');" style="">  20 import com.arialyy.aria.core.inf.GroupSendParams;                                                        </span>
+<span class="-1011357815313335831" onmouseenter="enter('-1011357815313335831');" onmouseout="out('-1011357815313335831');" style="">  21 import com.arialyy.aria.core.scheduler.ISchedulers;                                                      </span>
+<span class="-3586495952513455611" onmouseenter="enter('-3586495952513455611');" onmouseout="out('-3586495952513455611');" style="">  22 import com.arialyy.aria.util.ALog;                                                                       </span>
+<span  style="">  23                                                                                                          </span>
+<span class="1188357178855945174" onmouseenter="enter('1188357178855945174');" onmouseout="out('1188357178855945174');" style="">  24 /**                                                                                                      </span>
+<span class="2534896381285876432" onmouseenter="enter('2534896381285876432');" onmouseout="out('2534896381285876432');" style="">  25  * Created by Aria.Lao on 2017/7/20.                                                                     </span>
+<span class="-9096439396806402745" onmouseenter="enter('-9096439396806402745');" onmouseout="out('-9096439396806402745');" style="">  26  * 任务组下载事件                                                                                               </span>
+<span class="-3478703399357275674" onmouseenter="enter('-3478703399357275674');" onmouseout="out('-3478703399357275674');" style="">  27  */                                                                                                      </span>
+<span class="-6354426688120911263" onmouseenter="enter('-6354426688120911263');" onmouseout="out('-6354426688120911263');" style="">  28 class DownloadGroupListener                                                                              </span>
+<span class="-1696246330845699577" onmouseenter="enter('-1696246330845699577');" onmouseout="out('-1696246330845699577');" style="">  29     extends BaseDListener&lt;DownloadGroupEntity, DownloadGroupTaskEntity, DownloadGroupTask&gt;               </span>
+<span class="174064491892165481" onmouseenter="enter('174064491892165481');" onmouseout="out('174064491892165481');" style="">  30     implements IDownloadGroupListener {                                                                  </span>
+<span class="6540580073454354808" onmouseenter="enter('6540580073454354808');" onmouseout="out('6540580073454354808');" style="">  31   private final String TAG = &quot;DownloadGroupListener&quot;;                                                    </span>
+<span class="8244649316010409606" onmouseenter="enter('8244649316010409606');" onmouseout="out('8244649316010409606');" style="">  32   private GroupSendParams&lt;DownloadGroupTask, DownloadEntity&gt; mSeedEntity;                                </span>
+<span  style="">  33                                                                                                          </span>
+<span class="-6619231611956441231" onmouseenter="enter('-6619231611956441231');" onmouseout="out('-6619231611956441231');" style="">  34   DownloadGroupListener(DownloadGroupTask task, Handler outHandler) {                                    </span>
+<span class="-2542085818511540915" onmouseenter="enter('-2542085818511540915');" onmouseout="out('-2542085818511540915');" style="">  35     super(task, outHandler);                                                                             </span>
+<span class="3048968685552743029" onmouseenter="enter('3048968685552743029');" onmouseout="out('3048968685552743029');" style="">  36     mSeedEntity = new GroupSendParams&lt;&gt;();                                                               </span>
+<span class="-2544312095676519537" onmouseenter="enter('-2544312095676519537');" onmouseout="out('-2544312095676519537');" style="">  37     mSeedEntity.groupTask = task;                                                                        </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  38   }                                                                                                      </span>
+<span  style="">  39                                                                                                          </span>
+<span class="-7152713013246739105" onmouseenter="enter('-7152713013246739105');" onmouseout="out('-7152713013246739105');" style="">  40   @Override public void onSubPre(DownloadEntity subEntity) {                                             </span>
+<span class="-7182424035728283005" onmouseenter="enter('-7182424035728283005');" onmouseout="out('-7182424035728283005');" style="">  41     sendInState2Target(ISchedulers.SUB_PRE, subEntity);                                                  </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  42   }                                                                                                      </span>
+<span  style="">  43                                                                                                          </span>
+<span class="2557885658490133733" onmouseenter="enter('2557885658490133733');" onmouseout="out('2557885658490133733');" style="">  44   @Override public void supportBreakpoint(boolean support, DownloadEntity subEntity) {                   </span>
+<span  style="">  45                                                                                                          </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  46   }                                                                                                      </span>
+<span  style="">  47                                                                                                          </span>
+<span class="-3554047889098977200" onmouseenter="enter('-3554047889098977200');" onmouseout="out('-3554047889098977200');" style="">  48   @Override public void onSubStart(DownloadEntity subEntity) {                                           </span>
+<span class="-3483918869661876627" onmouseenter="enter('-3483918869661876627');" onmouseout="out('-3483918869661876627');" style="">  49     sendInState2Target(ISchedulers.SUB_START, subEntity);                                                </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  50   }                                                                                                      </span>
+<span  style="">  51                                                                                                          </span>
+<span class="-9173863251124520181" onmouseenter="enter('-9173863251124520181');" onmouseout="out('-9173863251124520181');" style="">  52   @Override public void onSubStop(DownloadEntity subEntity) {                                            </span>
+<span class="-4416783850467854062" onmouseenter="enter('-4416783850467854062');" onmouseout="out('-4416783850467854062');" style="">  53     saveCurrentLocation();                                                                               </span>
+<span class="-8919611147806563552" onmouseenter="enter('-8919611147806563552');" onmouseout="out('-8919611147806563552');" style="">  54     sendInState2Target(ISchedulers.SUB_STOP, subEntity);                                                 </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  55   }                                                                                                      </span>
+<span  style="">  56                                                                                                          </span>
+<span class="137061115358111094" onmouseenter="enter('137061115358111094');" onmouseout="out('137061115358111094');" style="">  57   @Override public void onSubComplete(DownloadEntity subEntity) {                                        </span>
+<span class="-4416783850467854062" onmouseenter="enter('-4416783850467854062');" onmouseout="out('-4416783850467854062');" style="">  58     saveCurrentLocation();                                                                               </span>
+<span class="2395008898484536012" onmouseenter="enter('2395008898484536012');" onmouseout="out('2395008898484536012');" style="">  59     sendInState2Target(ISchedulers.SUB_COMPLETE, subEntity);                                             </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  60   }                                                                                                      </span>
+<span  style="">  61                                                                                                          </span>
+<span class="-4223446572895854644" onmouseenter="enter('-4223446572895854644');" onmouseout="out('-4223446572895854644');" style="">  62   @Override public void onSubFail(DownloadEntity subEntity) {                                            </span>
+<span class="-4416783850467854062" onmouseenter="enter('-4416783850467854062');" onmouseout="out('-4416783850467854062');" style="">  63     saveCurrentLocation();                                                                               </span>
+<span class="4886366574578496486" onmouseenter="enter('4886366574578496486');" onmouseout="out('4886366574578496486');" style="">  64     sendInState2Target(ISchedulers.SUB_FAIL, subEntity);                                                 </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  65   }                                                                                                      </span>
+<span  style="">  66                                                                                                          </span>
+<span class="-7084121618920090508" onmouseenter="enter('-7084121618920090508');" onmouseout="out('-7084121618920090508');" style="">  67   @Override public void onSubCancel(DownloadEntity subEntity) {                                          </span>
+<span class="-4416783850467854062" onmouseenter="enter('-4416783850467854062');" onmouseout="out('-4416783850467854062');" style="">  68     saveCurrentLocation();                                                                               </span>
+<span class="-4627350495791369590" onmouseenter="enter('-4627350495791369590');" onmouseout="out('-4627350495791369590');" style="">  69     sendInState2Target(ISchedulers.SUB_CANCEL, subEntity);                                               </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  70   }                                                                                                      </span>
+<span  style="">  71                                                                                                          </span>
+<span class="-5819639562503137910" onmouseenter="enter('-5819639562503137910');" onmouseout="out('-5819639562503137910');" style="">  72   @Override public void onSubRunning(DownloadEntity subEntity) {                                         </span>
+<span class="-9172465205633208584" onmouseenter="enter('-9172465205633208584');" onmouseout="out('-9172465205633208584');" style="">  73     sendInState2Target(ISchedulers.SUB_RUNNING, subEntity);                                              </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  74   }                                                                                                      </span>
+<span  style="">  75                                                                                                          </span>
+<span class="1188357178855945174" onmouseenter="enter('1188357178855945174');" onmouseout="out('1188357178855945174');" style="">  76   /**                                                                                                    </span>
+<span class="5309333678065732533" onmouseenter="enter('5309333678065732533');" onmouseout="out('5309333678065732533');" style="">  77    * 将任务状态发送给下载器                                                                                         </span>
+<span class="329605257831645060" onmouseenter="enter('329605257831645060');" onmouseout="out('329605257831645060');" style="">  78    *                                                                                                     </span>
+<span class="4745042362407675676" onmouseenter="enter('4745042362407675676');" onmouseout="out('4745042362407675676');" style="">  79    * @param state {@link ISchedulers#START}                                                              </span>
+<span class="-3478703399357275674" onmouseenter="enter('-3478703399357275674');" onmouseout="out('-3478703399357275674');" style="">  80    */                                                                                                    </span>
+<span class="8596630920523236144" onmouseenter="enter('8596630920523236144');" onmouseout="out('8596630920523236144');" style="">  81   private void sendInState2Target(int state, DownloadEntity subEntity) {                                 </span>
+<span class="14240507737599715" onmouseenter="enter('14240507737599715');" onmouseout="out('14240507737599715');" style="">  82     if (outHandler.get() != null) {                                                                      </span>
+<span class="-5392518758519400861" onmouseenter="enter('-5392518758519400861');" onmouseout="out('-5392518758519400861');" style="">  83       mSeedEntity.entity = subEntity;                                                                    </span>
+<span class="5207111582530770694" onmouseenter="enter('5207111582530770694');" onmouseout="out('5207111582530770694');" style="">  84       outHandler.get().obtainMessage(state, ISchedulers.IS_SUB_TASK, 0, mSeedEntity).sendToTarget();     </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  85     }                                                                                                    </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  86   }                                                                                                      </span>
+<span  style="">  87                                                                                                          </span>
+<span class="-8190767281264611311" onmouseenter="enter('-8190767281264611311');" onmouseout="out('-8190767281264611311');" style="">  88   private void saveCurrentLocation() {                                                                   </span>
+<span class="-8607572572942247296" onmouseenter="enter('-8607572572942247296');" onmouseout="out('-8607572572942247296');" style="">  89     if (mEntity.getSubEntities() == null || mEntity.getSubEntities().isEmpty()) {                        </span>
+<span class="7207045947689942291" onmouseenter="enter('7207045947689942291');" onmouseout="out('7207045947689942291');" style="">  90       ALog.w(TAG, &quot;保存进度失败，子任务为null&quot;);                                                                    </span>
+<span class="4043029072030362567" onmouseenter="enter('4043029072030362567');" onmouseout="out('4043029072030362567');" style="">  91       return;                                                                                            </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  92     }                                                                                                    </span>
+<span class="-1772918154446906383" onmouseenter="enter('-1772918154446906383');" onmouseout="out('-1772918154446906383');" style="">  93     long location = 0;                                                                                   </span>
+<span class="-33757067416748864" onmouseenter="enter('-33757067416748864');" onmouseout="out('-33757067416748864');" style="">  94     for (DownloadEntity e : mEntity.getSubEntities()) {                                                  </span>
+<span class="-1288312593516515904" onmouseenter="enter('-1288312593516515904');" onmouseout="out('-1288312593516515904');" style="">  95       location += e.getCurrentProgress();                                                                </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  96     }                                                                                                    </span>
+<span class="-2107349552983253362" onmouseenter="enter('-2107349552983253362');" onmouseout="out('-2107349552983253362');" style="">  97     if (location &gt; mEntity.getFileSize()) {                                                              </span>
+<span class="6182870096164611028" onmouseenter="enter('6182870096164611028');" onmouseout="out('6182870096164611028');" style="">  98       location = mEntity.getFileSize();                                                                  </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  99     }                                                                                                    </span>
+<span class="4583373925393926398" onmouseenter="enter('4583373925393926398');" onmouseout="out('4583373925393926398');" style=""> 100     mEntity.setCurrentProgress(location);                                                                </span>
+<span class="-2332174823472847291" onmouseenter="enter('-2332174823472847291');" onmouseout="out('-2332174823472847291');" style=""> 101     mEntity.update();                                                                                    </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style=""> 102   }                                                                                                      </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style=""> 103 }                                                                                                        </span>
+
+
+
+
+
+
+
+</pre></td>
+                            <td><pre><span class="4534359625031764666" onmouseenter="enter('4534359625031764666');" onmouseout="out('4534359625031764666');" style="">   1 /*                                                                                                       </span>
+<span class="-4176855950178531235" onmouseenter="enter('-4176855950178531235');" onmouseout="out('-4176855950178531235');" style="">   2  * Copyright (C) 2016 AriaLyy(https://github.com/AriaLyy/Aria)                                           </span>
+<span class="329605257831645060" onmouseenter="enter('329605257831645060');" onmouseout="out('329605257831645060');" style="">   3  *                                                                                                       </span>
+<span class="-7144700690364548245" onmouseenter="enter('-7144700690364548245');" onmouseout="out('-7144700690364548245');" style="">   4  * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);                                       </span>
+<span class="-6614298523444173250" onmouseenter="enter('-6614298523444173250');" onmouseout="out('-6614298523444173250');" style="">   5  * you may not use this file except in compliance with the License.                                      </span>
+<span class="-4753901504248728101" onmouseenter="enter('-4753901504248728101');" onmouseout="out('-4753901504248728101');" style="">   6  * You may obtain a copy of the License at                                                               </span>
+<span class="329605257831645060" onmouseenter="enter('329605257831645060');" onmouseout="out('329605257831645060');" style="">   7  *                                                                                                       </span>
+<span class="-763207030729826407" onmouseenter="enter('-763207030729826407');" onmouseout="out('-763207030729826407');" style="">   8  *      http://www.apache.org/licenses/LICENSE-2.0                                                       </span>
+<span class="329605257831645060" onmouseenter="enter('329605257831645060');" onmouseout="out('329605257831645060');" style="">   9  *                                                                                                       </span>
+<span class="2557607632756179983" onmouseenter="enter('2557607632756179983');" onmouseout="out('2557607632756179983');" style="">  10  * Unless required by applicable law or agreed to in writing, software                                   </span>
+<span class="-9189129105512731955" onmouseenter="enter('-9189129105512731955');" onmouseout="out('-9189129105512731955');" style="">  11  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,                                     </span>
+<span class="5781161717946418340" onmouseenter="enter('5781161717946418340');" onmouseout="out('5781161717946418340');" style="">  12  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.                              </span>
+<span class="1761562277992059393" onmouseenter="enter('1761562277992059393');" onmouseout="out('1761562277992059393');" style="">  13  * See the License for the specific language governing permissions and                                   </span>
+<span class="7217408601297779962" onmouseenter="enter('7217408601297779962');" onmouseout="out('7217408601297779962');" style="">  14  * limitations under the License.                                                                        </span>
+<span class="-3478703399357275674" onmouseenter="enter('-3478703399357275674');" onmouseout="out('-3478703399357275674');" style="">  15  */                                                                                                      </span>
+<span class="1987357580077471394" onmouseenter="enter('1987357580077471394');" onmouseout="out('1987357580077471394');" style="">  16 package com.arialyy.aria.core.download;                                                                  </span>
+<span  style="">  17                                                                                                          </span>
+<span class="-1086316590722027623" onmouseenter="enter('-1086316590722027623');" onmouseout="out('-1086316590722027623');" style="">  18 import android.os.Handler;                                                                               </span>
+<span class="3512451831006950044" onmouseenter="enter('3512451831006950044');" onmouseout="out('3512451831006950044');" style="">  19 import com.arialyy.aria.core.download.downloader.IDownloadGroupListener;                                 </span>
+<span class="2889735241540192402" onmouseenter="enter('2889735241540192402');" onmouseout="out('2889735241540192402');" style="">  20 import com.arialyy.aria.core.inf.GroupSendParams;                                                        </span>
+<span class="-1011357815313335831" onmouseenter="enter('-1011357815313335831');" onmouseout="out('-1011357815313335831');" style="">  21 import com.arialyy.aria.core.scheduler.ISchedulers;                                                      </span>
+<span class="-3586495952513455611" onmouseenter="enter('-3586495952513455611');" onmouseout="out('-3586495952513455611');" style="">  22 import com.arialyy.aria.util.ALog;                                                                       </span>
+<span  style="">  23                                                                                                          </span>
+<span  style="">  24                                                                                                          </span>
+<span class="1188357178855945174" onmouseenter="enter('1188357178855945174');" onmouseout="out('1188357178855945174');" style="">  25 /**                                                                                                      </span>
+<span class="2534896381285876432" onmouseenter="enter('2534896381285876432');" onmouseout="out('2534896381285876432');" style="">  26  * Created by Aria.Lao on 2017/7/20.                                                                     </span>
+<span class="-9096439396806402745" onmouseenter="enter('-9096439396806402745');" onmouseout="out('-9096439396806402745');" style="">  27  * 任务组下载事件                                                                                               </span>
+<span class="-3478703399357275674" onmouseenter="enter('-3478703399357275674');" onmouseout="out('-3478703399357275674');" style="">  28  */                                                                                                      </span>
+<span class="-6186473473312628791" onmouseenter="enter('-6186473473312628791');" onmouseout="out('-6186473473312628791');" style=""><abbr title="  29 class DownloadGroupListener extends BaseDListener&lt;DownloadGroupEntity, DownloadGroupTaskEntity, DownloadGroupTask&gt; implements IDownloadGroupListener {">  29 class DownloadGroupListener extends BaseDListener&lt;DownloadGroupEntity, DownloadGroupTaskEntity, DownloadG🔵</abbr></span>
+<span class="6540580073454354808" onmouseenter="enter('6540580073454354808');" onmouseout="out('6540580073454354808');" style="">  30   private final String TAG = &quot;DownloadGroupListener&quot;;                                                    </span>
+<span  style="">  31                                                                                                          </span>
+<span class="8244649316010409606" onmouseenter="enter('8244649316010409606');" onmouseout="out('8244649316010409606');" style="">  32   private GroupSendParams&lt;DownloadGroupTask, DownloadEntity&gt; mSeedEntity;                                </span>
+<span  style="">  33                                                                                                          </span>
+<span class="-6619231611956441231" onmouseenter="enter('-6619231611956441231');" onmouseout="out('-6619231611956441231');" style="">  34   DownloadGroupListener(DownloadGroupTask task, Handler outHandler) {                                    </span>
+<span class="-2542085818511540915" onmouseenter="enter('-2542085818511540915');" onmouseout="out('-2542085818511540915');" style="">  35     super(task, outHandler);                                                                             </span>
+<span class="3048968685552743029" onmouseenter="enter('3048968685552743029');" onmouseout="out('3048968685552743029');" style="">  36     mSeedEntity = new GroupSendParams&lt;&gt;();                                                               </span>
+<span class="-2544312095676519537" onmouseenter="enter('-2544312095676519537');" onmouseout="out('-2544312095676519537');" style="">  37     mSeedEntity.groupTask = task;                                                                        </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  38   }                                                                                                      </span>
+<span  style="">  39                                                                                                          </span>
+<span class="-7152713013246739105" onmouseenter="enter('-7152713013246739105');" onmouseout="out('-7152713013246739105');" style="">  40   @Override public void onSubPre(DownloadEntity subEntity) {                                             </span>
+<span class="-7182424035728283005" onmouseenter="enter('-7182424035728283005');" onmouseout="out('-7182424035728283005');" style="">  41     sendInState2Target(ISchedulers.SUB_PRE, subEntity);                                                  </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  42   }                                                                                                      </span>
+<span  style="">  43                                                                                                          </span>
+<span class="2557885658490133733" onmouseenter="enter('2557885658490133733');" onmouseout="out('2557885658490133733');" style="">  44   @Override public void supportBreakpoint(boolean support, DownloadEntity subEntity) {                   </span>
+<span  style="">  45                                                                                                          </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  46   }                                                                                                      </span>
+<span  style="">  47                                                                                                          </span>
+<span class="-3554047889098977200" onmouseenter="enter('-3554047889098977200');" onmouseout="out('-3554047889098977200');" style="">  48   @Override public void onSubStart(DownloadEntity subEntity) {                                           </span>
+<span class="-3483918869661876627" onmouseenter="enter('-3483918869661876627');" onmouseout="out('-3483918869661876627');" style="">  49     sendInState2Target(ISchedulers.SUB_START, subEntity);                                                </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  50   }                                                                                                      </span>
+<span  style="">  51                                                                                                          </span>
+<span class="-9173863251124520181" onmouseenter="enter('-9173863251124520181');" onmouseout="out('-9173863251124520181');" style="">  52   @Override public void onSubStop(DownloadEntity subEntity) {                                            </span>
+<span class="-4416783850467854062" onmouseenter="enter('-4416783850467854062');" onmouseout="out('-4416783850467854062');" style="">  53     saveCurrentLocation();                                                                               </span>
+<span class="-8919611147806563552" onmouseenter="enter('-8919611147806563552');" onmouseout="out('-8919611147806563552');" style="">  54     sendInState2Target(ISchedulers.SUB_STOP, subEntity);                                                 </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  55   }                                                                                                      </span>
+<span  style="">  56                                                                                                          </span>
+<span class="137061115358111094" onmouseenter="enter('137061115358111094');" onmouseout="out('137061115358111094');" style="">  57   @Override public void onSubComplete(DownloadEntity subEntity) {                                        </span>
+<span class="-4416783850467854062" onmouseenter="enter('-4416783850467854062');" onmouseout="out('-4416783850467854062');" style="">  58     saveCurrentLocation();                                                                               </span>
+<span class="2395008898484536012" onmouseenter="enter('2395008898484536012');" onmouseout="out('2395008898484536012');" style="">  59     sendInState2Target(ISchedulers.SUB_COMPLETE, subEntity);                                             </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  60   }                                                                                                      </span>
+<span  style="">  61                                                                                                          </span>
+<span class="-4223446572895854644" onmouseenter="enter('-4223446572895854644');" onmouseout="out('-4223446572895854644');" style="">  62   @Override public void onSubFail(DownloadEntity subEntity) {                                            </span>
+<span class="-4416783850467854062" onmouseenter="enter('-4416783850467854062');" onmouseout="out('-4416783850467854062');" style="">  63     saveCurrentLocation();                                                                               </span>
+<span class="4886366574578496486" onmouseenter="enter('4886366574578496486');" onmouseout="out('4886366574578496486');" style="">  64     sendInState2Target(ISchedulers.SUB_FAIL, subEntity);                                                 </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  65   }                                                                                                      </span>
+<span  style="">  66                                                                                                          </span>
+<span class="-7084121618920090508" onmouseenter="enter('-7084121618920090508');" onmouseout="out('-7084121618920090508');" style="">  67   @Override public void onSubCancel(DownloadEntity subEntity) {                                          </span>
+<span class="-4416783850467854062" onmouseenter="enter('-4416783850467854062');" onmouseout="out('-4416783850467854062');" style="">  68     saveCurrentLocation();                                                                               </span>
+<span class="-4627350495791369590" onmouseenter="enter('-4627350495791369590');" onmouseout="out('-4627350495791369590');" style="">  69     sendInState2Target(ISchedulers.SUB_CANCEL, subEntity);                                               </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  70   }                                                                                                      </span>
+<span  style="">  71                                                                                                          </span>
+<span class="-5819639562503137910" onmouseenter="enter('-5819639562503137910');" onmouseout="out('-5819639562503137910');" style="">  72   @Override public void onSubRunning(DownloadEntity subEntity) {                                         </span>
+<span class="-9172465205633208584" onmouseenter="enter('-9172465205633208584');" onmouseout="out('-9172465205633208584');" style="">  73     sendInState2Target(ISchedulers.SUB_RUNNING, subEntity);                                              </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  74   }                                                                                                      </span>
+<span  style="">  75                                                                                                          </span>
+<span class="1188357178855945174" onmouseenter="enter('1188357178855945174');" onmouseout="out('1188357178855945174');" style="">  76   /**                                                                                                    </span>
+<span class="5309333678065732533" onmouseenter="enter('5309333678065732533');" onmouseout="out('5309333678065732533');" style="">  77    * 将任务状态发送给下载器                                                                                         </span>
+<span class="329605257831645060" onmouseenter="enter('329605257831645060');" onmouseout="out('329605257831645060');" style="">  78    *                                                                                                     </span>
+<span class="4745042362407675676" onmouseenter="enter('4745042362407675676');" onmouseout="out('4745042362407675676');" style="">  79    * @param state {@link ISchedulers#START}                                                              </span>
+<span class="-3478703399357275674" onmouseenter="enter('-3478703399357275674');" onmouseout="out('-3478703399357275674');" style="">  80    */                                                                                                    </span>
+<span class="8596630920523236144" onmouseenter="enter('8596630920523236144');" onmouseout="out('8596630920523236144');" style="">  81   private void sendInState2Target(int state, DownloadEntity subEntity) {                                 </span>
+<span class="14240507737599715" onmouseenter="enter('14240507737599715');" onmouseout="out('14240507737599715');" style="">  82     if (outHandler.get() != null) {                                                                      </span>
+<span class="-5392518758519400861" onmouseenter="enter('-5392518758519400861');" onmouseout="out('-5392518758519400861');" style="">  83       mSeedEntity.entity = subEntity;                                                                    </span>
+<span class="5207111582530770694" onmouseenter="enter('5207111582530770694');" onmouseout="out('5207111582530770694');" style="">  84       outHandler.get().obtainMessage(state, ISchedulers.IS_SUB_TASK, 0, mSeedEntity).sendToTarget();     </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  85     }                                                                                                    </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  86   }                                                                                                      </span>
+<span  style="">  87                                                                                                          </span>
+<span class="-8190767281264611311" onmouseenter="enter('-8190767281264611311');" onmouseout="out('-8190767281264611311');" style="">  88   private void saveCurrentLocation() {                                                                   </span>
+<span class="3578836947330302960" onmouseenter="enter('3578836947330302960');" onmouseout="out('3578836947330302960');" style="">  89     if ((mEntity.getSubEntities() == null) || mEntity.getSubEntities().isEmpty()) {                      </span>
+<span class="7207045947689942291" onmouseenter="enter('7207045947689942291');" onmouseout="out('7207045947689942291');" style="">  90       ALog.w(TAG, &quot;保存进度失败，子任务为null&quot;);                                                                    </span>
+<span class="4043029072030362567" onmouseenter="enter('4043029072030362567');" onmouseout="out('4043029072030362567');" style="">  91       return;                                                                                            </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  92     }                                                                                                    </span>
+<span class="-1772918154446906383" onmouseenter="enter('-1772918154446906383');" onmouseout="out('-1772918154446906383');" style="">  93     long location = 0;                                                                                   </span>
+<span class="-33757067416748864" onmouseenter="enter('-33757067416748864');" onmouseout="out('-33757067416748864');" style="">  94     for (DownloadEntity e : mEntity.getSubEntities()) {                                                  </span>
+<span class="-1288312593516515904" onmouseenter="enter('-1288312593516515904');" onmouseout="out('-1288312593516515904');" style="">  95       location += e.getCurrentProgress();                                                                </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  96     }                                                                                                    </span>
+<span class="-2107349552983253362" onmouseenter="enter('-2107349552983253362');" onmouseout="out('-2107349552983253362');" style="">  97     if (location &gt; mEntity.getFileSize()) {                                                              </span>
+<span class="6182870096164611028" onmouseenter="enter('6182870096164611028');" onmouseout="out('6182870096164611028');" style="">  98       location = mEntity.getFileSize();                                                                  </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  99     }                                                                                                    </span>
+<span class="4583373925393926398" onmouseenter="enter('4583373925393926398');" onmouseout="out('4583373925393926398');" style=""> 100     mEntity.setCurrentProgress(location);                                                                </span>
+<span class="-2332174823472847291" onmouseenter="enter('-2332174823472847291');" onmouseout="out('-2332174823472847291');" style=""> 101     mEntity.update();                                                                                    </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style=""> 102   }                                                                                                      </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style=""> 103 }                                                                                                        </span>
+
+
+
+
+
+
+
+</pre></td>
                         </tr>
                     </table>
                 </div>
@@ -399,214 +412,214 @@ del /Q jfstmerge.java.merge
                             <th>theirs vs. base</th>
                         </tr>
                         <tr>
-                            <td><pre>   1  /*
-   2   * Copyright (C) 2016 AriaLyy(https://github.com/AriaLyy/Aria)
-   3   *
-   4   * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
-   5   * you may not use this file except in compliance with the License.
-   6   * You may obtain a copy of the License at
-   7   *
-   8   *      http://www.apache.org/licenses/LICENSE-2.0
-   9   *
-  10   * Unless required by applicable law or agreed to in writing, software
-  11   * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
-  12   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  13   * See the License for the specific language governing permissions and
-  14   * limitations under the License.
-  15   */
-  16  package com.arialyy.aria.core.download;
-  17  
-  18  import android.os.Handler;
-  19  import com.arialyy.aria.core.download.downloader.IDownloadGroupListener;
-  20  import com.arialyy.aria.core.inf.GroupSendParams;
-  21  import com.arialyy.aria.core.scheduler.ISchedulers;
-<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  22 +import com.arialyy.aria.util.ALog;</span>
-  23  
-  24  /**
-  25   * Created by Aria.Lao on 2017/7/20.
-  26   * 任务组下载事件
-  27   */
-  28  class DownloadGroupListener
-  29      extends BaseDListener&lt;DownloadGroupEntity, DownloadGroupTaskEntity, DownloadGroupTask&gt;
-  30      implements IDownloadGroupListener {
-  31    private final String TAG = &quot;DownloadGroupListener&quot;;
-  32    private GroupSendParams&lt;DownloadGroupTask, DownloadEntity&gt; mSeedEntity;
-  33  
-  34    DownloadGroupListener(DownloadGroupTask task, Handler outHandler) {
-  35      super(task, outHandler);
-  36      mSeedEntity = new GroupSendParams&lt;&gt;();
-  37      mSeedEntity.groupTask = task;
-  38    }
-  39  
-  40    @Override public void onSubPre(DownloadEntity subEntity) {
-  41      sendInState2Target(ISchedulers.SUB_PRE, subEntity);
-  42    }
-  43  
-  44    @Override public void supportBreakpoint(boolean support, DownloadEntity subEntity) {
-  45  
-  46    }
-  47  
-  48    @Override public void onSubStart(DownloadEntity subEntity) {
-  49      sendInState2Target(ISchedulers.SUB_START, subEntity);
-  50    }
-  51  
-  52    @Override public void onSubStop(DownloadEntity subEntity) {
-  53      saveCurrentLocation();
-  54      sendInState2Target(ISchedulers.SUB_STOP, subEntity);
-  55    }
-  56  
-  57    @Override public void onSubComplete(DownloadEntity subEntity) {
-  58      saveCurrentLocation();
-  59      sendInState2Target(ISchedulers.SUB_COMPLETE, subEntity);
-  60    }
-  61  
-  62    @Override public void onSubFail(DownloadEntity subEntity) {
-  63      saveCurrentLocation();
-  64      sendInState2Target(ISchedulers.SUB_FAIL, subEntity);
-  65    }
-  66  
-  67    @Override public void onSubCancel(DownloadEntity subEntity) {
-  68      saveCurrentLocation();
-  69      sendInState2Target(ISchedulers.SUB_CANCEL, subEntity);
-  70    }
-  71  
-  72    @Override public void onSubRunning(DownloadEntity subEntity) {
-  73      sendInState2Target(ISchedulers.SUB_RUNNING, subEntity);
-  74    }
-  75  
-  76    /**
-  77     * 将任务状态发送给下载器
-  78     *
-  79     * @param state {@link ISchedulers#START}
-  80     */
-  81    private void sendInState2Target(int state, DownloadEntity subEntity) {
-  82      if (outHandler.get() != null) {
-  83        mSeedEntity.entity = subEntity;
-  84        outHandler.get().obtainMessage(state, ISchedulers.IS_SUB_TASK, 0, mSeedEntity).sendToTarget();
-  85      }
-  86    }
-  87  
-  88    private void saveCurrentLocation() {
-<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  89 +    if (mEntity.getSubEntities() == null || mEntity.getSubEntities().isEmpty()) {</span>
-<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  90 +      ALog.w(TAG, &quot;保存进度失败，子任务为null&quot;);</span>
-<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  91 +      return;</span>
-<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  92 +    }</span>
-  93      long location = 0;
-  94      for (DownloadEntity e : mEntity.getSubEntities()) {
-  95        location += e.getCurrentProgress();
-<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  96 +    }</span>
-<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  97 +    if (location &gt; mEntity.getFileSize()) {</span>
-<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  98 +      location = mEntity.getFileSize();</span>
-  99      }
+                            <td><pre><span class="4534359625031764666" onmouseenter="enter('4534359625031764666');" onmouseout="out('4534359625031764666');" style="">   1  /*                                                                                                                </span>
+<span class="-4176855950178531235" onmouseenter="enter('-4176855950178531235');" onmouseout="out('-4176855950178531235');" style="">   2   * Copyright (C) 2016 AriaLyy(https://github.com/AriaLyy/Aria)                                                    </span>
+<span class="329605257831645060" onmouseenter="enter('329605257831645060');" onmouseout="out('329605257831645060');" style="">   3   *                                                                                                                </span>
+<span class="-7144700690364548245" onmouseenter="enter('-7144700690364548245');" onmouseout="out('-7144700690364548245');" style="">   4   * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);                                                </span>
+<span class="-6614298523444173250" onmouseenter="enter('-6614298523444173250');" onmouseout="out('-6614298523444173250');" style="">   5   * you may not use this file except in compliance with the License.                                               </span>
+<span class="-4753901504248728101" onmouseenter="enter('-4753901504248728101');" onmouseout="out('-4753901504248728101');" style="">   6   * You may obtain a copy of the License at                                                                        </span>
+<span class="329605257831645060" onmouseenter="enter('329605257831645060');" onmouseout="out('329605257831645060');" style="">   7   *                                                                                                                </span>
+<span class="-763207030729826407" onmouseenter="enter('-763207030729826407');" onmouseout="out('-763207030729826407');" style="">   8   *      http://www.apache.org/licenses/LICENSE-2.0                                                                </span>
+<span class="329605257831645060" onmouseenter="enter('329605257831645060');" onmouseout="out('329605257831645060');" style="">   9   *                                                                                                                </span>
+<span class="2557607632756179983" onmouseenter="enter('2557607632756179983');" onmouseout="out('2557607632756179983');" style="">  10   * Unless required by applicable law or agreed to in writing, software                                            </span>
+<span class="-9189129105512731955" onmouseenter="enter('-9189129105512731955');" onmouseout="out('-9189129105512731955');" style="">  11   * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,                                              </span>
+<span class="5781161717946418340" onmouseenter="enter('5781161717946418340');" onmouseout="out('5781161717946418340');" style="">  12   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.                                       </span>
+<span class="1761562277992059393" onmouseenter="enter('1761562277992059393');" onmouseout="out('1761562277992059393');" style="">  13   * See the License for the specific language governing permissions and                                            </span>
+<span class="7217408601297779962" onmouseenter="enter('7217408601297779962');" onmouseout="out('7217408601297779962');" style="">  14   * limitations under the License.                                                                                 </span>
+<span class="-3478703399357275674" onmouseenter="enter('-3478703399357275674');" onmouseout="out('-3478703399357275674');" style="">  15   */                                                                                                               </span>
+<span class="1987357580077471394" onmouseenter="enter('1987357580077471394');" onmouseout="out('1987357580077471394');" style="">  16  package com.arialyy.aria.core.download;                                                                           </span>
+<span  style="">  17                                                                                                                    </span>
+<span class="-1086316590722027623" onmouseenter="enter('-1086316590722027623');" onmouseout="out('-1086316590722027623');" style="">  18  import android.os.Handler;                                                                                        </span>
+<span class="3512451831006950044" onmouseenter="enter('3512451831006950044');" onmouseout="out('3512451831006950044');" style="">  19  import com.arialyy.aria.core.download.downloader.IDownloadGroupListener;                                          </span>
+<span class="2889735241540192402" onmouseenter="enter('2889735241540192402');" onmouseout="out('2889735241540192402');" style="">  20  import com.arialyy.aria.core.inf.GroupSendParams;                                                                 </span>
+<span class="-1011357815313335831" onmouseenter="enter('-1011357815313335831');" onmouseout="out('-1011357815313335831');" style="">  21  import com.arialyy.aria.core.scheduler.ISchedulers;                                                               </span>
+<span class="-3586495952513455611" onmouseenter="enter('-3586495952513455611');" onmouseout="out('-3586495952513455611');" style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  22 +import com.arialyy.aria.util.ALog;                                                                                </span>
+<span  style="">  23                                                                                                                    </span>
+<span class="1188357178855945174" onmouseenter="enter('1188357178855945174');" onmouseout="out('1188357178855945174');" style="">  24  /**                                                                                                               </span>
+<span class="2534896381285876432" onmouseenter="enter('2534896381285876432');" onmouseout="out('2534896381285876432');" style="">  25   * Created by Aria.Lao on 2017/7/20.                                                                              </span>
+<span class="-9096439396806402745" onmouseenter="enter('-9096439396806402745');" onmouseout="out('-9096439396806402745');" style="">  26   * 任务组下载事件                                                                                                        </span>
+<span class="-3478703399357275674" onmouseenter="enter('-3478703399357275674');" onmouseout="out('-3478703399357275674');" style="">  27   */                                                                                                               </span>
+<span class="-6354426688120911263" onmouseenter="enter('-6354426688120911263');" onmouseout="out('-6354426688120911263');" style="">  28  class DownloadGroupListener                                                                                       </span>
+<span class="-1696246330845699577" onmouseenter="enter('-1696246330845699577');" onmouseout="out('-1696246330845699577');" style="">  29      extends BaseDListener&lt;DownloadGroupEntity, DownloadGroupTaskEntity, DownloadGroupTask&gt;                        </span>
+<span class="174064491892165481" onmouseenter="enter('174064491892165481');" onmouseout="out('174064491892165481');" style="">  30      implements IDownloadGroupListener {                                                                           </span>
+<span class="6540580073454354808" onmouseenter="enter('6540580073454354808');" onmouseout="out('6540580073454354808');" style="">  31    private final String TAG = &quot;DownloadGroupListener&quot;;                                                             </span>
+<span class="8244649316010409606" onmouseenter="enter('8244649316010409606');" onmouseout="out('8244649316010409606');" style="">  32    private GroupSendParams&lt;DownloadGroupTask, DownloadEntity&gt; mSeedEntity;                                         </span>
+<span  style="">  33                                                                                                                    </span>
+<span class="-6619231611956441231" onmouseenter="enter('-6619231611956441231');" onmouseout="out('-6619231611956441231');" style="">  34    DownloadGroupListener(DownloadGroupTask task, Handler outHandler) {                                             </span>
+<span class="-2542085818511540915" onmouseenter="enter('-2542085818511540915');" onmouseout="out('-2542085818511540915');" style="">  35      super(task, outHandler);                                                                                      </span>
+<span class="3048968685552743029" onmouseenter="enter('3048968685552743029');" onmouseout="out('3048968685552743029');" style="">  36      mSeedEntity = new GroupSendParams&lt;&gt;();                                                                        </span>
+<span class="-2544312095676519537" onmouseenter="enter('-2544312095676519537');" onmouseout="out('-2544312095676519537');" style="">  37      mSeedEntity.groupTask = task;                                                                                 </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  38    }                                                                                                               </span>
+<span  style="">  39                                                                                                                    </span>
+<span class="-7152713013246739105" onmouseenter="enter('-7152713013246739105');" onmouseout="out('-7152713013246739105');" style="">  40    @Override public void onSubPre(DownloadEntity subEntity) {                                                      </span>
+<span class="-7182424035728283005" onmouseenter="enter('-7182424035728283005');" onmouseout="out('-7182424035728283005');" style="">  41      sendInState2Target(ISchedulers.SUB_PRE, subEntity);                                                           </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  42    }                                                                                                               </span>
+<span  style="">  43                                                                                                                    </span>
+<span class="2557885658490133733" onmouseenter="enter('2557885658490133733');" onmouseout="out('2557885658490133733');" style="">  44    @Override public void supportBreakpoint(boolean support, DownloadEntity subEntity) {                            </span>
+<span  style="">  45                                                                                                                    </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  46    }                                                                                                               </span>
+<span  style="">  47                                                                                                                    </span>
+<span class="-3554047889098977200" onmouseenter="enter('-3554047889098977200');" onmouseout="out('-3554047889098977200');" style="">  48    @Override public void onSubStart(DownloadEntity subEntity) {                                                    </span>
+<span class="-3483918869661876627" onmouseenter="enter('-3483918869661876627');" onmouseout="out('-3483918869661876627');" style="">  49      sendInState2Target(ISchedulers.SUB_START, subEntity);                                                         </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  50    }                                                                                                               </span>
+<span  style="">  51                                                                                                                    </span>
+<span class="-9173863251124520181" onmouseenter="enter('-9173863251124520181');" onmouseout="out('-9173863251124520181');" style="">  52    @Override public void onSubStop(DownloadEntity subEntity) {                                                     </span>
+<span class="-4416783850467854062" onmouseenter="enter('-4416783850467854062');" onmouseout="out('-4416783850467854062');" style="">  53      saveCurrentLocation();                                                                                        </span>
+<span class="-8919611147806563552" onmouseenter="enter('-8919611147806563552');" onmouseout="out('-8919611147806563552');" style="">  54      sendInState2Target(ISchedulers.SUB_STOP, subEntity);                                                          </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  55    }                                                                                                               </span>
+<span  style="">  56                                                                                                                    </span>
+<span class="137061115358111094" onmouseenter="enter('137061115358111094');" onmouseout="out('137061115358111094');" style="">  57    @Override public void onSubComplete(DownloadEntity subEntity) {                                                 </span>
+<span class="-4416783850467854062" onmouseenter="enter('-4416783850467854062');" onmouseout="out('-4416783850467854062');" style="">  58      saveCurrentLocation();                                                                                        </span>
+<span class="2395008898484536012" onmouseenter="enter('2395008898484536012');" onmouseout="out('2395008898484536012');" style="">  59      sendInState2Target(ISchedulers.SUB_COMPLETE, subEntity);                                                      </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  60    }                                                                                                               </span>
+<span  style="">  61                                                                                                                    </span>
+<span class="-4223446572895854644" onmouseenter="enter('-4223446572895854644');" onmouseout="out('-4223446572895854644');" style="">  62    @Override public void onSubFail(DownloadEntity subEntity) {                                                     </span>
+<span class="-4416783850467854062" onmouseenter="enter('-4416783850467854062');" onmouseout="out('-4416783850467854062');" style="">  63      saveCurrentLocation();                                                                                        </span>
+<span class="4886366574578496486" onmouseenter="enter('4886366574578496486');" onmouseout="out('4886366574578496486');" style="">  64      sendInState2Target(ISchedulers.SUB_FAIL, subEntity);                                                          </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  65    }                                                                                                               </span>
+<span  style="">  66                                                                                                                    </span>
+<span class="-7084121618920090508" onmouseenter="enter('-7084121618920090508');" onmouseout="out('-7084121618920090508');" style="">  67    @Override public void onSubCancel(DownloadEntity subEntity) {                                                   </span>
+<span class="-4416783850467854062" onmouseenter="enter('-4416783850467854062');" onmouseout="out('-4416783850467854062');" style="">  68      saveCurrentLocation();                                                                                        </span>
+<span class="-4627350495791369590" onmouseenter="enter('-4627350495791369590');" onmouseout="out('-4627350495791369590');" style="">  69      sendInState2Target(ISchedulers.SUB_CANCEL, subEntity);                                                        </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  70    }                                                                                                               </span>
+<span  style="">  71                                                                                                                    </span>
+<span class="-5819639562503137910" onmouseenter="enter('-5819639562503137910');" onmouseout="out('-5819639562503137910');" style="">  72    @Override public void onSubRunning(DownloadEntity subEntity) {                                                  </span>
+<span class="-9172465205633208584" onmouseenter="enter('-9172465205633208584');" onmouseout="out('-9172465205633208584');" style="">  73      sendInState2Target(ISchedulers.SUB_RUNNING, subEntity);                                                       </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  74    }                                                                                                               </span>
+<span  style="">  75                                                                                                                    </span>
+<span class="1188357178855945174" onmouseenter="enter('1188357178855945174');" onmouseout="out('1188357178855945174');" style="">  76    /**                                                                                                             </span>
+<span class="5309333678065732533" onmouseenter="enter('5309333678065732533');" onmouseout="out('5309333678065732533');" style="">  77     * 将任务状态发送给下载器                                                                                                  </span>
+<span class="329605257831645060" onmouseenter="enter('329605257831645060');" onmouseout="out('329605257831645060');" style="">  78     *                                                                                                              </span>
+<span class="4745042362407675676" onmouseenter="enter('4745042362407675676');" onmouseout="out('4745042362407675676');" style="">  79     * @param state {@link ISchedulers#START}                                                                       </span>
+<span class="-3478703399357275674" onmouseenter="enter('-3478703399357275674');" onmouseout="out('-3478703399357275674');" style="">  80     */                                                                                                             </span>
+<span class="8596630920523236144" onmouseenter="enter('8596630920523236144');" onmouseout="out('8596630920523236144');" style="">  81    private void sendInState2Target(int state, DownloadEntity subEntity) {                                          </span>
+<span class="14240507737599715" onmouseenter="enter('14240507737599715');" onmouseout="out('14240507737599715');" style="">  82      if (outHandler.get() != null) {                                                                               </span>
+<span class="-5392518758519400861" onmouseenter="enter('-5392518758519400861');" onmouseout="out('-5392518758519400861');" style="">  83        mSeedEntity.entity = subEntity;                                                                             </span>
+<span class="5207111582530770694" onmouseenter="enter('5207111582530770694');" onmouseout="out('5207111582530770694');" style="">  84        outHandler.get().obtainMessage(state, ISchedulers.IS_SUB_TASK, 0, mSeedEntity).sendToTarget();              </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  85      }                                                                                                             </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  86    }                                                                                                               </span>
+<span  style="">  87                                                                                                                    </span>
+<span class="-8190767281264611311" onmouseenter="enter('-8190767281264611311');" onmouseout="out('-8190767281264611311');" style="">  88    private void saveCurrentLocation() {                                                                            </span>
+<span class="-8607572572942247296" onmouseenter="enter('-8607572572942247296');" onmouseout="out('-8607572572942247296');" style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  89 +    if (mEntity.getSubEntities() == null || mEntity.getSubEntities().isEmpty()) {                                 </span>
+<span class="7207045947689942291" onmouseenter="enter('7207045947689942291');" onmouseout="out('7207045947689942291');" style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  90 +      ALog.w(TAG, &quot;保存进度失败，子任务为null&quot;);                                                                             </span>
+<span class="4043029072030362567" onmouseenter="enter('4043029072030362567');" onmouseout="out('4043029072030362567');" style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  91 +      return;                                                                                                     </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  92 +    }                                                                                                             </span>
+<span class="-1772918154446906383" onmouseenter="enter('-1772918154446906383');" onmouseout="out('-1772918154446906383');" style="">  93      long location = 0;                                                                                            </span>
+<span class="-33757067416748864" onmouseenter="enter('-33757067416748864');" onmouseout="out('-33757067416748864');" style="">  94      for (DownloadEntity e : mEntity.getSubEntities()) {                                                           </span>
+<span class="-1288312593516515904" onmouseenter="enter('-1288312593516515904');" onmouseout="out('-1288312593516515904');" style="">  95        location += e.getCurrentProgress();                                                                         </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  96 +    }                                                                                                             </span>
+<span class="-2107349552983253362" onmouseenter="enter('-2107349552983253362');" onmouseout="out('-2107349552983253362');" style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  97 +    if (location &gt; mEntity.getFileSize()) {                                                                       </span>
+<span class="6182870096164611028" onmouseenter="enter('6182870096164611028');" onmouseout="out('6182870096164611028');" style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  98 +      location = mEntity.getFileSize();                                                                           </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  99      }                                                                                                             </span>
 
- 100      mEntity.setCurrentProgress(location);
- 101      mEntity.update();
- 102    }
- 103  }</pre></td>
-                            <td><pre>   1  /*
-   2   * Copyright (C) 2016 AriaLyy(https://github.com/AriaLyy/Aria)
-   3   *
-   4   * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
-   5   * you may not use this file except in compliance with the License.
-   6   * You may obtain a copy of the License at
-   7   *
-   8   *      http://www.apache.org/licenses/LICENSE-2.0
-   9   *
-  10   * Unless required by applicable law or agreed to in writing, software
-  11   * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
-  12   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  13   * See the License for the specific language governing permissions and
-  14   * limitations under the License.
-  15   */
-  16  package com.arialyy.aria.core.download;
-  17  
-  18  import android.os.Handler;
-  19  import com.arialyy.aria.core.download.downloader.IDownloadGroupListener;
-  20  import com.arialyy.aria.core.inf.GroupSendParams;
-  21  import com.arialyy.aria.core.scheduler.ISchedulers;
+<span class="4583373925393926398" onmouseenter="enter('4583373925393926398');" onmouseout="out('4583373925393926398');" style=""> 100      mEntity.setCurrentProgress(location);                                                                         </span>
+<span class="-2332174823472847291" onmouseenter="enter('-2332174823472847291');" onmouseout="out('-2332174823472847291');" style=""> 101      mEntity.update();                                                                                             </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style=""> 102    }                                                                                                               </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style=""> 103  }                                                                                                                 </span></pre></td>
+                            <td><pre><span class="4534359625031764666" onmouseenter="enter('4534359625031764666');" onmouseout="out('4534359625031764666');" style="">   1  /*                                                                                                                </span>
+<span class="-4176855950178531235" onmouseenter="enter('-4176855950178531235');" onmouseout="out('-4176855950178531235');" style="">   2   * Copyright (C) 2016 AriaLyy(https://github.com/AriaLyy/Aria)                                                    </span>
+<span class="329605257831645060" onmouseenter="enter('329605257831645060');" onmouseout="out('329605257831645060');" style="">   3   *                                                                                                                </span>
+<span class="-7144700690364548245" onmouseenter="enter('-7144700690364548245');" onmouseout="out('-7144700690364548245');" style="">   4   * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);                                                </span>
+<span class="-6614298523444173250" onmouseenter="enter('-6614298523444173250');" onmouseout="out('-6614298523444173250');" style="">   5   * you may not use this file except in compliance with the License.                                               </span>
+<span class="-4753901504248728101" onmouseenter="enter('-4753901504248728101');" onmouseout="out('-4753901504248728101');" style="">   6   * You may obtain a copy of the License at                                                                        </span>
+<span class="329605257831645060" onmouseenter="enter('329605257831645060');" onmouseout="out('329605257831645060');" style="">   7   *                                                                                                                </span>
+<span class="-763207030729826407" onmouseenter="enter('-763207030729826407');" onmouseout="out('-763207030729826407');" style="">   8   *      http://www.apache.org/licenses/LICENSE-2.0                                                                </span>
+<span class="329605257831645060" onmouseenter="enter('329605257831645060');" onmouseout="out('329605257831645060');" style="">   9   *                                                                                                                </span>
+<span class="2557607632756179983" onmouseenter="enter('2557607632756179983');" onmouseout="out('2557607632756179983');" style="">  10   * Unless required by applicable law or agreed to in writing, software                                            </span>
+<span class="-9189129105512731955" onmouseenter="enter('-9189129105512731955');" onmouseout="out('-9189129105512731955');" style="">  11   * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,                                              </span>
+<span class="5781161717946418340" onmouseenter="enter('5781161717946418340');" onmouseout="out('5781161717946418340');" style="">  12   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.                                       </span>
+<span class="1761562277992059393" onmouseenter="enter('1761562277992059393');" onmouseout="out('1761562277992059393');" style="">  13   * See the License for the specific language governing permissions and                                            </span>
+<span class="7217408601297779962" onmouseenter="enter('7217408601297779962');" onmouseout="out('7217408601297779962');" style="">  14   * limitations under the License.                                                                                 </span>
+<span class="-3478703399357275674" onmouseenter="enter('-3478703399357275674');" onmouseout="out('-3478703399357275674');" style="">  15   */                                                                                                               </span>
+<span class="1987357580077471394" onmouseenter="enter('1987357580077471394');" onmouseout="out('1987357580077471394');" style="">  16  package com.arialyy.aria.core.download;                                                                           </span>
+<span  style="">  17                                                                                                                    </span>
+<span class="-1086316590722027623" onmouseenter="enter('-1086316590722027623');" onmouseout="out('-1086316590722027623');" style="">  18  import android.os.Handler;                                                                                        </span>
+<span class="3512451831006950044" onmouseenter="enter('3512451831006950044');" onmouseout="out('3512451831006950044');" style="">  19  import com.arialyy.aria.core.download.downloader.IDownloadGroupListener;                                          </span>
+<span class="2889735241540192402" onmouseenter="enter('2889735241540192402');" onmouseout="out('2889735241540192402');" style="">  20  import com.arialyy.aria.core.inf.GroupSendParams;                                                                 </span>
+<span class="-1011357815313335831" onmouseenter="enter('-1011357815313335831');" onmouseout="out('-1011357815313335831');" style="">  21  import com.arialyy.aria.core.scheduler.ISchedulers;                                                               </span>
 
-  22  
-  23  /**
-  24   * Created by Aria.Lao on 2017/7/20.
-  25   * 任务组下载事件
-  26   */
-  27  class DownloadGroupListener
-  28      extends BaseDListener&lt;DownloadGroupEntity, DownloadGroupTaskEntity, DownloadGroupTask&gt;
-  29      implements IDownloadGroupListener {
-  30    private final String TAG = &quot;DownloadGroupListener&quot;;
-  31    private GroupSendParams&lt;DownloadGroupTask, DownloadEntity&gt; mSeedEntity;
-  32  
-  33    DownloadGroupListener(DownloadGroupTask task, Handler outHandler) {
-  34      super(task, outHandler);
-  35      mSeedEntity = new GroupSendParams&lt;&gt;();
-  36      mSeedEntity.groupTask = task;
-  37    }
-  38  
-  39    @Override public void onSubPre(DownloadEntity subEntity) {
-  40      sendInState2Target(ISchedulers.SUB_PRE, subEntity);
-  41    }
-  42  
-  43    @Override public void supportBreakpoint(boolean support, DownloadEntity subEntity) {
-  44  
-  45    }
-  46  
-  47    @Override public void onSubStart(DownloadEntity subEntity) {
-  48      sendInState2Target(ISchedulers.SUB_START, subEntity);
-  49    }
-  50  
-  51    @Override public void onSubStop(DownloadEntity subEntity) {
-  52      saveCurrentLocation();
-  53      sendInState2Target(ISchedulers.SUB_STOP, subEntity);
-  54    }
-  55  
-  56    @Override public void onSubComplete(DownloadEntity subEntity) {
-  57      saveCurrentLocation();
-  58      sendInState2Target(ISchedulers.SUB_COMPLETE, subEntity);
-  59    }
-  60  
-  61    @Override public void onSubFail(DownloadEntity subEntity) {
-  62      saveCurrentLocation();
-  63      sendInState2Target(ISchedulers.SUB_FAIL, subEntity);
-  64    }
-  65  
-  66    @Override public void onSubCancel(DownloadEntity subEntity) {
-  67      saveCurrentLocation();
-  68      sendInState2Target(ISchedulers.SUB_CANCEL, subEntity);
-  69    }
-  70  
-  71    @Override public void onSubRunning(DownloadEntity subEntity) {
-  72      sendInState2Target(ISchedulers.SUB_RUNNING, subEntity);
-  73    }
-  74  
-  75    /**
-  76     * 将任务状态发送给下载器
-  77     *
-  78     * @param state {@link ISchedulers#START}
-  79     */
-  80    private void sendInState2Target(int state, DownloadEntity subEntity) {
-  81      if (outHandler.get() != null) {
-  82        mSeedEntity.entity = subEntity;
-  83        outHandler.get().obtainMessage(state, ISchedulers.IS_SUB_TASK, 0, mSeedEntity).sendToTarget();
-  84      }
-  85    }
-  86  
-  87    private void saveCurrentLocation() {
-
-
-
-
-  88      long location = 0;
-  89      for (DownloadEntity e : mEntity.getSubEntities()) {
-  90        location += e.getCurrentProgress();
+<span  style="">  22                                                                                                                    </span>
+<span class="1188357178855945174" onmouseenter="enter('1188357178855945174');" onmouseout="out('1188357178855945174');" style="">  23  /**                                                                                                               </span>
+<span class="2534896381285876432" onmouseenter="enter('2534896381285876432');" onmouseout="out('2534896381285876432');" style="">  24   * Created by Aria.Lao on 2017/7/20.                                                                              </span>
+<span class="-9096439396806402745" onmouseenter="enter('-9096439396806402745');" onmouseout="out('-9096439396806402745');" style="">  25   * 任务组下载事件                                                                                                        </span>
+<span class="-3478703399357275674" onmouseenter="enter('-3478703399357275674');" onmouseout="out('-3478703399357275674');" style="">  26   */                                                                                                               </span>
+<span class="-6354426688120911263" onmouseenter="enter('-6354426688120911263');" onmouseout="out('-6354426688120911263');" style="">  27  class DownloadGroupListener                                                                                       </span>
+<span class="-1696246330845699577" onmouseenter="enter('-1696246330845699577');" onmouseout="out('-1696246330845699577');" style="">  28      extends BaseDListener&lt;DownloadGroupEntity, DownloadGroupTaskEntity, DownloadGroupTask&gt;                        </span>
+<span class="174064491892165481" onmouseenter="enter('174064491892165481');" onmouseout="out('174064491892165481');" style="">  29      implements IDownloadGroupListener {                                                                           </span>
+<span class="6540580073454354808" onmouseenter="enter('6540580073454354808');" onmouseout="out('6540580073454354808');" style="">  30    private final String TAG = &quot;DownloadGroupListener&quot;;                                                             </span>
+<span class="8244649316010409606" onmouseenter="enter('8244649316010409606');" onmouseout="out('8244649316010409606');" style="">  31    private GroupSendParams&lt;DownloadGroupTask, DownloadEntity&gt; mSeedEntity;                                         </span>
+<span  style="">  32                                                                                                                    </span>
+<span class="-6619231611956441231" onmouseenter="enter('-6619231611956441231');" onmouseout="out('-6619231611956441231');" style="">  33    DownloadGroupListener(DownloadGroupTask task, Handler outHandler) {                                             </span>
+<span class="-2542085818511540915" onmouseenter="enter('-2542085818511540915');" onmouseout="out('-2542085818511540915');" style="">  34      super(task, outHandler);                                                                                      </span>
+<span class="3048968685552743029" onmouseenter="enter('3048968685552743029');" onmouseout="out('3048968685552743029');" style="">  35      mSeedEntity = new GroupSendParams&lt;&gt;();                                                                        </span>
+<span class="-2544312095676519537" onmouseenter="enter('-2544312095676519537');" onmouseout="out('-2544312095676519537');" style="">  36      mSeedEntity.groupTask = task;                                                                                 </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  37    }                                                                                                               </span>
+<span  style="">  38                                                                                                                    </span>
+<span class="-7152713013246739105" onmouseenter="enter('-7152713013246739105');" onmouseout="out('-7152713013246739105');" style="">  39    @Override public void onSubPre(DownloadEntity subEntity) {                                                      </span>
+<span class="-7182424035728283005" onmouseenter="enter('-7182424035728283005');" onmouseout="out('-7182424035728283005');" style="">  40      sendInState2Target(ISchedulers.SUB_PRE, subEntity);                                                           </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  41    }                                                                                                               </span>
+<span  style="">  42                                                                                                                    </span>
+<span class="2557885658490133733" onmouseenter="enter('2557885658490133733');" onmouseout="out('2557885658490133733');" style="">  43    @Override public void supportBreakpoint(boolean support, DownloadEntity subEntity) {                            </span>
+<span  style="">  44                                                                                                                    </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  45    }                                                                                                               </span>
+<span  style="">  46                                                                                                                    </span>
+<span class="-3554047889098977200" onmouseenter="enter('-3554047889098977200');" onmouseout="out('-3554047889098977200');" style="">  47    @Override public void onSubStart(DownloadEntity subEntity) {                                                    </span>
+<span class="-3483918869661876627" onmouseenter="enter('-3483918869661876627');" onmouseout="out('-3483918869661876627');" style="">  48      sendInState2Target(ISchedulers.SUB_START, subEntity);                                                         </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  49    }                                                                                                               </span>
+<span  style="">  50                                                                                                                    </span>
+<span class="-9173863251124520181" onmouseenter="enter('-9173863251124520181');" onmouseout="out('-9173863251124520181');" style="">  51    @Override public void onSubStop(DownloadEntity subEntity) {                                                     </span>
+<span class="-4416783850467854062" onmouseenter="enter('-4416783850467854062');" onmouseout="out('-4416783850467854062');" style="">  52      saveCurrentLocation();                                                                                        </span>
+<span class="-8919611147806563552" onmouseenter="enter('-8919611147806563552');" onmouseout="out('-8919611147806563552');" style="">  53      sendInState2Target(ISchedulers.SUB_STOP, subEntity);                                                          </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  54    }                                                                                                               </span>
+<span  style="">  55                                                                                                                    </span>
+<span class="137061115358111094" onmouseenter="enter('137061115358111094');" onmouseout="out('137061115358111094');" style="">  56    @Override public void onSubComplete(DownloadEntity subEntity) {                                                 </span>
+<span class="-4416783850467854062" onmouseenter="enter('-4416783850467854062');" onmouseout="out('-4416783850467854062');" style="">  57      saveCurrentLocation();                                                                                        </span>
+<span class="2395008898484536012" onmouseenter="enter('2395008898484536012');" onmouseout="out('2395008898484536012');" style="">  58      sendInState2Target(ISchedulers.SUB_COMPLETE, subEntity);                                                      </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  59    }                                                                                                               </span>
+<span  style="">  60                                                                                                                    </span>
+<span class="-4223446572895854644" onmouseenter="enter('-4223446572895854644');" onmouseout="out('-4223446572895854644');" style="">  61    @Override public void onSubFail(DownloadEntity subEntity) {                                                     </span>
+<span class="-4416783850467854062" onmouseenter="enter('-4416783850467854062');" onmouseout="out('-4416783850467854062');" style="">  62      saveCurrentLocation();                                                                                        </span>
+<span class="4886366574578496486" onmouseenter="enter('4886366574578496486');" onmouseout="out('4886366574578496486');" style="">  63      sendInState2Target(ISchedulers.SUB_FAIL, subEntity);                                                          </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  64    }                                                                                                               </span>
+<span  style="">  65                                                                                                                    </span>
+<span class="-7084121618920090508" onmouseenter="enter('-7084121618920090508');" onmouseout="out('-7084121618920090508');" style="">  66    @Override public void onSubCancel(DownloadEntity subEntity) {                                                   </span>
+<span class="-4416783850467854062" onmouseenter="enter('-4416783850467854062');" onmouseout="out('-4416783850467854062');" style="">  67      saveCurrentLocation();                                                                                        </span>
+<span class="-4627350495791369590" onmouseenter="enter('-4627350495791369590');" onmouseout="out('-4627350495791369590');" style="">  68      sendInState2Target(ISchedulers.SUB_CANCEL, subEntity);                                                        </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  69    }                                                                                                               </span>
+<span  style="">  70                                                                                                                    </span>
+<span class="-5819639562503137910" onmouseenter="enter('-5819639562503137910');" onmouseout="out('-5819639562503137910');" style="">  71    @Override public void onSubRunning(DownloadEntity subEntity) {                                                  </span>
+<span class="-9172465205633208584" onmouseenter="enter('-9172465205633208584');" onmouseout="out('-9172465205633208584');" style="">  72      sendInState2Target(ISchedulers.SUB_RUNNING, subEntity);                                                       </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  73    }                                                                                                               </span>
+<span  style="">  74                                                                                                                    </span>
+<span class="1188357178855945174" onmouseenter="enter('1188357178855945174');" onmouseout="out('1188357178855945174');" style="">  75    /**                                                                                                             </span>
+<span class="5309333678065732533" onmouseenter="enter('5309333678065732533');" onmouseout="out('5309333678065732533');" style="">  76     * 将任务状态发送给下载器                                                                                                  </span>
+<span class="329605257831645060" onmouseenter="enter('329605257831645060');" onmouseout="out('329605257831645060');" style="">  77     *                                                                                                              </span>
+<span class="4745042362407675676" onmouseenter="enter('4745042362407675676');" onmouseout="out('4745042362407675676');" style="">  78     * @param state {@link ISchedulers#START}                                                                       </span>
+<span class="-3478703399357275674" onmouseenter="enter('-3478703399357275674');" onmouseout="out('-3478703399357275674');" style="">  79     */                                                                                                             </span>
+<span class="8596630920523236144" onmouseenter="enter('8596630920523236144');" onmouseout="out('8596630920523236144');" style="">  80    private void sendInState2Target(int state, DownloadEntity subEntity) {                                          </span>
+<span class="14240507737599715" onmouseenter="enter('14240507737599715');" onmouseout="out('14240507737599715');" style="">  81      if (outHandler.get() != null) {                                                                               </span>
+<span class="-5392518758519400861" onmouseenter="enter('-5392518758519400861');" onmouseout="out('-5392518758519400861');" style="">  82        mSeedEntity.entity = subEntity;                                                                             </span>
+<span class="5207111582530770694" onmouseenter="enter('5207111582530770694');" onmouseout="out('5207111582530770694');" style="">  83        outHandler.get().obtainMessage(state, ISchedulers.IS_SUB_TASK, 0, mSeedEntity).sendToTarget();              </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  84      }                                                                                                             </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  85    }                                                                                                               </span>
+<span  style="">  86                                                                                                                    </span>
+<span class="-8190767281264611311" onmouseenter="enter('-8190767281264611311');" onmouseout="out('-8190767281264611311');" style="">  87    private void saveCurrentLocation() {                                                                            </span>
 
 
 
-  91      }
-<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  92 +</span>
-  93      mEntity.setCurrentProgress(location);
-  94      mEntity.update();
-  95    }
-  96  }</pre></td>
+
+<span class="-1772918154446906383" onmouseenter="enter('-1772918154446906383');" onmouseout="out('-1772918154446906383');" style="">  88      long location = 0;                                                                                            </span>
+<span class="-33757067416748864" onmouseenter="enter('-33757067416748864');" onmouseout="out('-33757067416748864');" style="">  89      for (DownloadEntity e : mEntity.getSubEntities()) {                                                           </span>
+<span class="-1288312593516515904" onmouseenter="enter('-1288312593516515904');" onmouseout="out('-1288312593516515904');" style="">  90        location += e.getCurrentProgress();                                                                         </span>
+
+
+
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  91      }                                                                                                             </span>
+<span  style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  92 +                                                                                                                  </span>
+<span class="4583373925393926398" onmouseenter="enter('4583373925393926398');" onmouseout="out('4583373925393926398');" style="">  93      mEntity.setCurrentProgress(location);                                                                         </span>
+<span class="-2332174823472847291" onmouseenter="enter('-2332174823472847291');" onmouseout="out('-2332174823472847291');" style="">  94      mEntity.update();                                                                                             </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  95    }                                                                                                               </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  96  }                                                                                                                 </span></pre></td>
                         </tr>
                     </table>
                 </div>

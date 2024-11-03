@@ -15,345 +15,95 @@
                 </style>
           </head>
           <body>
-            <pre>[[{&#x27;eq&#x27;: [{&#x27;CHUNK_OURS&#x27;: &#x27;&#x27;,
-           &#x27;CHUNK_THEIRS&#x27;: &#x27;import &#x27;
-                           &#x27;org.apache.calcite.sql.parser.SqlParser;\n&#x27;}],
+            <pre>[[{&#x27;eq&#x27;: [{&#x27;CHUNK_OURS&#x27;: &#x27;        public JobRequest &#x27;
+                         &#x27;getPendingRequest(@SuppressWarnings(&quot;SameParameterValue&quot;) &#x27;
+                         &#x27;boolean cleanUpOrphanedJob) {\n&#x27;
+                         &#x27;            // order is important for logging &#x27;
+                         &#x27;purposes\n&#x27;
+                         &#x27;            JobRequest request = &#x27;
+                         &#x27;mJobManager.getJobRequest(mJobId, true);\n&#x27;
+                         &#x27;            Job job = mJobManager.getJob(mJobId);\n&#x27;
+                         &#x27;            boolean periodic = request != null &amp;&amp; &#x27;
+                         &#x27;request.isPeriodic();\n&#x27;,
+           &#x27;CHUNK_THEIRS&#x27;: &#x27;        public JobRequest &#x27;
+                           &#x27;getPendingRequest(boolean cleanUpOrphanedJob, &#x27;
+                           &#x27;boolean markStarting) {\n&#x27;
+                           &#x27;            synchronized (COMMON_MONITOR) {\n&#x27;
+                           &#x27;                // order is important for logging &#x27;
+                           &#x27;purposes\n&#x27;
+                           &#x27;                JobRequest request = &#x27;
+                           &#x27;mJobManager.getJobRequest(mJobId, true);\n&#x27;
+                           &#x27;                Job job = &#x27;
+                           &#x27;mJobManager.getJob(mJobId);\n&#x27;
+                           &#x27;                boolean periodic = request != null &#x27;
+                           &#x27;&amp;&amp; request.isPeriodic();\n&#x27;}],
    &#x27;mergers&#x27;: {&#x27;baseline&#x27;}},
-  {&#x27;eq&#x27;: [{&#x27;CHUNK_OURS&#x27;: &#x27;&#x27;,
-           &#x27;CHUNK_THEIRS&#x27;: &#x27;    private void checkAndReplaceMultiJoin(SqlNode &#x27;
-                           &#x27;sqlNode, Set&lt;String&gt; sideTableSet) {\n&#x27;
-                           &#x27;        SqlKind sqlKind = sqlNode.getKind();\n&#x27;
-                           &#x27;        switch (sqlKind) {\n&#x27;
-                           &#x27;            case WITH: {\n&#x27;
-                           &#x27;                SqlWith sqlWith = (SqlWith) &#x27;
-                           &#x27;sqlNode;\n&#x27;
-                           &#x27;                SqlNodeList sqlNodeList = &#x27;
-                           &#x27;sqlWith.withList;\n&#x27;
-                           &#x27;                for (SqlNode withAsTable : &#x27;
-                           &#x27;sqlNodeList) {\n&#x27;
-                           &#x27;                    SqlWithItem sqlWithItem = &#x27;
-                           &#x27;(SqlWithItem) withAsTable;\n&#x27;
-                           &#x27;                    &#x27;
-                           &#x27;checkAndReplaceMultiJoin(sqlWithItem.query, &#x27;
-                           &#x27;sideTableSet);\n&#x27;
-                           &#x27;                }\n&#x27;
-                           &#x27;                &#x27;
-                           &#x27;checkAndReplaceMultiJoin(sqlWith.body, &#x27;
-                           &#x27;sideTableSet);\n&#x27;
-                           &#x27;                break;\n&#x27;
-                           &#x27;            }\n&#x27;
-                           &#x27;            case INSERT:\n&#x27;
-                           &#x27;                SqlNode sqlSource = ((SqlInsert) &#x27;
-                           &#x27;sqlNode).getSource();\n&#x27;
-                           &#x27;                &#x27;
-                           &#x27;checkAndReplaceMultiJoin(sqlSource, &#x27;
-                           &#x27;sideTableSet);\n&#x27;
-                           &#x27;                break;\n&#x27;
-                           &#x27;            case SELECT:\n&#x27;
-                           &#x27;                SqlNode sqlFrom = ((SqlSelect) &#x27;
-                           &#x27;sqlNode).getFrom();\n&#x27;
-                           &#x27;                if (sqlFrom.getKind() != &#x27;
-                           &#x27;IDENTIFIER) {\n&#x27;
-                           &#x27;                    &#x27;
-                           &#x27;checkAndReplaceMultiJoin(sqlFrom, sideTableSet);\n&#x27;
-                           &#x27;                }\n&#x27;
-                           &#x27;                break;\n&#x27;
-                           &#x27;            case JOIN:\n&#x27;
-                           &#x27;                &#x27;
-                           &#x27;convertSideJoinToNewQuery((SqlJoin) sqlNode, &#x27;
-                           &#x27;sideTableSet);\n&#x27;
-                           &#x27;                break;\n&#x27;
-                           &#x27;            case AS:\n&#x27;
-                           &#x27;                SqlNode info = ((SqlBasicCall) &#x27;
-                           &#x27;sqlNode).getOperands()[0];\n&#x27;
-                           &#x27;                if (info.getKind() != IDENTIFIER) &#x27;
-                           &#x27;{\n&#x27;
-                           &#x27;                    checkAndReplaceMultiJoin(info, &#x27;
-                           &#x27;sideTableSet);\n&#x27;
-                           &#x27;                }\n&#x27;
-                           &#x27;                break;\n&#x27;
-                           &#x27;            case UNION:\n&#x27;
-                           &#x27;                SqlNode unionLeft = &#x27;
-                           &#x27;((SqlBasicCall) sqlNode).getOperands()[0];\n&#x27;
-                           &#x27;                SqlNode unionRight = &#x27;
-                           &#x27;((SqlBasicCall) sqlNode).getOperands()[1];\n&#x27;
-                           &#x27;                &#x27;
-                           &#x27;checkAndReplaceMultiJoin(unionLeft, &#x27;
-                           &#x27;sideTableSet);\n&#x27;
-                           &#x27;                &#x27;
-                           &#x27;checkAndReplaceMultiJoin(unionRight, &#x27;
-                           &#x27;sideTableSet);\n&#x27;
-                           &#x27;                break;\n&#x27;
-                           &#x27;            default:\n&#x27;
-                           &#x27;                break;\n&#x27;
-                           &#x27;        }\n&#x27;
-                           &#x27;    }\n&#x27;},
-          {&#x27;CHUNK_OURS&#x27;: &#x27;&#x27;,
-           &#x27;CHUNK_THEIRS&#x27;: &#x27;private void checkAndReplaceMultiJoin(SqlNode &#x27;
-                           &#x27;sqlNode, Set&lt;String&gt; sideTableSet) {\n&#x27;
-                           &#x27;        SqlKind sqlKind = sqlNode.getKind();\n&#x27;
-                           &#x27;        switch (sqlKind) {\n&#x27;
-                           &#x27;            case WITH: {\n&#x27;
-                           &#x27;                SqlWith sqlWith = (SqlWith) &#x27;
-                           &#x27;sqlNode;\n&#x27;
-                           &#x27;                SqlNodeList sqlNodeList = &#x27;
-                           &#x27;sqlWith.withList;\n&#x27;
-                           &#x27;                for (SqlNode withAsTable : &#x27;
-                           &#x27;sqlNodeList) {\n&#x27;
-                           &#x27;                    SqlWithItem sqlWithItem = &#x27;
-                           &#x27;(SqlWithItem) withAsTable;\n&#x27;
-                           &#x27;                    &#x27;
-                           &#x27;checkAndReplaceMultiJoin(sqlWithItem.query, &#x27;
-                           &#x27;sideTableSet);\n&#x27;
-                           &#x27;                }\n&#x27;
-                           &#x27;                &#x27;
-                           &#x27;checkAndReplaceMultiJoin(sqlWith.body, &#x27;
-                           &#x27;sideTableSet);\n&#x27;
-                           &#x27;                break;\n&#x27;
-                           &#x27;            }\n&#x27;
-                           &#x27;            case INSERT:\n&#x27;
-                           &#x27;                SqlNode sqlSource = ((SqlInsert) &#x27;
-                           &#x27;sqlNode).getSource();\n&#x27;
-                           &#x27;                &#x27;
-                           &#x27;checkAndReplaceMultiJoin(sqlSource, &#x27;
-                           &#x27;sideTableSet);\n&#x27;
-                           &#x27;                break;\n&#x27;
-                           &#x27;            case SELECT:\n&#x27;
-                           &#x27;                SqlNode sqlFrom = ((SqlSelect) &#x27;
-                           &#x27;sqlNode).getFrom();\n&#x27;
-                           &#x27;                if (sqlFrom.getKind() != &#x27;
-                           &#x27;IDENTIFIER) {\n&#x27;
-                           &#x27;                    &#x27;
-                           &#x27;checkAndReplaceMultiJoin(sqlFrom, sideTableSet);\n&#x27;
-                           &#x27;                }\n&#x27;
-                           &#x27;                break;\n&#x27;
-                           &#x27;            case JOIN:\n&#x27;
-                           &#x27;                &#x27;
-                           &#x27;convertSideJoinToNewQuery((SqlJoin) sqlNode, &#x27;
-                           &#x27;sideTableSet);\n&#x27;
-                           &#x27;                break;\n&#x27;
-                           &#x27;            case AS:\n&#x27;
-                           &#x27;                SqlNode info = ((SqlBasicCall) &#x27;
-                           &#x27;sqlNode).getOperands()[0];\n&#x27;
-                           &#x27;                if (info.getKind() != IDENTIFIER) &#x27;
-                           &#x27;{\n&#x27;
-                           &#x27;                    checkAndReplaceMultiJoin(info, &#x27;
-                           &#x27;sideTableSet);\n&#x27;
-                           &#x27;                }\n&#x27;
-                           &#x27;                break;\n&#x27;
-                           &#x27;            case UNION:\n&#x27;
-                           &#x27;                SqlNode unionLeft = &#x27;
-                           &#x27;((SqlBasicCall) sqlNode).getOperands()[0];\n&#x27;
-                           &#x27;                SqlNode unionRight = &#x27;
-                           &#x27;((SqlBasicCall) sqlNode).getOperands()[1];\n&#x27;
-                           &#x27;                &#x27;
-                           &#x27;checkAndReplaceMultiJoin(unionLeft, &#x27;
-                           &#x27;sideTableSet);\n&#x27;
-                           &#x27;                &#x27;
-                           &#x27;checkAndReplaceMultiJoin(unionRight, &#x27;
-                           &#x27;sideTableSet);\n&#x27;
-                           &#x27;                break;\n&#x27;
-                           &#x27;            default:\n&#x27;
-                           &#x27;                break;\n&#x27;
-                           &#x27;        }\n&#x27;
-                           &#x27;    }\n&#x27;}],
-   &#x27;mergers&#x27;: {&#x27;baseline&#x27;, &#x27;jfstmerge&#x27;}},
-  {&#x27;eq&#x27;: [{&#x27;CHUNK_OURS&#x27;: &#x27;                parseSql(sqlOrderBy.query, &#x27;
-                         &#x27;sideTableSet, queueInfo, parentWhere, &#x27;
-                         &#x27;parentSelectList, parentGroupByList);\n&#x27;
-                         &#x27;\n&#x27;
-                         &#x27;            case LITERAL:\n&#x27;
-                         &#x27;                return LITERAL.toString();\n&#x27;,
-           &#x27;CHUNK_THEIRS&#x27;: &#x27;                parseSql(sqlOrderBy.query, &#x27;
-                           &#x27;sideTableSet, queueInfo, parentWhere, &#x27;
-                           &#x27;parentSelectList);\n&#x27;
-                           &#x27;            default:\n&#x27;
-                           &#x27;                break;\n&#x27;},
-          {&#x27;CHUNK_OURS&#x27;: &#x27;                parseSql(sqlOrderBy.query, &#x27;
-                         &#x27;sideTableSet, queueInfo, parentWhere, &#x27;
-                         &#x27;parentSelectList, parentGroupByList);\n&#x27;
-                         &#x27;\n&#x27;
-                         &#x27;            case LITERAL:\n&#x27;
-                         &#x27;                return LITERAL.toString();\n&#x27;,
-           &#x27;CHUNK_THEIRS&#x27;: &#x27;                parseSql(sqlOrderBy.query, &#x27;
-                           &#x27;sideTableSet, queueInfo, parentWhere, &#x27;
-                           &#x27;parentSelectList);\n&#x27;
-                           &#x27;            default:\n&#x27;
-                           &#x27;                break;\n&#x27;}],
-   &#x27;mergers&#x27;: {&#x27;baseline&#x27;, &#x27;jfstmerge&#x27;}},
-  {&#x27;eq&#x27;: [{&#x27;CHUNK_OURS&#x27;: &#x27;            case LITERAL:\n&#x27;
-                         &#x27;                return LITERAL.toString();\n&#x27;,
-           &#x27;CHUNK_THEIRS&#x27;: &#x27;\n            default:\n                break;\n&#x27;}],
-   &#x27;mergers&#x27;: {&#x27;spork&#x27;}}],
- [{&#x27;eq&#x27;: [{&#x27;CHUNK_OURS&#x27;: &#x27;&#x27;,
-           &#x27;CHUNK_THEIRS&#x27;: &#x27;import &#x27;
-                           &#x27;org.apache.calcite.sql.parser.SqlParser;\n&#x27;}],
+  {&#x27;eq&#x27;: [{&#x27;CHUNK_OURS&#x27;: &#x27;            } else if (request != null &amp;&amp; &#x27;
+                         &#x27;request.isStarted()) {\n&#x27;
+                         &#x27;                mCat.d(&quot;Request %d already started, &#x27;
+                         &#x27;%s&quot;, mJobId, request);\n&#x27;
+                         &#x27;                // not necessary to clean up, the &#x27;
+                         &#x27;JobManager will do this for started jobs\n&#x27;
+                         &#x27;                return null;\n&#x27;,
+           &#x27;CHUNK_THEIRS&#x27;: &#x27;                } else if (request != null &amp;&amp; &#x27;
+                           &#x27;request.isTransient()) {\n&#x27;
+                           &#x27;                    mCat.d(&quot;Request %d is &#x27;
+                           &#x27;transient, %s&quot;, mJobId, request);\n&#x27;
+                           &#x27;                    // not necessary to clean up, &#x27;
+                           &#x27;the JobManager will do this for transient jobs\n&#x27;
+                           &#x27;                    return null;\n&#x27;}],
    &#x27;mergers&#x27;: {&#x27;baseline&#x27;}},
-  {&#x27;eq&#x27;: [{&#x27;CHUNK_OURS&#x27;: &#x27;&#x27;,
-           &#x27;CHUNK_THEIRS&#x27;: &#x27;    private void checkAndReplaceMultiJoin(SqlNode &#x27;
-                           &#x27;sqlNode, Set&lt;String&gt; sideTableSet) {\n&#x27;
-                           &#x27;        SqlKind sqlKind = sqlNode.getKind();\n&#x27;
-                           &#x27;        switch (sqlKind) {\n&#x27;
-                           &#x27;            case WITH: {\n&#x27;
-                           &#x27;                SqlWith sqlWith = (SqlWith) &#x27;
-                           &#x27;sqlNode;\n&#x27;
-                           &#x27;                SqlNodeList sqlNodeList = &#x27;
-                           &#x27;sqlWith.withList;\n&#x27;
-                           &#x27;                for (SqlNode withAsTable : &#x27;
-                           &#x27;sqlNodeList) {\n&#x27;
-                           &#x27;                    SqlWithItem sqlWithItem = &#x27;
-                           &#x27;(SqlWithItem) withAsTable;\n&#x27;
-                           &#x27;                    &#x27;
-                           &#x27;checkAndReplaceMultiJoin(sqlWithItem.query, &#x27;
-                           &#x27;sideTableSet);\n&#x27;
-                           &#x27;                }\n&#x27;
-                           &#x27;                &#x27;
-                           &#x27;checkAndReplaceMultiJoin(sqlWith.body, &#x27;
-                           &#x27;sideTableSet);\n&#x27;
-                           &#x27;                break;\n&#x27;
-                           &#x27;            }\n&#x27;
-                           &#x27;            case INSERT:\n&#x27;
-                           &#x27;                SqlNode sqlSource = ((SqlInsert) &#x27;
-                           &#x27;sqlNode).getSource();\n&#x27;
-                           &#x27;                &#x27;
-                           &#x27;checkAndReplaceMultiJoin(sqlSource, &#x27;
-                           &#x27;sideTableSet);\n&#x27;
-                           &#x27;                break;\n&#x27;
-                           &#x27;            case SELECT:\n&#x27;
-                           &#x27;                SqlNode sqlFrom = ((SqlSelect) &#x27;
-                           &#x27;sqlNode).getFrom();\n&#x27;
-                           &#x27;                if (sqlFrom.getKind() != &#x27;
-                           &#x27;IDENTIFIER) {\n&#x27;
-                           &#x27;                    &#x27;
-                           &#x27;checkAndReplaceMultiJoin(sqlFrom, sideTableSet);\n&#x27;
-                           &#x27;                }\n&#x27;
-                           &#x27;                break;\n&#x27;
-                           &#x27;            case JOIN:\n&#x27;
-                           &#x27;                &#x27;
-                           &#x27;convertSideJoinToNewQuery((SqlJoin) sqlNode, &#x27;
-                           &#x27;sideTableSet);\n&#x27;
-                           &#x27;                break;\n&#x27;
-                           &#x27;            case AS:\n&#x27;
-                           &#x27;                SqlNode info = ((SqlBasicCall) &#x27;
-                           &#x27;sqlNode).getOperands()[0];\n&#x27;
-                           &#x27;                if (info.getKind() != IDENTIFIER) &#x27;
-                           &#x27;{\n&#x27;
-                           &#x27;                    checkAndReplaceMultiJoin(info, &#x27;
-                           &#x27;sideTableSet);\n&#x27;
-                           &#x27;                }\n&#x27;
-                           &#x27;                break;\n&#x27;
-                           &#x27;            case UNION:\n&#x27;
-                           &#x27;                SqlNode unionLeft = &#x27;
-                           &#x27;((SqlBasicCall) sqlNode).getOperands()[0];\n&#x27;
-                           &#x27;                SqlNode unionRight = &#x27;
-                           &#x27;((SqlBasicCall) sqlNode).getOperands()[1];\n&#x27;
-                           &#x27;                &#x27;
-                           &#x27;checkAndReplaceMultiJoin(unionLeft, &#x27;
-                           &#x27;sideTableSet);\n&#x27;
-                           &#x27;                &#x27;
-                           &#x27;checkAndReplaceMultiJoin(unionRight, &#x27;
-                           &#x27;sideTableSet);\n&#x27;
-                           &#x27;                break;\n&#x27;
-                           &#x27;            default:\n&#x27;
-                           &#x27;                break;\n&#x27;
-                           &#x27;        }\n&#x27;
-                           &#x27;    }\n&#x27;},
-          {&#x27;CHUNK_OURS&#x27;: &#x27;&#x27;,
-           &#x27;CHUNK_THEIRS&#x27;: &#x27;private void checkAndReplaceMultiJoin(SqlNode &#x27;
-                           &#x27;sqlNode, Set&lt;String&gt; sideTableSet) {\n&#x27;
-                           &#x27;        SqlKind sqlKind = sqlNode.getKind();\n&#x27;
-                           &#x27;        switch (sqlKind) {\n&#x27;
-                           &#x27;            case WITH: {\n&#x27;
-                           &#x27;                SqlWith sqlWith = (SqlWith) &#x27;
-                           &#x27;sqlNode;\n&#x27;
-                           &#x27;                SqlNodeList sqlNodeList = &#x27;
-                           &#x27;sqlWith.withList;\n&#x27;
-                           &#x27;                for (SqlNode withAsTable : &#x27;
-                           &#x27;sqlNodeList) {\n&#x27;
-                           &#x27;                    SqlWithItem sqlWithItem = &#x27;
-                           &#x27;(SqlWithItem) withAsTable;\n&#x27;
-                           &#x27;                    &#x27;
-                           &#x27;checkAndReplaceMultiJoin(sqlWithItem.query, &#x27;
-                           &#x27;sideTableSet);\n&#x27;
-                           &#x27;                }\n&#x27;
-                           &#x27;                &#x27;
-                           &#x27;checkAndReplaceMultiJoin(sqlWith.body, &#x27;
-                           &#x27;sideTableSet);\n&#x27;
-                           &#x27;                break;\n&#x27;
-                           &#x27;            }\n&#x27;
-                           &#x27;            case INSERT:\n&#x27;
-                           &#x27;                SqlNode sqlSource = ((SqlInsert) &#x27;
-                           &#x27;sqlNode).getSource();\n&#x27;
-                           &#x27;                &#x27;
-                           &#x27;checkAndReplaceMultiJoin(sqlSource, &#x27;
-                           &#x27;sideTableSet);\n&#x27;
-                           &#x27;                break;\n&#x27;
-                           &#x27;            case SELECT:\n&#x27;
-                           &#x27;                SqlNode sqlFrom = ((SqlSelect) &#x27;
-                           &#x27;sqlNode).getFrom();\n&#x27;
-                           &#x27;                if (sqlFrom.getKind() != &#x27;
-                           &#x27;IDENTIFIER) {\n&#x27;
-                           &#x27;                    &#x27;
-                           &#x27;checkAndReplaceMultiJoin(sqlFrom, sideTableSet);\n&#x27;
-                           &#x27;                }\n&#x27;
-                           &#x27;                break;\n&#x27;
-                           &#x27;            case JOIN:\n&#x27;
-                           &#x27;                &#x27;
-                           &#x27;convertSideJoinToNewQuery((SqlJoin) sqlNode, &#x27;
-                           &#x27;sideTableSet);\n&#x27;
-                           &#x27;                break;\n&#x27;
-                           &#x27;            case AS:\n&#x27;
-                           &#x27;                SqlNode info = ((SqlBasicCall) &#x27;
-                           &#x27;sqlNode).getOperands()[0];\n&#x27;
-                           &#x27;                if (info.getKind() != IDENTIFIER) &#x27;
-                           &#x27;{\n&#x27;
-                           &#x27;                    checkAndReplaceMultiJoin(info, &#x27;
-                           &#x27;sideTableSet);\n&#x27;
-                           &#x27;                }\n&#x27;
-                           &#x27;                break;\n&#x27;
-                           &#x27;            case UNION:\n&#x27;
-                           &#x27;                SqlNode unionLeft = &#x27;
-                           &#x27;((SqlBasicCall) sqlNode).getOperands()[0];\n&#x27;
-                           &#x27;                SqlNode unionRight = &#x27;
-                           &#x27;((SqlBasicCall) sqlNode).getOperands()[1];\n&#x27;
-                           &#x27;                &#x27;
-                           &#x27;checkAndReplaceMultiJoin(unionLeft, &#x27;
-                           &#x27;sideTableSet);\n&#x27;
-                           &#x27;                &#x27;
-                           &#x27;checkAndReplaceMultiJoin(unionRight, &#x27;
-                           &#x27;sideTableSet);\n&#x27;
-                           &#x27;                break;\n&#x27;
-                           &#x27;            default:\n&#x27;
-                           &#x27;                break;\n&#x27;
-                           &#x27;        }\n&#x27;
-                           &#x27;    }\n&#x27;}],
+  {&#x27;eq&#x27;: [{&#x27;CHUNK_OURS&#x27;: &#x27;public JobRequest &#x27;
+                         &#x27;getPendingRequest(@SuppressWarnings(&quot;SameParameterValue&quot;) &#x27;
+                         &#x27;boolean cleanUpOrphanedJob) {\n&#x27;,
+           &#x27;CHUNK_THEIRS&#x27;: &#x27;public JobRequest getPendingRequest(boolean &#x27;
+                           &#x27;cleanUpOrphanedJob, boolean markStarting) {\n&#x27;
+                           &#x27;            synchronized (COMMON_MONITOR) {\n&#x27;}],
+   &#x27;mergers&#x27;: {&#x27;jfstmerge&#x27;}}],
+ [{&#x27;eq&#x27;: [{&#x27;CHUNK_OURS&#x27;: &#x27;        public JobRequest &#x27;
+                         &#x27;getPendingRequest(@SuppressWarnings(&quot;SameParameterValue&quot;) &#x27;
+                         &#x27;boolean cleanUpOrphanedJob) {\n&#x27;
+                         &#x27;            // order is important for logging &#x27;
+                         &#x27;purposes\n&#x27;
+                         &#x27;            JobRequest request = &#x27;
+                         &#x27;mJobManager.getJobRequest(mJobId, true);\n&#x27;
+                         &#x27;            Job job = mJobManager.getJob(mJobId);\n&#x27;
+                         &#x27;            boolean periodic = request != null &amp;&amp; &#x27;
+                         &#x27;request.isPeriodic();\n&#x27;,
+           &#x27;CHUNK_THEIRS&#x27;: &#x27;        public JobRequest &#x27;
+                           &#x27;getPendingRequest(boolean cleanUpOrphanedJob, &#x27;
+                           &#x27;boolean markStarting) {\n&#x27;
+                           &#x27;            synchronized (COMMON_MONITOR) {\n&#x27;
+                           &#x27;                // order is important for logging &#x27;
+                           &#x27;purposes\n&#x27;
+                           &#x27;                JobRequest request = &#x27;
+                           &#x27;mJobManager.getJobRequest(mJobId, true);\n&#x27;
+                           &#x27;                Job job = &#x27;
+                           &#x27;mJobManager.getJob(mJobId);\n&#x27;
+                           &#x27;                boolean periodic = request != null &#x27;
+                           &#x27;&amp;&amp; request.isPeriodic();\n&#x27;},
+          {&#x27;CHUNK_OURS&#x27;: &#x27;public JobRequest &#x27;
+                         &#x27;getPendingRequest(@SuppressWarnings(&quot;SameParameterValue&quot;) &#x27;
+                         &#x27;boolean cleanUpOrphanedJob) {\n&#x27;,
+           &#x27;CHUNK_THEIRS&#x27;: &#x27;public JobRequest getPendingRequest(boolean &#x27;
+                           &#x27;cleanUpOrphanedJob, boolean markStarting) {\n&#x27;
+                           &#x27;            synchronized (COMMON_MONITOR) {\n&#x27;}],
    &#x27;mergers&#x27;: {&#x27;baseline&#x27;, &#x27;jfstmerge&#x27;}},
-  {&#x27;eq&#x27;: [{&#x27;CHUNK_OURS&#x27;: &#x27;                parseSql(sqlOrderBy.query, &#x27;
-                         &#x27;sideTableSet, queueInfo, parentWhere, &#x27;
-                         &#x27;parentSelectList, parentGroupByList);\n&#x27;
-                         &#x27;\n&#x27;
-                         &#x27;            case LITERAL:\n&#x27;
-                         &#x27;                return LITERAL.toString();\n&#x27;,
-           &#x27;CHUNK_THEIRS&#x27;: &#x27;                parseSql(sqlOrderBy.query, &#x27;
-                           &#x27;sideTableSet, queueInfo, parentWhere, &#x27;
-                           &#x27;parentSelectList);\n&#x27;
-                           &#x27;            default:\n&#x27;
-                           &#x27;                break;\n&#x27;},
-          {&#x27;CHUNK_OURS&#x27;: &#x27;                parseSql(sqlOrderBy.query, &#x27;
-                         &#x27;sideTableSet, queueInfo, parentWhere, &#x27;
-                         &#x27;parentSelectList, parentGroupByList);\n&#x27;
-                         &#x27;\n&#x27;
-                         &#x27;            case LITERAL:\n&#x27;
-                         &#x27;                return LITERAL.toString();\n&#x27;,
-           &#x27;CHUNK_THEIRS&#x27;: &#x27;                parseSql(sqlOrderBy.query, &#x27;
-                           &#x27;sideTableSet, queueInfo, parentWhere, &#x27;
-                           &#x27;parentSelectList);\n&#x27;
-                           &#x27;            default:\n&#x27;
-                           &#x27;                break;\n&#x27;},
-          {&#x27;CHUNK_OURS&#x27;: &#x27;            case LITERAL:\n&#x27;
-                         &#x27;                return LITERAL.toString();\n&#x27;,
-           &#x27;CHUNK_THEIRS&#x27;: &#x27;\n            default:\n                break;\n&#x27;}],
-   &#x27;mergers&#x27;: {&#x27;spork&#x27;, &#x27;baseline&#x27;, &#x27;jfstmerge&#x27;}}]]</pre>
+  {&#x27;eq&#x27;: [{&#x27;CHUNK_OURS&#x27;: &#x27;            } else if (request != null &amp;&amp; &#x27;
+                         &#x27;request.isStarted()) {\n&#x27;
+                         &#x27;                mCat.d(&quot;Request %d already started, &#x27;
+                         &#x27;%s&quot;, mJobId, request);\n&#x27;
+                         &#x27;                // not necessary to clean up, the &#x27;
+                         &#x27;JobManager will do this for started jobs\n&#x27;
+                         &#x27;                return null;\n&#x27;,
+           &#x27;CHUNK_THEIRS&#x27;: &#x27;                } else if (request != null &amp;&amp; &#x27;
+                           &#x27;request.isTransient()) {\n&#x27;
+                           &#x27;                    mCat.d(&quot;Request %d is &#x27;
+                           &#x27;transient, %s&quot;, mJobId, request);\n&#x27;
+                           &#x27;                    // not necessary to clean up, &#x27;
+                           &#x27;the JobManager will do this for transient jobs\n&#x27;
+                           &#x27;                    return null;\n&#x27;}],
+   &#x27;mergers&#x27;: {&#x27;baseline&#x27;}}]]</pre>
           </body>
         </html>
         

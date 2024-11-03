@@ -15,399 +15,504 @@
                 </style>
           </head>
           <body>
-            <pre>[[{&#x27;eq&#x27;: [{&#x27;CHUNK_OURS&#x27;: &#x27;    public void asyncInvoke(Tuple2&lt;Boolean,Row&gt; &#x27;
-                         &#x27;input, ResultFuture&lt;Tuple2&lt;Boolean,Row&gt;&gt; &#x27;
-                         &#x27;resultFuture) throws Exception {\n&#x27;
-                         &#x27;        Tuple2&lt;Boolean, Row&gt; inputCopy = &#x27;
-                         &#x27;Tuple2.of(input.f0, input.f1);\n&#x27;
-                         &#x27;        //scannerBuilder 设置为null重新加载过滤条件\n&#x27;,
-           &#x27;CHUNK_THEIRS&#x27;: &#x27;    public void handleAsyncInvoke(Map&lt;String, &#x27;
-                           &#x27;Object&gt; inputParams, CRow input, &#x27;
-                           &#x27;ResultFuture&lt;CRow&gt; resultFuture) throws Exception &#x27;
-                           &#x27;{\n&#x27;
-                           &#x27;        CRow inputCopy = new CRow(input.row(), &#x27;
-                           &#x27;input.change());\n&#x27;
-                           &#x27;        //scannerBuilder &#x27;
-                           &#x27;设置为null重新加载过滤条件,然后connkudu重新赋值\n&#x27;
-                           &#x27;        //todo:代码需要优化\n&#x27;}],
+            <pre>[[{&#x27;eq&#x27;: [{&#x27;CHUNK_OURS&#x27;: &#x27;import com.dtstack.flink.sql.side.*;\n&#x27;
+                         &#x27;import &#x27;
+                         &#x27;com.dtstack.flink.sql.side.redis.enums.RedisType;\n&#x27;,
+           &#x27;CHUNK_THEIRS&#x27;: &#x27;import &#x27;
+                           &#x27;org.apache.flink.api.java.typeutils.RowTypeInfo;\n&#x27;
+                           &#x27;import org.apache.flink.table.runtime.types.CRow;\n&#x27;
+                           &#x27;import org.apache.flink.types.Row;\n&#x27;
+                           &#x27;import org.apache.flink.util.Collector;\n&#x27;
+                           &#x27;\n&#x27;
+                           &#x27;import com.dtstack.flink.sql.side.AllReqRow;\n&#x27;
+                           &#x27;import com.dtstack.flink.sql.side.FieldInfo;\n&#x27;
+                           &#x27;import com.dtstack.flink.sql.side.JoinInfo;\n&#x27;
+                           &#x27;import &#x27;
+                           &#x27;com.dtstack.flink.sql.side.SideTableInfo;\n&#x27;}],
    &#x27;mergers&#x27;: {&#x27;baseline&#x27;}},
-  {&#x27;eq&#x27;: [{&#x27;CHUNK_OURS&#x27;: &#x27;        for (int i = 0; i &lt; &#x27;
-                         &#x27;sideInfo.getEqualValIndex().size(); i++) {\n&#x27;
-                         &#x27;            Object equalObj = &#x27;
-                         &#x27;inputCopy.f1.getField(sideInfo.getEqualValIndex().get(i));\n&#x27;
-                         &#x27;            if (equalObj == null) {\n&#x27;
-                         &#x27;                dealMissKey(inputCopy, &#x27;
-                         &#x27;resultFuture);\n&#x27;
-                         &#x27;                return;\n&#x27;
-                         &#x27;            }\n&#x27;
-                         &#x27;            //增加过滤条件\n&#x27;
-                         &#x27;            &#x27;
-                         &#x27;scannerBuilder.addPredicate(KuduPredicate.newInListPredicate(schema.getColumn(sideInfo.getEqualFieldList().get(i)), &#x27;
-                         &#x27;Collections.singletonList(equalObj)));\n&#x27;
-                         &#x27;            inputParams.add(equalObj);\n&#x27;
-                         &#x27;        }\n&#x27;,
-           &#x27;CHUNK_THEIRS&#x27;: &#x27;        inputParams.entrySet().forEach(e -&gt;{\n&#x27;
-                           &#x27;            &#x27;
-                           &#x27;scannerBuilder.addPredicate(KuduPredicate.newInListPredicate(schema.getColumn(e.getKey()), &#x27;
-                           &#x27;Collections.singletonList(e.getValue())));\n&#x27;
-                           &#x27;        });\n&#x27;}],
-   &#x27;mergers&#x27;: {&#x27;baseline&#x27;}},
-  {&#x27;eq&#x27;: [{&#x27;CHUNK_OURS&#x27;: &#x27;\n&#x27;
-                         &#x27;        String key = buildCacheKey(inputParams);\n&#x27;
-                         &#x27;\n&#x27;
-                         &#x27;        if (openCache()) {\n&#x27;
-                         &#x27;            //判断数据是否已经加载到缓存中\n&#x27;
-                         &#x27;            CacheObj val = getFromCache(key);\n&#x27;
-                         &#x27;            if (val != null) {\n&#x27;
-                         &#x27;                if (ECacheContentType.MissVal == &#x27;
-                         &#x27;val.getType()) {\n&#x27;
-                         &#x27;                    dealMissKey(inputCopy, &#x27;
-                         &#x27;resultFuture);\n&#x27;
-                         &#x27;                    return;\n&#x27;
-                         &#x27;                } else if &#x27;
-                         &#x27;(ECacheContentType.SingleLine == val.getType()) {\n&#x27;
-                         &#x27;                    try {\n&#x27;
-                         &#x27;                        Row row = &#x27;
-                         &#x27;fillData(inputCopy.f1, val);\n&#x27;
-                         &#x27;                        &#x27;
-                         &#x27;resultFuture.complete(Collections.singleton(Tuple2.of(inputCopy.f0,row)));\n&#x27;
-                         &#x27;                    } catch (Exception e) {\n&#x27;
-                         &#x27;                        &#x27;
-                         &#x27;dealFillDataError(resultFuture, e, inputCopy);\n&#x27;
-                         &#x27;                    }\n&#x27;
-                         &#x27;                } else if &#x27;
-                         &#x27;(ECacheContentType.MultiLine == val.getType()) {\n&#x27;
-                         &#x27;                    try {\n&#x27;
-                         &#x27;                        List&lt;Tuple2&lt;Boolean,Row&gt;&gt; &#x27;
-                         &#x27;rowList = Lists.newArrayList();\n&#x27;
-                         &#x27;                        for (Object jsonArray : &#x27;
-                         &#x27;(List) val.getContent()) {\n&#x27;
-                         &#x27;                            Row row = &#x27;
-                         &#x27;fillData(inputCopy.f1, jsonArray);\n&#x27;
-                         &#x27;                            &#x27;
-                         &#x27;rowList.add(Tuple2.of(inputCopy.f0, row));\n&#x27;
-                         &#x27;                        }\n&#x27;
-                         &#x27;                        &#x27;
-                         &#x27;resultFuture.complete(rowList);\n&#x27;
-                         &#x27;                    } catch (Exception e) {\n&#x27;
-                         &#x27;                        &#x27;
-                         &#x27;dealFillDataError(resultFuture, e, inputCopy);\n&#x27;
-                         &#x27;                    }\n&#x27;
-                         &#x27;                } else {\n&#x27;
-                         &#x27;                    &#x27;
-                         &#x27;resultFuture.completeExceptionally(new &#x27;
-                         &#x27;RuntimeException(&quot;not support cache obj type &quot; + &#x27;
-                         &#x27;val.getType()));\n&#x27;
-                         &#x27;                }\n&#x27;
-                         &#x27;                return;\n&#x27;
-                         &#x27;            }\n&#x27;
-                         &#x27;        }\n&#x27;,
+  {&#x27;eq&#x27;: [{&#x27;CHUNK_OURS&#x27;: &#x27;import org.apache.calcite.sql.JoinType;\n&#x27;
+                         &#x27;import &#x27;
+                         &#x27;org.apache.commons.collections.CollectionUtils;\n&#x27;
+                         &#x27;import org.apache.commons.collections.MapUtils;\n&#x27;
+                         &#x27;import org.apache.commons.lang.StringUtils;\n&#x27;
+                         &#x27;import &#x27;
+                         &#x27;org.apache.commons.pool2.impl.GenericObjectPoolConfig;\n&#x27;
+                         &#x27;import &#x27;
+                         &#x27;org.apache.flink.api.java.typeutils.RowTypeInfo;\n&#x27;,
            &#x27;CHUNK_THEIRS&#x27;: &#x27;&#x27;}],
    &#x27;mergers&#x27;: {&#x27;baseline&#x27;}},
-  {&#x27;eq&#x27;: [{&#x27;CHUNK_OURS&#x27;: &#x27;    @Override\n&#x27;
-                         &#x27;    public void asyncInvoke(Tuple2&lt;Boolean,Row&gt; &#x27;
-                         &#x27;input, ResultFuture&lt;Tuple2&lt;Boolean,Row&gt;&gt; &#x27;
-                         &#x27;resultFuture) throws Exception {\n&#x27;
-                         &#x27;        Tuple2&lt;Boolean, Row&gt; inputCopy = &#x27;
-                         &#x27;Tuple2.of(input.f0, input.f1);\n&#x27;
-                         &#x27;        //scannerBuilder 设置为null重新加载过滤条件\n&#x27;
-                         &#x27;        scannerBuilder = null;\n&#x27;
-                         &#x27;        connKuDu();\n&#x27;
-                         &#x27;        JsonArray inputParams = new JsonArray();\n&#x27;
-                         &#x27;        Schema schema = table.getSchema();\n&#x27;
-                         &#x27;        //  @wenbaoup fix bug\n&#x27;
-                         &#x27;        for (int i = 0; i &lt; &#x27;
+  {&#x27;eq&#x27;: [{&#x27;CHUNK_OURS&#x27;: &#x27;        for (int i = 0; i &lt; &#x27;
                          &#x27;sideInfo.getEqualValIndex().size(); i++) {\n&#x27;
+                         &#x27;            Integer conValIndex = &#x27;
+                         &#x27;sideInfo.getEqualValIndex().get(i);\n&#x27;
                          &#x27;            Object equalObj = &#x27;
-                         &#x27;inputCopy.f1.getField(sideInfo.getEqualValIndex().get(i));\n&#x27;
-                         &#x27;            if (equalObj == null) {\n&#x27;
-                         &#x27;                dealMissKey(inputCopy, &#x27;
-                         &#x27;resultFuture);\n&#x27;
+                         &#x27;row.getField(conValIndex);\n&#x27;,
+           &#x27;CHUNK_THEIRS&#x27;: &#x27;        for(Integer conValIndex : &#x27;
+                           &#x27;sideInfo.getEqualValIndex()){\n&#x27;
+                           &#x27;            Object equalObj = &#x27;
+                           &#x27;input.row().getField(conValIndex);\n&#x27;},
+          {&#x27;CHUNK_OURS&#x27;: &#x27;        for (int i = 0; i &lt; &#x27;
+                         &#x27;sideInfo.getEqualValIndex().size(); i++) {\n&#x27;
+                         &#x27;            Integer conValIndex = &#x27;
+                         &#x27;sideInfo.getEqualValIndex().get(i);\n&#x27;
+                         &#x27;            Object equalObj = &#x27;
+                         &#x27;row.getField(conValIndex);\n&#x27;,
+           &#x27;CHUNK_THEIRS&#x27;: &#x27;        for(Integer conValIndex : &#x27;
+                           &#x27;sideInfo.getEqualValIndex()){\n&#x27;
+                           &#x27;            Object equalObj = &#x27;
+                           &#x27;input.row().getField(conValIndex);\n&#x27;}],
+   &#x27;mergers&#x27;: {&#x27;baseline&#x27;, &#x27;jfstmerge&#x27;}},
+  {&#x27;eq&#x27;: [{&#x27;CHUNK_OURS&#x27;: &#x27;        String key = buildCacheKey(inputParams);\n&#x27;
+                         &#x27;        if(StringUtils.isBlank(key)){\n&#x27;,
+           &#x27;CHUNK_THEIRS&#x27;: &#x27;        String key = buildKey(inputParams);\n&#x27;
+                           &#x27;\n&#x27;
+                           &#x27;        Map&lt;String, String&gt; cacheMap = &#x27;
+                           &#x27;cacheRef.get().get(key);\n&#x27;
+                           &#x27;\n&#x27;
+                           &#x27;        if (cacheMap == null){\n&#x27;
+                           &#x27;            if(sideInfo.getJoinType() == &#x27;
+                           &#x27;JoinType.LEFT){\n&#x27;
+                           &#x27;                Row data = fillData(input.row(), &#x27;
+                           &#x27;null);\n&#x27;
+                           &#x27;                out.collect(new CRow(data, &#x27;
+                           &#x27;input.change()));\n&#x27;
+                           &#x27;            }else{\n&#x27;
+                           &#x27;                return;\n&#x27;
+                           &#x27;            }\n&#x27;
+                           &#x27;\n&#x27;}],
+   &#x27;mergers&#x27;: {&#x27;baseline&#x27;}},
+  {&#x27;eq&#x27;: [{&#x27;CHUNK_OURS&#x27;: &#x27;        Map&lt;String, String&gt; cacheMap = &#x27;
+                         &#x27;cacheRef.get().get(key);\n&#x27;
+                         &#x27;        if(MapUtils.isEmpty(cacheMap)){\n&#x27;
+                         &#x27;            if(sideInfo.getJoinType() != &#x27;
+                         &#x27;JoinType.LEFT){\n&#x27;
                          &#x27;                return;\n&#x27;
                          &#x27;            }\n&#x27;
-                         &#x27;            //增加过滤条件\n&#x27;
-                         &#x27;            &#x27;
-                         &#x27;scannerBuilder.addPredicate(KuduPredicate.newInListPredicate(schema.getColumn(sideInfo.getEqualFieldList().get(i)), &#x27;
-                         &#x27;Collections.singletonList(equalObj)));\n&#x27;
-                         &#x27;            inputParams.add(equalObj);\n&#x27;
+                         &#x27;            Row data = fillData(row, null);\n&#x27;
+                         &#x27;            out.collect(data);\n&#x27;
+                         &#x27;            return;\n&#x27;
+                         &#x27;\n&#x27;
                          &#x27;        }\n&#x27;
-                         &#x27;\n&#x27;
-                         &#x27;        //  填充谓词信息\n&#x27;
-                         &#x27;        List&lt;PredicateInfo&gt; predicateInfoes = &#x27;
-                         &#x27;sideInfo.getSideTableInfo().getPredicateInfoes();\n&#x27;
-                         &#x27;        if (predicateInfoes.size() &gt; 0) {\n&#x27;
-                         &#x27;            predicateInfoes.stream().map(info -&gt; {\n&#x27;
-                         &#x27;                KuduPredicate kuduPredicate = &#x27;
-                         &#x27;KuduUtil.buildKuduPredicate(schema, info);\n&#x27;
-                         &#x27;                if (null != kuduPredicate) {\n&#x27;
-                         &#x27;                    &#x27;
-                         &#x27;scannerBuilder.addPredicate(kuduPredicate);\n&#x27;
-                         &#x27;                }\n&#x27;
-                         &#x27;                return info;\n&#x27;
-                         &#x27;            }).count();\n&#x27;
-                         &#x27;        }\n&#x27;
-                         &#x27;\n&#x27;
-                         &#x27;\n&#x27;
-                         &#x27;        String key = buildCacheKey(inputParams);\n&#x27;
-                         &#x27;\n&#x27;
-                         &#x27;        if (openCache()) {\n&#x27;
-                         &#x27;            //判断数据是否已经加载到缓存中\n&#x27;
-                         &#x27;            CacheObj val = getFromCache(key);\n&#x27;
-                         &#x27;            if (val != null) {\n&#x27;
-                         &#x27;                if (ECacheContentType.MissVal == &#x27;
-                         &#x27;val.getType()) {\n&#x27;
-                         &#x27;                    dealMissKey(inputCopy, &#x27;
-                         &#x27;resultFuture);\n&#x27;
-                         &#x27;                    return;\n&#x27;
-                         &#x27;                } else if &#x27;
-                         &#x27;(ECacheContentType.SingleLine == val.getType()) {\n&#x27;
-                         &#x27;                    try {\n&#x27;
-                         &#x27;                        Row row = &#x27;
-                         &#x27;fillData(inputCopy.f1, val);\n&#x27;
-                         &#x27;                        &#x27;
-                         &#x27;resultFuture.complete(Collections.singleton(Tuple2.of(inputCopy.f0,row)));\n&#x27;
-                         &#x27;                    } catch (Exception e) {\n&#x27;
-                         &#x27;                        &#x27;
-                         &#x27;dealFillDataError(resultFuture, e, inputCopy);\n&#x27;
-                         &#x27;                    }\n&#x27;
-                         &#x27;                } else if &#x27;
-                         &#x27;(ECacheContentType.MultiLine == val.getType()) {\n&#x27;
-                         &#x27;                    try {\n&#x27;
-                         &#x27;                        List&lt;Tuple2&lt;Boolean,Row&gt;&gt; &#x27;
-                         &#x27;rowList = Lists.newArrayList();\n&#x27;
-                         &#x27;                        for (Object jsonArray : &#x27;
-                         &#x27;(List) val.getContent()) {\n&#x27;
-                         &#x27;                            Row row = &#x27;
-                         &#x27;fillData(inputCopy.f1, jsonArray);\n&#x27;
-                         &#x27;                            &#x27;
-                         &#x27;rowList.add(Tuple2.of(inputCopy.f0, row));\n&#x27;
-                         &#x27;                        }\n&#x27;
-                         &#x27;                        &#x27;
-                         &#x27;resultFuture.complete(rowList);\n&#x27;
-                         &#x27;                    } catch (Exception e) {\n&#x27;
-                         &#x27;                        &#x27;
-                         &#x27;dealFillDataError(resultFuture, e, inputCopy);\n&#x27;
-                         &#x27;                    }\n&#x27;
-                         &#x27;                } else {\n&#x27;
-                         &#x27;                    &#x27;
-                         &#x27;resultFuture.completeExceptionally(new &#x27;
-                         &#x27;RuntimeException(&quot;not support cache obj type &quot; + &#x27;
-                         &#x27;val.getType()));\n&#x27;
-                         &#x27;                }\n&#x27;
+                         &#x27;        Row newRow = fillData(row, cacheMap);\n&#x27;
+                         &#x27;        out.collect(newRow);\n&#x27;,
+           &#x27;CHUNK_THEIRS&#x27;: &#x27;        Row newRow = fillData(input.row(), &#x27;
+                           &#x27;cacheMap);\n&#x27;
+                           &#x27;        out.collect(new CRow(newRow, &#x27;
+                           &#x27;input.change()));\n&#x27;}],
+   &#x27;mergers&#x27;: {&#x27;baseline&#x27;}},
+  {&#x27;eq&#x27;: [{&#x27;CHUNK_OURS&#x27;: &#x27;            for(String key : keys){\n&#x27;
+                         &#x27;                tmpCache.put(key, &#x27;
+                         &#x27;jedis.hgetAll(key));\n&#x27;,
+           &#x27;CHUNK_THEIRS&#x27;: &#x27;\n&#x27;
+                           &#x27;            if (tableInfo.getRedisType() != 3){\n&#x27;
+                           &#x27;                String perKey = &#x27;
+                           &#x27;tableInfo.getTableName() + &quot;*&quot;;\n&#x27;
+                           &#x27;                Set&lt;String&gt; keys = ((Jedis) &#x27;
+                           &#x27;jedis).keys(perKey);\n&#x27;
+                           &#x27;                List&lt;String&gt; newPerKeys = new &#x27;
+                           &#x27;LinkedList&lt;&gt;();\n&#x27;
+                           &#x27;                for (String key : keys){\n&#x27;
+                           &#x27;                    String[] splitKey = &#x27;
+                           &#x27;StringUtils.split(key, &quot;:&quot;);\n&#x27;
+                           &#x27;                    String newKey = splitKey[0] + &#x27;
+                           &#x27;&quot;:&quot; + splitKey[1] + &quot;:&quot; + splitKey[2];\n&#x27;
+                           &#x27;                    newPerKeys.add(newKey);\n&#x27;
+                           &#x27;                }\n&#x27;
+                           &#x27;                List&lt;String&gt; list = &#x27;
+                           &#x27;newPerKeys.stream().distinct().collect(Collectors.toList());\n&#x27;
+                           &#x27;                for(String key : list){\n&#x27;
+                           &#x27;                    Map&lt;String, String&gt; kv = &#x27;
+                           &#x27;Maps.newHashMap();\n&#x27;
+                           &#x27;                    String[] primaryKv = &#x27;
+                           &#x27;StringUtils.split(key, &quot;:&quot;);\n&#x27;
+                           &#x27;                    kv.put(primaryKv[1], &#x27;
+                           &#x27;primaryKv[2]);\n&#x27;
+                           &#x27;                    String pattern = key + &quot;*&quot;;\n&#x27;
+                           &#x27;                    Set&lt;String&gt; realKeys = &#x27;
+                           &#x27;((Jedis) jedis).keys(pattern);\n&#x27;
+                           &#x27;                    for (String realKey : &#x27;
+                           &#x27;realKeys){\n&#x27;
+                           &#x27;                        &#x27;
+                           &#x27;kv.put(StringUtils.split(realKey, &quot;:&quot;)[3], &#x27;
+                           &#x27;jedis.get(realKey));\n&#x27;
+                           &#x27;                    }\n&#x27;
+                           &#x27;                    tmpCache.put(key, kv);\n&#x27;
+                           &#x27;                }\n&#x27;
+                           &#x27;            } else {\n&#x27;
+                           &#x27;                String perKey = &#x27;
+                           &#x27;tableInfo.getTableName() + &quot;*&quot;;\n&#x27;
+                           &#x27;                Set&lt;String&gt; keys = &#x27;
+                           &#x27;keys((JedisCluster) jedis, perKey);\n&#x27;
+                           &#x27;                List&lt;String&gt; newPerKeys = new &#x27;
+                           &#x27;LinkedList&lt;&gt;();\n&#x27;
+                           &#x27;                for (String key : keys){\n&#x27;
+                           &#x27;                    String[] splitKey = &#x27;
+                           &#x27;StringUtils.split(key, &quot;:&quot;);\n&#x27;
+                           &#x27;                    String newKey = splitKey[0] + &#x27;
+                           &#x27;&quot;:&quot; + splitKey[1] + &quot;:&quot; + splitKey[2];\n&#x27;
+                           &#x27;                    newPerKeys.add(newKey);\n&#x27;
+                           &#x27;                }\n&#x27;
+                           &#x27;                List&lt;String&gt; list = &#x27;
+                           &#x27;newPerKeys.stream().distinct().collect(Collectors.toList());\n&#x27;
+                           &#x27;                for(String key : list){\n&#x27;
+                           &#x27;                    Map&lt;String, String&gt; kv = &#x27;
+                           &#x27;Maps.newHashMap();\n&#x27;
+                           &#x27;                    String[] primaryKv = &#x27;
+                           &#x27;StringUtils.split(key, &quot;:&quot;);\n&#x27;
+                           &#x27;                    kv.put(primaryKv[1], &#x27;
+                           &#x27;primaryKv[2]);\n&#x27;
+                           &#x27;                    String pattern = key + &quot;*&quot;;\n&#x27;
+                           &#x27;                    Set&lt;String&gt; realKeys = &#x27;
+                           &#x27;keys((JedisCluster) jedis, pattern);\n&#x27;
+                           &#x27;                    for (String realKey : &#x27;
+                           &#x27;realKeys){\n&#x27;
+                           &#x27;                        &#x27;
+                           &#x27;kv.put(StringUtils.split(key, &quot;:&quot;)[3], &#x27;
+                           &#x27;jedis.get(realKey));\n&#x27;
+                           &#x27;                    }\n&#x27;
+                           &#x27;                    tmpCache.put(key, kv);\n&#x27;
+                           &#x27;                }\n&#x27;}],
+   &#x27;mergers&#x27;: {&#x27;baseline&#x27;}},
+  {&#x27;eq&#x27;: [{&#x27;CHUNK_OURS&#x27;: &#x27;        if(MapUtils.isEmpty(cacheMap)){\n&#x27;
+                         &#x27;            if(sideInfo.getJoinType() != &#x27;
+                         &#x27;JoinType.LEFT){\n&#x27;
                          &#x27;                return;\n&#x27;
                          &#x27;            }\n&#x27;
-                         &#x27;        }\n&#x27;
-                         &#x27;        List&lt;Map&lt;String, Object&gt;&gt; cacheContent = &#x27;
-                         &#x27;Lists.newArrayList();\n&#x27;
-                         &#x27;        AsyncKuduScanner asyncKuduScanner = &#x27;
-                         &#x27;scannerBuilder.build();\n&#x27;
-                         &#x27;        List&lt;Tuple2&lt;Boolean,Row&gt;&gt; rowList = &#x27;
-                         &#x27;Lists.newArrayList();\n&#x27;
-                         &#x27;        Deferred&lt;RowResultIterator&gt; data = &#x27;
-                         &#x27;asyncKuduScanner.nextRows();\n&#x27;
-                         &#x27;        //从之前的同步修改为调用异步的Callback\n&#x27;
-                         &#x27;        data.addCallbackDeferring(new &#x27;
-                         &#x27;GetListRowCB(inputCopy, cacheContent, rowList, &#x27;
-                         &#x27;asyncKuduScanner, resultFuture, key));\n&#x27;
-                         &#x27;    }\n&#x27;,
-           &#x27;CHUNK_THEIRS&#x27;: &#x27;\n&#x27;}],
+                         &#x27;            Row data = fillData(row, null);\n&#x27;
+                         &#x27;            out.collect(data);\n&#x27;,
+           &#x27;CHUNK_THEIRS&#x27;: &#x27;\n&#x27;
+                           &#x27;        if (cacheMap == null){\n&#x27;
+                           &#x27;            if(sideInfo.getJoinType() == &#x27;
+                           &#x27;JoinType.LEFT){\n&#x27;
+                           &#x27;                Row data = fillData(input.row(), &#x27;
+                           &#x27;null);\n&#x27;
+                           &#x27;                out.collect(new CRow(data, &#x27;
+                           &#x27;input.change()));\n&#x27;
+                           &#x27;            }else{\n&#x27;}],
+   &#x27;mergers&#x27;: {&#x27;jfstmerge&#x27;}},
+  {&#x27;eq&#x27;: [{&#x27;CHUNK_OURS&#x27;: &#x27;        Row newRow = fillData(row, cacheMap);\n&#x27;
+                         &#x27;        out.collect(newRow);\n&#x27;,
+           &#x27;CHUNK_THEIRS&#x27;: &#x27;\n&#x27;
+                           &#x27;        Row newRow = fillData(input.row(), &#x27;
+                           &#x27;cacheMap);\n&#x27;
+                           &#x27;        out.collect(new CRow(newRow, &#x27;
+                           &#x27;input.change()));\n&#x27;}],
+   &#x27;mergers&#x27;: {&#x27;jfstmerge&#x27;}},
+  {&#x27;eq&#x27;: [{&#x27;CHUNK_OURS&#x27;: &#x27;                tmpCache.put(key, &#x27;
+                         &#x27;jedis.hgetAll(key));\n&#x27;,
+           &#x27;CHUNK_THEIRS&#x27;: &#x27;                    String[] splitKey = &#x27;
+                           &#x27;StringUtils.split(key, &quot;:&quot;);\n&#x27;
+                           &#x27;                    String newKey = splitKey[0] + &#x27;
+                           &#x27;&quot;:&quot; + splitKey[1] + &quot;:&quot; + splitKey[2];\n&#x27;
+                           &#x27;                    newPerKeys.add(newKey);\n&#x27;}],
+   &#x27;mergers&#x27;: {&#x27;jfstmerge&#x27;}},
+  {&#x27;eq&#x27;: [{&#x27;CHUNK_OURS&#x27;: &#x27;&#x27;,
+           &#x27;CHUNK_THEIRS&#x27;: &#x27;                List&lt;String&gt; list = &#x27;
+                           &#x27;newPerKeys.stream().distinct().collect(Collectors.toList());\n&#x27;
+                           &#x27;                for(String key : list){\n&#x27;
+                           &#x27;                    Map&lt;String, String&gt; kv = &#x27;
+                           &#x27;Maps.newHashMap();\n&#x27;
+                           &#x27;                    String[] primaryKv = &#x27;
+                           &#x27;StringUtils.split(key, &quot;:&quot;);\n&#x27;
+                           &#x27;                    kv.put(primaryKv[1], &#x27;
+                           &#x27;primaryKv[2]);\n&#x27;
+                           &#x27;                    String pattern = key + &quot;*&quot;;\n&#x27;
+                           &#x27;                    Set&lt;String&gt; realKeys = &#x27;
+                           &#x27;((Jedis) jedis).keys(pattern);\n&#x27;
+                           &#x27;                    for (String realKey : &#x27;
+                           &#x27;realKeys){\n&#x27;
+                           &#x27;                        &#x27;
+                           &#x27;kv.put(StringUtils.split(realKey, &quot;:&quot;)[3], &#x27;
+                           &#x27;jedis.get(realKey));\n&#x27;
+                           &#x27;                    }\n&#x27;
+                           &#x27;                    tmpCache.put(key, kv);\n&#x27;
+                           &#x27;                }\n&#x27;
+                           &#x27;            } else {\n&#x27;
+                           &#x27;                String perKey = &#x27;
+                           &#x27;tableInfo.getTableName() + &quot;*&quot;;\n&#x27;
+                           &#x27;                Set&lt;String&gt; keys = &#x27;
+                           &#x27;keys((JedisCluster) jedis, perKey);\n&#x27;
+                           &#x27;                List&lt;String&gt; newPerKeys = new &#x27;
+                           &#x27;LinkedList&lt;&gt;();\n&#x27;
+                           &#x27;                for (String key : keys){\n&#x27;
+                           &#x27;                    String[] splitKey = &#x27;
+                           &#x27;StringUtils.split(key, &quot;:&quot;);\n&#x27;
+                           &#x27;                    String newKey = splitKey[0] + &#x27;
+                           &#x27;&quot;:&quot; + splitKey[1] + &quot;:&quot; + splitKey[2];\n&#x27;
+                           &#x27;                    newPerKeys.add(newKey);\n&#x27;
+                           &#x27;                }\n&#x27;
+                           &#x27;                List&lt;String&gt; list = &#x27;
+                           &#x27;newPerKeys.stream().distinct().collect(Collectors.toList());\n&#x27;
+                           &#x27;                for(String key : list){\n&#x27;
+                           &#x27;                    Map&lt;String, String&gt; kv = &#x27;
+                           &#x27;Maps.newHashMap();\n&#x27;
+                           &#x27;                    String[] primaryKv = &#x27;
+                           &#x27;StringUtils.split(key, &quot;:&quot;);\n&#x27;
+                           &#x27;                    kv.put(primaryKv[1], &#x27;
+                           &#x27;primaryKv[2]);\n&#x27;
+                           &#x27;                    String pattern = key + &quot;*&quot;;\n&#x27;
+                           &#x27;                    Set&lt;String&gt; realKeys = &#x27;
+                           &#x27;keys((JedisCluster) jedis, pattern);\n&#x27;
+                           &#x27;                    for (String realKey : &#x27;
+                           &#x27;realKeys){\n&#x27;
+                           &#x27;                        &#x27;
+                           &#x27;kv.put(StringUtils.split(key, &quot;:&quot;)[3], &#x27;
+                           &#x27;jedis.get(realKey));\n&#x27;
+                           &#x27;                    }\n&#x27;
+                           &#x27;                    tmpCache.put(key, kv);\n&#x27;
+                           &#x27;                }\n&#x27;
+                           &#x27;            }\n&#x27;
+                           &#x27;\n&#x27;
+                           &#x27;\n&#x27;}],
    &#x27;mergers&#x27;: {&#x27;jfstmerge&#x27;}}],
- [{&#x27;eq&#x27;: [{&#x27;CHUNK_OURS&#x27;: &#x27;    public void asyncInvoke(Tuple2&lt;Boolean,Row&gt; &#x27;
-                         &#x27;input, ResultFuture&lt;Tuple2&lt;Boolean,Row&gt;&gt; &#x27;
-                         &#x27;resultFuture) throws Exception {\n&#x27;
-                         &#x27;        Tuple2&lt;Boolean, Row&gt; inputCopy = &#x27;
-                         &#x27;Tuple2.of(input.f0, input.f1);\n&#x27;
-                         &#x27;        //scannerBuilder 设置为null重新加载过滤条件\n&#x27;,
-           &#x27;CHUNK_THEIRS&#x27;: &#x27;    public void handleAsyncInvoke(Map&lt;String, &#x27;
-                           &#x27;Object&gt; inputParams, CRow input, &#x27;
-                           &#x27;ResultFuture&lt;CRow&gt; resultFuture) throws Exception &#x27;
-                           &#x27;{\n&#x27;
-                           &#x27;        CRow inputCopy = new CRow(input.row(), &#x27;
-                           &#x27;input.change());\n&#x27;
-                           &#x27;        //scannerBuilder &#x27;
-                           &#x27;设置为null重新加载过滤条件,然后connkudu重新赋值\n&#x27;
-                           &#x27;        //todo:代码需要优化\n&#x27;}],
+ [{&#x27;eq&#x27;: [{&#x27;CHUNK_OURS&#x27;: &#x27;import com.dtstack.flink.sql.side.*;\n&#x27;
+                         &#x27;import &#x27;
+                         &#x27;com.dtstack.flink.sql.side.redis.enums.RedisType;\n&#x27;,
+           &#x27;CHUNK_THEIRS&#x27;: &#x27;import &#x27;
+                           &#x27;org.apache.flink.api.java.typeutils.RowTypeInfo;\n&#x27;
+                           &#x27;import org.apache.flink.table.runtime.types.CRow;\n&#x27;
+                           &#x27;import org.apache.flink.types.Row;\n&#x27;
+                           &#x27;import org.apache.flink.util.Collector;\n&#x27;
+                           &#x27;\n&#x27;
+                           &#x27;import com.dtstack.flink.sql.side.AllReqRow;\n&#x27;
+                           &#x27;import com.dtstack.flink.sql.side.FieldInfo;\n&#x27;
+                           &#x27;import com.dtstack.flink.sql.side.JoinInfo;\n&#x27;
+                           &#x27;import &#x27;
+                           &#x27;com.dtstack.flink.sql.side.SideTableInfo;\n&#x27;}],
+   &#x27;mergers&#x27;: {&#x27;baseline&#x27;}},
+  {&#x27;eq&#x27;: [{&#x27;CHUNK_OURS&#x27;: &#x27;import org.apache.calcite.sql.JoinType;\n&#x27;
+                         &#x27;import &#x27;
+                         &#x27;org.apache.commons.collections.CollectionUtils;\n&#x27;
+                         &#x27;import org.apache.commons.collections.MapUtils;\n&#x27;
+                         &#x27;import org.apache.commons.lang.StringUtils;\n&#x27;
+                         &#x27;import &#x27;
+                         &#x27;org.apache.commons.pool2.impl.GenericObjectPoolConfig;\n&#x27;
+                         &#x27;import &#x27;
+                         &#x27;org.apache.flink.api.java.typeutils.RowTypeInfo;\n&#x27;,
+           &#x27;CHUNK_THEIRS&#x27;: &#x27;&#x27;}],
    &#x27;mergers&#x27;: {&#x27;baseline&#x27;}},
   {&#x27;eq&#x27;: [{&#x27;CHUNK_OURS&#x27;: &#x27;        for (int i = 0; i &lt; &#x27;
                          &#x27;sideInfo.getEqualValIndex().size(); i++) {\n&#x27;
+                         &#x27;            Integer conValIndex = &#x27;
+                         &#x27;sideInfo.getEqualValIndex().get(i);\n&#x27;
                          &#x27;            Object equalObj = &#x27;
-                         &#x27;inputCopy.f1.getField(sideInfo.getEqualValIndex().get(i));\n&#x27;
-                         &#x27;            if (equalObj == null) {\n&#x27;
-                         &#x27;                dealMissKey(inputCopy, &#x27;
-                         &#x27;resultFuture);\n&#x27;
-                         &#x27;                return;\n&#x27;
-                         &#x27;            }\n&#x27;
-                         &#x27;            //增加过滤条件\n&#x27;
-                         &#x27;            &#x27;
-                         &#x27;scannerBuilder.addPredicate(KuduPredicate.newInListPredicate(schema.getColumn(sideInfo.getEqualFieldList().get(i)), &#x27;
-                         &#x27;Collections.singletonList(equalObj)));\n&#x27;
-                         &#x27;            inputParams.add(equalObj);\n&#x27;
-                         &#x27;        }\n&#x27;,
-           &#x27;CHUNK_THEIRS&#x27;: &#x27;        inputParams.entrySet().forEach(e -&gt;{\n&#x27;
-                           &#x27;            &#x27;
-                           &#x27;scannerBuilder.addPredicate(KuduPredicate.newInListPredicate(schema.getColumn(e.getKey()), &#x27;
-                           &#x27;Collections.singletonList(e.getValue())));\n&#x27;
-                           &#x27;        });\n&#x27;}],
-   &#x27;mergers&#x27;: {&#x27;baseline&#x27;}},
-  {&#x27;eq&#x27;: [{&#x27;CHUNK_OURS&#x27;: &#x27;\n&#x27;
-                         &#x27;        String key = buildCacheKey(inputParams);\n&#x27;
-                         &#x27;\n&#x27;
-                         &#x27;        if (openCache()) {\n&#x27;
-                         &#x27;            //判断数据是否已经加载到缓存中\n&#x27;
-                         &#x27;            CacheObj val = getFromCache(key);\n&#x27;
-                         &#x27;            if (val != null) {\n&#x27;
-                         &#x27;                if (ECacheContentType.MissVal == &#x27;
-                         &#x27;val.getType()) {\n&#x27;
-                         &#x27;                    dealMissKey(inputCopy, &#x27;
-                         &#x27;resultFuture);\n&#x27;
-                         &#x27;                    return;\n&#x27;
-                         &#x27;                } else if &#x27;
-                         &#x27;(ECacheContentType.SingleLine == val.getType()) {\n&#x27;
-                         &#x27;                    try {\n&#x27;
-                         &#x27;                        Row row = &#x27;
-                         &#x27;fillData(inputCopy.f1, val);\n&#x27;
-                         &#x27;                        &#x27;
-                         &#x27;resultFuture.complete(Collections.singleton(Tuple2.of(inputCopy.f0,row)));\n&#x27;
-                         &#x27;                    } catch (Exception e) {\n&#x27;
-                         &#x27;                        &#x27;
-                         &#x27;dealFillDataError(resultFuture, e, inputCopy);\n&#x27;
-                         &#x27;                    }\n&#x27;
-                         &#x27;                } else if &#x27;
-                         &#x27;(ECacheContentType.MultiLine == val.getType()) {\n&#x27;
-                         &#x27;                    try {\n&#x27;
-                         &#x27;                        List&lt;Tuple2&lt;Boolean,Row&gt;&gt; &#x27;
-                         &#x27;rowList = Lists.newArrayList();\n&#x27;
-                         &#x27;                        for (Object jsonArray : &#x27;
-                         &#x27;(List) val.getContent()) {\n&#x27;
-                         &#x27;                            Row row = &#x27;
-                         &#x27;fillData(inputCopy.f1, jsonArray);\n&#x27;
-                         &#x27;                            &#x27;
-                         &#x27;rowList.add(Tuple2.of(inputCopy.f0, row));\n&#x27;
-                         &#x27;                        }\n&#x27;
-                         &#x27;                        &#x27;
-                         &#x27;resultFuture.complete(rowList);\n&#x27;
-                         &#x27;                    } catch (Exception e) {\n&#x27;
-                         &#x27;                        &#x27;
-                         &#x27;dealFillDataError(resultFuture, e, inputCopy);\n&#x27;
-                         &#x27;                    }\n&#x27;
-                         &#x27;                } else {\n&#x27;
-                         &#x27;                    &#x27;
-                         &#x27;resultFuture.completeExceptionally(new &#x27;
-                         &#x27;RuntimeException(&quot;not support cache obj type &quot; + &#x27;
-                         &#x27;val.getType()));\n&#x27;
-                         &#x27;                }\n&#x27;
-                         &#x27;                return;\n&#x27;
-                         &#x27;            }\n&#x27;
-                         &#x27;        }\n&#x27;,
-           &#x27;CHUNK_THEIRS&#x27;: &#x27;&#x27;},
-          {&#x27;CHUNK_OURS&#x27;: &#x27;    @Override\n&#x27;
-                         &#x27;    public void asyncInvoke(Tuple2&lt;Boolean,Row&gt; &#x27;
-                         &#x27;input, ResultFuture&lt;Tuple2&lt;Boolean,Row&gt;&gt; &#x27;
-                         &#x27;resultFuture) throws Exception {\n&#x27;
-                         &#x27;        Tuple2&lt;Boolean, Row&gt; inputCopy = &#x27;
-                         &#x27;Tuple2.of(input.f0, input.f1);\n&#x27;
-                         &#x27;        //scannerBuilder 设置为null重新加载过滤条件\n&#x27;
-                         &#x27;        scannerBuilder = null;\n&#x27;
-                         &#x27;        connKuDu();\n&#x27;
-                         &#x27;        JsonArray inputParams = new JsonArray();\n&#x27;
-                         &#x27;        Schema schema = table.getSchema();\n&#x27;
-                         &#x27;        //  @wenbaoup fix bug\n&#x27;
-                         &#x27;        for (int i = 0; i &lt; &#x27;
+                         &#x27;row.getField(conValIndex);\n&#x27;,
+           &#x27;CHUNK_THEIRS&#x27;: &#x27;        for(Integer conValIndex : &#x27;
+                           &#x27;sideInfo.getEqualValIndex()){\n&#x27;
+                           &#x27;            Object equalObj = &#x27;
+                           &#x27;input.row().getField(conValIndex);\n&#x27;},
+          {&#x27;CHUNK_OURS&#x27;: &#x27;        for (int i = 0; i &lt; &#x27;
                          &#x27;sideInfo.getEqualValIndex().size(); i++) {\n&#x27;
+                         &#x27;            Integer conValIndex = &#x27;
+                         &#x27;sideInfo.getEqualValIndex().get(i);\n&#x27;
                          &#x27;            Object equalObj = &#x27;
-                         &#x27;inputCopy.f1.getField(sideInfo.getEqualValIndex().get(i));\n&#x27;
-                         &#x27;            if (equalObj == null) {\n&#x27;
-                         &#x27;                dealMissKey(inputCopy, &#x27;
-                         &#x27;resultFuture);\n&#x27;
+                         &#x27;row.getField(conValIndex);\n&#x27;,
+           &#x27;CHUNK_THEIRS&#x27;: &#x27;        for(Integer conValIndex : &#x27;
+                           &#x27;sideInfo.getEqualValIndex()){\n&#x27;
+                           &#x27;            Object equalObj = &#x27;
+                           &#x27;input.row().getField(conValIndex);\n&#x27;}],
+   &#x27;mergers&#x27;: {&#x27;baseline&#x27;, &#x27;jfstmerge&#x27;}},
+  {&#x27;eq&#x27;: [{&#x27;CHUNK_OURS&#x27;: &#x27;        String key = buildCacheKey(inputParams);\n&#x27;
+                         &#x27;        if(StringUtils.isBlank(key)){\n&#x27;,
+           &#x27;CHUNK_THEIRS&#x27;: &#x27;        String key = buildKey(inputParams);\n&#x27;
+                           &#x27;\n&#x27;
+                           &#x27;        Map&lt;String, String&gt; cacheMap = &#x27;
+                           &#x27;cacheRef.get().get(key);\n&#x27;
+                           &#x27;\n&#x27;
+                           &#x27;        if (cacheMap == null){\n&#x27;
+                           &#x27;            if(sideInfo.getJoinType() == &#x27;
+                           &#x27;JoinType.LEFT){\n&#x27;
+                           &#x27;                Row data = fillData(input.row(), &#x27;
+                           &#x27;null);\n&#x27;
+                           &#x27;                out.collect(new CRow(data, &#x27;
+                           &#x27;input.change()));\n&#x27;
+                           &#x27;            }else{\n&#x27;
+                           &#x27;                return;\n&#x27;
+                           &#x27;            }\n&#x27;
+                           &#x27;\n&#x27;}],
+   &#x27;mergers&#x27;: {&#x27;baseline&#x27;}},
+  {&#x27;eq&#x27;: [{&#x27;CHUNK_OURS&#x27;: &#x27;        Map&lt;String, String&gt; cacheMap = &#x27;
+                         &#x27;cacheRef.get().get(key);\n&#x27;
+                         &#x27;        if(MapUtils.isEmpty(cacheMap)){\n&#x27;
+                         &#x27;            if(sideInfo.getJoinType() != &#x27;
+                         &#x27;JoinType.LEFT){\n&#x27;
                          &#x27;                return;\n&#x27;
                          &#x27;            }\n&#x27;
-                         &#x27;            //增加过滤条件\n&#x27;
-                         &#x27;            &#x27;
-                         &#x27;scannerBuilder.addPredicate(KuduPredicate.newInListPredicate(schema.getColumn(sideInfo.getEqualFieldList().get(i)), &#x27;
-                         &#x27;Collections.singletonList(equalObj)));\n&#x27;
-                         &#x27;            inputParams.add(equalObj);\n&#x27;
+                         &#x27;            Row data = fillData(row, null);\n&#x27;
+                         &#x27;            out.collect(data);\n&#x27;
+                         &#x27;            return;\n&#x27;
+                         &#x27;\n&#x27;
                          &#x27;        }\n&#x27;
-                         &#x27;\n&#x27;
-                         &#x27;        //  填充谓词信息\n&#x27;
-                         &#x27;        List&lt;PredicateInfo&gt; predicateInfoes = &#x27;
-                         &#x27;sideInfo.getSideTableInfo().getPredicateInfoes();\n&#x27;
-                         &#x27;        if (predicateInfoes.size() &gt; 0) {\n&#x27;
-                         &#x27;            predicateInfoes.stream().map(info -&gt; {\n&#x27;
-                         &#x27;                KuduPredicate kuduPredicate = &#x27;
-                         &#x27;KuduUtil.buildKuduPredicate(schema, info);\n&#x27;
-                         &#x27;                if (null != kuduPredicate) {\n&#x27;
-                         &#x27;                    &#x27;
-                         &#x27;scannerBuilder.addPredicate(kuduPredicate);\n&#x27;
-                         &#x27;                }\n&#x27;
-                         &#x27;                return info;\n&#x27;
-                         &#x27;            }).count();\n&#x27;
-                         &#x27;        }\n&#x27;
-                         &#x27;\n&#x27;
-                         &#x27;\n&#x27;
-                         &#x27;        String key = buildCacheKey(inputParams);\n&#x27;
-                         &#x27;\n&#x27;
-                         &#x27;        if (openCache()) {\n&#x27;
-                         &#x27;            //判断数据是否已经加载到缓存中\n&#x27;
-                         &#x27;            CacheObj val = getFromCache(key);\n&#x27;
-                         &#x27;            if (val != null) {\n&#x27;
-                         &#x27;                if (ECacheContentType.MissVal == &#x27;
-                         &#x27;val.getType()) {\n&#x27;
-                         &#x27;                    dealMissKey(inputCopy, &#x27;
-                         &#x27;resultFuture);\n&#x27;
-                         &#x27;                    return;\n&#x27;
-                         &#x27;                } else if &#x27;
-                         &#x27;(ECacheContentType.SingleLine == val.getType()) {\n&#x27;
-                         &#x27;                    try {\n&#x27;
-                         &#x27;                        Row row = &#x27;
-                         &#x27;fillData(inputCopy.f1, val);\n&#x27;
-                         &#x27;                        &#x27;
-                         &#x27;resultFuture.complete(Collections.singleton(Tuple2.of(inputCopy.f0,row)));\n&#x27;
-                         &#x27;                    } catch (Exception e) {\n&#x27;
-                         &#x27;                        &#x27;
-                         &#x27;dealFillDataError(resultFuture, e, inputCopy);\n&#x27;
-                         &#x27;                    }\n&#x27;
-                         &#x27;                } else if &#x27;
-                         &#x27;(ECacheContentType.MultiLine == val.getType()) {\n&#x27;
-                         &#x27;                    try {\n&#x27;
-                         &#x27;                        List&lt;Tuple2&lt;Boolean,Row&gt;&gt; &#x27;
-                         &#x27;rowList = Lists.newArrayList();\n&#x27;
-                         &#x27;                        for (Object jsonArray : &#x27;
-                         &#x27;(List) val.getContent()) {\n&#x27;
-                         &#x27;                            Row row = &#x27;
-                         &#x27;fillData(inputCopy.f1, jsonArray);\n&#x27;
-                         &#x27;                            &#x27;
-                         &#x27;rowList.add(Tuple2.of(inputCopy.f0, row));\n&#x27;
-                         &#x27;                        }\n&#x27;
-                         &#x27;                        &#x27;
-                         &#x27;resultFuture.complete(rowList);\n&#x27;
-                         &#x27;                    } catch (Exception e) {\n&#x27;
-                         &#x27;                        &#x27;
-                         &#x27;dealFillDataError(resultFuture, e, inputCopy);\n&#x27;
-                         &#x27;                    }\n&#x27;
-                         &#x27;                } else {\n&#x27;
-                         &#x27;                    &#x27;
-                         &#x27;resultFuture.completeExceptionally(new &#x27;
-                         &#x27;RuntimeException(&quot;not support cache obj type &quot; + &#x27;
-                         &#x27;val.getType()));\n&#x27;
-                         &#x27;                }\n&#x27;
+                         &#x27;        Row newRow = fillData(row, cacheMap);\n&#x27;
+                         &#x27;        out.collect(newRow);\n&#x27;,
+           &#x27;CHUNK_THEIRS&#x27;: &#x27;        Row newRow = fillData(input.row(), &#x27;
+                           &#x27;cacheMap);\n&#x27;
+                           &#x27;        out.collect(new CRow(newRow, &#x27;
+                           &#x27;input.change()));\n&#x27;},
+          {&#x27;CHUNK_OURS&#x27;: &#x27;        Row newRow = fillData(row, cacheMap);\n&#x27;
+                         &#x27;        out.collect(newRow);\n&#x27;,
+           &#x27;CHUNK_THEIRS&#x27;: &#x27;\n&#x27;
+                           &#x27;        Row newRow = fillData(input.row(), &#x27;
+                           &#x27;cacheMap);\n&#x27;
+                           &#x27;        out.collect(new CRow(newRow, &#x27;
+                           &#x27;input.change()));\n&#x27;}],
+   &#x27;mergers&#x27;: {&#x27;baseline&#x27;, &#x27;jfstmerge&#x27;}},
+  {&#x27;eq&#x27;: [{&#x27;CHUNK_OURS&#x27;: &#x27;            for(String key : keys){\n&#x27;
+                         &#x27;                tmpCache.put(key, &#x27;
+                         &#x27;jedis.hgetAll(key));\n&#x27;,
+           &#x27;CHUNK_THEIRS&#x27;: &#x27;\n&#x27;
+                           &#x27;            if (tableInfo.getRedisType() != 3){\n&#x27;
+                           &#x27;                String perKey = &#x27;
+                           &#x27;tableInfo.getTableName() + &quot;*&quot;;\n&#x27;
+                           &#x27;                Set&lt;String&gt; keys = ((Jedis) &#x27;
+                           &#x27;jedis).keys(perKey);\n&#x27;
+                           &#x27;                List&lt;String&gt; newPerKeys = new &#x27;
+                           &#x27;LinkedList&lt;&gt;();\n&#x27;
+                           &#x27;                for (String key : keys){\n&#x27;
+                           &#x27;                    String[] splitKey = &#x27;
+                           &#x27;StringUtils.split(key, &quot;:&quot;);\n&#x27;
+                           &#x27;                    String newKey = splitKey[0] + &#x27;
+                           &#x27;&quot;:&quot; + splitKey[1] + &quot;:&quot; + splitKey[2];\n&#x27;
+                           &#x27;                    newPerKeys.add(newKey);\n&#x27;
+                           &#x27;                }\n&#x27;
+                           &#x27;                List&lt;String&gt; list = &#x27;
+                           &#x27;newPerKeys.stream().distinct().collect(Collectors.toList());\n&#x27;
+                           &#x27;                for(String key : list){\n&#x27;
+                           &#x27;                    Map&lt;String, String&gt; kv = &#x27;
+                           &#x27;Maps.newHashMap();\n&#x27;
+                           &#x27;                    String[] primaryKv = &#x27;
+                           &#x27;StringUtils.split(key, &quot;:&quot;);\n&#x27;
+                           &#x27;                    kv.put(primaryKv[1], &#x27;
+                           &#x27;primaryKv[2]);\n&#x27;
+                           &#x27;                    String pattern = key + &quot;*&quot;;\n&#x27;
+                           &#x27;                    Set&lt;String&gt; realKeys = &#x27;
+                           &#x27;((Jedis) jedis).keys(pattern);\n&#x27;
+                           &#x27;                    for (String realKey : &#x27;
+                           &#x27;realKeys){\n&#x27;
+                           &#x27;                        &#x27;
+                           &#x27;kv.put(StringUtils.split(realKey, &quot;:&quot;)[3], &#x27;
+                           &#x27;jedis.get(realKey));\n&#x27;
+                           &#x27;                    }\n&#x27;
+                           &#x27;                    tmpCache.put(key, kv);\n&#x27;
+                           &#x27;                }\n&#x27;
+                           &#x27;            } else {\n&#x27;
+                           &#x27;                String perKey = &#x27;
+                           &#x27;tableInfo.getTableName() + &quot;*&quot;;\n&#x27;
+                           &#x27;                Set&lt;String&gt; keys = &#x27;
+                           &#x27;keys((JedisCluster) jedis, perKey);\n&#x27;
+                           &#x27;                List&lt;String&gt; newPerKeys = new &#x27;
+                           &#x27;LinkedList&lt;&gt;();\n&#x27;
+                           &#x27;                for (String key : keys){\n&#x27;
+                           &#x27;                    String[] splitKey = &#x27;
+                           &#x27;StringUtils.split(key, &quot;:&quot;);\n&#x27;
+                           &#x27;                    String newKey = splitKey[0] + &#x27;
+                           &#x27;&quot;:&quot; + splitKey[1] + &quot;:&quot; + splitKey[2];\n&#x27;
+                           &#x27;                    newPerKeys.add(newKey);\n&#x27;
+                           &#x27;                }\n&#x27;
+                           &#x27;                List&lt;String&gt; list = &#x27;
+                           &#x27;newPerKeys.stream().distinct().collect(Collectors.toList());\n&#x27;
+                           &#x27;                for(String key : list){\n&#x27;
+                           &#x27;                    Map&lt;String, String&gt; kv = &#x27;
+                           &#x27;Maps.newHashMap();\n&#x27;
+                           &#x27;                    String[] primaryKv = &#x27;
+                           &#x27;StringUtils.split(key, &quot;:&quot;);\n&#x27;
+                           &#x27;                    kv.put(primaryKv[1], &#x27;
+                           &#x27;primaryKv[2]);\n&#x27;
+                           &#x27;                    String pattern = key + &quot;*&quot;;\n&#x27;
+                           &#x27;                    Set&lt;String&gt; realKeys = &#x27;
+                           &#x27;keys((JedisCluster) jedis, pattern);\n&#x27;
+                           &#x27;                    for (String realKey : &#x27;
+                           &#x27;realKeys){\n&#x27;
+                           &#x27;                        &#x27;
+                           &#x27;kv.put(StringUtils.split(key, &quot;:&quot;)[3], &#x27;
+                           &#x27;jedis.get(realKey));\n&#x27;
+                           &#x27;                    }\n&#x27;
+                           &#x27;                    tmpCache.put(key, kv);\n&#x27;
+                           &#x27;                }\n&#x27;},
+          {&#x27;CHUNK_OURS&#x27;: &#x27;                tmpCache.put(key, &#x27;
+                         &#x27;jedis.hgetAll(key));\n&#x27;,
+           &#x27;CHUNK_THEIRS&#x27;: &#x27;                    String[] splitKey = &#x27;
+                           &#x27;StringUtils.split(key, &quot;:&quot;);\n&#x27;
+                           &#x27;                    String newKey = splitKey[0] + &#x27;
+                           &#x27;&quot;:&quot; + splitKey[1] + &quot;:&quot; + splitKey[2];\n&#x27;
+                           &#x27;                    newPerKeys.add(newKey);\n&#x27;}],
+   &#x27;mergers&#x27;: {&#x27;baseline&#x27;, &#x27;jfstmerge&#x27;}},
+  {&#x27;eq&#x27;: [{&#x27;CHUNK_OURS&#x27;: &#x27;        if(MapUtils.isEmpty(cacheMap)){\n&#x27;
+                         &#x27;            if(sideInfo.getJoinType() != &#x27;
+                         &#x27;JoinType.LEFT){\n&#x27;
                          &#x27;                return;\n&#x27;
                          &#x27;            }\n&#x27;
-                         &#x27;        }\n&#x27;
-                         &#x27;        List&lt;Map&lt;String, Object&gt;&gt; cacheContent = &#x27;
-                         &#x27;Lists.newArrayList();\n&#x27;
-                         &#x27;        AsyncKuduScanner asyncKuduScanner = &#x27;
-                         &#x27;scannerBuilder.build();\n&#x27;
-                         &#x27;        List&lt;Tuple2&lt;Boolean,Row&gt;&gt; rowList = &#x27;
-                         &#x27;Lists.newArrayList();\n&#x27;
-                         &#x27;        Deferred&lt;RowResultIterator&gt; data = &#x27;
-                         &#x27;asyncKuduScanner.nextRows();\n&#x27;
-                         &#x27;        //从之前的同步修改为调用异步的Callback\n&#x27;
-                         &#x27;        data.addCallbackDeferring(new &#x27;
-                         &#x27;GetListRowCB(inputCopy, cacheContent, rowList, &#x27;
-                         &#x27;asyncKuduScanner, resultFuture, key));\n&#x27;
-                         &#x27;    }\n&#x27;,
-           &#x27;CHUNK_THEIRS&#x27;: &#x27;\n&#x27;}],
-   &#x27;mergers&#x27;: {&#x27;baseline&#x27;, &#x27;jfstmerge&#x27;}}]]</pre>
+                         &#x27;            Row data = fillData(row, null);\n&#x27;
+                         &#x27;            out.collect(data);\n&#x27;,
+           &#x27;CHUNK_THEIRS&#x27;: &#x27;\n&#x27;
+                           &#x27;        if (cacheMap == null){\n&#x27;
+                           &#x27;            if(sideInfo.getJoinType() == &#x27;
+                           &#x27;JoinType.LEFT){\n&#x27;
+                           &#x27;                Row data = fillData(input.row(), &#x27;
+                           &#x27;null);\n&#x27;
+                           &#x27;                out.collect(new CRow(data, &#x27;
+                           &#x27;input.change()));\n&#x27;
+                           &#x27;            }else{\n&#x27;}],
+   &#x27;mergers&#x27;: {&#x27;jfstmerge&#x27;}},
+  {&#x27;eq&#x27;: [{&#x27;CHUNK_OURS&#x27;: &#x27;&#x27;,
+           &#x27;CHUNK_THEIRS&#x27;: &#x27;                List&lt;String&gt; list = &#x27;
+                           &#x27;newPerKeys.stream().distinct().collect(Collectors.toList());\n&#x27;
+                           &#x27;                for(String key : list){\n&#x27;
+                           &#x27;                    Map&lt;String, String&gt; kv = &#x27;
+                           &#x27;Maps.newHashMap();\n&#x27;
+                           &#x27;                    String[] primaryKv = &#x27;
+                           &#x27;StringUtils.split(key, &quot;:&quot;);\n&#x27;
+                           &#x27;                    kv.put(primaryKv[1], &#x27;
+                           &#x27;primaryKv[2]);\n&#x27;
+                           &#x27;                    String pattern = key + &quot;*&quot;;\n&#x27;
+                           &#x27;                    Set&lt;String&gt; realKeys = &#x27;
+                           &#x27;((Jedis) jedis).keys(pattern);\n&#x27;
+                           &#x27;                    for (String realKey : &#x27;
+                           &#x27;realKeys){\n&#x27;
+                           &#x27;                        &#x27;
+                           &#x27;kv.put(StringUtils.split(realKey, &quot;:&quot;)[3], &#x27;
+                           &#x27;jedis.get(realKey));\n&#x27;
+                           &#x27;                    }\n&#x27;
+                           &#x27;                    tmpCache.put(key, kv);\n&#x27;
+                           &#x27;                }\n&#x27;
+                           &#x27;            } else {\n&#x27;
+                           &#x27;                String perKey = &#x27;
+                           &#x27;tableInfo.getTableName() + &quot;*&quot;;\n&#x27;
+                           &#x27;                Set&lt;String&gt; keys = &#x27;
+                           &#x27;keys((JedisCluster) jedis, perKey);\n&#x27;
+                           &#x27;                List&lt;String&gt; newPerKeys = new &#x27;
+                           &#x27;LinkedList&lt;&gt;();\n&#x27;
+                           &#x27;                for (String key : keys){\n&#x27;
+                           &#x27;                    String[] splitKey = &#x27;
+                           &#x27;StringUtils.split(key, &quot;:&quot;);\n&#x27;
+                           &#x27;                    String newKey = splitKey[0] + &#x27;
+                           &#x27;&quot;:&quot; + splitKey[1] + &quot;:&quot; + splitKey[2];\n&#x27;
+                           &#x27;                    newPerKeys.add(newKey);\n&#x27;
+                           &#x27;                }\n&#x27;
+                           &#x27;                List&lt;String&gt; list = &#x27;
+                           &#x27;newPerKeys.stream().distinct().collect(Collectors.toList());\n&#x27;
+                           &#x27;                for(String key : list){\n&#x27;
+                           &#x27;                    Map&lt;String, String&gt; kv = &#x27;
+                           &#x27;Maps.newHashMap();\n&#x27;
+                           &#x27;                    String[] primaryKv = &#x27;
+                           &#x27;StringUtils.split(key, &quot;:&quot;);\n&#x27;
+                           &#x27;                    kv.put(primaryKv[1], &#x27;
+                           &#x27;primaryKv[2]);\n&#x27;
+                           &#x27;                    String pattern = key + &quot;*&quot;;\n&#x27;
+                           &#x27;                    Set&lt;String&gt; realKeys = &#x27;
+                           &#x27;keys((JedisCluster) jedis, pattern);\n&#x27;
+                           &#x27;                    for (String realKey : &#x27;
+                           &#x27;realKeys){\n&#x27;
+                           &#x27;                        &#x27;
+                           &#x27;kv.put(StringUtils.split(key, &quot;:&quot;)[3], &#x27;
+                           &#x27;jedis.get(realKey));\n&#x27;
+                           &#x27;                    }\n&#x27;
+                           &#x27;                    tmpCache.put(key, kv);\n&#x27;
+                           &#x27;                }\n&#x27;
+                           &#x27;            }\n&#x27;
+                           &#x27;\n&#x27;
+                           &#x27;\n&#x27;}],
+   &#x27;mergers&#x27;: {&#x27;jfstmerge&#x27;}}]]</pre>
           </body>
         </html>
         

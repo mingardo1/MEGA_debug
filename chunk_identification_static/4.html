@@ -12,11 +12,24 @@
                             height: 48vh;
                             overflow-y: auto;
                         }
-                        abbr {
-                          /* Here is the delay */
-                          transition-delay:0s;
+                        .highlighted {
+                            background-color: rgba(177, 82, 227, 0.85) !important;
                         }
                     </style>
+                    <script>
+                        function enter(c) {
+                            const lines = document.getElementsByClassName(c);
+                            for (let i = 0; i < lines.length; i++) {
+                               lines.item(i).classList.add('highlighted');
+                            }
+                        }
+                        function out(c) {
+                            const lines = document.getElementsByClassName(c);
+                            for (let i = 0; i < lines.length; i++) {
+                               lines.item(i).classList.remove('highlighted');
+                            }
+                        }
+                    </script>
               </head>
               <body>
                 <span style="height: 4vh">
@@ -55,370 +68,370 @@ del /Q jfstmerge.java.merge
                             <th>spork</th>
                         </tr>
                         <tr>
-                            <td><pre>   1 /*
-   2  * Copyright (C) 2016 AriaLyy(https://github.com/AriaLyy/Aria)
-   3  *
-   4  * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
-   5  * you may not use this file except in compliance with the License.
-   6  * You may obtain a copy of the License at
-   7  *
-   8  *      http://www.apache.org/licenses/LICENSE-2.0
-   9  *
-  10  * Unless required by applicable law or agreed to in writing, software
-  11  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
-  12  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  13  * See the License for the specific language governing permissions and
-  14  * limitations under the License.
-  15  */
-  16 package com.arialyy.aria.core.download.group;
-  17 
-  18 import android.net.Uri;
-  19 import android.text.TextUtils;
-  20 import com.arialyy.aria.core.FtpUrlEntity;
-  21 import com.arialyy.aria.core.common.CompleteInfo;
-  22 import com.arialyy.aria.core.common.OnFileInfoCallback;
-  23 import com.arialyy.aria.core.download.DGTaskWrapper;
-  24 import com.arialyy.aria.core.download.DTaskWrapper;
-  25 import com.arialyy.aria.core.inf.AbsEntity;
-  26 import com.arialyy.aria.core.inf.IEntity;
-  27 import com.arialyy.aria.exception.BaseException;
-  28 import java.util.concurrent.locks.Condition;
-  29 import java.util.concurrent.locks.ReentrantLock;
-  30 
-  31 /**
-  32  * Created by Aria.Lao on 2017/7/27.
-  33  * ftp文件夹下载工具
-  34  */
-  35 public class FtpDirDownloadUtil extends AbsGroupUtil {
-  36   private String TAG = &quot;FtpDirDownloadUtil&quot;;
-  37   private ReentrantLock LOCK = new ReentrantLock();
-  38   private Condition condition = LOCK.newCondition();
-  39 
-  40   public FtpDirDownloadUtil(IDGroupListener listener, DGTaskWrapper taskEntity) {
-  41     super(listener, taskEntity);
-  42   }
-  43 
-  44   @Override int getTaskType() {
-  45     return FTP_DIR;
-  46   }
-  47 
-  48 &lt;&lt;&lt;&lt;&lt;&lt;&lt; GitAnalyzerPlus_ours
-<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  49   @Override protected void onPreStart() {</span>
-<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  50     super.onPreStart();</span>
-  51 ||||||| GitAnalyzerPlus_base
-<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  52   @Override protected void onStart() {</span>
-<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  53     super.onStart();</span>
-<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  54     if (mGTWrapper.getEntity().getFileSize() &gt; 1) {</span>
-<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  55       startDownload();</span>
-<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  56     } else {</span>
-<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  57 </span>
-<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  58       FtpDirInfoThread infoThread = new FtpDirInfoThread(mGTWrapper, new OnFileInfoCallback() {</span>
-<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  59         @Override public void onComplete(String url, CompleteInfo info) {</span>
-<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  60           if (info.code &gt;= 200 &amp;&amp; info.code &lt; 300) {</span>
-  61 =======
-<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  62   @Override protected boolean onStart() {</span>
-  63 &gt;&gt;&gt;&gt;&gt;&gt;&gt; GitAnalyzerPlus_theirs
-  64     if (mGTWrapper.getEntity().getFileSize() &gt; 1) {
-  65       startDownload(true);
-  66     } else {
-  67       FtpDirInfoThread infoThread = new FtpDirInfoThread(mGTWrapper, new OnFileInfoCallback() {
-  68         @Override public void onComplete(String url, CompleteInfo info) {
-  69           if (info.code &gt;= 200 &amp;&amp; info.code &lt; 300) {
-  70             startDownload(false);
-  71           }
-  72         }
-  73 
-  74         @Override public void onFail(AbsEntity entity, BaseException e, boolean needRetry) {
-  75           mListener.onFail(needRetry, e);
-  76         }
-  77       });
-  78       new Thread(infoThread).start();
-  79       try {
-  80         LOCK.lock();
-  81         condition.await();
-  82       } catch (InterruptedException e) {
-  83         e.printStackTrace();
-  84       } finally {
-  85         LOCK.unlock();
-  86       }
-  87     }
-  88     return true;
-  89   }
-  90 
-  91   /**
-  92    * @param needCloneInfo 第一次下载，信息已经在{@link FtpDirInfoThread}中clone了
-  93    */
-  94   private void startDownload(boolean needCloneInfo) {
-  95     try {
-  96       LOCK.lock();
-  97       condition.signalAll();
-  98     } finally {
-  99       LOCK.unlock();
- 100     }
- 101     initState();
- 102     for (DTaskWrapper wrapper : mGTWrapper.getSubTaskWrapper()) {
- 103       if (needCloneInfo) {
- 104         cloneInfo(wrapper);
- 105       }
- 106       if (wrapper.getState() != IEntity.STATE_COMPLETE) {
- 107         createAndStartSubLoader(wrapper);
- 108       }
- 109     }
- 110   }
- 111 
- 112   private void cloneInfo(DTaskWrapper subWrapper) {
- 113     FtpUrlEntity urlEntity = mGTWrapper.asFtp().getUrlEntity().clone();
- 114     Uri uri = Uri.parse(subWrapper.getEntity().getUrl());
- 115     String remotePath = uri.getPath();
- 116     urlEntity.remotePath = TextUtils.isEmpty(remotePath) ? &quot;/&quot; : remotePath;
- 117 
- 118     subWrapper.asFtp().setUrlEntity(urlEntity);
- 119     subWrapper.asFtp().setCharSet(mGTWrapper.asFtp().getCharSet());
- 120     subWrapper.asFtp().setProxy(mGTWrapper.asFtp().getProxy());
- 121   }
- 122 }</pre></td>
-                            <td><pre>   1 /*
-   2  * Copyright (C) 2016 AriaLyy(https://github.com/AriaLyy/Aria)
-   3  *
-   4  * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
-   5  * you may not use this file except in compliance with the License.
-   6  * You may obtain a copy of the License at
-   7  *
-   8  *      http://www.apache.org/licenses/LICENSE-2.0
-   9  *
-  10  * Unless required by applicable law or agreed to in writing, software
-  11  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
-  12  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  13  * See the License for the specific language governing permissions and
-  14  * limitations under the License.
-  15  */
-  16 package com.arialyy.aria.core.download.group;
-  17 
-  18 import android.net.Uri;
-  19 import android.text.TextUtils;
-  20 import com.arialyy.aria.core.FtpUrlEntity;
-  21 import com.arialyy.aria.core.common.CompleteInfo;
-  22 import com.arialyy.aria.core.common.OnFileInfoCallback;
-  23 import com.arialyy.aria.core.download.DGTaskWrapper;
-  24 import com.arialyy.aria.core.download.DTaskWrapper;
-  25 import com.arialyy.aria.core.inf.AbsEntity;
-  26 import com.arialyy.aria.core.inf.IEntity;
-  27 import com.arialyy.aria.exception.BaseException;
-  28 import java.util.concurrent.locks.Condition;
-  29 import java.util.concurrent.locks.ReentrantLock;
-  30 
-  31 /**
-  32  * Created by Aria.Lao on 2017/7/27.
-  33  * ftp文件夹下载工具
-  34  */
-  35 public class FtpDirDownloadUtil extends AbsGroupUtil {
-  36   private String TAG = &quot;FtpDirDownloadUtil&quot;;
-  37   private ReentrantLock LOCK = new ReentrantLock();
-  38   private Condition condition = LOCK.newCondition();
-  39 
-  40   public FtpDirDownloadUtil(IDGroupListener listener, DGTaskWrapper taskEntity) {
-  41     super(listener, taskEntity);
-  42   }
-  43 
-  44   @Override int getTaskType() {
-  45     return FTP_DIR;
-  46   }
-  47 
-  48 &lt;&lt;&lt;&lt;&lt;&lt;&lt; MINE
-<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  49 @Override protected void onPreStart() {</span>
-<span style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  50     super.onPreStart();</span>
-  51 ||||||| BASE
-<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  52 @Override protected void onStart() {</span>
-<span style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  53     super.onStart();</span>
-  54 =======
-<span style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  55 @Override protected boolean onStart() {</span>
-  56 &gt;&gt;&gt;&gt;&gt;&gt;&gt; YOURS
-  57     if (mGTWrapper.getEntity().getFileSize() &gt; 1) {
-  58       startDownload(true);
-  59     } else {
-  60       FtpDirInfoThread infoThread = new FtpDirInfoThread(mGTWrapper, new OnFileInfoCallback() {
-  61         @Override public void onComplete(String url, CompleteInfo info) {
-  62           if (info.code &gt;= 200 &amp;&amp; info.code &lt; 300) {
-  63             startDownload(false);
-  64           }
-  65         }
-  66 
-  67         @Override public void onFail(AbsEntity entity, BaseException e, boolean needRetry) {
-  68           mListener.onFail(needRetry, e);
-  69         }
-  70       });
-  71       new Thread(infoThread).start();
-  72       try {
-  73         LOCK.lock();
-  74         condition.await();
-  75       } catch (InterruptedException e) {
-  76         e.printStackTrace();
-  77       } finally {
-  78         LOCK.unlock();
-  79       }
-  80     }
-  81     return true;
-  82   }
-  83 
-  84   /**
-  85    * @param needCloneInfo 第一次下载，信息已经在{@link FtpDirInfoThread}中clone了
-  86    */
-  87   private void startDownload(boolean needCloneInfo) {
-  88     try {
-  89       LOCK.lock();
-  90       condition.signalAll();
-  91     } finally {
-  92       LOCK.unlock();
-  93     }
-  94     initState();
-  95     for (DTaskWrapper wrapper : mGTWrapper.getSubTaskWrapper()) {
-  96       if (needCloneInfo) {
-  97         cloneInfo(wrapper);
-  98       }
-  99       if (wrapper.getState() != IEntity.STATE_COMPLETE) {
- 100         createAndStartSubLoader(wrapper);
- 101       }
- 102     }
- 103   }
- 104 
- 105   private void cloneInfo(DTaskWrapper subWrapper) {
- 106     FtpUrlEntity urlEntity = mGTWrapper.asFtp().getUrlEntity().clone();
- 107     Uri uri = Uri.parse(subWrapper.getEntity().getUrl());
- 108     String remotePath = uri.getPath();
- 109     urlEntity.remotePath = TextUtils.isEmpty(remotePath) ? &quot;/&quot; : remotePath;
- 110 
- 111     subWrapper.asFtp().setUrlEntity(urlEntity);
- 112     subWrapper.asFtp().setCharSet(mGTWrapper.asFtp().getCharSet());
- 113     subWrapper.asFtp().setProxy(mGTWrapper.asFtp().getProxy());
- 114   }
- 115 }
- 
- 
- 
- 
- 
- </pre></td>
-                            <td><pre>   1 /*
-   2  * Copyright (C) 2016 AriaLyy(https://github.com/AriaLyy/Aria)
-   3  *
-   4  * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
-   5  * you may not use this file except in compliance with the License.
-   6  * You may obtain a copy of the License at
-   7  *
-   8  *      http://www.apache.org/licenses/LICENSE-2.0
-   9  *
-  10  * Unless required by applicable law or agreed to in writing, software
-  11  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
-  12  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  13  * See the License for the specific language governing permissions and
-  14  * limitations under the License.
-  15  */
-  16 package com.arialyy.aria.core.download.group;
-  17 
-  18 import android.net.Uri;
-  19 import android.text.TextUtils;
-  20 import com.arialyy.aria.core.FtpUrlEntity;
-  21 import com.arialyy.aria.core.common.CompleteInfo;
-  22 import com.arialyy.aria.core.common.OnFileInfoCallback;
-  23 import com.arialyy.aria.core.download.DGTaskWrapper;
-  24 import com.arialyy.aria.core.download.DTaskWrapper;
-  25 import com.arialyy.aria.core.inf.AbsEntity;
-  26 import com.arialyy.aria.core.inf.IEntity;
-  27 import com.arialyy.aria.exception.BaseException;
-  28 import java.util.concurrent.locks.Condition;
-  29 import java.util.concurrent.locks.ReentrantLock;
-  30 
-  31 
-  32 /**
-  33  * Created by Aria.Lao on 2017/7/27.
-  34  * ftp文件夹下载工具
-  35  */
-  36 public class FtpDirDownloadUtil extends AbsGroupUtil {
-  37   private String TAG = &quot;FtpDirDownloadUtil&quot;;
-  38 
-  39   private ReentrantLock LOCK = new ReentrantLock();
-  40 
-  41   private Condition condition = LOCK.newCondition();
-  42 
-  43   public FtpDirDownloadUtil(IDGroupListener listener, DGTaskWrapper taskEntity) {
-  44     super(listener, taskEntity);
-  45   }
-  46 
-  47   @Override int getTaskType() {
-  48     return FTP_DIR;
-  49   }
-  50 
-  51   @Override
-  52   protected boolean onPreStart() {
-  53     if (mGTWrapper.getEntity().getFileSize() &gt; 1) {
-  54       startDownload(true);
-  55     } else {
-  56       FtpDirInfoThread infoThread = new FtpDirInfoThread(mGTWrapper, new OnFileInfoCallback() {
-  57         @Override
-  58         public void onComplete(String url, CompleteInfo info) {
-  59           if ((info.code &gt;= 200) &amp;&amp; (info.code &lt; 300)) {
-  60             startDownload(false);
-  61           }
-  62         }
-  63 
-  64         @Override public void onFail(AbsEntity entity, BaseException e, boolean needRetry) {
-  65           mListener.onFail(needRetry, e);
-  66         }
-  67       });
-  68       new Thread(infoThread).start();
-  69       try {
-  70         LOCK.lock();
-  71         condition.await();
-  72       } catch (java.lang.InterruptedException e) {
-  73         e.printStackTrace();
-  74       } finally {
-  75         LOCK.unlock();
-  76       }
-  77     }
-  78     return true;
-  79   }
-  80 
-  81   /**
-  82    * @param needCloneInfo 第一次下载，信息已经在{@link FtpDirInfoThread}中clone了
-  83    */
-  84   private void startDownload(boolean needCloneInfo) {
-  85     try {
-  86       LOCK.lock();
-  87       condition.signalAll();
-  88     } finally {
-  89       LOCK.unlock();
-  90     }
-  91     initState();
-  92     for (DTaskWrapper wrapper : mGTWrapper.getSubTaskWrapper()) {
-  93       if (needCloneInfo) {
-  94         cloneInfo(wrapper);
-  95       }
-  96       if (wrapper.getState() != IEntity.STATE_COMPLETE) {
-  97         createAndStartSubLoader(wrapper);
-  98       }
-  99     }
- 100   }
- 101 
- 102   private void cloneInfo(DTaskWrapper subWrapper) {
- 103     FtpUrlEntity urlEntity = mGTWrapper.asFtp().getUrlEntity().clone();
- 104     Uri uri = Uri.parse(subWrapper.getEntity().getUrl());
- 105     String remotePath = uri.getPath();
- 106     urlEntity.remotePath = TextUtils.isEmpty(remotePath) ? &quot;/&quot; : remotePath;
- 107 
- 108     subWrapper.asFtp().setUrlEntity(urlEntity);
- 109     subWrapper.asFtp().setCharSet(mGTWrapper.asFtp().getCharSet());
- 110     subWrapper.asFtp().setProxy(mGTWrapper.asFtp().getProxy());
- 111   }
- 112 }
- 
- 
- 
- 
- 
- 
- 
- 
- </pre></td>
+                            <td><pre><span class="4534359625031764666" onmouseenter="enter('4534359625031764666');" onmouseout="out('4534359625031764666');" style="">   1 /*                                                                                                       </span>
+<span class="-4176855950178531235" onmouseenter="enter('-4176855950178531235');" onmouseout="out('-4176855950178531235');" style="">   2  * Copyright (C) 2016 AriaLyy(https://github.com/AriaLyy/Aria)                                           </span>
+<span class="329605257831645060" onmouseenter="enter('329605257831645060');" onmouseout="out('329605257831645060');" style="">   3  *                                                                                                       </span>
+<span class="-7144700690364548245" onmouseenter="enter('-7144700690364548245');" onmouseout="out('-7144700690364548245');" style="">   4  * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);                                       </span>
+<span class="-6614298523444173250" onmouseenter="enter('-6614298523444173250');" onmouseout="out('-6614298523444173250');" style="">   5  * you may not use this file except in compliance with the License.                                      </span>
+<span class="-4753901504248728101" onmouseenter="enter('-4753901504248728101');" onmouseout="out('-4753901504248728101');" style="">   6  * You may obtain a copy of the License at                                                               </span>
+<span class="329605257831645060" onmouseenter="enter('329605257831645060');" onmouseout="out('329605257831645060');" style="">   7  *                                                                                                       </span>
+<span class="-763207030729826407" onmouseenter="enter('-763207030729826407');" onmouseout="out('-763207030729826407');" style="">   8  *      http://www.apache.org/licenses/LICENSE-2.0                                                       </span>
+<span class="329605257831645060" onmouseenter="enter('329605257831645060');" onmouseout="out('329605257831645060');" style="">   9  *                                                                                                       </span>
+<span class="2557607632756179983" onmouseenter="enter('2557607632756179983');" onmouseout="out('2557607632756179983');" style="">  10  * Unless required by applicable law or agreed to in writing, software                                   </span>
+<span class="-9189129105512731955" onmouseenter="enter('-9189129105512731955');" onmouseout="out('-9189129105512731955');" style="">  11  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,                                     </span>
+<span class="5781161717946418340" onmouseenter="enter('5781161717946418340');" onmouseout="out('5781161717946418340');" style="">  12  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.                              </span>
+<span class="1761562277992059393" onmouseenter="enter('1761562277992059393');" onmouseout="out('1761562277992059393');" style="">  13  * See the License for the specific language governing permissions and                                   </span>
+<span class="7217408601297779962" onmouseenter="enter('7217408601297779962');" onmouseout="out('7217408601297779962');" style="">  14  * limitations under the License.                                                                        </span>
+<span class="-3478703399357275674" onmouseenter="enter('-3478703399357275674');" onmouseout="out('-3478703399357275674');" style="">  15  */                                                                                                      </span>
+<span class="-1898253769494936956" onmouseenter="enter('-1898253769494936956');" onmouseout="out('-1898253769494936956');" style="">  16 package com.arialyy.aria.core.download.group;                                                            </span>
+<span  style="">  17                                                                                                          </span>
+<span class="-8750621697125156872" onmouseenter="enter('-8750621697125156872');" onmouseout="out('-8750621697125156872');" style="">  18 import android.net.Uri;                                                                                  </span>
+<span class="3727887607099278716" onmouseenter="enter('3727887607099278716');" onmouseout="out('3727887607099278716');" style="">  19 import android.text.TextUtils;                                                                           </span>
+<span class="-1826527463380491929" onmouseenter="enter('-1826527463380491929');" onmouseout="out('-1826527463380491929');" style="">  20 import com.arialyy.aria.core.FtpUrlEntity;                                                               </span>
+<span class="5028823532254250595" onmouseenter="enter('5028823532254250595');" onmouseout="out('5028823532254250595');" style="">  21 import com.arialyy.aria.core.common.CompleteInfo;                                                        </span>
+<span class="-1788009330887423510" onmouseenter="enter('-1788009330887423510');" onmouseout="out('-1788009330887423510');" style="">  22 import com.arialyy.aria.core.common.OnFileInfoCallback;                                                  </span>
+<span class="3129861871570792913" onmouseenter="enter('3129861871570792913');" onmouseout="out('3129861871570792913');" style="">  23 import com.arialyy.aria.core.download.DGTaskWrapper;                                                     </span>
+<span class="-3497740022528182602" onmouseenter="enter('-3497740022528182602');" onmouseout="out('-3497740022528182602');" style="">  24 import com.arialyy.aria.core.download.DTaskWrapper;                                                      </span>
+<span class="3322471595626447686" onmouseenter="enter('3322471595626447686');" onmouseout="out('3322471595626447686');" style="">  25 import com.arialyy.aria.core.inf.AbsEntity;                                                              </span>
+<span class="-5016163043314935005" onmouseenter="enter('-5016163043314935005');" onmouseout="out('-5016163043314935005');" style="">  26 import com.arialyy.aria.core.inf.IEntity;                                                                </span>
+<span class="-2677921716710306058" onmouseenter="enter('-2677921716710306058');" onmouseout="out('-2677921716710306058');" style="">  27 import com.arialyy.aria.exception.BaseException;                                                         </span>
+<span class="-2621756745147508332" onmouseenter="enter('-2621756745147508332');" onmouseout="out('-2621756745147508332');" style="">  28 import java.util.concurrent.locks.Condition;                                                             </span>
+<span class="7829593089976432692" onmouseenter="enter('7829593089976432692');" onmouseout="out('7829593089976432692');" style="">  29 import java.util.concurrent.locks.ReentrantLock;                                                         </span>
+<span  style="">  30                                                                                                          </span>
+<span class="1188357178855945174" onmouseenter="enter('1188357178855945174');" onmouseout="out('1188357178855945174');" style="">  31 /**                                                                                                      </span>
+<span class="1794853546228202306" onmouseenter="enter('1794853546228202306');" onmouseout="out('1794853546228202306');" style="">  32  * Created by Aria.Lao on 2017/7/27.                                                                     </span>
+<span class="-2057788039395764322" onmouseenter="enter('-2057788039395764322');" onmouseout="out('-2057788039395764322');" style="">  33  * ftp文件夹下载工具                                                                                            </span>
+<span class="-3478703399357275674" onmouseenter="enter('-3478703399357275674');" onmouseout="out('-3478703399357275674');" style="">  34  */                                                                                                      </span>
+<span class="-5962779167288592566" onmouseenter="enter('-5962779167288592566');" onmouseout="out('-5962779167288592566');" style="">  35 public class FtpDirDownloadUtil extends AbsGroupUtil {                                                   </span>
+<span class="-3111960916969408164" onmouseenter="enter('-3111960916969408164');" onmouseout="out('-3111960916969408164');" style="">  36   private String TAG = &quot;FtpDirDownloadUtil&quot;;                                                             </span>
+<span class="-4693289927940198172" onmouseenter="enter('-4693289927940198172');" onmouseout="out('-4693289927940198172');" style="">  37   private ReentrantLock LOCK = new ReentrantLock();                                                      </span>
+<span class="5272785486088894310" onmouseenter="enter('5272785486088894310');" onmouseout="out('5272785486088894310');" style="">  38   private Condition condition = LOCK.newCondition();                                                     </span>
+<span  style="">  39                                                                                                          </span>
+<span class="-7413909877816734166" onmouseenter="enter('-7413909877816734166');" onmouseout="out('-7413909877816734166');" style="">  40   public FtpDirDownloadUtil(IDGroupListener listener, DGTaskWrapper taskEntity) {                        </span>
+<span class="-7841553057471002442" onmouseenter="enter('-7841553057471002442');" onmouseout="out('-7841553057471002442');" style="">  41     super(listener, taskEntity);                                                                         </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  42   }                                                                                                      </span>
+<span  style="">  43                                                                                                          </span>
+<span class="7947472288428602188" onmouseenter="enter('7947472288428602188');" onmouseout="out('7947472288428602188');" style="">  44   @Override int getTaskType() {                                                                          </span>
+<span class="-2332889583841588441" onmouseenter="enter('-2332889583841588441');" onmouseout="out('-2332889583841588441');" style="">  45     return FTP_DIR;                                                                                      </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  46   }                                                                                                      </span>
+<span  style="">  47                                                                                                          </span>
+<span class="-4667942192763773056" onmouseenter="enter('-4667942192763773056');" onmouseout="out('-4667942192763773056');" style="">  48 &lt;&lt;&lt;&lt;&lt;&lt;&lt; GitAnalyzerPlus_ours                                                                             </span>
+<span class="2774624075386118133" onmouseenter="enter('2774624075386118133');" onmouseout="out('2774624075386118133');" style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  49   @Override protected void onPreStart() {                                                                </span>
+<span class="5619431986925050119" onmouseenter="enter('5619431986925050119');" onmouseout="out('5619431986925050119');" style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  50     super.onPreStart();                                                                                  </span>
+<span class="6741223626729319096" onmouseenter="enter('6741223626729319096');" onmouseout="out('6741223626729319096');" style="">  51 ||||||| GitAnalyzerPlus_base                                                                             </span>
+<span class="7849318491336065590" onmouseenter="enter('7849318491336065590');" onmouseout="out('7849318491336065590');" style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  52   @Override protected void onStart() {                                                                   </span>
+<span class="8068463127664630279" onmouseenter="enter('8068463127664630279');" onmouseout="out('8068463127664630279');" style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  53     super.onStart();                                                                                     </span>
+<span class="5828248294444065761" onmouseenter="enter('5828248294444065761');" onmouseout="out('5828248294444065761');" style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  54     if (mGTWrapper.getEntity().getFileSize() &gt; 1) {                                                      </span>
+<span class="1497820413888703615" onmouseenter="enter('1497820413888703615');" onmouseout="out('1497820413888703615');" style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  55       startDownload();                                                                                   </span>
+<span class="-6023928394739582014" onmouseenter="enter('-6023928394739582014');" onmouseout="out('-6023928394739582014');" style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  56     } else {                                                                                             </span>
+<span  style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  57                                                                                                          </span>
+<span class="3775086071501199642" onmouseenter="enter('3775086071501199642');" onmouseout="out('3775086071501199642');" style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  58       FtpDirInfoThread infoThread = new FtpDirInfoThread(mGTWrapper, new OnFileInfoCallback() {          </span>
+<span class="-2050288510094905379" onmouseenter="enter('-2050288510094905379');" onmouseout="out('-2050288510094905379');" style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  59         @Override public void onComplete(String url, CompleteInfo info) {                                </span>
+<span class="3749191010904650047" onmouseenter="enter('3749191010904650047');" onmouseout="out('3749191010904650047');" style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  60           if (info.code &gt;= 200 &amp;&amp; info.code &lt; 300) {                                                     </span>
+<span class="3796057323931724632" onmouseenter="enter('3796057323931724632');" onmouseout="out('3796057323931724632');" style="">  61 =======                                                                                                  </span>
+<span class="-527000804738597587" onmouseenter="enter('-527000804738597587');" onmouseout="out('-527000804738597587');" style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  62   @Override protected boolean onStart() {                                                                </span>
+<span class="-1382546150375666264" onmouseenter="enter('-1382546150375666264');" onmouseout="out('-1382546150375666264');" style="">  63 &gt;&gt;&gt;&gt;&gt;&gt;&gt; GitAnalyzerPlus_theirs                                                                           </span>
+<span class="5828248294444065761" onmouseenter="enter('5828248294444065761');" onmouseout="out('5828248294444065761');" style="">  64     if (mGTWrapper.getEntity().getFileSize() &gt; 1) {                                                      </span>
+<span class="-1809307550799287856" onmouseenter="enter('-1809307550799287856');" onmouseout="out('-1809307550799287856');" style="">  65       startDownload(true);                                                                               </span>
+<span class="-6023928394739582014" onmouseenter="enter('-6023928394739582014');" onmouseout="out('-6023928394739582014');" style="">  66     } else {                                                                                             </span>
+<span class="3775086071501199642" onmouseenter="enter('3775086071501199642');" onmouseout="out('3775086071501199642');" style="">  67       FtpDirInfoThread infoThread = new FtpDirInfoThread(mGTWrapper, new OnFileInfoCallback() {          </span>
+<span class="-2050288510094905379" onmouseenter="enter('-2050288510094905379');" onmouseout="out('-2050288510094905379');" style="">  68         @Override public void onComplete(String url, CompleteInfo info) {                                </span>
+<span class="3749191010904650047" onmouseenter="enter('3749191010904650047');" onmouseout="out('3749191010904650047');" style="">  69           if (info.code &gt;= 200 &amp;&amp; info.code &lt; 300) {                                                     </span>
+<span class="-7542888645272231689" onmouseenter="enter('-7542888645272231689');" onmouseout="out('-7542888645272231689');" style="">  70             startDownload(false);                                                                        </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  71           }                                                                                              </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  72         }                                                                                                </span>
+<span  style="">  73                                                                                                          </span>
+<span class="4202361941777062332" onmouseenter="enter('4202361941777062332');" onmouseout="out('4202361941777062332');" style="">  74         @Override public void onFail(AbsEntity entity, BaseException e, boolean needRetry) {             </span>
+<span class="8285813611364437915" onmouseenter="enter('8285813611364437915');" onmouseout="out('8285813611364437915');" style="">  75           mListener.onFail(needRetry, e);                                                                </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  76         }                                                                                                </span>
+<span class="7938821646327104961" onmouseenter="enter('7938821646327104961');" onmouseout="out('7938821646327104961');" style="">  77       });                                                                                                </span>
+<span class="-9128110853298759146" onmouseenter="enter('-9128110853298759146');" onmouseout="out('-9128110853298759146');" style="">  78       new Thread(infoThread).start();                                                                    </span>
+<span class="-2989978199866728989" onmouseenter="enter('-2989978199866728989');" onmouseout="out('-2989978199866728989');" style="">  79       try {                                                                                              </span>
+<span class="-6650174078043072843" onmouseenter="enter('-6650174078043072843');" onmouseout="out('-6650174078043072843');" style="">  80         LOCK.lock();                                                                                     </span>
+<span class="408215768272697829" onmouseenter="enter('408215768272697829');" onmouseout="out('408215768272697829');" style="">  81         condition.await();                                                                               </span>
+<span class="-7528533024404460182" onmouseenter="enter('-7528533024404460182');" onmouseout="out('-7528533024404460182');" style="">  82       } catch (InterruptedException e) {                                                                 </span>
+<span class="4090663313211582937" onmouseenter="enter('4090663313211582937');" onmouseout="out('4090663313211582937');" style="">  83         e.printStackTrace();                                                                             </span>
+<span class="9062373144943479618" onmouseenter="enter('9062373144943479618');" onmouseout="out('9062373144943479618');" style="">  84       } finally {                                                                                        </span>
+<span class="7898199919247603164" onmouseenter="enter('7898199919247603164');" onmouseout="out('7898199919247603164');" style="">  85         LOCK.unlock();                                                                                   </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  86       }                                                                                                  </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  87     }                                                                                                    </span>
+<span class="-3118901906653197100" onmouseenter="enter('-3118901906653197100');" onmouseout="out('-3118901906653197100');" style="">  88     return true;                                                                                         </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  89   }                                                                                                      </span>
+<span  style="">  90                                                                                                          </span>
+<span class="1188357178855945174" onmouseenter="enter('1188357178855945174');" onmouseout="out('1188357178855945174');" style="">  91   /**                                                                                                    </span>
+<span class="2520495743777636011" onmouseenter="enter('2520495743777636011');" onmouseout="out('2520495743777636011');" style="">  92    * @param needCloneInfo 第一次下载，信息已经在{@link FtpDirInfoThread}中clone了                                     </span>
+<span class="-3478703399357275674" onmouseenter="enter('-3478703399357275674');" onmouseout="out('-3478703399357275674');" style="">  93    */                                                                                                    </span>
+<span class="-1875683460680626733" onmouseenter="enter('-1875683460680626733');" onmouseout="out('-1875683460680626733');" style="">  94   private void startDownload(boolean needCloneInfo) {                                                    </span>
+<span class="-2989978199866728989" onmouseenter="enter('-2989978199866728989');" onmouseout="out('-2989978199866728989');" style="">  95     try {                                                                                                </span>
+<span class="-6650174078043072843" onmouseenter="enter('-6650174078043072843');" onmouseout="out('-6650174078043072843');" style="">  96       LOCK.lock();                                                                                       </span>
+<span class="4414547000749226706" onmouseenter="enter('4414547000749226706');" onmouseout="out('4414547000749226706');" style="">  97       condition.signalAll();                                                                             </span>
+<span class="9062373144943479618" onmouseenter="enter('9062373144943479618');" onmouseout="out('9062373144943479618');" style="">  98     } finally {                                                                                          </span>
+<span class="7898199919247603164" onmouseenter="enter('7898199919247603164');" onmouseout="out('7898199919247603164');" style="">  99       LOCK.unlock();                                                                                     </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style=""> 100     }                                                                                                    </span>
+<span class="-1342729191298827949" onmouseenter="enter('-1342729191298827949');" onmouseout="out('-1342729191298827949');" style=""> 101     initState();                                                                                         </span>
+<span class="-3609264869766321022" onmouseenter="enter('-3609264869766321022');" onmouseout="out('-3609264869766321022');" style=""> 102     for (DTaskWrapper wrapper : mGTWrapper.getSubTaskWrapper()) {                                        </span>
+<span class="5932488872985900343" onmouseenter="enter('5932488872985900343');" onmouseout="out('5932488872985900343');" style=""> 103       if (needCloneInfo) {                                                                               </span>
+<span class="4736647084797011248" onmouseenter="enter('4736647084797011248');" onmouseout="out('4736647084797011248');" style=""> 104         cloneInfo(wrapper);                                                                              </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style=""> 105       }                                                                                                  </span>
+<span class="1582042434488765352" onmouseenter="enter('1582042434488765352');" onmouseout="out('1582042434488765352');" style=""> 106       if (wrapper.getState() != IEntity.STATE_COMPLETE) {                                                </span>
+<span class="-6162195828863091653" onmouseenter="enter('-6162195828863091653');" onmouseout="out('-6162195828863091653');" style=""> 107         createAndStartSubLoader(wrapper);                                                                </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style=""> 108       }                                                                                                  </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style=""> 109     }                                                                                                    </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style=""> 110   }                                                                                                      </span>
+<span  style=""> 111                                                                                                          </span>
+<span class="-6940300392816531628" onmouseenter="enter('-6940300392816531628');" onmouseout="out('-6940300392816531628');" style=""> 112   private void cloneInfo(DTaskWrapper subWrapper) {                                                      </span>
+<span class="-504051504662208551" onmouseenter="enter('-504051504662208551');" onmouseout="out('-504051504662208551');" style=""> 113     FtpUrlEntity urlEntity = mGTWrapper.asFtp().getUrlEntity().clone();                                  </span>
+<span class="1924326156832934668" onmouseenter="enter('1924326156832934668');" onmouseout="out('1924326156832934668');" style=""> 114     Uri uri = Uri.parse(subWrapper.getEntity().getUrl());                                                </span>
+<span class="7204430896521032087" onmouseenter="enter('7204430896521032087');" onmouseout="out('7204430896521032087');" style=""> 115     String remotePath = uri.getPath();                                                                   </span>
+<span class="8474823335874347491" onmouseenter="enter('8474823335874347491');" onmouseout="out('8474823335874347491');" style=""> 116     urlEntity.remotePath = TextUtils.isEmpty(remotePath) ? &quot;/&quot; : remotePath;                             </span>
+<span  style=""> 117                                                                                                          </span>
+<span class="6246426708329578526" onmouseenter="enter('6246426708329578526');" onmouseout="out('6246426708329578526');" style=""> 118     subWrapper.asFtp().setUrlEntity(urlEntity);                                                          </span>
+<span class="4978227270896389936" onmouseenter="enter('4978227270896389936');" onmouseout="out('4978227270896389936');" style=""> 119     subWrapper.asFtp().setCharSet(mGTWrapper.asFtp().getCharSet());                                      </span>
+<span class="7696242006805228199" onmouseenter="enter('7696242006805228199');" onmouseout="out('7696242006805228199');" style=""> 120     subWrapper.asFtp().setProxy(mGTWrapper.asFtp().getProxy());                                          </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style=""> 121   }                                                                                                      </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style=""> 122 }                                                                                                        </span></pre></td>
+                            <td><pre><span class="4534359625031764666" onmouseenter="enter('4534359625031764666');" onmouseout="out('4534359625031764666');" style="">   1 /*                                                                                                       </span>
+<span class="-4176855950178531235" onmouseenter="enter('-4176855950178531235');" onmouseout="out('-4176855950178531235');" style="">   2  * Copyright (C) 2016 AriaLyy(https://github.com/AriaLyy/Aria)                                           </span>
+<span class="329605257831645060" onmouseenter="enter('329605257831645060');" onmouseout="out('329605257831645060');" style="">   3  *                                                                                                       </span>
+<span class="-7144700690364548245" onmouseenter="enter('-7144700690364548245');" onmouseout="out('-7144700690364548245');" style="">   4  * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);                                       </span>
+<span class="-6614298523444173250" onmouseenter="enter('-6614298523444173250');" onmouseout="out('-6614298523444173250');" style="">   5  * you may not use this file except in compliance with the License.                                      </span>
+<span class="-4753901504248728101" onmouseenter="enter('-4753901504248728101');" onmouseout="out('-4753901504248728101');" style="">   6  * You may obtain a copy of the License at                                                               </span>
+<span class="329605257831645060" onmouseenter="enter('329605257831645060');" onmouseout="out('329605257831645060');" style="">   7  *                                                                                                       </span>
+<span class="-763207030729826407" onmouseenter="enter('-763207030729826407');" onmouseout="out('-763207030729826407');" style="">   8  *      http://www.apache.org/licenses/LICENSE-2.0                                                       </span>
+<span class="329605257831645060" onmouseenter="enter('329605257831645060');" onmouseout="out('329605257831645060');" style="">   9  *                                                                                                       </span>
+<span class="2557607632756179983" onmouseenter="enter('2557607632756179983');" onmouseout="out('2557607632756179983');" style="">  10  * Unless required by applicable law or agreed to in writing, software                                   </span>
+<span class="-9189129105512731955" onmouseenter="enter('-9189129105512731955');" onmouseout="out('-9189129105512731955');" style="">  11  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,                                     </span>
+<span class="5781161717946418340" onmouseenter="enter('5781161717946418340');" onmouseout="out('5781161717946418340');" style="">  12  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.                              </span>
+<span class="1761562277992059393" onmouseenter="enter('1761562277992059393');" onmouseout="out('1761562277992059393');" style="">  13  * See the License for the specific language governing permissions and                                   </span>
+<span class="7217408601297779962" onmouseenter="enter('7217408601297779962');" onmouseout="out('7217408601297779962');" style="">  14  * limitations under the License.                                                                        </span>
+<span class="-3478703399357275674" onmouseenter="enter('-3478703399357275674');" onmouseout="out('-3478703399357275674');" style="">  15  */                                                                                                      </span>
+<span class="-1898253769494936956" onmouseenter="enter('-1898253769494936956');" onmouseout="out('-1898253769494936956');" style="">  16 package com.arialyy.aria.core.download.group;                                                            </span>
+<span  style="">  17                                                                                                          </span>
+<span class="-8750621697125156872" onmouseenter="enter('-8750621697125156872');" onmouseout="out('-8750621697125156872');" style="">  18 import android.net.Uri;                                                                                  </span>
+<span class="3727887607099278716" onmouseenter="enter('3727887607099278716');" onmouseout="out('3727887607099278716');" style="">  19 import android.text.TextUtils;                                                                           </span>
+<span class="-1826527463380491929" onmouseenter="enter('-1826527463380491929');" onmouseout="out('-1826527463380491929');" style="">  20 import com.arialyy.aria.core.FtpUrlEntity;                                                               </span>
+<span class="5028823532254250595" onmouseenter="enter('5028823532254250595');" onmouseout="out('5028823532254250595');" style="">  21 import com.arialyy.aria.core.common.CompleteInfo;                                                        </span>
+<span class="-1788009330887423510" onmouseenter="enter('-1788009330887423510');" onmouseout="out('-1788009330887423510');" style="">  22 import com.arialyy.aria.core.common.OnFileInfoCallback;                                                  </span>
+<span class="3129861871570792913" onmouseenter="enter('3129861871570792913');" onmouseout="out('3129861871570792913');" style="">  23 import com.arialyy.aria.core.download.DGTaskWrapper;                                                     </span>
+<span class="-3497740022528182602" onmouseenter="enter('-3497740022528182602');" onmouseout="out('-3497740022528182602');" style="">  24 import com.arialyy.aria.core.download.DTaskWrapper;                                                      </span>
+<span class="3322471595626447686" onmouseenter="enter('3322471595626447686');" onmouseout="out('3322471595626447686');" style="">  25 import com.arialyy.aria.core.inf.AbsEntity;                                                              </span>
+<span class="-5016163043314935005" onmouseenter="enter('-5016163043314935005');" onmouseout="out('-5016163043314935005');" style="">  26 import com.arialyy.aria.core.inf.IEntity;                                                                </span>
+<span class="-2677921716710306058" onmouseenter="enter('-2677921716710306058');" onmouseout="out('-2677921716710306058');" style="">  27 import com.arialyy.aria.exception.BaseException;                                                         </span>
+<span class="-2621756745147508332" onmouseenter="enter('-2621756745147508332');" onmouseout="out('-2621756745147508332');" style="">  28 import java.util.concurrent.locks.Condition;                                                             </span>
+<span class="7829593089976432692" onmouseenter="enter('7829593089976432692');" onmouseout="out('7829593089976432692');" style="">  29 import java.util.concurrent.locks.ReentrantLock;                                                         </span>
+<span  style="">  30                                                                                                          </span>
+<span class="1188357178855945174" onmouseenter="enter('1188357178855945174');" onmouseout="out('1188357178855945174');" style="">  31 /**                                                                                                      </span>
+<span class="1794853546228202306" onmouseenter="enter('1794853546228202306');" onmouseout="out('1794853546228202306');" style="">  32  * Created by Aria.Lao on 2017/7/27.                                                                     </span>
+<span class="-2057788039395764322" onmouseenter="enter('-2057788039395764322');" onmouseout="out('-2057788039395764322');" style="">  33  * ftp文件夹下载工具                                                                                            </span>
+<span class="-3478703399357275674" onmouseenter="enter('-3478703399357275674');" onmouseout="out('-3478703399357275674');" style="">  34  */                                                                                                      </span>
+<span class="-5962779167288592566" onmouseenter="enter('-5962779167288592566');" onmouseout="out('-5962779167288592566');" style="">  35 public class FtpDirDownloadUtil extends AbsGroupUtil {                                                   </span>
+<span class="-3111960916969408164" onmouseenter="enter('-3111960916969408164');" onmouseout="out('-3111960916969408164');" style="">  36   private String TAG = &quot;FtpDirDownloadUtil&quot;;                                                             </span>
+<span class="-4693289927940198172" onmouseenter="enter('-4693289927940198172');" onmouseout="out('-4693289927940198172');" style="">  37   private ReentrantLock LOCK = new ReentrantLock();                                                      </span>
+<span class="5272785486088894310" onmouseenter="enter('5272785486088894310');" onmouseout="out('5272785486088894310');" style="">  38   private Condition condition = LOCK.newCondition();                                                     </span>
+<span  style="">  39                                                                                                          </span>
+<span class="-7413909877816734166" onmouseenter="enter('-7413909877816734166');" onmouseout="out('-7413909877816734166');" style="">  40   public FtpDirDownloadUtil(IDGroupListener listener, DGTaskWrapper taskEntity) {                        </span>
+<span class="-7841553057471002442" onmouseenter="enter('-7841553057471002442');" onmouseout="out('-7841553057471002442');" style="">  41     super(listener, taskEntity);                                                                         </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  42   }                                                                                                      </span>
+<span  style="">  43                                                                                                          </span>
+<span class="7947472288428602188" onmouseenter="enter('7947472288428602188');" onmouseout="out('7947472288428602188');" style="">  44   @Override int getTaskType() {                                                                          </span>
+<span class="-2332889583841588441" onmouseenter="enter('-2332889583841588441');" onmouseout="out('-2332889583841588441');" style="">  45     return FTP_DIR;                                                                                      </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  46   }                                                                                                      </span>
+<span  style="">  47                                                                                                          </span>
+<span class="7598536375028459133" onmouseenter="enter('7598536375028459133');" onmouseout="out('7598536375028459133');" style="">  48 &lt;&lt;&lt;&lt;&lt;&lt;&lt; MINE                                                                                             </span>
+<span class="2774624075386118133" onmouseenter="enter('2774624075386118133');" onmouseout="out('2774624075386118133');" style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  49 @Override protected void onPreStart() {                                                                  </span>
+<span class="5619431986925050119" onmouseenter="enter('5619431986925050119');" onmouseout="out('5619431986925050119');" style="background-color: rgba(255, 167, 0, 0.24); margin: 0">  50     super.onPreStart();                                                                                  </span>
+<span class="7991106586064342212" onmouseenter="enter('7991106586064342212');" onmouseout="out('7991106586064342212');" style="">  51 ||||||| BASE                                                                                             </span>
+<span class="7849318491336065590" onmouseenter="enter('7849318491336065590');" onmouseout="out('7849318491336065590');" style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  52 @Override protected void onStart() {                                                                     </span>
+<span class="8068463127664630279" onmouseenter="enter('8068463127664630279');" onmouseout="out('8068463127664630279');" style="background-color: rgba(0, 0, 0, 0.15); margin: 0">  53     super.onStart();                                                                                     </span>
+<span class="3796057323931724632" onmouseenter="enter('3796057323931724632');" onmouseout="out('3796057323931724632');" style="">  54 =======                                                                                                  </span>
+<span class="-527000804738597587" onmouseenter="enter('-527000804738597587');" onmouseout="out('-527000804738597587');" style="background-color: rgba(0, 0, 255, 0.24); margin: 0">  55 @Override protected boolean onStart() {                                                                  </span>
+<span class="-5027112130205478640" onmouseenter="enter('-5027112130205478640');" onmouseout="out('-5027112130205478640');" style="">  56 &gt;&gt;&gt;&gt;&gt;&gt;&gt; YOURS                                                                                            </span>
+<span class="5828248294444065761" onmouseenter="enter('5828248294444065761');" onmouseout="out('5828248294444065761');" style="">  57     if (mGTWrapper.getEntity().getFileSize() &gt; 1) {                                                      </span>
+<span class="-1809307550799287856" onmouseenter="enter('-1809307550799287856');" onmouseout="out('-1809307550799287856');" style="">  58       startDownload(true);                                                                               </span>
+<span class="-6023928394739582014" onmouseenter="enter('-6023928394739582014');" onmouseout="out('-6023928394739582014');" style="">  59     } else {                                                                                             </span>
+<span class="3775086071501199642" onmouseenter="enter('3775086071501199642');" onmouseout="out('3775086071501199642');" style="">  60       FtpDirInfoThread infoThread = new FtpDirInfoThread(mGTWrapper, new OnFileInfoCallback() {          </span>
+<span class="-2050288510094905379" onmouseenter="enter('-2050288510094905379');" onmouseout="out('-2050288510094905379');" style="">  61         @Override public void onComplete(String url, CompleteInfo info) {                                </span>
+<span class="3749191010904650047" onmouseenter="enter('3749191010904650047');" onmouseout="out('3749191010904650047');" style="">  62           if (info.code &gt;= 200 &amp;&amp; info.code &lt; 300) {                                                     </span>
+<span class="-7542888645272231689" onmouseenter="enter('-7542888645272231689');" onmouseout="out('-7542888645272231689');" style="">  63             startDownload(false);                                                                        </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  64           }                                                                                              </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  65         }                                                                                                </span>
+<span  style="">  66                                                                                                          </span>
+<span class="4202361941777062332" onmouseenter="enter('4202361941777062332');" onmouseout="out('4202361941777062332');" style="">  67         @Override public void onFail(AbsEntity entity, BaseException e, boolean needRetry) {             </span>
+<span class="8285813611364437915" onmouseenter="enter('8285813611364437915');" onmouseout="out('8285813611364437915');" style="">  68           mListener.onFail(needRetry, e);                                                                </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  69         }                                                                                                </span>
+<span class="7938821646327104961" onmouseenter="enter('7938821646327104961');" onmouseout="out('7938821646327104961');" style="">  70       });                                                                                                </span>
+<span class="-9128110853298759146" onmouseenter="enter('-9128110853298759146');" onmouseout="out('-9128110853298759146');" style="">  71       new Thread(infoThread).start();                                                                    </span>
+<span class="-2989978199866728989" onmouseenter="enter('-2989978199866728989');" onmouseout="out('-2989978199866728989');" style="">  72       try {                                                                                              </span>
+<span class="-6650174078043072843" onmouseenter="enter('-6650174078043072843');" onmouseout="out('-6650174078043072843');" style="">  73         LOCK.lock();                                                                                     </span>
+<span class="408215768272697829" onmouseenter="enter('408215768272697829');" onmouseout="out('408215768272697829');" style="">  74         condition.await();                                                                               </span>
+<span class="-7528533024404460182" onmouseenter="enter('-7528533024404460182');" onmouseout="out('-7528533024404460182');" style="">  75       } catch (InterruptedException e) {                                                                 </span>
+<span class="4090663313211582937" onmouseenter="enter('4090663313211582937');" onmouseout="out('4090663313211582937');" style="">  76         e.printStackTrace();                                                                             </span>
+<span class="9062373144943479618" onmouseenter="enter('9062373144943479618');" onmouseout="out('9062373144943479618');" style="">  77       } finally {                                                                                        </span>
+<span class="7898199919247603164" onmouseenter="enter('7898199919247603164');" onmouseout="out('7898199919247603164');" style="">  78         LOCK.unlock();                                                                                   </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  79       }                                                                                                  </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  80     }                                                                                                    </span>
+<span class="-3118901906653197100" onmouseenter="enter('-3118901906653197100');" onmouseout="out('-3118901906653197100');" style="">  81     return true;                                                                                         </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  82   }                                                                                                      </span>
+<span  style="">  83                                                                                                          </span>
+<span class="1188357178855945174" onmouseenter="enter('1188357178855945174');" onmouseout="out('1188357178855945174');" style="">  84   /**                                                                                                    </span>
+<span class="2520495743777636011" onmouseenter="enter('2520495743777636011');" onmouseout="out('2520495743777636011');" style="">  85    * @param needCloneInfo 第一次下载，信息已经在{@link FtpDirInfoThread}中clone了                                     </span>
+<span class="-3478703399357275674" onmouseenter="enter('-3478703399357275674');" onmouseout="out('-3478703399357275674');" style="">  86    */                                                                                                    </span>
+<span class="-1875683460680626733" onmouseenter="enter('-1875683460680626733');" onmouseout="out('-1875683460680626733');" style="">  87   private void startDownload(boolean needCloneInfo) {                                                    </span>
+<span class="-2989978199866728989" onmouseenter="enter('-2989978199866728989');" onmouseout="out('-2989978199866728989');" style="">  88     try {                                                                                                </span>
+<span class="-6650174078043072843" onmouseenter="enter('-6650174078043072843');" onmouseout="out('-6650174078043072843');" style="">  89       LOCK.lock();                                                                                       </span>
+<span class="4414547000749226706" onmouseenter="enter('4414547000749226706');" onmouseout="out('4414547000749226706');" style="">  90       condition.signalAll();                                                                             </span>
+<span class="9062373144943479618" onmouseenter="enter('9062373144943479618');" onmouseout="out('9062373144943479618');" style="">  91     } finally {                                                                                          </span>
+<span class="7898199919247603164" onmouseenter="enter('7898199919247603164');" onmouseout="out('7898199919247603164');" style="">  92       LOCK.unlock();                                                                                     </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  93     }                                                                                                    </span>
+<span class="-1342729191298827949" onmouseenter="enter('-1342729191298827949');" onmouseout="out('-1342729191298827949');" style="">  94     initState();                                                                                         </span>
+<span class="-3609264869766321022" onmouseenter="enter('-3609264869766321022');" onmouseout="out('-3609264869766321022');" style="">  95     for (DTaskWrapper wrapper : mGTWrapper.getSubTaskWrapper()) {                                        </span>
+<span class="5932488872985900343" onmouseenter="enter('5932488872985900343');" onmouseout="out('5932488872985900343');" style="">  96       if (needCloneInfo) {                                                                               </span>
+<span class="4736647084797011248" onmouseenter="enter('4736647084797011248');" onmouseout="out('4736647084797011248');" style="">  97         cloneInfo(wrapper);                                                                              </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  98       }                                                                                                  </span>
+<span class="1582042434488765352" onmouseenter="enter('1582042434488765352');" onmouseout="out('1582042434488765352');" style="">  99       if (wrapper.getState() != IEntity.STATE_COMPLETE) {                                                </span>
+<span class="-6162195828863091653" onmouseenter="enter('-6162195828863091653');" onmouseout="out('-6162195828863091653');" style=""> 100         createAndStartSubLoader(wrapper);                                                                </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style=""> 101       }                                                                                                  </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style=""> 102     }                                                                                                    </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style=""> 103   }                                                                                                      </span>
+<span  style=""> 104                                                                                                          </span>
+<span class="-6940300392816531628" onmouseenter="enter('-6940300392816531628');" onmouseout="out('-6940300392816531628');" style=""> 105   private void cloneInfo(DTaskWrapper subWrapper) {                                                      </span>
+<span class="-504051504662208551" onmouseenter="enter('-504051504662208551');" onmouseout="out('-504051504662208551');" style=""> 106     FtpUrlEntity urlEntity = mGTWrapper.asFtp().getUrlEntity().clone();                                  </span>
+<span class="1924326156832934668" onmouseenter="enter('1924326156832934668');" onmouseout="out('1924326156832934668');" style=""> 107     Uri uri = Uri.parse(subWrapper.getEntity().getUrl());                                                </span>
+<span class="7204430896521032087" onmouseenter="enter('7204430896521032087');" onmouseout="out('7204430896521032087');" style=""> 108     String remotePath = uri.getPath();                                                                   </span>
+<span class="8474823335874347491" onmouseenter="enter('8474823335874347491');" onmouseout="out('8474823335874347491');" style=""> 109     urlEntity.remotePath = TextUtils.isEmpty(remotePath) ? &quot;/&quot; : remotePath;                             </span>
+<span  style=""> 110                                                                                                          </span>
+<span class="6246426708329578526" onmouseenter="enter('6246426708329578526');" onmouseout="out('6246426708329578526');" style=""> 111     subWrapper.asFtp().setUrlEntity(urlEntity);                                                          </span>
+<span class="4978227270896389936" onmouseenter="enter('4978227270896389936');" onmouseout="out('4978227270896389936');" style=""> 112     subWrapper.asFtp().setCharSet(mGTWrapper.asFtp().getCharSet());                                      </span>
+<span class="7696242006805228199" onmouseenter="enter('7696242006805228199');" onmouseout="out('7696242006805228199');" style=""> 113     subWrapper.asFtp().setProxy(mGTWrapper.asFtp().getProxy());                                          </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style=""> 114   }                                                                                                      </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style=""> 115 }                                                                                                        </span>
+
+
+
+
+
+</pre></td>
+                            <td><pre><span class="4534359625031764666" onmouseenter="enter('4534359625031764666');" onmouseout="out('4534359625031764666');" style="">   1 /*                                                                                                       </span>
+<span class="-4176855950178531235" onmouseenter="enter('-4176855950178531235');" onmouseout="out('-4176855950178531235');" style="">   2  * Copyright (C) 2016 AriaLyy(https://github.com/AriaLyy/Aria)                                           </span>
+<span class="329605257831645060" onmouseenter="enter('329605257831645060');" onmouseout="out('329605257831645060');" style="">   3  *                                                                                                       </span>
+<span class="-7144700690364548245" onmouseenter="enter('-7144700690364548245');" onmouseout="out('-7144700690364548245');" style="">   4  * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);                                       </span>
+<span class="-6614298523444173250" onmouseenter="enter('-6614298523444173250');" onmouseout="out('-6614298523444173250');" style="">   5  * you may not use this file except in compliance with the License.                                      </span>
+<span class="-4753901504248728101" onmouseenter="enter('-4753901504248728101');" onmouseout="out('-4753901504248728101');" style="">   6  * You may obtain a copy of the License at                                                               </span>
+<span class="329605257831645060" onmouseenter="enter('329605257831645060');" onmouseout="out('329605257831645060');" style="">   7  *                                                                                                       </span>
+<span class="-763207030729826407" onmouseenter="enter('-763207030729826407');" onmouseout="out('-763207030729826407');" style="">   8  *      http://www.apache.org/licenses/LICENSE-2.0                                                       </span>
+<span class="329605257831645060" onmouseenter="enter('329605257831645060');" onmouseout="out('329605257831645060');" style="">   9  *                                                                                                       </span>
+<span class="2557607632756179983" onmouseenter="enter('2557607632756179983');" onmouseout="out('2557607632756179983');" style="">  10  * Unless required by applicable law or agreed to in writing, software                                   </span>
+<span class="-9189129105512731955" onmouseenter="enter('-9189129105512731955');" onmouseout="out('-9189129105512731955');" style="">  11  * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,                                     </span>
+<span class="5781161717946418340" onmouseenter="enter('5781161717946418340');" onmouseout="out('5781161717946418340');" style="">  12  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.                              </span>
+<span class="1761562277992059393" onmouseenter="enter('1761562277992059393');" onmouseout="out('1761562277992059393');" style="">  13  * See the License for the specific language governing permissions and                                   </span>
+<span class="7217408601297779962" onmouseenter="enter('7217408601297779962');" onmouseout="out('7217408601297779962');" style="">  14  * limitations under the License.                                                                        </span>
+<span class="-3478703399357275674" onmouseenter="enter('-3478703399357275674');" onmouseout="out('-3478703399357275674');" style="">  15  */                                                                                                      </span>
+<span class="-1898253769494936956" onmouseenter="enter('-1898253769494936956');" onmouseout="out('-1898253769494936956');" style="">  16 package com.arialyy.aria.core.download.group;                                                            </span>
+<span  style="">  17                                                                                                          </span>
+<span class="-8750621697125156872" onmouseenter="enter('-8750621697125156872');" onmouseout="out('-8750621697125156872');" style="">  18 import android.net.Uri;                                                                                  </span>
+<span class="3727887607099278716" onmouseenter="enter('3727887607099278716');" onmouseout="out('3727887607099278716');" style="">  19 import android.text.TextUtils;                                                                           </span>
+<span class="-1826527463380491929" onmouseenter="enter('-1826527463380491929');" onmouseout="out('-1826527463380491929');" style="">  20 import com.arialyy.aria.core.FtpUrlEntity;                                                               </span>
+<span class="5028823532254250595" onmouseenter="enter('5028823532254250595');" onmouseout="out('5028823532254250595');" style="">  21 import com.arialyy.aria.core.common.CompleteInfo;                                                        </span>
+<span class="-1788009330887423510" onmouseenter="enter('-1788009330887423510');" onmouseout="out('-1788009330887423510');" style="">  22 import com.arialyy.aria.core.common.OnFileInfoCallback;                                                  </span>
+<span class="3129861871570792913" onmouseenter="enter('3129861871570792913');" onmouseout="out('3129861871570792913');" style="">  23 import com.arialyy.aria.core.download.DGTaskWrapper;                                                     </span>
+<span class="-3497740022528182602" onmouseenter="enter('-3497740022528182602');" onmouseout="out('-3497740022528182602');" style="">  24 import com.arialyy.aria.core.download.DTaskWrapper;                                                      </span>
+<span class="3322471595626447686" onmouseenter="enter('3322471595626447686');" onmouseout="out('3322471595626447686');" style="">  25 import com.arialyy.aria.core.inf.AbsEntity;                                                              </span>
+<span class="-5016163043314935005" onmouseenter="enter('-5016163043314935005');" onmouseout="out('-5016163043314935005');" style="">  26 import com.arialyy.aria.core.inf.IEntity;                                                                </span>
+<span class="-2677921716710306058" onmouseenter="enter('-2677921716710306058');" onmouseout="out('-2677921716710306058');" style="">  27 import com.arialyy.aria.exception.BaseException;                                                         </span>
+<span class="-2621756745147508332" onmouseenter="enter('-2621756745147508332');" onmouseout="out('-2621756745147508332');" style="">  28 import java.util.concurrent.locks.Condition;                                                             </span>
+<span class="7829593089976432692" onmouseenter="enter('7829593089976432692');" onmouseout="out('7829593089976432692');" style="">  29 import java.util.concurrent.locks.ReentrantLock;                                                         </span>
+<span  style="">  30                                                                                                          </span>
+<span  style="">  31                                                                                                          </span>
+<span class="1188357178855945174" onmouseenter="enter('1188357178855945174');" onmouseout="out('1188357178855945174');" style="">  32 /**                                                                                                      </span>
+<span class="1794853546228202306" onmouseenter="enter('1794853546228202306');" onmouseout="out('1794853546228202306');" style="">  33  * Created by Aria.Lao on 2017/7/27.                                                                     </span>
+<span class="-2057788039395764322" onmouseenter="enter('-2057788039395764322');" onmouseout="out('-2057788039395764322');" style="">  34  * ftp文件夹下载工具                                                                                            </span>
+<span class="-3478703399357275674" onmouseenter="enter('-3478703399357275674');" onmouseout="out('-3478703399357275674');" style="">  35  */                                                                                                      </span>
+<span class="-5962779167288592566" onmouseenter="enter('-5962779167288592566');" onmouseout="out('-5962779167288592566');" style="">  36 public class FtpDirDownloadUtil extends AbsGroupUtil {                                                   </span>
+<span class="-3111960916969408164" onmouseenter="enter('-3111960916969408164');" onmouseout="out('-3111960916969408164');" style="">  37   private String TAG = &quot;FtpDirDownloadUtil&quot;;                                                             </span>
+<span  style="">  38                                                                                                          </span>
+<span class="-4693289927940198172" onmouseenter="enter('-4693289927940198172');" onmouseout="out('-4693289927940198172');" style="">  39   private ReentrantLock LOCK = new ReentrantLock();                                                      </span>
+<span  style="">  40                                                                                                          </span>
+<span class="5272785486088894310" onmouseenter="enter('5272785486088894310');" onmouseout="out('5272785486088894310');" style="">  41   private Condition condition = LOCK.newCondition();                                                     </span>
+<span  style="">  42                                                                                                          </span>
+<span class="-7413909877816734166" onmouseenter="enter('-7413909877816734166');" onmouseout="out('-7413909877816734166');" style="">  43   public FtpDirDownloadUtil(IDGroupListener listener, DGTaskWrapper taskEntity) {                        </span>
+<span class="-7841553057471002442" onmouseenter="enter('-7841553057471002442');" onmouseout="out('-7841553057471002442');" style="">  44     super(listener, taskEntity);                                                                         </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  45   }                                                                                                      </span>
+<span  style="">  46                                                                                                          </span>
+<span class="7947472288428602188" onmouseenter="enter('7947472288428602188');" onmouseout="out('7947472288428602188');" style="">  47   @Override int getTaskType() {                                                                          </span>
+<span class="-2332889583841588441" onmouseenter="enter('-2332889583841588441');" onmouseout="out('-2332889583841588441');" style="">  48     return FTP_DIR;                                                                                      </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  49   }                                                                                                      </span>
+<span  style="">  50                                                                                                          </span>
+<span class="5563255192340639251" onmouseenter="enter('5563255192340639251');" onmouseout="out('5563255192340639251');" style="">  51   @Override                                                                                              </span>
+<span class="-3521323895466331158" onmouseenter="enter('-3521323895466331158');" onmouseout="out('-3521323895466331158');" style="">  52   protected boolean onPreStart() {                                                                       </span>
+<span class="5828248294444065761" onmouseenter="enter('5828248294444065761');" onmouseout="out('5828248294444065761');" style="">  53     if (mGTWrapper.getEntity().getFileSize() &gt; 1) {                                                      </span>
+<span class="-1809307550799287856" onmouseenter="enter('-1809307550799287856');" onmouseout="out('-1809307550799287856');" style="">  54       startDownload(true);                                                                               </span>
+<span class="-6023928394739582014" onmouseenter="enter('-6023928394739582014');" onmouseout="out('-6023928394739582014');" style="">  55     } else {                                                                                             </span>
+<span class="3775086071501199642" onmouseenter="enter('3775086071501199642');" onmouseout="out('3775086071501199642');" style="">  56       FtpDirInfoThread infoThread = new FtpDirInfoThread(mGTWrapper, new OnFileInfoCallback() {          </span>
+<span class="5563255192340639251" onmouseenter="enter('5563255192340639251');" onmouseout="out('5563255192340639251');" style="">  57         @Override                                                                                        </span>
+<span class="3401976593396757396" onmouseenter="enter('3401976593396757396');" onmouseout="out('3401976593396757396');" style="">  58         public void onComplete(String url, CompleteInfo info) {                                          </span>
+<span class="-8316408501290066988" onmouseenter="enter('-8316408501290066988');" onmouseout="out('-8316408501290066988');" style="">  59           if ((info.code &gt;= 200) &amp;&amp; (info.code &lt; 300)) {                                                 </span>
+<span class="-7542888645272231689" onmouseenter="enter('-7542888645272231689');" onmouseout="out('-7542888645272231689');" style="">  60             startDownload(false);                                                                        </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  61           }                                                                                              </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  62         }                                                                                                </span>
+<span  style="">  63                                                                                                          </span>
+<span class="4202361941777062332" onmouseenter="enter('4202361941777062332');" onmouseout="out('4202361941777062332');" style="">  64         @Override public void onFail(AbsEntity entity, BaseException e, boolean needRetry) {             </span>
+<span class="8285813611364437915" onmouseenter="enter('8285813611364437915');" onmouseout="out('8285813611364437915');" style="">  65           mListener.onFail(needRetry, e);                                                                </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  66         }                                                                                                </span>
+<span class="7938821646327104961" onmouseenter="enter('7938821646327104961');" onmouseout="out('7938821646327104961');" style="">  67       });                                                                                                </span>
+<span class="-9128110853298759146" onmouseenter="enter('-9128110853298759146');" onmouseout="out('-9128110853298759146');" style="">  68       new Thread(infoThread).start();                                                                    </span>
+<span class="-2989978199866728989" onmouseenter="enter('-2989978199866728989');" onmouseout="out('-2989978199866728989');" style="">  69       try {                                                                                              </span>
+<span class="-6650174078043072843" onmouseenter="enter('-6650174078043072843');" onmouseout="out('-6650174078043072843');" style="">  70         LOCK.lock();                                                                                     </span>
+<span class="408215768272697829" onmouseenter="enter('408215768272697829');" onmouseout="out('408215768272697829');" style="">  71         condition.await();                                                                               </span>
+<span class="4824049649208119838" onmouseenter="enter('4824049649208119838');" onmouseout="out('4824049649208119838');" style="">  72       } catch (java.lang.InterruptedException e) {                                                       </span>
+<span class="4090663313211582937" onmouseenter="enter('4090663313211582937');" onmouseout="out('4090663313211582937');" style="">  73         e.printStackTrace();                                                                             </span>
+<span class="9062373144943479618" onmouseenter="enter('9062373144943479618');" onmouseout="out('9062373144943479618');" style="">  74       } finally {                                                                                        </span>
+<span class="7898199919247603164" onmouseenter="enter('7898199919247603164');" onmouseout="out('7898199919247603164');" style="">  75         LOCK.unlock();                                                                                   </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  76       }                                                                                                  </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  77     }                                                                                                    </span>
+<span class="-3118901906653197100" onmouseenter="enter('-3118901906653197100');" onmouseout="out('-3118901906653197100');" style="">  78     return true;                                                                                         </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  79   }                                                                                                      </span>
+<span  style="">  80                                                                                                          </span>
+<span class="1188357178855945174" onmouseenter="enter('1188357178855945174');" onmouseout="out('1188357178855945174');" style="">  81   /**                                                                                                    </span>
+<span class="2520495743777636011" onmouseenter="enter('2520495743777636011');" onmouseout="out('2520495743777636011');" style="">  82    * @param needCloneInfo 第一次下载，信息已经在{@link FtpDirInfoThread}中clone了                                     </span>
+<span class="-3478703399357275674" onmouseenter="enter('-3478703399357275674');" onmouseout="out('-3478703399357275674');" style="">  83    */                                                                                                    </span>
+<span class="-1875683460680626733" onmouseenter="enter('-1875683460680626733');" onmouseout="out('-1875683460680626733');" style="">  84   private void startDownload(boolean needCloneInfo) {                                                    </span>
+<span class="-2989978199866728989" onmouseenter="enter('-2989978199866728989');" onmouseout="out('-2989978199866728989');" style="">  85     try {                                                                                                </span>
+<span class="-6650174078043072843" onmouseenter="enter('-6650174078043072843');" onmouseout="out('-6650174078043072843');" style="">  86       LOCK.lock();                                                                                       </span>
+<span class="4414547000749226706" onmouseenter="enter('4414547000749226706');" onmouseout="out('4414547000749226706');" style="">  87       condition.signalAll();                                                                             </span>
+<span class="9062373144943479618" onmouseenter="enter('9062373144943479618');" onmouseout="out('9062373144943479618');" style="">  88     } finally {                                                                                          </span>
+<span class="7898199919247603164" onmouseenter="enter('7898199919247603164');" onmouseout="out('7898199919247603164');" style="">  89       LOCK.unlock();                                                                                     </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  90     }                                                                                                    </span>
+<span class="-1342729191298827949" onmouseenter="enter('-1342729191298827949');" onmouseout="out('-1342729191298827949');" style="">  91     initState();                                                                                         </span>
+<span class="-3609264869766321022" onmouseenter="enter('-3609264869766321022');" onmouseout="out('-3609264869766321022');" style="">  92     for (DTaskWrapper wrapper : mGTWrapper.getSubTaskWrapper()) {                                        </span>
+<span class="5932488872985900343" onmouseenter="enter('5932488872985900343');" onmouseout="out('5932488872985900343');" style="">  93       if (needCloneInfo) {                                                                               </span>
+<span class="4736647084797011248" onmouseenter="enter('4736647084797011248');" onmouseout="out('4736647084797011248');" style="">  94         cloneInfo(wrapper);                                                                              </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  95       }                                                                                                  </span>
+<span class="1582042434488765352" onmouseenter="enter('1582042434488765352');" onmouseout="out('1582042434488765352');" style="">  96       if (wrapper.getState() != IEntity.STATE_COMPLETE) {                                                </span>
+<span class="-6162195828863091653" onmouseenter="enter('-6162195828863091653');" onmouseout="out('-6162195828863091653');" style="">  97         createAndStartSubLoader(wrapper);                                                                </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  98       }                                                                                                  </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  99     }                                                                                                    </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style=""> 100   }                                                                                                      </span>
+<span  style=""> 101                                                                                                          </span>
+<span class="-6940300392816531628" onmouseenter="enter('-6940300392816531628');" onmouseout="out('-6940300392816531628');" style=""> 102   private void cloneInfo(DTaskWrapper subWrapper) {                                                      </span>
+<span class="-504051504662208551" onmouseenter="enter('-504051504662208551');" onmouseout="out('-504051504662208551');" style=""> 103     FtpUrlEntity urlEntity = mGTWrapper.asFtp().getUrlEntity().clone();                                  </span>
+<span class="1924326156832934668" onmouseenter="enter('1924326156832934668');" onmouseout="out('1924326156832934668');" style=""> 104     Uri uri = Uri.parse(subWrapper.getEntity().getUrl());                                                </span>
+<span class="7204430896521032087" onmouseenter="enter('7204430896521032087');" onmouseout="out('7204430896521032087');" style=""> 105     String remotePath = uri.getPath();                                                                   </span>
+<span class="8474823335874347491" onmouseenter="enter('8474823335874347491');" onmouseout="out('8474823335874347491');" style=""> 106     urlEntity.remotePath = TextUtils.isEmpty(remotePath) ? &quot;/&quot; : remotePath;                             </span>
+<span  style=""> 107                                                                                                          </span>
+<span class="6246426708329578526" onmouseenter="enter('6246426708329578526');" onmouseout="out('6246426708329578526');" style=""> 108     subWrapper.asFtp().setUrlEntity(urlEntity);                                                          </span>
+<span class="4978227270896389936" onmouseenter="enter('4978227270896389936');" onmouseout="out('4978227270896389936');" style=""> 109     subWrapper.asFtp().setCharSet(mGTWrapper.asFtp().getCharSet());                                      </span>
+<span class="7696242006805228199" onmouseenter="enter('7696242006805228199');" onmouseout="out('7696242006805228199');" style=""> 110     subWrapper.asFtp().setProxy(mGTWrapper.asFtp().getProxy());                                          </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style=""> 111   }                                                                                                      </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style=""> 112 }                                                                                                        </span>
+
+
+
+
+
+
+
+
+</pre></td>
                         </tr>
                     </table>
                 </div>
@@ -429,202 +442,189 @@ del /Q jfstmerge.java.merge
                             <th>theirs vs. base</th>
                         </tr>
                         <tr>
-                            <td><pre>   1  /*
-   2   * Copyright (C) 2016 AriaLyy(https://github.com/AriaLyy/Aria)
-   3   *
-   4   * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
-   5   * you may not use this file except in compliance with the License.
-   6   * You may obtain a copy of the License at
-   7   *
-   8   *      http://www.apache.org/licenses/LICENSE-2.0
-   9   *
-  10   * Unless required by applicable law or agreed to in writing, software
-  11   * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
-  12   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  13   * See the License for the specific language governing permissions and
-  14   * limitations under the License.
-  15   */
-  16  package com.arialyy.aria.core.download.group;
-  17  
-<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  18 +import android.net.Uri;</span>
-<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  19 +import android.text.TextUtils;</span>
-<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  20 +import com.arialyy.aria.core.FtpUrlEntity;</span>
-  21  import com.arialyy.aria.core.common.CompleteInfo;
-  22  import com.arialyy.aria.core.common.OnFileInfoCallback;
-  23  import com.arialyy.aria.core.download.DGTaskWrapper;
-  24  import com.arialyy.aria.core.download.DTaskWrapper;
-  25  import com.arialyy.aria.core.inf.AbsEntity;
-  26  import com.arialyy.aria.core.inf.IEntity;
-  27  import com.arialyy.aria.exception.BaseException;
-<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  28 +import java.util.concurrent.locks.Condition;</span>
-<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  29 +import java.util.concurrent.locks.ReentrantLock;</span>
-  30  
-  31  /**
-  32   * Created by Aria.Lao on 2017/7/27.
-  33   * ftp文件夹下载工具
-  34   */
-  35  public class FtpDirDownloadUtil extends AbsGroupUtil {
-  36    private String TAG = &quot;FtpDirDownloadUtil&quot;;
-<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  37 +  private ReentrantLock LOCK = new ReentrantLock();</span>
-<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  38 +  private Condition condition = LOCK.newCondition();</span>
-  39  
-  40    public FtpDirDownloadUtil(IDGroupListener listener, DGTaskWrapper taskEntity) {
-  41      super(listener, taskEntity);
-  42    }
-  43  
-  44    @Override int getTaskType() {
-  45      return FTP_DIR;
-  46    }
-  47  
-<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  48 -  @Override protected void onStart() {</span>
-<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  49 -    super.onStart();</span>
-<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  50 +  @Override protected void onPreStart() {</span>
-<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  51 +    super.onPreStart();</span>
-  52      if (mGTWrapper.getEntity().getFileSize() &gt; 1) {
-<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  53 -      startDownload();</span>
-<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  54 +      startDownload(true);</span>
-  55      } else {
-<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  56 -</span>
-  57        FtpDirInfoThread infoThread = new FtpDirInfoThread(mGTWrapper, new OnFileInfoCallback() {
-  58          @Override public void onComplete(String url, CompleteInfo info) {
-  59            if (info.code &gt;= 200 &amp;&amp; info.code &lt; 300) {
-<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  60 -            startDownload();</span>
-<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  61 +            startDownload(false);</span>
-  62            }
-  63          }
-  64  
-  65          @Override public void onFail(AbsEntity entity, BaseException e, boolean needRetry) {
-  66            mListener.onFail(needRetry, e);
-  67          }
-  68        });
-  69        new Thread(infoThread).start();
-<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  70 +      try {</span>
-<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  71 +        LOCK.lock();</span>
-<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  72 +        condition.await();</span>
-<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  73 +      } catch (InterruptedException e) {</span>
-<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  74 +        e.printStackTrace();</span>
-<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  75 +      } finally {</span>
-<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  76 +        LOCK.unlock();</span>
-<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  77 +      }</span>
-  78      }
+                            <td><pre><span class="4534359625031764666" onmouseenter="enter('4534359625031764666');" onmouseout="out('4534359625031764666');" style="">   1  /*                                                                                                                </span>
+<span class="-4176855950178531235" onmouseenter="enter('-4176855950178531235');" onmouseout="out('-4176855950178531235');" style="">   2   * Copyright (C) 2016 AriaLyy(https://github.com/AriaLyy/Aria)                                                    </span>
+<span class="329605257831645060" onmouseenter="enter('329605257831645060');" onmouseout="out('329605257831645060');" style="">   3   *                                                                                                                </span>
+<span class="-7144700690364548245" onmouseenter="enter('-7144700690364548245');" onmouseout="out('-7144700690364548245');" style="">   4   * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);                                                </span>
+<span class="-6614298523444173250" onmouseenter="enter('-6614298523444173250');" onmouseout="out('-6614298523444173250');" style="">   5   * you may not use this file except in compliance with the License.                                               </span>
+<span class="-4753901504248728101" onmouseenter="enter('-4753901504248728101');" onmouseout="out('-4753901504248728101');" style="">   6   * You may obtain a copy of the License at                                                                        </span>
+<span class="329605257831645060" onmouseenter="enter('329605257831645060');" onmouseout="out('329605257831645060');" style="">   7   *                                                                                                                </span>
+<span class="-763207030729826407" onmouseenter="enter('-763207030729826407');" onmouseout="out('-763207030729826407');" style="">   8   *      http://www.apache.org/licenses/LICENSE-2.0                                                                </span>
+<span class="329605257831645060" onmouseenter="enter('329605257831645060');" onmouseout="out('329605257831645060');" style="">   9   *                                                                                                                </span>
+<span class="2557607632756179983" onmouseenter="enter('2557607632756179983');" onmouseout="out('2557607632756179983');" style="">  10   * Unless required by applicable law or agreed to in writing, software                                            </span>
+<span class="-9189129105512731955" onmouseenter="enter('-9189129105512731955');" onmouseout="out('-9189129105512731955');" style="">  11   * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,                                              </span>
+<span class="5781161717946418340" onmouseenter="enter('5781161717946418340');" onmouseout="out('5781161717946418340');" style="">  12   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.                                       </span>
+<span class="1761562277992059393" onmouseenter="enter('1761562277992059393');" onmouseout="out('1761562277992059393');" style="">  13   * See the License for the specific language governing permissions and                                            </span>
+<span class="7217408601297779962" onmouseenter="enter('7217408601297779962');" onmouseout="out('7217408601297779962');" style="">  14   * limitations under the License.                                                                                 </span>
+<span class="-3478703399357275674" onmouseenter="enter('-3478703399357275674');" onmouseout="out('-3478703399357275674');" style="">  15   */                                                                                                               </span>
+<span class="-1898253769494936956" onmouseenter="enter('-1898253769494936956');" onmouseout="out('-1898253769494936956');" style="">  16  package com.arialyy.aria.core.download.group;                                                                     </span>
+<span  style="">  17                                                                                                                    </span>
+<span class="-8750621697125156872" onmouseenter="enter('-8750621697125156872');" onmouseout="out('-8750621697125156872');" style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  18 +import android.net.Uri;                                                                                           </span>
+<span class="3727887607099278716" onmouseenter="enter('3727887607099278716');" onmouseout="out('3727887607099278716');" style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  19 +import android.text.TextUtils;                                                                                    </span>
+<span class="-1826527463380491929" onmouseenter="enter('-1826527463380491929');" onmouseout="out('-1826527463380491929');" style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  20 +import com.arialyy.aria.core.FtpUrlEntity;                                                                        </span>
+<span class="5028823532254250595" onmouseenter="enter('5028823532254250595');" onmouseout="out('5028823532254250595');" style="">  21  import com.arialyy.aria.core.common.CompleteInfo;                                                                 </span>
+<span class="-1788009330887423510" onmouseenter="enter('-1788009330887423510');" onmouseout="out('-1788009330887423510');" style="">  22  import com.arialyy.aria.core.common.OnFileInfoCallback;                                                           </span>
+<span class="3129861871570792913" onmouseenter="enter('3129861871570792913');" onmouseout="out('3129861871570792913');" style="">  23  import com.arialyy.aria.core.download.DGTaskWrapper;                                                              </span>
+<span class="-3497740022528182602" onmouseenter="enter('-3497740022528182602');" onmouseout="out('-3497740022528182602');" style="">  24  import com.arialyy.aria.core.download.DTaskWrapper;                                                               </span>
+<span class="3322471595626447686" onmouseenter="enter('3322471595626447686');" onmouseout="out('3322471595626447686');" style="">  25  import com.arialyy.aria.core.inf.AbsEntity;                                                                       </span>
+<span class="-5016163043314935005" onmouseenter="enter('-5016163043314935005');" onmouseout="out('-5016163043314935005');" style="">  26  import com.arialyy.aria.core.inf.IEntity;                                                                         </span>
+<span class="-2677921716710306058" onmouseenter="enter('-2677921716710306058');" onmouseout="out('-2677921716710306058');" style="">  27  import com.arialyy.aria.exception.BaseException;                                                                  </span>
+<span class="-2621756745147508332" onmouseenter="enter('-2621756745147508332');" onmouseout="out('-2621756745147508332');" style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  28 +import java.util.concurrent.locks.Condition;                                                                      </span>
+<span class="7829593089976432692" onmouseenter="enter('7829593089976432692');" onmouseout="out('7829593089976432692');" style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  29 +import java.util.concurrent.locks.ReentrantLock;                                                                  </span>
+<span  style="">  30                                                                                                                    </span>
+<span class="1188357178855945174" onmouseenter="enter('1188357178855945174');" onmouseout="out('1188357178855945174');" style="">  31  /**                                                                                                               </span>
+<span class="1794853546228202306" onmouseenter="enter('1794853546228202306');" onmouseout="out('1794853546228202306');" style="">  32   * Created by Aria.Lao on 2017/7/27.                                                                              </span>
+<span class="-2057788039395764322" onmouseenter="enter('-2057788039395764322');" onmouseout="out('-2057788039395764322');" style="">  33   * ftp文件夹下载工具                                                                                                     </span>
+<span class="-3478703399357275674" onmouseenter="enter('-3478703399357275674');" onmouseout="out('-3478703399357275674');" style="">  34   */                                                                                                               </span>
+<span class="-5962779167288592566" onmouseenter="enter('-5962779167288592566');" onmouseout="out('-5962779167288592566');" style="">  35  public class FtpDirDownloadUtil extends AbsGroupUtil {                                                            </span>
+<span class="-3111960916969408164" onmouseenter="enter('-3111960916969408164');" onmouseout="out('-3111960916969408164');" style="">  36    private String TAG = &quot;FtpDirDownloadUtil&quot;;                                                                      </span>
+<span class="-4693289927940198172" onmouseenter="enter('-4693289927940198172');" onmouseout="out('-4693289927940198172');" style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  37 +  private ReentrantLock LOCK = new ReentrantLock();                                                               </span>
+<span class="5272785486088894310" onmouseenter="enter('5272785486088894310');" onmouseout="out('5272785486088894310');" style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  38 +  private Condition condition = LOCK.newCondition();                                                              </span>
+<span  style="">  39                                                                                                                    </span>
+<span class="-7413909877816734166" onmouseenter="enter('-7413909877816734166');" onmouseout="out('-7413909877816734166');" style="">  40    public FtpDirDownloadUtil(IDGroupListener listener, DGTaskWrapper taskEntity) {                                 </span>
+<span class="-7841553057471002442" onmouseenter="enter('-7841553057471002442');" onmouseout="out('-7841553057471002442');" style="">  41      super(listener, taskEntity);                                                                                  </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  42    }                                                                                                               </span>
+<span  style="">  43                                                                                                                    </span>
+<span class="7947472288428602188" onmouseenter="enter('7947472288428602188');" onmouseout="out('7947472288428602188');" style="">  44    @Override int getTaskType() {                                                                                   </span>
+<span class="-2332889583841588441" onmouseenter="enter('-2332889583841588441');" onmouseout="out('-2332889583841588441');" style="">  45      return FTP_DIR;                                                                                               </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  46    }                                                                                                               </span>
+<span  style="">  47                                                                                                                    </span>
+<span class="7849318491336065590" onmouseenter="enter('7849318491336065590');" onmouseout="out('7849318491336065590');" style="background-color: rgba(255, 0, 0, 0.2); margin: 0">  48 -  @Override protected void onStart() {                                                                            </span>
+<span class="8068463127664630279" onmouseenter="enter('8068463127664630279');" onmouseout="out('8068463127664630279');" style="background-color: rgba(255, 0, 0, 0.2); margin: 0">  49 -    super.onStart();                                                                                              </span>
+<span class="2774624075386118133" onmouseenter="enter('2774624075386118133');" onmouseout="out('2774624075386118133');" style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  50 +  @Override protected void onPreStart() {                                                                         </span>
+<span class="5619431986925050119" onmouseenter="enter('5619431986925050119');" onmouseout="out('5619431986925050119');" style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  51 +    super.onPreStart();                                                                                           </span>
+<span class="5828248294444065761" onmouseenter="enter('5828248294444065761');" onmouseout="out('5828248294444065761');" style="">  52      if (mGTWrapper.getEntity().getFileSize() &gt; 1) {                                                               </span>
+<span class="1497820413888703615" onmouseenter="enter('1497820413888703615');" onmouseout="out('1497820413888703615');" style="background-color: rgba(255, 0, 0, 0.2); margin: 0">  53 -      startDownload();                                                                                            </span>
+<span class="-1809307550799287856" onmouseenter="enter('-1809307550799287856');" onmouseout="out('-1809307550799287856');" style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  54 +      startDownload(true);                                                                                        </span>
+<span class="-6023928394739582014" onmouseenter="enter('-6023928394739582014');" onmouseout="out('-6023928394739582014');" style="">  55      } else {                                                                                                      </span>
+<span  style="background-color: rgba(255, 0, 0, 0.2); margin: 0">  56 -                                                                                                                  </span>
+<span class="3775086071501199642" onmouseenter="enter('3775086071501199642');" onmouseout="out('3775086071501199642');" style="">  57        FtpDirInfoThread infoThread = new FtpDirInfoThread(mGTWrapper, new OnFileInfoCallback() {                   </span>
+<span class="-2050288510094905379" onmouseenter="enter('-2050288510094905379');" onmouseout="out('-2050288510094905379');" style="">  58          @Override public void onComplete(String url, CompleteInfo info) {                                         </span>
+<span class="3749191010904650047" onmouseenter="enter('3749191010904650047');" onmouseout="out('3749191010904650047');" style="">  59            if (info.code &gt;= 200 &amp;&amp; info.code &lt; 300) {                                                              </span>
+<span class="1497820413888703615" onmouseenter="enter('1497820413888703615');" onmouseout="out('1497820413888703615');" style="background-color: rgba(255, 0, 0, 0.2); margin: 0">  60 -            startDownload();                                                                                      </span>
+<span class="-7542888645272231689" onmouseenter="enter('-7542888645272231689');" onmouseout="out('-7542888645272231689');" style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  61 +            startDownload(false);                                                                                 </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  62            }                                                                                                       </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  63          }                                                                                                         </span>
+<span  style="">  64                                                                                                                    </span>
+<span class="4202361941777062332" onmouseenter="enter('4202361941777062332');" onmouseout="out('4202361941777062332');" style="">  65          @Override public void onFail(AbsEntity entity, BaseException e, boolean needRetry) {                      </span>
+<span class="8285813611364437915" onmouseenter="enter('8285813611364437915');" onmouseout="out('8285813611364437915');" style="">  66            mListener.onFail(needRetry, e);                                                                         </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  67          }                                                                                                         </span>
+<span class="7938821646327104961" onmouseenter="enter('7938821646327104961');" onmouseout="out('7938821646327104961');" style="">  68        });                                                                                                         </span>
+<span class="-9128110853298759146" onmouseenter="enter('-9128110853298759146');" onmouseout="out('-9128110853298759146');" style="">  69        new Thread(infoThread).start();                                                                             </span>
+<span class="-2989978199866728989" onmouseenter="enter('-2989978199866728989');" onmouseout="out('-2989978199866728989');" style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  70 +      try {                                                                                                       </span>
+<span class="-6650174078043072843" onmouseenter="enter('-6650174078043072843');" onmouseout="out('-6650174078043072843');" style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  71 +        LOCK.lock();                                                                                              </span>
+<span class="408215768272697829" onmouseenter="enter('408215768272697829');" onmouseout="out('408215768272697829');" style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  72 +        condition.await();                                                                                        </span>
+<span class="-7528533024404460182" onmouseenter="enter('-7528533024404460182');" onmouseout="out('-7528533024404460182');" style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  73 +      } catch (InterruptedException e) {                                                                          </span>
+<span class="4090663313211582937" onmouseenter="enter('4090663313211582937');" onmouseout="out('4090663313211582937');" style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  74 +        e.printStackTrace();                                                                                      </span>
+<span class="9062373144943479618" onmouseenter="enter('9062373144943479618');" onmouseout="out('9062373144943479618');" style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  75 +      } finally {                                                                                                 </span>
+<span class="7898199919247603164" onmouseenter="enter('7898199919247603164');" onmouseout="out('7898199919247603164');" style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  76 +        LOCK.unlock();                                                                                            </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  77 +      }                                                                                                           </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  78      }                                                                                                             </span>
 
-  79    }
-  80  
-<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  81 -  private void startDownload() {</span>
-<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  82 +  /**</span>
-<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  83 +   * @param needCloneInfo 第一次下载，信息已经在{@link FtpDirInfoThread}中clone了</span>
-<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  84 +   */</span>
-<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  85 +  private void startDownload(boolean needCloneInfo) {</span>
-<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  86 +    try {</span>
-<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  87 +      LOCK.lock();</span>
-<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  88 +      condition.signalAll();</span>
-<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  89 +    } finally {</span>
-<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  90 +      LOCK.unlock();</span>
-<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  91 +    }</span>
-<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  92 +    initState();</span>
-  93      for (DTaskWrapper wrapper : mGTWrapper.getSubTaskWrapper()) {
-<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  94 +      if (needCloneInfo) {</span>
-<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  95 +        cloneInfo(wrapper);</span>
-<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  96 +      }</span>
-  97        if (wrapper.getState() != IEntity.STATE_COMPLETE) {
-  98          createAndStartSubLoader(wrapper);
-  99        }
- 100      }
- 101    }
-<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 102 +</span>
-<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 103 +  private void cloneInfo(DTaskWrapper subWrapper) {</span>
-<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 104 +    FtpUrlEntity urlEntity = mGTWrapper.asFtp().getUrlEntity().clone();</span>
-<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 105 +    Uri uri = Uri.parse(subWrapper.getEntity().getUrl());</span>
-<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 106 +    String remotePath = uri.getPath();</span>
-<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 107 +    urlEntity.remotePath = TextUtils.isEmpty(remotePath) ? &quot;/&quot; : remotePath;</span>
-<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 108 +</span>
-<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 109 +    subWrapper.asFtp().setUrlEntity(urlEntity);</span>
-<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 110 +    subWrapper.asFtp().setCharSet(mGTWrapper.asFtp().getCharSet());</span>
-<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 111 +    subWrapper.asFtp().setProxy(mGTWrapper.asFtp().getProxy());</span>
-<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 112 +  }</span>
- 113  }</pre></td>
-                            <td><pre>   1  /*
-   2   * Copyright (C) 2016 AriaLyy(https://github.com/AriaLyy/Aria)
-   3   *
-   4   * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
-   5   * you may not use this file except in compliance with the License.
-   6   * You may obtain a copy of the License at
-   7   *
-   8   *      http://www.apache.org/licenses/LICENSE-2.0
-   9   *
-  10   * Unless required by applicable law or agreed to in writing, software
-  11   * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
-  12   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  13   * See the License for the specific language governing permissions and
-  14   * limitations under the License.
-  15   */
-  16  package com.arialyy.aria.core.download.group;
-  17  
-
-
-
-  18  import com.arialyy.aria.core.common.CompleteInfo;
-  19  import com.arialyy.aria.core.common.OnFileInfoCallback;
-  20  import com.arialyy.aria.core.download.DGTaskWrapper;
-  21  import com.arialyy.aria.core.download.DTaskWrapper;
-  22  import com.arialyy.aria.core.inf.AbsEntity;
-  23  import com.arialyy.aria.core.inf.IEntity;
-  24  import com.arialyy.aria.exception.BaseException;
-
-
-  25  
-  26  /**
-  27   * Created by Aria.Lao on 2017/7/27.
-  28   * ftp文件夹下载工具
-  29   */
-  30  public class FtpDirDownloadUtil extends AbsGroupUtil {
-  31    private String TAG = &quot;FtpDirDownloadUtil&quot;;
-
-
-  32  
-  33    public FtpDirDownloadUtil(IDGroupListener listener, DGTaskWrapper taskEntity) {
-  34      super(listener, taskEntity);
-  35    }
-  36  
-  37    @Override int getTaskType() {
-  38      return FTP_DIR;
-  39    }
-  40  
-<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  41 -  @Override protected void onStart() {</span>
-<span style="background-color: rgba(255, 0, 0, 0.2);; margin: 0">  42 -    super.onStart();</span>
-<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  43 +  @Override protected boolean onStart() {</span>
-
-  44      if (mGTWrapper.getEntity().getFileSize() &gt; 1) {
-  45        startDownload();
-
-  46      } else {
-  47  
-  48        FtpDirInfoThread infoThread = new FtpDirInfoThread(mGTWrapper, new OnFileInfoCallback() {
-  49          @Override public void onComplete(String url, CompleteInfo info) {
-  50            if (info.code &gt;= 200 &amp;&amp; info.code &lt; 300) {
-  51              startDownload();
-
-  52            }
-  53          }
-  54  
-  55          @Override public void onFail(AbsEntity entity, BaseException e, boolean needRetry) {
-  56            mListener.onFail(needRetry, e);
-  57          }
-  58        });
-  59        new Thread(infoThread).start();
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  79    }                                                                                                               </span>
+<span  style="">  80                                                                                                                    </span>
+<span class="661693137305496532" onmouseenter="enter('661693137305496532');" onmouseout="out('661693137305496532');" style="background-color: rgba(255, 0, 0, 0.2); margin: 0">  81 -  private void startDownload() {                                                                                  </span>
+<span class="1188357178855945174" onmouseenter="enter('1188357178855945174');" onmouseout="out('1188357178855945174');" style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  82 +  /**                                                                                                             </span>
+<span class="2520495743777636011" onmouseenter="enter('2520495743777636011');" onmouseout="out('2520495743777636011');" style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  83 +   * @param needCloneInfo 第一次下载，信息已经在{@link FtpDirInfoThread}中clone了                                              </span>
+<span class="-3478703399357275674" onmouseenter="enter('-3478703399357275674');" onmouseout="out('-3478703399357275674');" style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  84 +   */                                                                                                             </span>
+<span class="-1875683460680626733" onmouseenter="enter('-1875683460680626733');" onmouseout="out('-1875683460680626733');" style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  85 +  private void startDownload(boolean needCloneInfo) {                                                             </span>
+<span class="-2989978199866728989" onmouseenter="enter('-2989978199866728989');" onmouseout="out('-2989978199866728989');" style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  86 +    try {                                                                                                         </span>
+<span class="-6650174078043072843" onmouseenter="enter('-6650174078043072843');" onmouseout="out('-6650174078043072843');" style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  87 +      LOCK.lock();                                                                                                </span>
+<span class="4414547000749226706" onmouseenter="enter('4414547000749226706');" onmouseout="out('4414547000749226706');" style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  88 +      condition.signalAll();                                                                                      </span>
+<span class="9062373144943479618" onmouseenter="enter('9062373144943479618');" onmouseout="out('9062373144943479618');" style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  89 +    } finally {                                                                                                   </span>
+<span class="7898199919247603164" onmouseenter="enter('7898199919247603164');" onmouseout="out('7898199919247603164');" style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  90 +      LOCK.unlock();                                                                                              </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  91 +    }                                                                                                             </span>
+<span class="-1342729191298827949" onmouseenter="enter('-1342729191298827949');" onmouseout="out('-1342729191298827949');" style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  92 +    initState();                                                                                                  </span>
+<span class="-3609264869766321022" onmouseenter="enter('-3609264869766321022');" onmouseout="out('-3609264869766321022');" style="">  93      for (DTaskWrapper wrapper : mGTWrapper.getSubTaskWrapper()) {                                                 </span>
+<span class="5932488872985900343" onmouseenter="enter('5932488872985900343');" onmouseout="out('5932488872985900343');" style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  94 +      if (needCloneInfo) {                                                                                        </span>
+<span class="4736647084797011248" onmouseenter="enter('4736647084797011248');" onmouseout="out('4736647084797011248');" style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  95 +        cloneInfo(wrapper);                                                                                       </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  96 +      }                                                                                                           </span>
+<span class="1582042434488765352" onmouseenter="enter('1582042434488765352');" onmouseout="out('1582042434488765352');" style="">  97        if (wrapper.getState() != IEntity.STATE_COMPLETE) {                                                         </span>
+<span class="-6162195828863091653" onmouseenter="enter('-6162195828863091653');" onmouseout="out('-6162195828863091653');" style="">  98          createAndStartSubLoader(wrapper);                                                                         </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  99        }                                                                                                           </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style=""> 100      }                                                                                                             </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style=""> 101    }                                                                                                               </span>
+<span  style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 102 +                                                                                                                  </span>
+<span class="-6940300392816531628" onmouseenter="enter('-6940300392816531628');" onmouseout="out('-6940300392816531628');" style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 103 +  private void cloneInfo(DTaskWrapper subWrapper) {                                                               </span>
+<span class="-504051504662208551" onmouseenter="enter('-504051504662208551');" onmouseout="out('-504051504662208551');" style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 104 +    FtpUrlEntity urlEntity = mGTWrapper.asFtp().getUrlEntity().clone();                                           </span>
+<span class="1924326156832934668" onmouseenter="enter('1924326156832934668');" onmouseout="out('1924326156832934668');" style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 105 +    Uri uri = Uri.parse(subWrapper.getEntity().getUrl());                                                         </span>
+<span class="7204430896521032087" onmouseenter="enter('7204430896521032087');" onmouseout="out('7204430896521032087');" style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 106 +    String remotePath = uri.getPath();                                                                            </span>
+<span class="8474823335874347491" onmouseenter="enter('8474823335874347491');" onmouseout="out('8474823335874347491');" style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 107 +    urlEntity.remotePath = TextUtils.isEmpty(remotePath) ? &quot;/&quot; : remotePath;                                      </span>
+<span  style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 108 +                                                                                                                  </span>
+<span class="6246426708329578526" onmouseenter="enter('6246426708329578526');" onmouseout="out('6246426708329578526');" style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 109 +    subWrapper.asFtp().setUrlEntity(urlEntity);                                                                   </span>
+<span class="4978227270896389936" onmouseenter="enter('4978227270896389936');" onmouseout="out('4978227270896389936');" style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 110 +    subWrapper.asFtp().setCharSet(mGTWrapper.asFtp().getCharSet());                                               </span>
+<span class="7696242006805228199" onmouseenter="enter('7696242006805228199');" onmouseout="out('7696242006805228199');" style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 111 +    subWrapper.asFtp().setProxy(mGTWrapper.asFtp().getProxy());                                                   </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="background-color: rgba(0, 255, 0, 0.2); margin: 0"> 112 +  }                                                                                                               </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style=""> 113  }                                                                                                                 </span></pre></td>
+                            <td><pre><span class="4534359625031764666" onmouseenter="enter('4534359625031764666');" onmouseout="out('4534359625031764666');" style="">   1  /*                                                                                                                </span>
+<span class="-4176855950178531235" onmouseenter="enter('-4176855950178531235');" onmouseout="out('-4176855950178531235');" style="">   2   * Copyright (C) 2016 AriaLyy(https://github.com/AriaLyy/Aria)                                                    </span>
+<span class="329605257831645060" onmouseenter="enter('329605257831645060');" onmouseout="out('329605257831645060');" style="">   3   *                                                                                                                </span>
+<span class="-7144700690364548245" onmouseenter="enter('-7144700690364548245');" onmouseout="out('-7144700690364548245');" style="">   4   * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);                                                </span>
+<span class="-6614298523444173250" onmouseenter="enter('-6614298523444173250');" onmouseout="out('-6614298523444173250');" style="">   5   * you may not use this file except in compliance with the License.                                               </span>
+<span class="-4753901504248728101" onmouseenter="enter('-4753901504248728101');" onmouseout="out('-4753901504248728101');" style="">   6   * You may obtain a copy of the License at                                                                        </span>
+<span class="329605257831645060" onmouseenter="enter('329605257831645060');" onmouseout="out('329605257831645060');" style="">   7   *                                                                                                                </span>
+<span class="-763207030729826407" onmouseenter="enter('-763207030729826407');" onmouseout="out('-763207030729826407');" style="">   8   *      http://www.apache.org/licenses/LICENSE-2.0                                                                </span>
+<span class="329605257831645060" onmouseenter="enter('329605257831645060');" onmouseout="out('329605257831645060');" style="">   9   *                                                                                                                </span>
+<span class="2557607632756179983" onmouseenter="enter('2557607632756179983');" onmouseout="out('2557607632756179983');" style="">  10   * Unless required by applicable law or agreed to in writing, software                                            </span>
+<span class="-9189129105512731955" onmouseenter="enter('-9189129105512731955');" onmouseout="out('-9189129105512731955');" style="">  11   * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,                                              </span>
+<span class="5781161717946418340" onmouseenter="enter('5781161717946418340');" onmouseout="out('5781161717946418340');" style="">  12   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.                                       </span>
+<span class="1761562277992059393" onmouseenter="enter('1761562277992059393');" onmouseout="out('1761562277992059393');" style="">  13   * See the License for the specific language governing permissions and                                            </span>
+<span class="7217408601297779962" onmouseenter="enter('7217408601297779962');" onmouseout="out('7217408601297779962');" style="">  14   * limitations under the License.                                                                                 </span>
+<span class="-3478703399357275674" onmouseenter="enter('-3478703399357275674');" onmouseout="out('-3478703399357275674');" style="">  15   */                                                                                                               </span>
+<span class="-1898253769494936956" onmouseenter="enter('-1898253769494936956');" onmouseout="out('-1898253769494936956');" style="">  16  package com.arialyy.aria.core.download.group;                                                                     </span>
+<span  style="">  17                                                                                                                    </span>
 
 
 
+<span class="5028823532254250595" onmouseenter="enter('5028823532254250595');" onmouseout="out('5028823532254250595');" style="">  18  import com.arialyy.aria.core.common.CompleteInfo;                                                                 </span>
+<span class="-1788009330887423510" onmouseenter="enter('-1788009330887423510');" onmouseout="out('-1788009330887423510');" style="">  19  import com.arialyy.aria.core.common.OnFileInfoCallback;                                                           </span>
+<span class="3129861871570792913" onmouseenter="enter('3129861871570792913');" onmouseout="out('3129861871570792913');" style="">  20  import com.arialyy.aria.core.download.DGTaskWrapper;                                                              </span>
+<span class="-3497740022528182602" onmouseenter="enter('-3497740022528182602');" onmouseout="out('-3497740022528182602');" style="">  21  import com.arialyy.aria.core.download.DTaskWrapper;                                                               </span>
+<span class="3322471595626447686" onmouseenter="enter('3322471595626447686');" onmouseout="out('3322471595626447686');" style="">  22  import com.arialyy.aria.core.inf.AbsEntity;                                                                       </span>
+<span class="-5016163043314935005" onmouseenter="enter('-5016163043314935005');" onmouseout="out('-5016163043314935005');" style="">  23  import com.arialyy.aria.core.inf.IEntity;                                                                         </span>
+<span class="-2677921716710306058" onmouseenter="enter('-2677921716710306058');" onmouseout="out('-2677921716710306058');" style="">  24  import com.arialyy.aria.exception.BaseException;                                                                  </span>
 
 
+<span  style="">  25                                                                                                                    </span>
+<span class="1188357178855945174" onmouseenter="enter('1188357178855945174');" onmouseout="out('1188357178855945174');" style="">  26  /**                                                                                                               </span>
+<span class="1794853546228202306" onmouseenter="enter('1794853546228202306');" onmouseout="out('1794853546228202306');" style="">  27   * Created by Aria.Lao on 2017/7/27.                                                                              </span>
+<span class="-2057788039395764322" onmouseenter="enter('-2057788039395764322');" onmouseout="out('-2057788039395764322');" style="">  28   * ftp文件夹下载工具                                                                                                     </span>
+<span class="-3478703399357275674" onmouseenter="enter('-3478703399357275674');" onmouseout="out('-3478703399357275674');" style="">  29   */                                                                                                               </span>
+<span class="-5962779167288592566" onmouseenter="enter('-5962779167288592566');" onmouseout="out('-5962779167288592566');" style="">  30  public class FtpDirDownloadUtil extends AbsGroupUtil {                                                            </span>
+<span class="-3111960916969408164" onmouseenter="enter('-3111960916969408164');" onmouseout="out('-3111960916969408164');" style="">  31    private String TAG = &quot;FtpDirDownloadUtil&quot;;                                                                      </span>
 
 
+<span  style="">  32                                                                                                                    </span>
+<span class="-7413909877816734166" onmouseenter="enter('-7413909877816734166');" onmouseout="out('-7413909877816734166');" style="">  33    public FtpDirDownloadUtil(IDGroupListener listener, DGTaskWrapper taskEntity) {                                 </span>
+<span class="-7841553057471002442" onmouseenter="enter('-7841553057471002442');" onmouseout="out('-7841553057471002442');" style="">  34      super(listener, taskEntity);                                                                                  </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  35    }                                                                                                               </span>
+<span  style="">  36                                                                                                                    </span>
+<span class="7947472288428602188" onmouseenter="enter('7947472288428602188');" onmouseout="out('7947472288428602188');" style="">  37    @Override int getTaskType() {                                                                                   </span>
+<span class="-2332889583841588441" onmouseenter="enter('-2332889583841588441');" onmouseout="out('-2332889583841588441');" style="">  38      return FTP_DIR;                                                                                               </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  39    }                                                                                                               </span>
+<span  style="">  40                                                                                                                    </span>
+<span class="7849318491336065590" onmouseenter="enter('7849318491336065590');" onmouseout="out('7849318491336065590');" style="background-color: rgba(255, 0, 0, 0.2); margin: 0">  41 -  @Override protected void onStart() {                                                                            </span>
+<span class="8068463127664630279" onmouseenter="enter('8068463127664630279');" onmouseout="out('8068463127664630279');" style="background-color: rgba(255, 0, 0, 0.2); margin: 0">  42 -    super.onStart();                                                                                              </span>
+<span class="-527000804738597587" onmouseenter="enter('-527000804738597587');" onmouseout="out('-527000804738597587');" style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  43 +  @Override protected boolean onStart() {                                                                         </span>
 
-  60      }
-<span style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  61 +    return true;</span>
-  62    }
-  63  
-  64    private void startDownload() {
+<span class="5828248294444065761" onmouseenter="enter('5828248294444065761');" onmouseout="out('5828248294444065761');" style="">  44      if (mGTWrapper.getEntity().getFileSize() &gt; 1) {                                                               </span>
+<span class="1497820413888703615" onmouseenter="enter('1497820413888703615');" onmouseout="out('1497820413888703615');" style="">  45        startDownload();                                                                                            </span>
+
+<span class="-6023928394739582014" onmouseenter="enter('-6023928394739582014');" onmouseout="out('-6023928394739582014');" style="">  46      } else {                                                                                                      </span>
+<span  style="">  47                                                                                                                    </span>
+<span class="3775086071501199642" onmouseenter="enter('3775086071501199642');" onmouseout="out('3775086071501199642');" style="">  48        FtpDirInfoThread infoThread = new FtpDirInfoThread(mGTWrapper, new OnFileInfoCallback() {                   </span>
+<span class="-2050288510094905379" onmouseenter="enter('-2050288510094905379');" onmouseout="out('-2050288510094905379');" style="">  49          @Override public void onComplete(String url, CompleteInfo info) {                                         </span>
+<span class="3749191010904650047" onmouseenter="enter('3749191010904650047');" onmouseout="out('3749191010904650047');" style="">  50            if (info.code &gt;= 200 &amp;&amp; info.code &lt; 300) {                                                              </span>
+<span class="1497820413888703615" onmouseenter="enter('1497820413888703615');" onmouseout="out('1497820413888703615');" style="">  51              startDownload();                                                                                      </span>
+
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  52            }                                                                                                       </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  53          }                                                                                                         </span>
+<span  style="">  54                                                                                                                    </span>
+<span class="4202361941777062332" onmouseenter="enter('4202361941777062332');" onmouseout="out('4202361941777062332');" style="">  55          @Override public void onFail(AbsEntity entity, BaseException e, boolean needRetry) {                      </span>
+<span class="8285813611364437915" onmouseenter="enter('8285813611364437915');" onmouseout="out('8285813611364437915');" style="">  56            mListener.onFail(needRetry, e);                                                                         </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  57          }                                                                                                         </span>
+<span class="7938821646327104961" onmouseenter="enter('7938821646327104961');" onmouseout="out('7938821646327104961');" style="">  58        });                                                                                                         </span>
+<span class="-9128110853298759146" onmouseenter="enter('-9128110853298759146');" onmouseout="out('-9128110853298759146');" style="">  59        new Thread(infoThread).start();                                                                             </span>
 
 
 
@@ -633,18 +633,11 @@ del /Q jfstmerge.java.merge
 
 
 
-
-
-
-  65      for (DTaskWrapper wrapper : mGTWrapper.getSubTaskWrapper()) {
-
-
-
-  66        if (wrapper.getState() != IEntity.STATE_COMPLETE) {
-  67          createAndStartSubLoader(wrapper);
-  68        }
-  69      }
-  70    }
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  60      }                                                                                                             </span>
+<span class="-3118901906653197100" onmouseenter="enter('-3118901906653197100');" onmouseout="out('-3118901906653197100');" style="background-color: rgba(0, 255, 0, 0.2); margin: 0">  61 +    return true;                                                                                                  </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  62    }                                                                                                               </span>
+<span  style="">  63                                                                                                                    </span>
+<span class="661693137305496532" onmouseenter="enter('661693137305496532');" onmouseout="out('661693137305496532');" style="">  64    private void startDownload() {                                                                                  </span>
 
 
 
@@ -656,7 +649,27 @@ del /Q jfstmerge.java.merge
 
 
 
-  71  }</pre></td>
+<span class="-3609264869766321022" onmouseenter="enter('-3609264869766321022');" onmouseout="out('-3609264869766321022');" style="">  65      for (DTaskWrapper wrapper : mGTWrapper.getSubTaskWrapper()) {                                                 </span>
+
+
+
+<span class="1582042434488765352" onmouseenter="enter('1582042434488765352');" onmouseout="out('1582042434488765352');" style="">  66        if (wrapper.getState() != IEntity.STATE_COMPLETE) {                                                         </span>
+<span class="-6162195828863091653" onmouseenter="enter('-6162195828863091653');" onmouseout="out('-6162195828863091653');" style="">  67          createAndStartSubLoader(wrapper);                                                                         </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  68        }                                                                                                           </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  69      }                                                                                                             </span>
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  70    }                                                                                                               </span>
+
+
+
+
+
+
+
+
+
+
+
+<span class="-1659227874853751674" onmouseenter="enter('-1659227874853751674');" onmouseout="out('-1659227874853751674');" style="">  71  }                                                                                                                 </span></pre></td>
                         </tr>
                     </table>
                 </div>

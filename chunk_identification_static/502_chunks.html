@@ -15,58 +15,176 @@
                 </style>
           </head>
           <body>
-            <pre>[[{&#x27;eq&#x27;: [{&#x27;CHUNK_OURS&#x27;: &#x27;            default:\n                break;\n\n&#x27;,
-           &#x27;CHUNK_THEIRS&#x27;: &#x27;            case &quot;decimal&quot;:\n&#x27;
-                           &#x27;                return &#x27;
-                           &#x27;Bytes.toBigDecimal(hbaseData);\n&#x27;
-                           &#x27;            default:\n&#x27;
-                           &#x27;                throw new RuntimeException(&quot;not &#x27;
-                           &#x27;support type of &quot; + type);\n&#x27;},
-          {&#x27;CHUNK_OURS&#x27;: &#x27;            default:\n                break;\n&#x27;,
+            <pre>[[{&#x27;eq&#x27;: [{&#x27;CHUNK_OURS&#x27;: &#x27;import java.time.LocalDate;\n&#x27;
+                         &#x27;import java.time.LocalDateTime;\n&#x27;
+                         &#x27;import java.time.LocalTime;\n&#x27;
+                         &#x27;import java.time.ZoneId;\n&#x27;
+                         &#x27;import java.time.format.DateTimeFormatter;\n&#x27;
+                         &#x27;import java.time.format.DateTimeParseException;\n&#x27;,
+           &#x27;CHUNK_THEIRS&#x27;: &#x27;import java.time.Instant;\n&#x27;
+                           &#x27;import java.time.LocalDate;\n&#x27;
+                           &#x27;import java.time.LocalTime;\n&#x27;
+                           &#x27;import java.time.ZoneOffset;\n&#x27;}],
+   &#x27;mergers&#x27;: {&#x27;baseline&#x27;}},
+  {&#x27;eq&#x27;: [{&#x27;CHUNK_OURS&#x27;: &#x27;&#x27;,
            &#x27;CHUNK_THEIRS&#x27;: &#x27;\n&#x27;
-                           &#x27;            case &quot;decimal&quot;:\n&#x27;
-                           &#x27;                return &#x27;
-                           &#x27;Bytes.toBigDecimal(hbaseData);\n&#x27;
-                           &#x27;            default:\n&#x27;
-                           &#x27;                throw new RuntimeException(&quot;not &#x27;
-                           &#x27;support type of &quot; + type);\n&#x27;}],
-   &#x27;mergers&#x27;: {&#x27;baseline&#x27;, &#x27;spork&#x27;}},
-  {&#x27;eq&#x27;: [{&#x27;CHUNK_OURS&#x27;: &#x27;            default:\n&#x27;
-                         &#x27;                break;\n&#x27;
-                         &#x27;\n&#x27;
-                         &#x27;        }\n&#x27;
-                         &#x27;\n&#x27;,
-           &#x27;CHUNK_THEIRS&#x27;: &#x27;            case &quot;decimal&quot;:\n&#x27;
-                           &#x27;                return &#x27;
-                           &#x27;Bytes.toBigDecimal(hbaseData);\n&#x27;
-                           &#x27;            default:\n&#x27;}],
-   &#x27;mergers&#x27;: {&#x27;jfstmerge&#x27;}}],
- [{&#x27;eq&#x27;: [{&#x27;CHUNK_OURS&#x27;: &#x27;            default:\n                break;\n\n&#x27;,
-           &#x27;CHUNK_THEIRS&#x27;: &#x27;            case &quot;decimal&quot;:\n&#x27;
-                           &#x27;                return &#x27;
-                           &#x27;Bytes.toBigDecimal(hbaseData);\n&#x27;
-                           &#x27;            default:\n&#x27;
-                           &#x27;                throw new RuntimeException(&quot;not &#x27;
-                           &#x27;support type of &quot; + type);\n&#x27;},
-          {&#x27;CHUNK_OURS&#x27;: &#x27;            default:\n                break;\n&#x27;,
+                           &#x27;\n&#x27;
+                           &#x27;    public static Timestamp &#x27;
+                           &#x27;getTimestampFromStr(String timeStr) {\n&#x27;
+                           &#x27;        if (DATETIME.matcher(timeStr).matches()) &#x27;
+                           &#x27;{\n&#x27;
+                           &#x27;            Instant instant = &#x27;
+                           &#x27;Instant.from(ISO_INSTANT.parse(timeStr));\n&#x27;
+                           &#x27;            return new &#x27;
+                           &#x27;Timestamp(instant.getEpochSecond() * &#x27;
+                           &#x27;MILLIS_PER_SECOND);\n&#x27;
+                           &#x27;        } else {\n&#x27;
+                           &#x27;            java.sql.Date date = null;\n&#x27;
+                           &#x27;            try {\n&#x27;
+                           &#x27;                date = new &#x27;
+                           &#x27;java.sql.Date(datetimeFormatter.parse(timeStr).getTime());\n&#x27;
+                           &#x27;            } catch (ParseException e) {\n&#x27;
+                           &#x27;                throw new &#x27;
+                           &#x27;RuntimeException(&quot;getTimestampFromStr error data &#x27;
+                           &#x27;is &quot; + timeStr);\n&#x27;
+                           &#x27;            }\n&#x27;
+                           &#x27;            return new Timestamp(date.getTime());\n&#x27;
+                           &#x27;        }\n&#x27;
+                           &#x27;    }\n&#x27;
+                           &#x27;\n&#x27;
+                           &#x27;    public static java.sql.Date &#x27;
+                           &#x27;getDateFromStr(String dateStr) {\n&#x27;
+                           &#x27;        // 2020-01-01 format\n&#x27;
+                           &#x27;        if (DATE.matcher(dateStr).matches()) {\n&#x27;
+                           &#x27;            // convert from local date to instant\n&#x27;
+                           &#x27;            Instant instant = &#x27;
+                           &#x27;LocalDate.parse(dateStr).atTime(LocalTime.of(0, 0, &#x27;
+                           &#x27;0, 0)).toInstant(ZoneOffset.UTC);\n&#x27;
+                           &#x27;            // calculate the timezone offset in &#x27;
+                           &#x27;millis\n&#x27;
+                           &#x27;            int offset = &#x27;
+                           &#x27;TimeZone.getDefault().getOffset(instant.toEpochMilli());\n&#x27;
+                           &#x27;            // need to remove the offset since &#x27;
+                           &#x27;time has no TZ component\n&#x27;
+                           &#x27;            return new &#x27;
+                           &#x27;java.sql.Date(instant.toEpochMilli() - offset);\n&#x27;
+                           &#x27;        } else if &#x27;
+                           &#x27;(DATETIME.matcher(dateStr).matches()) {\n&#x27;
+                           &#x27;            // 2020-01-01T12:12:12Z format\n&#x27;
+                           &#x27;            Instant instant = &#x27;
+                           &#x27;Instant.from(ISO_INSTANT.parse(dateStr));\n&#x27;
+                           &#x27;            return new &#x27;
+                           &#x27;java.sql.Date(instant.toEpochMilli());\n&#x27;
+                           &#x27;        } else {\n&#x27;
+                           &#x27;            try {\n&#x27;
+                           &#x27;                // 2020-01-01 12:12:12.0 format\n&#x27;
+                           &#x27;                return new &#x27;
+                           &#x27;java.sql.Date(datetimeFormatter.parse(dateStr).getTime());\n&#x27;
+                           &#x27;            } catch (ParseException e) {\n&#x27;
+                           &#x27;                throw new RuntimeException(&quot;String &#x27;
+                           &#x27;convert to Date fail.&quot;);\n&#x27;
+                           &#x27;            }\n&#x27;
+                           &#x27;        }\n&#x27;
+                           &#x27;    }\n&#x27;
+                           &#x27;\n&#x27;
+                           &#x27;\n&#x27;
+                           &#x27;    public static String &#x27;
+                           &#x27;getStringFromTimestamp(Timestamp timestamp) {\n&#x27;
+                           &#x27;        return &#x27;
+                           &#x27;datetimeFormatter.format(timestamp);\n&#x27;
+                           &#x27;    }\n&#x27;
+                           &#x27;\n&#x27;
+                           &#x27;    public static String &#x27;
+                           &#x27;getStringFromDate(java.sql.Date date) {\n&#x27;
+                           &#x27;        return dateFormatter.format(date);\n&#x27;
+                           &#x27;    }\n&#x27;
+                           &#x27;\n&#x27;}],
+   &#x27;mergers&#x27;: {&#x27;baseline&#x27;}}],
+ [{&#x27;eq&#x27;: [{&#x27;CHUNK_OURS&#x27;: &#x27;import java.time.LocalDate;\n&#x27;
+                         &#x27;import java.time.LocalDateTime;\n&#x27;
+                         &#x27;import java.time.LocalTime;\n&#x27;
+                         &#x27;import java.time.ZoneId;\n&#x27;
+                         &#x27;import java.time.format.DateTimeFormatter;\n&#x27;
+                         &#x27;import java.time.format.DateTimeParseException;\n&#x27;,
+           &#x27;CHUNK_THEIRS&#x27;: &#x27;import java.time.Instant;\n&#x27;
+                           &#x27;import java.time.LocalDate;\n&#x27;
+                           &#x27;import java.time.LocalTime;\n&#x27;
+                           &#x27;import java.time.ZoneOffset;\n&#x27;}],
+   &#x27;mergers&#x27;: {&#x27;baseline&#x27;}},
+  {&#x27;eq&#x27;: [{&#x27;CHUNK_OURS&#x27;: &#x27;&#x27;,
            &#x27;CHUNK_THEIRS&#x27;: &#x27;\n&#x27;
-                           &#x27;            case &quot;decimal&quot;:\n&#x27;
-                           &#x27;                return &#x27;
-                           &#x27;Bytes.toBigDecimal(hbaseData);\n&#x27;
-                           &#x27;            default:\n&#x27;
-                           &#x27;                throw new RuntimeException(&quot;not &#x27;
-                           &#x27;support type of &quot; + type);\n&#x27;}],
-   &#x27;mergers&#x27;: {&#x27;baseline&#x27;, &#x27;spork&#x27;}},
-  {&#x27;eq&#x27;: [{&#x27;CHUNK_OURS&#x27;: &#x27;            default:\n&#x27;
-                         &#x27;                break;\n&#x27;
-                         &#x27;\n&#x27;
-                         &#x27;        }\n&#x27;
-                         &#x27;\n&#x27;,
-           &#x27;CHUNK_THEIRS&#x27;: &#x27;            case &quot;decimal&quot;:\n&#x27;
-                           &#x27;                return &#x27;
-                           &#x27;Bytes.toBigDecimal(hbaseData);\n&#x27;
-                           &#x27;            default:\n&#x27;}],
-   &#x27;mergers&#x27;: {&#x27;jfstmerge&#x27;}}]]</pre>
+                           &#x27;\n&#x27;
+                           &#x27;    public static Timestamp &#x27;
+                           &#x27;getTimestampFromStr(String timeStr) {\n&#x27;
+                           &#x27;        if (DATETIME.matcher(timeStr).matches()) &#x27;
+                           &#x27;{\n&#x27;
+                           &#x27;            Instant instant = &#x27;
+                           &#x27;Instant.from(ISO_INSTANT.parse(timeStr));\n&#x27;
+                           &#x27;            return new &#x27;
+                           &#x27;Timestamp(instant.getEpochSecond() * &#x27;
+                           &#x27;MILLIS_PER_SECOND);\n&#x27;
+                           &#x27;        } else {\n&#x27;
+                           &#x27;            java.sql.Date date = null;\n&#x27;
+                           &#x27;            try {\n&#x27;
+                           &#x27;                date = new &#x27;
+                           &#x27;java.sql.Date(datetimeFormatter.parse(timeStr).getTime());\n&#x27;
+                           &#x27;            } catch (ParseException e) {\n&#x27;
+                           &#x27;                throw new &#x27;
+                           &#x27;RuntimeException(&quot;getTimestampFromStr error data &#x27;
+                           &#x27;is &quot; + timeStr);\n&#x27;
+                           &#x27;            }\n&#x27;
+                           &#x27;            return new Timestamp(date.getTime());\n&#x27;
+                           &#x27;        }\n&#x27;
+                           &#x27;    }\n&#x27;
+                           &#x27;\n&#x27;
+                           &#x27;    public static java.sql.Date &#x27;
+                           &#x27;getDateFromStr(String dateStr) {\n&#x27;
+                           &#x27;        // 2020-01-01 format\n&#x27;
+                           &#x27;        if (DATE.matcher(dateStr).matches()) {\n&#x27;
+                           &#x27;            // convert from local date to instant\n&#x27;
+                           &#x27;            Instant instant = &#x27;
+                           &#x27;LocalDate.parse(dateStr).atTime(LocalTime.of(0, 0, &#x27;
+                           &#x27;0, 0)).toInstant(ZoneOffset.UTC);\n&#x27;
+                           &#x27;            // calculate the timezone offset in &#x27;
+                           &#x27;millis\n&#x27;
+                           &#x27;            int offset = &#x27;
+                           &#x27;TimeZone.getDefault().getOffset(instant.toEpochMilli());\n&#x27;
+                           &#x27;            // need to remove the offset since &#x27;
+                           &#x27;time has no TZ component\n&#x27;
+                           &#x27;            return new &#x27;
+                           &#x27;java.sql.Date(instant.toEpochMilli() - offset);\n&#x27;
+                           &#x27;        } else if &#x27;
+                           &#x27;(DATETIME.matcher(dateStr).matches()) {\n&#x27;
+                           &#x27;            // 2020-01-01T12:12:12Z format\n&#x27;
+                           &#x27;            Instant instant = &#x27;
+                           &#x27;Instant.from(ISO_INSTANT.parse(dateStr));\n&#x27;
+                           &#x27;            return new &#x27;
+                           &#x27;java.sql.Date(instant.toEpochMilli());\n&#x27;
+                           &#x27;        } else {\n&#x27;
+                           &#x27;            try {\n&#x27;
+                           &#x27;                // 2020-01-01 12:12:12.0 format\n&#x27;
+                           &#x27;                return new &#x27;
+                           &#x27;java.sql.Date(datetimeFormatter.parse(dateStr).getTime());\n&#x27;
+                           &#x27;            } catch (ParseException e) {\n&#x27;
+                           &#x27;                throw new RuntimeException(&quot;String &#x27;
+                           &#x27;convert to Date fail.&quot;);\n&#x27;
+                           &#x27;            }\n&#x27;
+                           &#x27;        }\n&#x27;
+                           &#x27;    }\n&#x27;
+                           &#x27;\n&#x27;
+                           &#x27;\n&#x27;
+                           &#x27;    public static String &#x27;
+                           &#x27;getStringFromTimestamp(Timestamp timestamp) {\n&#x27;
+                           &#x27;        return &#x27;
+                           &#x27;datetimeFormatter.format(timestamp);\n&#x27;
+                           &#x27;    }\n&#x27;
+                           &#x27;\n&#x27;
+                           &#x27;    public static String &#x27;
+                           &#x27;getStringFromDate(java.sql.Date date) {\n&#x27;
+                           &#x27;        return dateFormatter.format(date);\n&#x27;
+                           &#x27;    }\n&#x27;
+                           &#x27;\n&#x27;}],
+   &#x27;mergers&#x27;: {&#x27;baseline&#x27;}}]]</pre>
           </body>
         </html>
         

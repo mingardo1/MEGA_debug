@@ -15,40 +15,118 @@
                 </style>
           </head>
           <body>
-            <pre>[[{&#x27;eq&#x27;: [{&#x27;CHUNK_OURS&#x27;: &#x27;    public AutoImportSql blLocaleData() {\n&#x27;
-                         &#x27;        return new &#x27;
-                         &#x27;AutoImportSql(AutoImportPersistenceUnit.BL_PU,&quot;config/bc/sql/demo/load_locale.sql&quot;, &#x27;
-                         &#x27;BASIC_DATA_SPECIAL);\n&#x27;
-                         &#x27;    }\n&#x27;
-                         &#x27;\n&#x27;
-                         &#x27;    @Bean\n&#x27;,
-           &#x27;CHUNK_THEIRS&#x27;: &#x27;&#x27;}],
-   &#x27;mergers&#x27;: {&#x27;baseline&#x27;}},
-  {&#x27;eq&#x27;: [{&#x27;CHUNK_OURS&#x27;: &#x27;@Bean\n&#x27;
-                         &#x27;    public AutoImportSql blLocaleData() {\n&#x27;
-                         &#x27;        return new &#x27;
-                         &#x27;AutoImportSql(AutoImportPersistenceUnit.BL_PU,&quot;config/bc/sql/demo/load_locale.sql&quot;, &#x27;
-                         &#x27;BASIC_DATA_SPECIAL);\n&#x27;
-                         &#x27;    }\n&#x27;,
-           &#x27;CHUNK_THEIRS&#x27;: &#x27;&#x27;}],
-   &#x27;mergers&#x27;: {&#x27;jfstmerge&#x27;}}],
- [{&#x27;eq&#x27;: [{&#x27;CHUNK_OURS&#x27;: &#x27;    public AutoImportSql blLocaleData() {\n&#x27;
-                         &#x27;        return new &#x27;
-                         &#x27;AutoImportSql(AutoImportPersistenceUnit.BL_PU,&quot;config/bc/sql/demo/load_locale.sql&quot;, &#x27;
-                         &#x27;BASIC_DATA_SPECIAL);\n&#x27;
-                         &#x27;    }\n&#x27;
-                         &#x27;\n&#x27;
-                         &#x27;    @Bean\n&#x27;,
-           &#x27;CHUNK_THEIRS&#x27;: &#x27;&#x27;}],
-   &#x27;mergers&#x27;: {&#x27;baseline&#x27;}},
-  {&#x27;eq&#x27;: [{&#x27;CHUNK_OURS&#x27;: &#x27;@Bean\n&#x27;
-                         &#x27;    public AutoImportSql blLocaleData() {\n&#x27;
-                         &#x27;        return new &#x27;
-                         &#x27;AutoImportSql(AutoImportPersistenceUnit.BL_PU,&quot;config/bc/sql/demo/load_locale.sql&quot;, &#x27;
-                         &#x27;BASIC_DATA_SPECIAL);\n&#x27;
-                         &#x27;    }\n&#x27;,
-           &#x27;CHUNK_THEIRS&#x27;: &#x27;&#x27;}],
-   &#x27;mergers&#x27;: {&#x27;jfstmerge&#x27;}}]]</pre>
+            <pre>[[{&#x27;eq&#x27;: [{&#x27;CHUNK_OURS&#x27;: &#x27;&#x27;,
+           &#x27;CHUNK_THEIRS&#x27;: &#x27;    public CustomerAddress &#x27;
+                           &#x27;readCustomerAddressByIdAndCustomerId(Long &#x27;
+                           &#x27;customerAddressId, Long customerId) {\n&#x27;
+                           &#x27;        CriteriaBuilder builder = &#x27;
+                           &#x27;em.getCriteriaBuilder();\n&#x27;
+                           &#x27;        CriteriaQuery&lt;CustomerAddress&gt; criteria = &#x27;
+                           &#x27;builder.createQuery(CustomerAddress.class);\n&#x27;
+                           &#x27;        Root&lt;CustomerAddressImpl&gt; customerAddress &#x27;
+                           &#x27;= criteria.from(CustomerAddressImpl.class);\n&#x27;
+                           &#x27;        criteria.select(customerAddress);\n&#x27;
+                           &#x27;\n&#x27;
+                           &#x27;        List&lt;Predicate&gt; predicates = new &#x27;
+                           &#x27;ArrayList&lt;&gt;();\n&#x27;
+                           &#x27;        &#x27;
+                           &#x27;predicates.add(builder.equal(customerAddress.get(&quot;id&quot;), &#x27;
+                           &#x27;customerAddressId));\n&#x27;
+                           &#x27;        &#x27;
+                           &#x27;predicates.add(builder.equal(customerAddress.get(&quot;customer&quot;).get(&quot;id&quot;), &#x27;
+                           &#x27;customerId));\n&#x27;
+                           &#x27;\n&#x27;
+                           &#x27;        &#x27;
+                           &#x27;criteria.where(builder.and(predicates.toArray(new &#x27;
+                           &#x27;Predicate[predicates.size()])));\n&#x27;
+                           &#x27;        TypedQuery&lt;CustomerAddress&gt; query = &#x27;
+                           &#x27;em.createQuery(criteria);\n&#x27;
+                           &#x27;        query.setHint(QueryHints.HINT_CACHEABLE, &#x27;
+                           &#x27;true);\n&#x27;
+                           &#x27;        &#x27;
+                           &#x27;query.setHint(QueryHints.HINT_CACHE_REGION, &#x27;
+                           &#x27;&quot;query.CustomerAddress&quot;);\n&#x27;
+                           &#x27;\n&#x27;
+                           &#x27;        return query.getSingleResult();\n&#x27;
+                           &#x27;    }\n&#x27;
+                           &#x27;\n&#x27;
+                           &#x27;    @SuppressWarnings(&quot;unchecked&quot;)\n&#x27;
+                           &#x27;    protected void &#x27;
+                           &#x27;clearDefaultAddressForCustomer(Long customerId) {\n&#x27;
+                           &#x27;        // This has to be done in two queries &#x27;
+                           &quot;because MySQL doesn&#x27;t support updates on a table &quot;
+                           &#x27;with a subquery on the same table\n&#x27;
+                           &#x27;        Query query = &#x27;
+                           &#x27;em.createNamedQuery(&quot;BC_READ_DEFAULT_ADDRESS_IDS_BY_CUSTOMER_ID&quot;);\n&#x27;
+                           &#x27;        query.setParameter(&quot;customerId&quot;, &#x27;
+                           &#x27;customerId);\n&#x27;
+                           &#x27;        List&lt;Long&gt; addressIds = &#x27;
+                           &#x27;query.getResultList();\n&#x27;
+                           &#x27;        Query update = &#x27;
+                           &#x27;em.createNamedQuery(&quot;BC_CLEAR_DEFAULT_ADDRESS_BY_IDS&quot;);\n&#x27;
+                           &#x27;        update.setParameter(&quot;addressIds&quot;, &#x27;
+                           &#x27;addressIds);\n&#x27;
+                           &#x27;        update.executeUpdate();\n&#x27;
+                           &#x27;    }\n&#x27;
+                           &#x27;\n&#x27;
+                           &#x27;    @Override\n&#x27;}],
+   &#x27;mergers&#x27;: {&#x27;baseline&#x27;}}],
+ [{&#x27;eq&#x27;: [{&#x27;CHUNK_OURS&#x27;: &#x27;&#x27;,
+           &#x27;CHUNK_THEIRS&#x27;: &#x27;    public CustomerAddress &#x27;
+                           &#x27;readCustomerAddressByIdAndCustomerId(Long &#x27;
+                           &#x27;customerAddressId, Long customerId) {\n&#x27;
+                           &#x27;        CriteriaBuilder builder = &#x27;
+                           &#x27;em.getCriteriaBuilder();\n&#x27;
+                           &#x27;        CriteriaQuery&lt;CustomerAddress&gt; criteria = &#x27;
+                           &#x27;builder.createQuery(CustomerAddress.class);\n&#x27;
+                           &#x27;        Root&lt;CustomerAddressImpl&gt; customerAddress &#x27;
+                           &#x27;= criteria.from(CustomerAddressImpl.class);\n&#x27;
+                           &#x27;        criteria.select(customerAddress);\n&#x27;
+                           &#x27;\n&#x27;
+                           &#x27;        List&lt;Predicate&gt; predicates = new &#x27;
+                           &#x27;ArrayList&lt;&gt;();\n&#x27;
+                           &#x27;        &#x27;
+                           &#x27;predicates.add(builder.equal(customerAddress.get(&quot;id&quot;), &#x27;
+                           &#x27;customerAddressId));\n&#x27;
+                           &#x27;        &#x27;
+                           &#x27;predicates.add(builder.equal(customerAddress.get(&quot;customer&quot;).get(&quot;id&quot;), &#x27;
+                           &#x27;customerId));\n&#x27;
+                           &#x27;\n&#x27;
+                           &#x27;        &#x27;
+                           &#x27;criteria.where(builder.and(predicates.toArray(new &#x27;
+                           &#x27;Predicate[predicates.size()])));\n&#x27;
+                           &#x27;        TypedQuery&lt;CustomerAddress&gt; query = &#x27;
+                           &#x27;em.createQuery(criteria);\n&#x27;
+                           &#x27;        query.setHint(QueryHints.HINT_CACHEABLE, &#x27;
+                           &#x27;true);\n&#x27;
+                           &#x27;        &#x27;
+                           &#x27;query.setHint(QueryHints.HINT_CACHE_REGION, &#x27;
+                           &#x27;&quot;query.CustomerAddress&quot;);\n&#x27;
+                           &#x27;\n&#x27;
+                           &#x27;        return query.getSingleResult();\n&#x27;
+                           &#x27;    }\n&#x27;
+                           &#x27;\n&#x27;
+                           &#x27;    @SuppressWarnings(&quot;unchecked&quot;)\n&#x27;
+                           &#x27;    protected void &#x27;
+                           &#x27;clearDefaultAddressForCustomer(Long customerId) {\n&#x27;
+                           &#x27;        // This has to be done in two queries &#x27;
+                           &quot;because MySQL doesn&#x27;t support updates on a table &quot;
+                           &#x27;with a subquery on the same table\n&#x27;
+                           &#x27;        Query query = &#x27;
+                           &#x27;em.createNamedQuery(&quot;BC_READ_DEFAULT_ADDRESS_IDS_BY_CUSTOMER_ID&quot;);\n&#x27;
+                           &#x27;        query.setParameter(&quot;customerId&quot;, &#x27;
+                           &#x27;customerId);\n&#x27;
+                           &#x27;        List&lt;Long&gt; addressIds = &#x27;
+                           &#x27;query.getResultList();\n&#x27;
+                           &#x27;        Query update = &#x27;
+                           &#x27;em.createNamedQuery(&quot;BC_CLEAR_DEFAULT_ADDRESS_BY_IDS&quot;);\n&#x27;
+                           &#x27;        update.setParameter(&quot;addressIds&quot;, &#x27;
+                           &#x27;addressIds);\n&#x27;
+                           &#x27;        update.executeUpdate();\n&#x27;
+                           &#x27;    }\n&#x27;
+                           &#x27;\n&#x27;
+                           &#x27;    @Override\n&#x27;}],
+   &#x27;mergers&#x27;: {&#x27;baseline&#x27;}}]]</pre>
           </body>
         </html>
         
